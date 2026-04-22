@@ -461,7 +461,7 @@ input[type=range]::-webkit-slider-thumb{
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .loading-name{font-size:22px;font-weight:700;color:var(--text)}
 .loading-bar{width:160px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
-.loading-fill{height:100%;background:var(--accent);border-radius:2px;animation:load 1.8s ease forwards}
+.loading-fill{height:100%;background:var(--accent);border-radius:2px;animation:load 1.0s ease forwards}
 @keyframes load{from{width:0}to{width:100%}}
 </style>
 </head>
@@ -2543,16 +2543,15 @@ function startApp(){
 }
 
 function init(){
-  // Unregister any old broken service workers first
+  // Clear ALL service workers to fix any cached stale versions
   if('serviceWorker' in navigator){
     navigator.serviceWorker.getRegistrations().then(regs=>{
       regs.forEach(r=>r.unregister());
-    }).then(()=>{
-      // Re-register with correct path after clearing old ones
-      setTimeout(()=>{
-        navigator.serviceWorker.register('sw.js').catch(()=>{});
-      }, 500);
     }).catch(()=>{});
+    // Clear caches too
+    if('caches' in window){
+      caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
+    }
   }
 
   // Set today's date defaults immediately
@@ -2574,12 +2573,12 @@ function init(){
     }
   }
 
-  // Try to launch after animation (1.8s), with a hard fallback at 3s
-  setTimeout(launch, 1800);
+  // Launch after short animation, hard fallback at 2s
+  setTimeout(launch, 1200);
   setTimeout(()=>{
     const loader=document.getElementById('loading');
     if(loader && loader.style.display!=='none') launch();
-  }, 3000);
+  }, 2000);
 }
 
 window.addEventListener('load', init);
