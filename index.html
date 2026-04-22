@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 /* ─── Reset & Base ─────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -22,7 +22,7 @@
   --amber:#fbbf24; --coral:#f87171; --blue:#60a5fa;
   --purple:#a78bfa; --pink:#f472b6; --indigo:#818cf8;
   --text:#e8f5f0; --muted:#6b8f7a; --muted2:#4a6b5a;
-  --font:'Sora',sans-serif; --mono:'Space Mono',monospace;
+  --font:'Sora',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif; --mono:'Space Mono','Courier New',monospace;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -457,7 +457,7 @@ input[type=range]::-webkit-slider-thumb{
   background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:16px;
 }
-.loading-logo{font-size:56px;animation:pulse 2s ease-in-out infinite}
+.loading-logo{display:flex;align-items:center;justify-content:center;animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .loading-name{font-size:22px;font-weight:700;color:var(--text)}
 .loading-bar{width:160px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
@@ -469,7 +469,14 @@ input[type=range]::-webkit-slider-thumb{
 
 <!-- Loading Screen -->
 <div id="loading">
-  <div class="loading-logo">💚</div>
+  <div class="loading-logo">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 68 L12 42 C6 36 6 26 12 20 C18 14 28 14 34 20 L40 26 L46 20 C52 14 62 14 68 20 C74 26 74 36 68 42 Z" fill="#ef4444" opacity="0.9"/>
+      <polyline points="22,44 30,32 36,40 44,28 50,36 58,26" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <line x1="54" y1="50" x2="54" y2="58" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="50" y1="54" x2="58" y2="54" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
   <div class="loading-name">Health Stephan</div>
   <div class="loading-bar"><div class="loading-fill"></div></div>
 </div>
@@ -2542,51 +2549,60 @@ function startApp(){
   renderScan();
 }
 
-function init(){
-  // Clear ALL service workers to fix any cached stale versions
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(regs=>{
-      regs.forEach(r=>r.unregister());
-    }).catch(()=>{});
-    // Clear caches too
-    if('caches' in window){
-      caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
-    }
-  }
-
-  // Set today's date defaults immediately
-  const t=today();
-  ['weight-input-date','sleep-date'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=t; });
-
-  // Hide loader — use both timeout and animation end as fallback
-  function launch(){
-    const loader=document.getElementById('loading');
+function launch(){
+  try {
+    // Hide loader
+    var loader=document.getElementById('loading');
     if(loader) loader.style.display='none';
-    try {
-      if(profile.isOnboarded){ startApp(); } else { initOnboarding(); }
-    } catch(e){
-      console.error('Launch error:',e);
-      // Emergency fallback — show app anyway
-      document.getElementById('loading').style.display='none';
-      document.getElementById('app').style.display='flex';
-      renderHome();
-    }
+    // Set dates
+    var t=today();
+    ['weight-input-date','sleep-date'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.value=t;
+    });
+    // Start app
+    if(profile.isOnboarded){ startApp(); } else { initOnboarding(); }
+  } catch(err){
+    // Nuclear fallback — force show app no matter what
+    console.error(err);
+    var loader2=document.getElementById('loading');
+    if(loader2) loader2.style.display='none';
+    var app=document.getElementById('app');
+    if(app) app.style.display='flex';
+    var ob=document.getElementById('onboarding');
+    if(ob && !profile.isOnboarded) ob.style.display='flex';
   }
-
-  // Launch after short animation, hard fallback at 2s
-  setTimeout(launch, 1200);
-  setTimeout(()=>{
-    const loader=document.getElementById('loading');
-    if(loader && loader.style.display!=='none') launch();
-  }, 2000);
 }
 
+function init(){
+  // Kill any service workers and caches immediately
+  try {
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(r){ r.unregister(); });
+      });
+    }
+    if('caches' in window){
+      caches.keys().then(function(keys){
+        keys.forEach(function(k){ caches.delete(k); });
+      });
+    }
+  } catch(e){}
+
+  // Launch at 1s, hard fallback at 1.5s, nuclear fallback at 2.5s
+  setTimeout(launch, 900);
+  setTimeout(function(){
+    var loader=document.getElementById('loading');
+    if(loader && loader.style.display!=='none') launch();
+  }, 1500);
+  setTimeout(function(){
+    var loader=document.getElementById('loading');
+    if(loader && loader.style.display!=='none') launch();
+  }, 2500);
+}
+
+// Run on BOTH events to guarantee it fires
 window.addEventListener('load', init);
-// Also try on DOMContentLoaded as backup
-document.addEventListener('DOMContentLoaded', ()=>{
-  const t=today();
-  ['weight-input-date','sleep-date'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=t; });
-});
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(launch, 1800); });
 </script>
 
 </body>
