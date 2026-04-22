@@ -1,10 +1,16 @@
-// v3 — forces replacement of any old cached version
-const CACHE = 'health-stephan-v3';
-const ASSETS = ['/', '/index.html'];
+// v4 — GitHub Pages compatible
+const CACHE = 'health-stephan-v4';
+const ASSETS = [
+  '/healthstephan/',
+  '/healthstephan/index.html',
+  '/healthstephan/manifest.json'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
+    caches.open(CACHE).then(c => {
+      return Promise.allSettled(ASSETS.map(a => c.add(a)));
+    })
   );
   self.skipWaiting();
 });
@@ -19,10 +25,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for HTML, cache first for assets
   if(e.request.mode === 'navigate'){
     e.respondWith(
-      fetch(e.request).catch(() => caches.match('/index.html'))
+      fetch(e.request).catch(() => caches.match('/healthstephan/index.html'))
     );
   } else {
     e.respondWith(

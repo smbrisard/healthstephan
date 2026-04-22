@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0f0d">
 <title>Health Stephan</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -2547,6 +2547,11 @@ function init(){
   if('serviceWorker' in navigator){
     navigator.serviceWorker.getRegistrations().then(regs=>{
       regs.forEach(r=>r.unregister());
+    }).then(()=>{
+      // Re-register with correct path after clearing old ones
+      setTimeout(()=>{
+        navigator.serviceWorker.register('sw.js').catch(()=>{});
+      }, 500);
     }).catch(()=>{});
   }
 
