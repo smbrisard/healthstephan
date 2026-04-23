@@ -843,10 +843,11 @@ function obNext() {
 
 // ═══ HOME ═══
 function rHome() {
+  try {
   var h=new Date().getHours(), gr=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  set('hm-greet',gr+', '+P.name);
+  set('hm-greet',gr+', '+String(P.name||'Stephan'));
   set('hm-date',new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'}));
-  var init=P.name.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
   set('hm-av',init);
 
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+P.burned, pct=Math.min(eaten/P.calTarget,1);
@@ -896,6 +897,7 @@ function rHome() {
     });
   });
   mEl.innerHTML=html;
+  } catch(e) { console.error('rHome error', e); }
 }
 
 // ═══ FOOD DATABASE ═══
@@ -1513,8 +1515,8 @@ function saveTargets(){save(); toast('All targets saved!');}
 
 // ═══ PROFILE ═══
 function rProfile(){
-  var lw=latWt(), init=P.name.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
-  set('pr-av',init); set('pr-name',P.name); set('pr-streak',P.streak||0); set('pr-meals',P.mealsLogged||0);
+  var lw=latWt(), _nm2=String(P.name||'Stephan'); var init=_nm2.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
+  set('pr-av',init); set('pr-name',_nm2); set('pr-streak',P.streak||0); set('pr-meals',P.mealsLogged||0);
   if(WL.length>=2){var s=WL.slice().sort(function(a,b){return a.date.localeCompare(b.date);}),ch=s[s.length-1].weight-s[0].weight,ce=g('pr-change'); if(ce){ce.textContent=(ch>=0?'+':'')+fD(k2l(Math.abs(ch)),1); ce.style.color=ch<0?'var(--grn)':'var(--red)';}}
   var bmi=lw?calcBMI(lw.weight):null, bs=bmi?bmiSt(bmi):null;
   sH('pr-stats',D('class="g2"',D('',D('style="font-size:11px;color:var(--dim)"','Weight')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:var(--grn)"',lw?fW(lw.weight):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','BMI')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:'+(bs?bs.col:'var(--dim)')+';"',bmi?fD(bmi):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','Height')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',cm2fi(P.heightCm)))+D('',D('style="font-size:11px;color:var(--dim)"','Age')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',P.age+' yrs'))+D('',D('style="font-size:11px;color:var(--dim)"','Goal weight')+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fW(P.goalKg)))+D('',D('style="font-size:11px;color:var(--dim)"','Goal')+D('style="font-size:13px;font-weight:600;margin-top:3px"',P.goal==='lose'?'Lose weight':P.goal==='build'?'Build muscle':'Maintain'))));
@@ -1541,9 +1543,16 @@ function launchApp(){
   rHome();
 }
 function launch(){
-  var loader=g('loading'); if(loader) loader.style.display='none';
-  if(P.isOnboarded){ launchApp(); }
-  else { var ob=g('ob'); if(ob) ob.style.display='flex'; }
+  try {
+    var loader=g('loading'); if(loader) loader.style.display='none';
+    if(P.isOnboarded){ launchApp(); }
+    else { var ob=g('ob'); if(ob) ob.style.display='flex'; }
+  } catch(e) {
+    console.error('launch error', e);
+    // Force show app anyway so user is never stuck on loading screen
+    var loader=g('loading'); if(loader) loader.style.display='none';
+    var ob=g('ob'); if(ob) ob.style.display='flex';
+  }
 }
 if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}); }
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
