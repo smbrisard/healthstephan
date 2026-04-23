@@ -27,7 +27,7 @@ input,select{font-family:var(--fn)}
 ::-webkit-scrollbar{display:none}
 
 /* LOADING */
-#loading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#loading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s ease}
 .ldpulse{animation:ldp 2s ease-in-out infinite}
 @keyframes ldp{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .ldbar{width:120px;height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
@@ -680,7 +680,14 @@ var STORE_KEY = 'hs_v1';
 function loadAll() {
   try {
     var raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      // Handle both {profile:...} (current) and {p:...} (old builds)
+      if (parsed && parsed.profile) return parsed;
+      if (parsed && parsed.p) { parsed.profile = parsed.p; return parsed; }
+      // Handle flat profile object saved directly
+      if (parsed && parsed.name) return { profile: parsed, wt:[], ml:[], sl:[], dl:[] };
+    }
   } catch(e) {}
   // Try migrating from any previous key
   var oldKeys = ['hsp','hs_p','hs_p2','hs_p3'];
@@ -1543,16 +1550,17 @@ function launchApp(){
   rHome();
 }
 function launch(){
+  var loader=g('loading');
+  // Always hide loader first, unconditionally, before anything else
+  if(loader){ loader.style.opacity='0'; loader.style.pointerEvents='none'; loader.classList.add('gone'); }
   try {
-    var loader=g('loading'); if(loader) loader.style.display='none';
     if(P.isOnboarded){ launchApp(); }
     else { var ob=g('ob'); if(ob) ob.style.display='flex'; }
   } catch(e) {
-    console.error('launch error', e);
-    // Force show app anyway so user is never stuck on loading screen
-    var loader=g('loading'); if(loader) loader.style.display='none';
-    var ob=g('ob'); if(ob) ob.style.display='flex';
+    console.error('launch error',e);
+    try { launchApp(); } catch(e2) { console.error('launchApp error',e2); }
   }
+  setTimeout(function(){ if(loader) loader.style.display='none'; }, 500);
 }
 if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}); }
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
