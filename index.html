@@ -695,26 +695,48 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 var STORE_KEY = 'hs_v1';
 
 function loadAll() {
+  var result = null;
+  // 1. Try current key first
   try {
     var raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       var parsed = JSON.parse(raw);
-      // Handle both {profile:...} (current) and {p:...} (old builds)
-      if (parsed && parsed.profile) return parsed;
-      if (parsed && parsed.p) { parsed.profile = parsed.p; return parsed; }
-      // Handle flat profile object saved directly
-      if (parsed && parsed.name) return { profile: parsed, wt:[], ml:[], sl:[], dl:[] };
+      if (parsed && parsed.profile) result = parsed;
+      else if (parsed && parsed.p) { parsed.profile = parsed.p; result = parsed; }
+      else if (parsed && parsed.name) result = { profile: parsed, wt:[], ml:[], sl:[], dl:[] };
     }
   } catch(e) {}
-  // Try migrating from any previous key
-  var oldKeys = ['hsp','hs_p','hs_p2','hs_p3'];
-  for (var i = 0; i < oldKeys.length; i++) {
+  // 2. Try old flat keys (hsp etc) — prefer if they have isOnboarded=true
+  var oldPKeys = ['hsp','hs_p','hs_p2','hs_p3'];
+  for (var i = 0; i < oldPKeys.length; i++) {
     try {
-      var old = localStorage.getItem(oldKeys[i]);
-      if (old) { var d = JSON.parse(old); if (d && d.name) return { profile: d, wt:[], ml:[], sl:[], dl:[] }; }
+      var oldRaw = localStorage.getItem(oldPKeys[i]);
+      if (oldRaw) {
+        var oldP = JSON.parse(oldRaw);
+        if (oldP && oldP.name && oldP.isOnboarded) {
+          // Found an onboarded profile in old key
+          var merged = result || { profile: {}, wt:[], ml:[], sl:[], dl:[] };
+          // Only override profile if current one isn't onboarded
+          if (!merged.profile || !merged.profile.isOnboarded) {
+            merged.profile = oldP;
+          }
+          // Also try to load arrays from old keys if current has none
+          if (!merged.wt || !merged.wt.length) merged.wt = tryOldArr(['hswl','hs_wt','hs_wt2']);
+          if (!merged.ml || !merged.ml.length) merged.ml = tryOldArr(['hsml','hs_ml','hs_ml2']);
+          if (!merged.sl || !merged.sl.length) merged.sl = tryOldArr(['hssl','hs_sl','hs_sl2']);
+          if (!merged.dl || !merged.dl.length) merged.dl = tryOldArr(['hsdl','hs_dl','hs_dl2']);
+          return merged;
+        }
+      }
     } catch(e) {}
   }
-  return null;
+  return result;
+}
+function tryOldArr(keys) {
+  for (var i = 0; i < keys.length; i++) {
+    try { var v = localStorage.getItem(keys[i]); if (v) { var a = JSON.parse(v); if (Array.isArray(a) && a.length) return a; } } catch(e) {}
+  }
+  return [];
 }
 
 var _data = loadAll();
