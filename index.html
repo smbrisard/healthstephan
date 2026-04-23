@@ -889,10 +889,10 @@ function rHome() {
   var wtChgEl=g('hm-wtchg'), wtChgLbl=g('hm-wtchg-lbl');
   if (WL.length>=2) {
     var sorted=WL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
-    var chg=sorted[sorted.length-1].weight - sorted[0].weight;
-    var chgLbs=k2l(Math.abs(chg));
-    if(wtChgEl){wtChgEl.textContent=(chg>=0?'+':'-')+fD(chgLbs,1)+' lbs'; wtChgEl.style.color=chg<0?'var(--grn)':'var(--red)';}
-    if(wtChgLbl) wtChgLbl.textContent='since start';
+    var firstWtKg=sorted[0].weight, lastWtKg=sorted[sorted.length-1].weight;
+    var chgKg=lastWtKg-firstWtKg, chgLbs=k2l(Math.abs(chgKg));
+    if(wtChgEl){wtChgEl.textContent=(chgKg<=0?'-':'+')+fD(chgLbs,1)+' lbs'; wtChgEl.style.color=chgKg<=0?'var(--grn)':'var(--red)';}
+    if(wtChgLbl) wtChgLbl.textContent=chgKg<=0?'lost since start':'gained since start';
   } else if(WL.length===1) {
     if(wtChgEl){wtChgEl.textContent=fW(WL[0].weight); wtChgEl.style.color='var(--pur)';}
     if(wtChgLbl) wtChgLbl.textContent='current weight';
@@ -1198,7 +1198,7 @@ function rFoodGrid() {
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
     var idx=FOODS.indexOf(f); var over=f.c>rem&&rem>0;
-    return D('class="ftile" onclick="openFood('+idx+')"',D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px"',f.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    return D('class="ftile" onclick="openFood('+idx+')"',D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',f.p)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -1307,7 +1307,7 @@ function drawWtChart(entries) {
   cv.width=W; cv.height=H; ctx.clearRect(0,0,W,H);
   if(entries.length<2){ctx.fillStyle='rgba(255,255,255,.12)'; ctx.font='13px sans-serif'; ctx.textAlign='center'; ctx.fillText('Add 2+ entries to see chart',W/2,H/2); return;}
   var ws=entries.map(function(e){return e.weight;}), mn=Math.min.apply(null,ws)-.5, mx=Math.max.apply(null,ws)+.5;
-  var xS=W/(entries.length-1), toX=function(i){return i*xS;}, toY=function(w){return H-8-((w-mn)/(mx-mn))*(H-16);};
+  var xS=W/(entries.length-1), toX=function(i){return i*xS;}, toY=function(w){return H-22-((w-mn)/(mx-mn))*(H-30);};
   if(P.goalKg>=mn&&P.goalKg<=mx){ctx.strokeStyle='rgba(180,77,255,.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(0,toY(P.goalKg));ctx.lineTo(W,toY(P.goalKg));ctx.stroke();ctx.setLineDash([]);}
   var gr=ctx.createLinearGradient(0,0,0,H); gr.addColorStop(0,'rgba(180,77,255,.14)'); gr.addColorStop(1,'rgba(180,77,255,0)');
   ctx.beginPath(); ctx.moveTo(toX(0),toY(entries[0].weight)); entries.forEach(function(e,i){if(i>0)ctx.lineTo(toX(i),toY(e.weight));});
@@ -1315,14 +1315,49 @@ function drawWtChart(entries) {
   ctx.beginPath(); ctx.moveTo(toX(0),toY(entries[0].weight)); entries.forEach(function(e,i){if(i>0)ctx.lineTo(toX(i),toY(e.weight));});
   ctx.strokeStyle='#b44dff'; ctx.lineWidth=2.5; ctx.stroke();
   entries.forEach(function(e,i){ctx.beginPath();ctx.arc(toX(i),toY(e.weight),4,0,Math.PI*2);ctx.fillStyle='#b44dff';ctx.fill();ctx.strokeStyle='rgba(10,10,15,.8)';ctx.lineWidth=1.5;ctx.stroke();});
+  // Date labels — show at most 5 evenly spaced
+  ctx.fillStyle='rgba(255,255,255,.35)';ctx.font='10px sans-serif';ctx.textAlign='center';
+  var step=Math.max(1,Math.ceil(entries.length/5));
+  entries.forEach(function(e,i){
+    if(i===0||i===entries.length-1||i%step===0){
+      var d=new Date(e.date+'T12:00');
+      var lbl=d.toLocaleDateString('en',{month:'short',day:'numeric'});
+      var x=toX(i); if(x<20)x=20; if(x>W-20)x=W-20;
+      ctx.fillText(lbl,x,H-1);
+    }
+  });
 }
 function rWtAnalysis(entries) {
   var e2=g('wt-analysis'); if(!e2) return;
   if(entries.length<2){e2.innerHTML=D('style="color:var(--dim);font-size:13px;text-align:center"','Not enough data for analysis.'); return;}
-  var ws=entries.map(function(e){return e.weight;}), tot=ws[ws.length-1]-ws[0], dd=(new Date(entries[entries.length-1].date)-new Date(entries[0].date))/86400000, wkly=dd>0?tot/(dd/7):0;
-  var ins=wkly<-.6?'Losing fast. Consider eating slightly more.':wkly<-.1?'Steady progress. Keep it up!':wkly<.1?'Weight stable. Adjust deficit.':'Slight upward trend. Review intake.';
-  e2.innerHTML=D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"',D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+(tot<0?'var(--grn)':'var(--red)')+';"',(tot>=0?'+':'-')+fD(k2l(Math.abs(tot)),1)+' lbs')+D('style="font-size:11px;color:var(--dim);margin-top:2px"','Total'))+D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--amb)"',(wkly>=0?'+':'-')+fD(k2l(Math.abs(wkly)),1)+' lbs')+D('style="font-size:11px;color:var(--dim);margin-top:2px"','Per week'))+D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',fW(Math.min.apply(null,ws)))+D('style="font-size:11px;color:var(--dim);margin-top:2px"','Lowest'))+D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(Math.max.apply(null,ws)-Math.min.apply(null,ws)),1)+' lbs')+D('style="font-size:11px;color:var(--dim);margin-top:2px"','Fluctuation')))+D('style="display:flex;gap:8px;padding:10px 12px;background:rgba(255,184,48,.07);border-radius:10px;border:.5px solid rgba(255,184,48,.2)"',S('style="font-size:14px"','&#128161;')+S('style="font-size:12px;color:var(--dim)"',ins));
+  var wsLbs=entries.map(function(e){return k2l(e.weight);});
+  var firstLbs=wsLbs[0], lastLbs=wsLbs[wsLbs.length-1];
+  var totLbs=lastLbs-firstLbs;
+  var dd=(new Date(entries[entries.length-1].date)-new Date(entries[0].date))/86400000;
+  var wklyLbs=dd>0?(totLbs/(dd/7)):0;
+  var lowestLbs=Math.min.apply(null,wsLbs);
+  var highestLbs=Math.max.apply(null,wsLbs);
+  var rangeLbs=highestLbs-lowestLbs;
+  var ins=wklyLbs<-1?'Losing quickly. Consider eating a little more.':wklyLbs<-0.1?'Steady loss. Great work!':wklyLbs<0.1?'Weight stable. Adjust deficit if needed.':'Slight upward trend. Review intake.';
+  var totCol=totLbs<=0?'var(--grn)':'var(--red)';
+  var wkCol=wklyLbs<=0?'var(--grn)':'var(--red)';
+  e2.innerHTML=D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"',
+    D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+totCol+'"',(totLbs>0?'+':'')+fD(totLbs,1)+' lbs')+
+      D('style="font-size:11px;color:var(--dim);margin-top:2px"','Since start'))+
+    D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+wkCol+'"',(wklyLbs>0?'+':'')+fD(wklyLbs,1)+' lbs')+
+      D('style="font-size:11px;color:var(--dim);margin-top:2px"','Per week'))+
+    D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',fD(lowestLbs,1)+' lbs')+
+      D('style="font-size:11px;color:var(--dim);margin-top:2px"','Lowest'))+
+    D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(rangeLbs,1)+' lbs')+
+      D('style="font-size:11px;color:var(--dim);margin-top:2px"','Range')))+
+  D('style="display:flex;gap:8px;padding:10px 12px;background:rgba(255,184,48,.07);border-radius:10px;border:.5px solid rgba(255,184,48,.2)"',
+    S('style="font-size:14px"','&#128161;')+S('style="font-size:12px;color:var(--dim)"',ins));
 }
+
 function rWtLog() {
   var e2=g('wt-log'); if(!e2) return;
   var sorted=WL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
@@ -1590,7 +1625,7 @@ function histNav(dir) {
     var d = new Date(histDate + 'T12:00');
     d.setDate(d.getDate() + dir);
     histDate = d.toISOString().slice(0,10);
-    var de = el('hist-date');
+    var de = g('hist-date');
     if (de) de.value = histDate;
     rHistory();
   } catch(e) { console.error('histNav',e); }
@@ -1598,11 +1633,11 @@ function histNav(dir) {
 
 function rHistory() {
   try {
-    var de = el('hist-date');
+    var de = g('hist-date');
     if (de && de.value) histDate = de.value;
     else if (de) de.value = histDate;
 
-    var sub = el('hist-sub');
+    var sub = g('hist-sub');
     if (sub) {
       var d = new Date(histDate + 'T12:00');
       var isToday = histDate === today();
@@ -1627,7 +1662,7 @@ function rHistory() {
     var drinkUnits = dayDrinks.reduce(function(a,d){ return a+(d.u||0); }, 0);
 
     var hasAny = dayMeals.length || dayDrinks.length || dayWt.length || daySl.length;
-    var hb = el('hist-body');
+    var hb = g('hist-body');
     if (!hb) return;
 
     if (!hasAny) {
