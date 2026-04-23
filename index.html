@@ -737,7 +737,7 @@ function migrateArr(key, oldKeys) {
   return [];
 }
 var WL = migrateArr('wt', ['hswl','hs_wt','hs_wt2']);
-var FL = (_d && Array.isArray(_d.fl)) ? _d.fl : [];
+var FL = (_data && Array.isArray(_data.fl)) ? _data.fl : [];
 var ML = migrateArr('ml', ['hsml','hs_ml','hs_ml2']);
 var SL = migrateArr('sl', ['hssl','hs_sl','hs_sl2']);
 var DL = migrateArr('dl', ['hsdl','hs_dl','hs_dl2']);
