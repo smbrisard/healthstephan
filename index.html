@@ -1170,8 +1170,8 @@ function selGoal(g,el){
   document.querySelectorAll('.goal-card').forEach(function(c){ c.classList.remove('on'); c.querySelector('.gcheck').innerHTML=''; });
   el.classList.add('on'); el.querySelector('.gcheck').innerHTML='&#10003;';
 }
-function adjHt(d){ obHtCm=Math.max(140,Math.min(220,obHtCm+d*2.54)); document.getElementById('ob-ht-d').textContent=c2fi(obHtCm); updObBMI(); }
-function adjWt(d){ obWtKg=Math.max(40,Math.min(200,parseFloat((obWtKg+l2k(d)).toFixed(1)))); document.getElementById('ob-wt-d').textContent=fD(k2l(obWtKg),1)+' lbs'; updObBMI(); }
+function adjHt(d){ obHtCm=Math.max(140,Math.min(220,obHtCm+d*2.54)); (document.getElementById('ob-ht-d')||{}).textContent=c2fi(obHtCm); updObBMI(); }
+function adjWt(d){ obWtKg=Math.max(40,Math.min(200,parseFloat((obWtKg+l2k(d)).toFixed(1)))); (document.getElementById('ob-wt-d')||{}).textContent=fD(k2l(obWtKg),1)+' lbs'; updObBMI(); }
 function adjObHt(inches){
   var newCm=obHtCm+inches*2.54;
   obHtCm=Math.max(140,Math.min(220,newCm));
@@ -1228,6 +1228,8 @@ function obNext(){
 
 // HOME
 function rHome(){
+  try{
+
   var h2=new Date().getHours();
   var greet=h2<12?'Good morning':h2<17?'Good afternoon':'Good evening';
   document.getElementById('hm-greet').textContent=greet+', '+P.name;
@@ -1276,12 +1278,18 @@ function rHome(){
       div('class="ritem-right"',div('class="ritem-val" style="color:var(--red3)"',fN(m.cals))+div('class="ritem-unit"','kcal')));
   });
   mel.innerHTML=html;
+
+  }catch(e){console.error("rHome:",e.message||e);}
 }
 
 // FOOD
 var selFood=null, foodCat='all', foodSearch='';
 function rFood(){
+  try{
+
   try{ rFoodWarn(); rFoodCats(); filterFoods(); rFoodLog(); }catch(e){console.error('rFood error:',e);}
+
+  }catch(e){console.error("rFood:",e.message||e);}
 }
 function rFoodWarn(){
   var rem=P.calTarget-tTotal(); var el=document.getElementById('food-warn');
@@ -1436,7 +1444,11 @@ function addFood(){
 }
 
 // NUTRITION
-function rNutrition(){ rBMICard(); rNutCards(); }
+function rNutrition(){
+  try{
+ rBMICard(); rNutCards(); 
+  }catch(e){console.error("rNutrition:",e.message||e);}
+}
 function rBMICard(){
   var lw=latWt(); var el=document.getElementById('bmi-card'); if(!el)return;
   if(!lw){ el.innerHTML=div('style="color:var(--t4);text-align:center;font-size:13px"','Log your weight to see your BMI.'); return; }
@@ -1503,6 +1515,8 @@ function fmtN2(v,u){ var n=Math.round(v); if(u==='mg'&&n>=1000)return(n/1000).to
 // WEIGHT
 var wtRange='7d', wtLbs=172;
 function rWeight(){
+  try{
+
   var lw=latWt();
   document.getElementById('wt-cur').textContent=lw?fW(lw.weight):'--';
   document.getElementById('wt-goal').textContent=fW(P.goalKg);
@@ -1514,6 +1528,8 @@ function rWeight(){
     el.style.color=chg<0?'var(--grn2)':'var(--red3)';
   }else{ document.getElementById('wt-chg').textContent='--'; }
   drawWtChart(entries); rWtAnalysis(entries); rWtLog();
+
+  }catch(e){console.error("rWeight:",e.message||e);}
 }
 function getWtRange(){
   var now=Date.now(); var d={7:7,'7d':7,'1m':30,'3m':90,'all':9999}; var days=(d[wtRange]||7)*86400000;
@@ -1597,6 +1613,8 @@ function saveWeight(){
 
 // SLEEP
 function rSleep(){
+  try{
+
   var sorted=sleepLog.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
   var last=sorted[0]; var recent=sorted.slice(0,7).reverse();
   var lnEl=document.getElementById('sl-last'); if(!lnEl)return;
@@ -1618,7 +1636,7 @@ function rSleep(){
   document.getElementById('sl-bars').innerHTML=bh;
   var lh='';
   recent.forEach(function(e){ lh+=div('style="flex:1;text-align:center;font-size:9px;color:var(--t4)"',new Date(e.date).toLocaleDateString('en',{weekday:'short'}).slice(0,3)); });
-  document.getElementById('sl-lbls').innerHTML=lh;
+  (document.getElementById('sl-lbls')||{}).innerHTML=lh;
   var hrs=sorted.map(function(e){ return e.hours; });
   document.getElementById('sl-avg').textContent=hrs.length?hHM(hrs.reduce(function(a,b){ return a+b; },0)/hrs.length):'--';
   document.getElementById('sl-best').textContent=hrs.length?hHM(Math.max.apply(null,hrs)):'--';
@@ -1632,6 +1650,8 @@ function rSleep(){
       div('class="badge '+s.c+'" style="font-size:10px"',s.l));
   });
   document.getElementById('sl-log').innerHTML=lh2;
+
+  }catch(e){console.error("rSleep:",e.message||e);}
 }
 function slAdv(h){ if(h>=7&&h<=9)return'Ideal sleep duration. Your recovery is excellent.'; if(h>=6)return'Slightly under target. Try going to bed 30 min earlier.'; if(h>9)return'Oversleeping may indicate poor sleep quality or fatigue.'; return'Under 6 hours significantly impairs recovery and metabolism. Aim for 7-9 hours.'; }
 function onSlTime(){
@@ -1734,6 +1754,8 @@ var FI_METRICS = [
   {key:'sleepLast',icon:'&#128564;',label:'Last Night Sleep',unit:'hrs',hint:'Or log in Sleep tab',step:0.25,min:0,max:14,cat:'recovery',col:'var(--blu2)'}
 ];
 function rFitness(){
+  try{
+
   var cats={activity:'fi-activity',cardio:'fi-cardio',recovery:'fi-recovery'};
   Object.keys(cats).forEach(function(cat){ var el=document.getElementById(cats[cat]); if(el)el.innerHTML=''; });
   FI_METRICS.forEach(function(m){
@@ -1748,26 +1770,30 @@ function rFitness(){
       div('class="upd-btn" onclick="openMetricModal(\''+m.key+'\',\''+m.label+'\','+val+','+m.step+','+m.min+','+m.max+',\''+m.unit+'\')"','Update'));
   });
   document.getElementById('fi-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
+
+  }catch(e){console.error("rFitness:",e.message||e);}
 }
 function openMetricModal(key,label,val,step,min,max,unit){
   MM_KEY=key; MM_VAL=parseFloat(val); MM_STEP=parseFloat(step); MM_MIN=parseFloat(min); MM_MAX=parseFloat(max); MM_UNIT=unit;
-  document.getElementById('mm-title').textContent='Update '+label;
-  document.getElementById('mm-unit').textContent=unit;
+  (document.getElementById('mm-title')||{}).textContent='Update '+label;
+  (document.getElementById('mm-unit')||{}).textContent=unit;
   updateMMDisp();
   var btns='';
   var steps=MM_STEP<1?[-MM_STEP*10,-MM_STEP,MM_STEP,MM_STEP*10]:[-MM_STEP*10,-MM_STEP,MM_STEP,MM_STEP*10];
   steps.forEach(function(s){
     btns+=div('class="step-btn" onclick="adjMM('+s+')" style="border-radius:12px;min-width:52px;font-size:13px;font-weight:700"',(s>0?'+':'')+s);
   });
-  document.getElementById('mm-steppers').innerHTML=btns;
+  (document.getElementById('mm-steppers')||{}).innerHTML=btns;
   openModal('metric-modal');
 }
 function adjMM(d){ MM_VAL=parseFloat(Math.max(MM_MIN,Math.min(MM_MAX,MM_VAL+d)).toFixed(2)); updateMMDisp(); }
-function updateMMDisp(){ var d=document.getElementById('mm-disp'); if(d)d.textContent=MM_STEP<1?fD(MM_VAL,2):fN(MM_VAL); }
+function updateMMDisp(){ var d=(document.getElementById('mm-disp')||{}); if(d)d.textContent=MM_STEP<1?fD(MM_VAL,2):fN(MM_VAL); }
 // saveMetric defined below
 
 // HEALTH
 function rHealth(){
+  try{
+
   var bp=bpS(P.systolic,P.diastolic); var hr=hrS(P.rhr); var hrv=hrvS(P.hrv); var spo=spo2S(P.spo2); var rr=rrS(P.rr); var sl=slS(P.sleepLast);
   var score=0; if(bp.l==='Normal')score+=25; else if(bp.c==='ba')score+=12; if(hr.c==='bg')score+=15; if(hrv.c==='bg')score+=15; if(spo.c==='bg')score+=20; if(sl.c==='bg')score+=15; if(rr.c==='bg')score+=10;
   var sb=document.getElementById('hlth-score'); sb.textContent=score; sb.className='badge '+(score>=80?'bg':score>=55?'ba':'br')+' style="font-family:var(--mn);font-size:14px;font-weight:700"';
@@ -1800,22 +1826,24 @@ function rHealth(){
   if(sl.c==='br')flags.push({e:'&#128564;',t:'Insufficient sleep ('+fD(P.sleepLast,1)+'h)',c:'var(--red3)'});
   if(!flags.length){ document.getElementById('hlth-flags').innerHTML=div('class="callout cinfo"',sp('','&#127973;')+sp('','All metrics are within normal ranges. Great work!')); }
   else{ var fh=''; flags.forEach(function(f){ fh+=div('style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:14px;margin-bottom:8px;background:'+f.c+'12;border:0.5px solid '+f.c+'40"',sp('style="font-size:20px"',f.e)+sp('style="font-size:13px;color:'+f.c+';font-weight:600"',f.t)); }); document.getElementById('hlth-flags').innerHTML=fh; }
+
+  }catch(e){console.error("rHealth:",e.message||e);}
 }
 var bpSys=118, bpDia=76;
 function openBPModal(){
   bpSys=P.systolic; bpDia=P.diastolic;
   // Repurpose metric modal for BP
-  document.getElementById('mm-title').textContent='Update Blood Pressure';
-  document.getElementById('mm-disp').textContent=bpSys+'/'+bpDia;
-  document.getElementById('mm-unit').textContent='mmHg';
-  document.getElementById('mm-steppers').innerHTML=
+  (document.getElementById('mm-title')||{}).textContent='Update Blood Pressure';
+  (document.getElementById('mm-disp')||{}).textContent=bpSys+'/'+bpDia;
+  (document.getElementById('mm-unit')||{}).textContent='mmHg';
+  (document.getElementById('mm-steppers')||{}).innerHTML=
     div('style="display:flex;flex-direction:column;gap:10px;width:100%"',
       div('style="display:flex;justify-content:space-between;align-items:center"',sp('style="font-size:13px;color:var(--t3)"','Systolic')+div('style="display:flex;gap:8px"',div('class="step-btn" onclick="adjBP(\'sys\',-5)"','-5')+div('class="step-btn" onclick="adjBP(\'sys\',5)"','+5')))+
       div('style="display:flex;justify-content:space-between;align-items:center"',sp('style="font-size:13px;color:var(--t3)"','Diastolic')+div('style="display:flex;gap:8px"',div('class="step-btn" onclick="adjBP(\'dia\',-5)"','-5')+div('class="step-btn" onclick="adjBP(\'dia\',5)"','+5'))));
-  var btn=document.getElementById('mm-steppers').closest('.msheet').querySelector('.btn');
+  var btn=(document.getElementById('mm-steppers')||{}).closest('.msheet').querySelector('.btn');
   openModal('metric-modal');
 }
-function adjBP(t,d){ if(t==='sys')bpSys=Math.max(70,Math.min(220,bpSys+d)); else bpDia=Math.max(40,Math.min(140,bpDia+d)); document.getElementById('mm-disp').textContent=bpSys+'/'+bpDia; }
+function adjBP(t,d){ if(t==='sys')bpSys=Math.max(70,Math.min(220,bpSys+d)); else bpDia=Math.max(40,Math.min(140,bpDia+d)); (document.getElementById('mm-disp')||{}).textContent=bpSys+'/'+bpDia; }
 function saveMetric(){
   if(MM_KEY===''){P.systolic=bpSys;P.diastolic=bpDia;}
   else{P[MM_KEY]=MM_VAL;}
@@ -1914,14 +1942,14 @@ function rProfile(){
   var ti=P.heightCm/2.54;
   document.getElementById('ed-ft').value=Math.floor(ti/12);
   document.getElementById('ed-in').value=Math.round(ti%12);
-  document.getElementById('ed-gwt').value=fD(k2l(P.goalKg),1);
+  (document.getElementById('ed-gwt')||{}).value=fD(k2l(P.goalKg),1);
 }
 function saveProfile(){
   P.name=document.getElementById('ed-name').value||P.name;
   P.age=parseInt(document.getElementById('ed-age').value)||P.age;
   var ft=parseInt(document.getElementById('ed-ft').value)||0; var inch=parseInt(document.getElementById('ed-in').value)||0;
   if(ft>0)P.heightCm=fi2c(ft,inch);
-  var gw=parseFloat(document.getElementById('ed-gwt').value); if(gw>0)P.goalKg=l2k(gw);
+  var gw=parseFloat((document.getElementById('ed-gwt')||{}).value); if(gw>0)P.goalKg=l2k(gw);
   save(); rProfile(); rHome();
   toast('Profile saved!');
 }
