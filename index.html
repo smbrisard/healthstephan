@@ -1259,9 +1259,9 @@ function rHome(){
 
   var lsl=sleepLog.slice().sort(function(a,b){ return b.date.localeCompare(a.date); })[0];
   document.getElementById('hm-sleep').textContent=lsl?hHM(lsl.hours):'--';
-  document.getElementById('hm-sleep-bar').style.width=lsl?Math.min(lsl.hours/9*100,100)+'%':'0%';
+  var slBar=document.getElementById('hm-sleep-bar'); if(slBar)slBar.style.width=lsl?Math.min(lsl.hours/9*100,100)+'%':'0%';
   document.getElementById('hm-steps').textContent=fN(P.stepsToday);
-  document.getElementById('hm-steps-bar').style.width=Math.min(P.stepsToday/P.steps*100,100)+'%';
+  var stBar=document.getElementById('hm-steps-bar'); if(stBar)stBar.style.width=Math.min(P.stepsToday/P.steps*100,100)+'%';
   document.getElementById('hm-hr').textContent=P.rhr;
   document.getElementById('hm-burned').textContent=fN(P.burned);
 
@@ -1281,7 +1281,7 @@ function rHome(){
 // FOOD
 var selFood=null, foodCat='all', foodSearch='';
 function rFood(){
-  rFoodWarn(); rFoodCats(); filterFoods(); rFoodLog();
+  try{ rFoodWarn(); rFoodCats(); filterFoods(); rFoodLog(); }catch(e){console.error('rFood error:',e);}
 }
 function rFoodWarn(){
   var rem=P.calTarget-tTotal(); var el=document.getElementById('food-warn');
@@ -1344,7 +1344,7 @@ function removeMeal(id){
   toast('Meal removed');
 }
 function rFoodLog(){
-  var el=document.getElementById('food-log-list'); if(!el)return;
+  var el=document.getElementById('food-today-log')||document.getElementById('food-log-list'); if(!el)return;
   var all=tMeals();
   if(!all.length){ el.innerHTML=div('style="text-align:center;padding:20px;color:var(--t4);font-size:14px"','No food logged today. Tap a food above to add.'); return; }
   var sections=['Breakfast','Lunch','Dinner','Snack'];
@@ -1764,7 +1764,7 @@ function openMetricModal(key,label,val,step,min,max,unit){
 }
 function adjMM(d){ MM_VAL=parseFloat(Math.max(MM_MIN,Math.min(MM_MAX,MM_VAL+d)).toFixed(2)); updateMMDisp(); }
 function updateMMDisp(){ var d=document.getElementById('mm-disp'); if(d)d.textContent=MM_STEP<1?fD(MM_VAL,2):fN(MM_VAL); }
-function saveMetric(){ P[MM_KEY]=MM_VAL; save(); closeModal('metric-modal'); rFitness(); toast('Updated!'); }
+// saveMetric defined below
 
 // HEALTH
 function rHealth(){
