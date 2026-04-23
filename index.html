@@ -1807,9 +1807,9 @@ function rHistory() {
         }).join('')+
         '</svg>'+
         D('style="display:flex;justify-content:space-between;margin-top:4px"',
-          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[0].wt,1)+' lbs · '+wtPoints[0].lbl)+
+          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[0].wt,1)+' lbs - '+wtPoints[0].lbl)+
           D('style="font-size:10px;color:var(--pur)"',fD(wtPoints[wtPoints.length-1].wt-wtPoints[0].wt,1)+' lbs')+
-          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[wtPoints.length-1].wt,1)+' lbs · '+wtPoints[wtPoints.length-1].lbl)));
+          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[wtPoints.length-1].wt,1)+' lbs - '+wtPoints[wtPoints.length-1].lbl)));
     }
 
     // ── 7-day calorie vs goal comparison ────────────────────────
@@ -1826,7 +1826,7 @@ function rHistory() {
             var bg=isSel?'rgba(0,229,255,.15)':d.logged?(over?'rgba(255,59,92,.1)':'rgba(0,212,170,.1)'):'rgba(255,255,255,.04)';
             return D('style="text-align:center;padding:8px 2px;border-radius:9px;background:'+bg+';border:.5px solid '+(isSel?'var(--cyn)':'transparent')+';cursor:pointer" onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()"',
               D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',d.wkd)+
-              D('style="font-family:var(--mn);font-size:12px;font-weight:800;color:'+col+'"',d.logged?fN(d.cals):'—')+
+              D('style="font-family:var(--mn);font-size:12px;font-weight:800;color:'+col+'"',d.logged?fN(d.cals):'-')+
               D('style="font-size:9px;color:var(--dim);margin-top:1px"',d.logged?(over?'over':'ok'):''));
           }).join('')));
     }
