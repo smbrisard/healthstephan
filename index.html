@@ -576,6 +576,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
   </div>
 
+    <div class="scr" id="sc-history">
+      <div class="phdr">
+        <div><div class="ptitle">History</div><div class="psub" id="hist-sub">Daily breakdown</div></div>
+        <div style="display:flex;gap:7px;align-items:center">
+          <div onclick="histNav(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:.5px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">&#8249;</div>
+          <div onclick="histNav(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:.5px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">&#8250;</div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:8px">
+        <input type="date" id="hist-date" oninput="rHistory()" class="fld" style="margin-bottom:13px;font-size:15px">
+        <div id="hist-body"></div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- TAB BAR -->
   <div id="tabs">
     <div class="tab on" id="tab-home" onclick="showTab('home')"><svg><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</div>
@@ -589,6 +605,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="tab t-hl" id="tab-health" onclick="showTab('health')"><svg><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Health</div>
     <div class="tab" id="tab-tips" onclick="showTab('tips')"><svg><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Tips</div>
     <div class="tab" id="tab-targets" onclick="showTab('targets')"><svg><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Targets</div>
+    <div class="tab t-hl" id="tab-history" onclick="showTab('history')"><svg><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="17" x2="8" y2="17"/><line x1="12" y1="17" x2="12" y2="17"/></svg>History</div>
   </div>
 </div>
 
@@ -800,7 +817,7 @@ function showTab(name) {
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   var sc = g('sc-'+name); if(sc) sc.classList.add('on');
   var tb = g('tab-'+name); if(tb) tb.classList.add('on');
-  var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets};
+  var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
   if (r[name]) r[name]();
 }
 function openM(id) { var e=g(id); if(e){e.classList.add('on'); document.body.style.overflow='hidden';} }
@@ -1544,7 +1561,7 @@ function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localS
 function launchApp(){
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
-  var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td;
+  var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
   rHome();
 }
 function launch(){
@@ -1564,6 +1581,196 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().the
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
 setTimeout(launch, 900);
 setTimeout(function(){ var l=g('loading'); if(l&&l.style.display!=='none') launch(); }, 1700);
+
+// ═══ HISTORY ═══
+var histDate = today();
+
+function histNav(dir) {
+  try {
+    var d = new Date(histDate + 'T12:00');
+    d.setDate(d.getDate() + dir);
+    histDate = d.toISOString().slice(0,10);
+    var de = el('hist-date');
+    if (de) de.value = histDate;
+    rHistory();
+  } catch(e) { console.error('histNav',e); }
+}
+
+function rHistory() {
+  try {
+    var de = el('hist-date');
+    if (de && de.value) histDate = de.value;
+    else if (de) de.value = histDate;
+
+    var sub = el('hist-sub');
+    if (sub) {
+      var d = new Date(histDate + 'T12:00');
+      var isToday = histDate === today();
+      sub.textContent = isToday ? 'Today' : d.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    }
+
+    var dayMeals = ML.filter(function(m){ return m.date === histDate; });
+    var dayDrinks = DL.filter(function(d){ return d.date === histDate; });
+    var dayWt = WL.filter(function(w){ return w.date === histDate; });
+    var daySl = SL.filter(function(s){ return s.date === histDate; });
+
+    var foodCals = dayMeals.reduce(function(a,m){ return a+(m.cals||0); }, 0);
+    var drinkCals = dayDrinks.reduce(function(a,d){ return a+(d.c||0); }, 0);
+    var totalCals = foodCals + drinkCals;
+    var deficit = P.calTarget - totalCals;
+    var prot = dayMeals.reduce(function(a,m){ return a+(m.protein||0); }, 0);
+    var carbs = dayMeals.reduce(function(a,m){ return a+(m.carbs||0); }, 0);
+    var fat  = dayMeals.reduce(function(a,m){ return a+(m.fat||0); }, 0);
+    var fib  = dayMeals.reduce(function(a,m){ return a+(m.fiber||0); }, 0);
+    var sug  = dayMeals.reduce(function(a,m){ return a+(m.sugar||0); }, 0);
+    var sod  = dayMeals.reduce(function(a,m){ return a+(m.sodium||0); }, 0);
+    var drinkUnits = dayDrinks.reduce(function(a,d){ return a+(d.u||0); }, 0);
+
+    var hasAny = dayMeals.length || dayDrinks.length || dayWt.length || daySl.length;
+    var hb = el('hist-body');
+    if (!hb) return;
+
+    if (!hasAny) {
+      hb.innerHTML = D('style="padding:32px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:14px"',
+        '&#128197; No data logged for this day.<br><span style="font-size:12px;color:var(--dim2)">Use the date picker or arrows to navigate.</span>');
+      return;
+    }
+
+    var html = '';
+
+    // ── Calorie Summary ──────────────────────────────────────────────────────
+    if (dayMeals.length || dayDrinks.length) {
+      var defCol = deficit >= 0 ? 'var(--grn)' : 'var(--red)';
+      var pct = Math.min(totalCals / (P.calTarget||2200), 1);
+      html += D('class="slbl"','Calories');
+      html += D('style="background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:15px;margin-bottom:13px"',
+        D('style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px"',
+          D('',D('style="font-size:11px;color:var(--dim);margin-bottom:3px"','Total consumed')+
+             D('style="font-family:var(--mn);font-size:38px;font-weight:800;line-height:1;letter-spacing:-1px;color:var(--txt)"',fN(totalCals))+
+             D('style="font-size:12px;color:var(--dim)"','kcal'))+
+          D('style="text-align:right"',
+            D('style="font-size:11px;color:var(--dim);margin-bottom:3px"',deficit>=0?'deficit':'surplus')+
+            D('style="font-family:var(--mn);font-size:26px;font-weight:800;color:'+defCol+';line-height:1"',(deficit>=0?'-':'+') + fN(Math.abs(deficit)))+
+            D('style="font-size:11px;color:var(--dim)"','vs '+fN(P.calTarget)+' goal')))+
+        D('style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-bottom:10px"',
+          D('style="height:100%;width:'+Math.round(pct*100)+'%;background:linear-gradient(90deg,var(--grn),var(--cyn));border-radius:3px"',''))+
+        D('style="display:flex;justify-content:space-between"',
+          [['Food',foodCals,'var(--amb)'],['Drinks',drinkCals,'var(--pnk)'],['Goal',P.calTarget,'var(--grn)']].map(function(r){
+            return D('style="text-align:center"',D('style="font-family:var(--mn);font-size:15px;font-weight:800;color:'+r[2]+'"',fN(r[1]))+D('style="font-size:10px;color:var(--dim);margin-top:2px"',r[0]));
+          }).join('')));
+
+      // ── Macros ──────────────────────────────────────────────────────────────
+      html += D('class="slbl"','Macros');
+      html += D('style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px"',
+        [['Protein',prot,P.protein,'var(--grn)','g'],
+         ['Carbs',carbs,P.carbs,'var(--blu)','g'],
+         ['Fat',fat,P.fat,'var(--amb)','g'],
+         ['Fiber',fib,P.fiber,'#4ade80','g'],
+         ['Sugar',sug,P.sugar,'var(--pnk)','g'],
+         ['Sodium',sod,P.sodium,'var(--red)','mg']].map(function(r){
+          var v=Math.round(r[1]),t=Math.round(r[2]),pct2=t>0?Math.min(v/t,1.3):0,over=v>t;
+          return D('style="background:var(--s2);border-radius:13px;border:.5px solid var(--b1);padding:12px"',
+            D('style="font-size:11px;color:var(--dim);margin-bottom:4px"',r[0])+
+            D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:'+r[3]+';line-height:1"',v+r[4])+
+            D('style="font-size:10px;color:var(--dim);margin-top:1px;margin-bottom:6px"','/ '+t+r[4]+(over?' &#9650;':''))+
+            D('style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"',
+              D('style="height:100%;width:'+Math.min(pct2*100,100)+'%;background:'+(over?'var(--red)':r[3])+';border-radius:2px"','')));
+        }).join(''));
+    }
+
+    // ── Meals log ──────────────────────────────────────────────────────────
+    if (dayMeals.length) {
+      html += D('class="slbl"','Meals logged');
+      var secColors = {Breakfast:'var(--amb)',Lunch:'var(--grn)',Dinner:'var(--blu)',Snack:'var(--pur)'};
+      ['Breakfast','Lunch','Dinner','Snack'].forEach(function(sec){
+        var items = dayMeals.filter(function(m){ return m.type===sec; });
+        if (!items.length) return;
+        var col = secColors[sec];
+        var sCals = items.reduce(function(a,m){ return a+(m.cals||0); }, 0);
+        html += D('style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 5px"',
+          D('style="font-size:11px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:.8px"',sec)+
+          D('style="font-family:var(--mn);font-size:11px;color:var(--dim)"',fN(sCals)+' kcal'));
+        items.forEach(function(m){
+          html += D('class="ritem"',
+            D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+
+            D('class="rmain"',D('class="rname"',m.name||'')+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+
+            D('class="rval" style="color:'+col+';flex-shrink:0"',fN(m.cals)+' kcal'));
+        });
+      });
+      html += D('style="height:8px"','');
+    }
+
+    // ── Drinks log ────────────────────────────────────────────────────────────
+    if (dayDrinks.length) {
+      html += D('class="slbl"','Drinks logged');
+      var totalUnits = fD(drinkUnits, 1);
+      html += D('style="display:flex;align-items:center;gap:8px;margin-bottom:8px"',
+        D('class="badge '+(drinkUnits>=14?'br':drinkUnits>=7?'ba':'bg')+'"',totalUnits+' units')+
+        D('style="font-size:12px;color:var(--dim)"',fN(drinkCals)+' kcal from drinks'));
+      dayDrinks.forEach(function(d){
+        html += D('class="ritem"',
+          D('class="ric" style="background:rgba(255,77,184,.1)"',d.e||'&#127866;')+
+          D('class="rmain"',D('class="rname"',d.n||'')+D('class="rsub"',(d.u>0?d.u+' units · ':'')+fN(d.c)+' kcal'))+
+          D('class="rval" style="color:var(--pnk);flex-shrink:0"',fN(d.c)));
+      });
+      html += D('style="height:8px"','');
+    }
+
+    // ── Weight ───────────────────────────────────────────────────────────────
+    if (dayWt.length) {
+      html += D('class="slbl"','Weight');
+      dayWt.forEach(function(w){
+        var bmi = calcBMI(w.weight), bs = bmiSt(bmi);
+        html += D('class="ritem"',
+          D('class="ric" style="background:rgba(180,77,255,.1)"','&#9878;&#65039;')+
+          D('class="rmain"',D('class="rname"',fW(w.weight))+D('class="rsub"','BMI '+fD(bmi)+(w.note?' · '+w.note:'')))+
+          D('class="badge '+bs.c+'" style="flex-shrink:0;font-size:11px"',bs.l));
+      });
+      html += D('style="height:8px"','');
+    }
+
+    // ── Sleep ────────────────────────────────────────────────────────────────
+    if (daySl.length) {
+      html += D('class="slbl"','Sleep');
+      daySl.forEach(function(s){
+        var ss = slSt(s.hours);
+        html += D('class="ritem"',
+          D('class="ric" style="background:rgba(77,166,255,.1)"','&#128564;')+
+          D('class="rmain"',D('class="rname"',hHM(s.hours))+D('class="rsub"',s.bedtime+' to '+s.wake))+
+          D('class="badge '+ss.c+'" style="flex-shrink:0;font-size:11px"',ss.l));
+      });
+      html += D('style="height:8px"','');
+    }
+
+    hb.innerHTML = html;
+  } catch(e) { console.error('rHistory',e); var hb=el('hist-body'); if(hb) hb.innerHTML='<div style="padding:20px;color:var(--red)">Error rendering history.</div>'; }
+}
+
+// ── Weekly Trends (called from History tab week view) ────────────────────────
+function getWeekStats(startDateStr) {
+  var out = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(startDateStr + 'T12:00');
+    d.setDate(d.getDate() + i);
+    var dt = d.toISOString().slice(0,10);
+    var meals = ML.filter(function(m){ return m.date===dt; });
+    var drinks = DL.filter(function(dr){ return dr.date===dt; });
+    var cals = meals.reduce(function(a,m){ return a+(m.cals||0); },0) + drinks.reduce(function(a,dr){ return a+(dr.c||0); },0);
+    var wt = WL.filter(function(w){ return w.date===dt; });
+    var sl = SL.filter(function(s){ return s.date===dt; });
+    out.push({
+      date: dt,
+      label: d.toLocaleDateString('en',{weekday:'short'}),
+      cals: cals,
+      deficit: cals > 0 ? P.calTarget - cals : null,
+      weight: wt.length ? fD(k2l(wt[wt.length-1].weight),1) : null,
+      sleep: sl.length ? fD(sl[sl.length-1].hours,1) : null,
+      logged: meals.length + drinks.length > 0
+    });
+  }
+  return out;
+}
+
 </script>
 </body>
 </html>
