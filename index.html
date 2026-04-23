@@ -759,6 +759,16 @@ function g(id) { return document.getElementById(id); }
 function set(id,v) { var e=g(id); if(e) e.textContent=v; }
 function sH(id,v) { var e=g(id); if(e) e.innerHTML=v; }
 function tMeals() { return ML.filter(function(m){return m.date===today();}); }
+function toImperial(p) {
+  // Convert "Xg" to "Xg (Xoz)" and "Xml" to "Xml (Xfl oz)"
+  return p.replace(/(\d+\.?\d*)\s*g/g, function(m, n) {
+    var oz = (parseFloat(n)/28.3495).toFixed(1);
+    return n+'g ('+oz+'oz)';
+  }).replace(/(\d+\.?\d*)\s*ml/g, function(m, n) {
+    var floz = (parseFloat(n)/29.5735).toFixed(1);
+    return n+'ml ('+floz+'fl oz)';
+  });
+}
 function tDrinks() { return DL.filter(function(d){return d.date===today();}); }
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
 function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.cals||0);},0); }
@@ -888,7 +898,7 @@ function rHome() {
   // Weight change on quick stats
   var wtChgEl=g('hm-wtchg'), wtChgLbl=g('hm-wtchg-lbl');
   if (WL.length>=2) {
-    var sorted=WL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+    var sorted=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
     var firstWtKg=sorted[0].weight, lastWtKg=sorted[sorted.length-1].weight;
     var chgKg=lastWtKg-firstWtKg, chgLbs=k2l(Math.abs(chgKg));
     if(wtChgEl){wtChgEl.textContent=(chgKg<=0?'-':'+')+fD(chgLbs,1)+' lbs'; wtChgEl.style.color=chgKg<=0?'var(--grn)':'var(--red)';}
@@ -1198,7 +1208,7 @@ function rFoodGrid() {
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
     var idx=FOODS.indexOf(f); var over=f.c>rem&&rem>0;
-    return D('class="ftile" onclick="openFood('+idx+')"',D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',f.p)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    return D('class="ftile" onclick="openFood('+idx+')"',D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -1224,7 +1234,7 @@ function rmMeal(id) {
 function openFood(idx) {
   selF=FOODS[idx]; fSrv=1.0;
   var f=selF, rem=P.calTarget-tTotal(), exc=f.c>rem&&rem>0;
-  g('fm-em').innerHTML=f.e; set('fm-name',f.n); set('fm-portion',f.p);
+  g('fm-em').innerHTML=f.e; set('fm-name',f.n); set('fm-portion',toImperial(f.p));
   set('fm-cals',fN(f.c)); set('fm-srv','1.0'); set('fm-total',fN(f.c)+' kcal');
   set('fm-meal-lbl',mealTab); set('fm-date-lbl','today');
   var we=g('fm-warn'); if(we) we.innerHTML=exc?S('style="color:var(--red)"','Over target by '+fN(f.c-rem)+' kcal after adding'):S('style="color:var(--grn)"',fN(Math.max(0,rem-f.c))+' kcal remaining after adding');
@@ -1239,7 +1249,7 @@ function adjSrv(d) { fSrv=Math.max(0.5,parseFloat((fSrv+d).toFixed(1))); set('fm
 function buildNF(f) {
   function pc(v,dv){return Math.round(v/dv*100)+'%';}
   function hi(p){return parseFloat(p)>30?' style="color:var(--amb)"':'';}
-  return D('class="nf"',D('class="nft"','Nutrition Facts')+D('class="nfr" style="font-size:12px;color:var(--dim)"',S('','Serving size')+S('','1 serving'))+D('style="height:7px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('class="nfr nfb"',S('','Calories')+S('style="font-size:22px;font-family:var(--mn)"',Math.round(f.c)))+D('style="height:3px;background:var(--txt);margin:3px 0;border-radius:1px"','')+D('style="text-align:right;font-size:11px;color:var(--dim);margin-bottom:3px"','% Daily Value*')+D('class="nfr nfb"',S('','Total Fat')+S(hi(pc(f.f,78)),pc(f.f,78)+' '+Math.round(f.f)+'g'))+D('class="nfr nfi"',S('','Saturated Fat')+S(hi(pc(f.sf,20)),pc(f.sf,20)+' '+Math.round(f.sf)+'g'))+D('class="nfr nfb"',S('','Cholesterol')+S('',pc(f.ch,300)+' '+Math.round(f.ch)+'mg'))+D('class="nfr nfb"',S(hi(pc(f.na,2300)),'Sodium')+S(hi(pc(f.na,2300)),pc(f.na,2300)+' '+Math.round(f.na)+'mg'))+D('class="nfr nfb"',S('','Total Carbohydrate')+S('',pc(f.cb,275)+' '+Math.round(f.cb)+'g'))+D('class="nfr nfi"',S('','Dietary Fiber')+S('',pc(f.fi,28)+' '+Math.round(f.fi)+'g'))+D('class="nfr nfi"',S('','Total Sugars')+S('',Math.round(f.su)+'g'))+D('class="nfr nfi2"',S('','Incl. Added Sugars')+S('',pc(f.as,50)+' '+Math.round(f.as)+'g'))+D('class="nfr nfb"',S('','Protein')+S('',Math.round(f.pr)+'g'))+D('style="height:3px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('style="display:flex;gap:7px;flex-wrap:wrap;margin-top:3px"',S('style="font-size:11px;color:var(--dim)"','Vit D '+fD(f.vd)+'mcg')+S('style="font-size:11px;color:var(--dim)"','Calcium '+Math.round(f.ca)+'mg')+S('style="font-size:11px;color:var(--dim)"','Iron '+fD(f.ir)+'mg')+S('style="font-size:11px;color:var(--dim)"','Potassium '+Math.round(f.po)+'mg'))+D('style="font-size:10px;color:var(--dim2);margin-top:5px"','* Based on 2,000 kcal diet.'));
+  return D('class="nf"',D('class="nft"','Nutrition Facts')+D('class="nfr" style="font-size:12px;color:var(--dim)"',S('','Serving size')+S('',toImperial(f.p)))+D('style="height:7px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('class="nfr nfb"',S('','Calories')+S('style="font-size:22px;font-family:var(--mn)"',Math.round(f.c)))+D('style="height:3px;background:var(--txt);margin:3px 0;border-radius:1px"','')+D('style="text-align:right;font-size:11px;color:var(--dim);margin-bottom:3px"','% Daily Value*')+D('class="nfr nfb"',S('','Total Fat')+S(hi(pc(f.f,78)),pc(f.f,78)+' '+Math.round(f.f)+'g'))+D('class="nfr nfi"',S('','Saturated Fat')+S(hi(pc(f.sf,20)),pc(f.sf,20)+' '+Math.round(f.sf)+'g'))+D('class="nfr nfb"',S('','Cholesterol')+S('',pc(f.ch,300)+' '+Math.round(f.ch)+'mg'))+D('class="nfr nfb"',S(hi(pc(f.na,2300)),'Sodium')+S(hi(pc(f.na,2300)),pc(f.na,2300)+' '+Math.round(f.na)+'mg'))+D('class="nfr nfb"',S('','Total Carbohydrate')+S('',pc(f.cb,275)+' '+Math.round(f.cb)+'g'))+D('class="nfr nfi"',S('','Dietary Fiber')+S('',pc(f.fi,28)+' '+Math.round(f.fi)+'g'))+D('class="nfr nfi"',S('','Total Sugars')+S('',Math.round(f.su)+'g'))+D('class="nfr nfi2"',S('','Incl. Added Sugars')+S('',pc(f.as,50)+' '+Math.round(f.as)+'g'))+D('class="nfr nfb"',S('','Protein')+S('',Math.round(f.pr)+'g'))+D('style="height:3px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('style="display:flex;gap:7px;flex-wrap:wrap;margin-top:3px"',S('style="font-size:11px;color:var(--dim)"','Vit D '+fD(f.vd)+'mcg')+S('style="font-size:11px;color:var(--dim)"','Calcium '+Math.round(f.ca)+'mg')+S('style="font-size:11px;color:var(--dim)"','Iron '+fD(f.ir)+'mg')+S('style="font-size:11px;color:var(--dim)"','Potassium '+Math.round(f.po)+'mg'))+D('style="font-size:10px;color:var(--dim2);margin-top:5px"','* Based on 2,000 kcal diet.'));
 }
 
 function addFood() {
@@ -1330,6 +1340,7 @@ function drawWtChart(entries) {
 function rWtAnalysis(entries) {
   var e2=g('wt-analysis'); if(!e2) return;
   if(entries.length<2){e2.innerHTML=D('style="color:var(--dim);font-size:13px;text-align:center"','Not enough data for analysis.'); return;}
+  entries=entries.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
   var wsLbs=entries.map(function(e){return k2l(e.weight);});
   var firstLbs=wsLbs[0], lastLbs=wsLbs[wsLbs.length-1];
   var totLbs=lastLbs-firstLbs;
@@ -1362,7 +1373,7 @@ function rWtLog() {
   var e2=g('wt-log'); if(!e2) return;
   var sorted=WL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   if(!sorted.length){e2.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No entries yet. Tap + to add.'); return;}
-  e2.innerHTML=sorted.map(function(e){var bmi=calcBMI(e.weight),bs=bmiSt(bmi); return D('class="ritem"',D('style="text-align:center;width:36px;flex-shrink:0"',D('style="font-size:15px;font-weight:700"',e.date.slice(8))+D('style="font-size:11px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleString('en',{month:'short'})))+D('style="width:1px;height:32px;background:var(--b1);flex-shrink:0"','')+D('style="flex:1"',D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fW(e.weight))+(e.note?D('style="font-size:11px;color:var(--dim);margin-top:1px"',e.note):''))+D('class="badge '+bs.c+'" style="font-size:11px;font-family:var(--mn)"','BMI '+fD(bmi)));}).join('');
+  e2.innerHTML=sorted.map(function(e){var wlbs=k2l(e.weight),bmi=(P.heightCm>100?(e.weight/((P.heightCm/100)*(P.heightCm/100))):0),bs=bmiSt(bmi); return D('class="ritem"',D('style="text-align:center;width:36px;flex-shrink:0"',D('style="font-size:15px;font-weight:700"',e.date.slice(8))+D('style="font-size:11px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleString('en',{month:'short'})))+D('style="width:1px;height:32px;background:var(--b1);flex-shrink:0"','')+D('style="flex:1"',D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fD(wlbs,1)+' lbs')+(e.note?D('style="font-size:11px;color:var(--dim);margin-top:1px"',e.note):''))+D('class="badge '+bs.c+'" style="font-size:11px;font-family:var(--mn)"',bmi>0?'BMI '+fD(bmi,1):''));}).join('');
 }
 
 // ═══ SLEEP ═══
@@ -1574,7 +1585,7 @@ function saveTargets(){save(); toast('All targets saved!');}
 function rProfile(){
   var lw=latWt(), _nm2=String(P.name||'Stephan'); var init=_nm2.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
   set('pr-av',init); set('pr-name',_nm2); set('pr-streak',P.streak||0); set('pr-meals',P.mealsLogged||0);
-  if(WL.length>=2){var s=WL.slice().sort(function(a,b){return a.date.localeCompare(b.date);}),ch=s[s.length-1].weight-s[0].weight,ce=g('pr-change'); if(ce){ce.textContent=(ch>=0?'+':'')+fD(k2l(Math.abs(ch)),1); ce.style.color=ch<0?'var(--grn)':'var(--red)';}}
+  if(WL.length>=2){var s=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);}),ch=s[s.length-1].weight-s[0].weight,ce=g('pr-change'); if(ce){ce.textContent=(ch>=0?'+':'')+fD(k2l(Math.abs(ch)),1); ce.style.color=ch<0?'var(--grn)':'var(--red)';}}
   var bmi=lw?calcBMI(lw.weight):null, bs=bmi?bmiSt(bmi):null;
   sH('pr-stats',D('class="g2"',D('',D('style="font-size:11px;color:var(--dim)"','Weight')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:var(--grn)"',lw?fW(lw.weight):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','BMI')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:'+(bs?bs.col:'var(--dim)')+';"',bmi?fD(bmi):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','Height')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',cm2fi(P.heightCm)))+D('',D('style="font-size:11px;color:var(--dim)"','Age')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',P.age+' yrs'))+D('',D('style="font-size:11px;color:var(--dim)"','Goal weight')+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fW(P.goalKg)))+D('',D('style="font-size:11px;color:var(--dim)"','Goal')+D('style="font-size:13px;font-weight:600;margin-top:3px"',P.goal==='lose'?'Lose weight':P.goal==='build'?'Build muscle':'Maintain'))));
   var en=g('ed-name'),ea=g('ed-age'),ef=g('ed-ft'),ei=g('ed-in'),eg=g('ed-gwt');
