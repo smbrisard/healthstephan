@@ -628,6 +628,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="wt-date"></div>
     <div class="fw"><div class="flbl">Note (optional)</div><input class="fld" type="text" id="wt-note" placeholder="e.g. Morning weight"></div>
     <button class="btn btn-p" onclick="saveWt()">Save Weight</button>
+  
+    <button onclick="closeM('wt-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -638,6 +640,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="fw"><div class="flbl">Date (night of)</div><input class="fld" type="date" id="sl-date"></div>
     <div id="sl-prev" style="text-align:center;padding:13px;background:linear-gradient(135deg,rgba(77,166,255,.12),rgba(77,166,255,.04));border-radius:13px;font-family:var(--mn);font-size:24px;font-weight:800;color:var(--blu);margin-bottom:14px;border:.5px solid rgba(77,166,255,.2)">7h 0m</div>
     <button class="btn btn-b" onclick="saveSleep()">Save Sleep</button>
+  
+    <button onclick="closeM('sl-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -663,6 +667,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div style="font-size:12px;color:var(--dim);margin-bottom:8px">Adding to: <span style="color:var(--red);font-weight:700" id="fm-meal-lbl">Breakfast</span> &bull; <span id="fm-date-lbl">today</span></div>
     <div class="fw" style="margin-bottom:12px"><div class="flbl">Date (for past meals)</div><input class="fld" type="date" id="fm-date"></div>
     <button class="btn btn-r" onclick="addFood()">+ Add to Log</button>
+  
+    <button onclick="closeM('food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -681,6 +687,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="me-date"></div>
     <button class="btn btn-r" onclick="saveMealEdit()" style="margin-bottom:9px">Save Changes</button>
     <button onclick="deleteMealEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
+  
+    <button onclick="closeM('meal-edit-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -700,6 +708,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div style="font-size:13px;color:var(--dim);text-align:center;margin-bottom:10px">Total: <span style="color:var(--pnk);font-family:var(--mn);font-weight:700" id="dm-total">0 kcal</span></div>
     <div class="fw" style="margin-bottom:12px"><div class="flbl">Date</div><input class="fld" type="date" id="dm-date"></div>
     <button class="btn btn-k" onclick="addDrink()">+ Add to Log</button>
+  
+    <button onclick="closeM('dr-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -709,6 +719,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="callout ci" style="margin:10px 0 14px"><span>&#128162;</span><span>Enter from your Apple Watch or iPhone Health app. Change date to log or edit past days.</span></div>
     <div id="fi-edit"></div>
     <button class="btn btn-r" onclick="saveFiEdit()" style="margin-top:6px">Save Metrics</button>
+  
+    <button onclick="closeM('fi-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -733,6 +745,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="fw" style="flex:1"><div class="flbl">Date</div><input class="fld" type="date" id="medit-date"></div>
     </div>
     <button class="btn btn-r" onclick="saveMealEdit()">Save Changes</button>
+  </div>
+</div>
+<div class="modal" id="drink-edit-m"><div class="mbg" onclick="closeM('drink-edit-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Drink Entry</div>
+    <div id="de-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
+    <div class="fw"><div class="flbl">Calories</div><input class="fld" type="number" id="de-cals" step="1"></div>
+    <div class="fw"><div class="flbl">Units (alcohol)</div><input class="fld" type="number" id="de-units" step="0.1"></div>
+    <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="de-date"></div>
+    <button class="btn btn-k" onclick="saveDrinkEdit()" style="margin-bottom:9px">Save Changes</button>
+    <button onclick="deleteDrinkEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
+    <button onclick="closeM('drink-edit-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -843,6 +866,7 @@ function toImperial(p) {
     return n+'ml ('+floz+'fl oz)';
   });
 }
+function todayLocal(){var d=new Date();var yr=d.getFullYear();var mo=String(d.getMonth()+1).padStart(2,'0');var dy=String(d.getDate()).padStart(2,'0');return yr+'-'+mo+'-'+dy;}
 
 function tDrinks() { return DL.filter(function(d){return d.date===today();}); }
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
@@ -1328,7 +1352,7 @@ function rFoodLog() {
   var col=secColors[mealTab]||'var(--txt)';
   var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
   items.forEach(function(m){
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:26px;height:26px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="editMeal('+m.id+')"','&#9998;')+D('style="display:flex;gap:5px;flex-shrink:0"',D('style="width:26px;height:26px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;'))));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
   });
   le.innerHTML=html;
 }
@@ -1583,11 +1607,51 @@ function rDrGrid(){
 }
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
-  var td=tDrinks();
-  if(!td.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No drinks logged today.'); return;}
-  le.innerHTML=td.map(function(d){return D('class="ritem"',D('class="ric" style="background:rgba(255,77,184,.1)"',d.e||'&#127866;')+D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:var(--pnk)"',fN(d.c))+D('class="rmbtn" onclick="rmDrink('+d.id+')"','&#215;')));}).join('');
+  var td=DL.slice().sort(function(a,b){return b.id-a.id;}).slice(0,30);
+  if(!td.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No drinks logged yet.'); return;}
+  le.innerHTML=td.map(function(d){
+    var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',new Date(d.date+'T12:00').toLocaleDateString('en',{month:'short',day:'numeric'})):'';
+    return D('class="ritem"',
+      D('class="ric" style="background:rgba(255,77,184,.1)"',d.e||'&#127866;')+
+      D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.date&&d.date!==today()?' - '+new Date(d.date+'T12:00').toLocaleDateString('en',{month:'short',day:'numeric'}):'' )))+
+      D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',
+        D('class="rval" style="color:var(--pnk)"',fN(d.c))+
+        D('style="width:28px;height:28px;border-radius:50%;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--pnk);touch-action:manipulation" onclick="openDrinkEdit('+d.id+')"','&#9998;')+
+        D('class="rmbtn" onclick="rmDrink('+d.id+')"','&#215;')));
+  }).join('');
 }
 function rmDrink(id){DL=DL.filter(function(d){return d.id!==id;}); save(); rDrinks(); toast('Drink removed');}
+var _editDrinkId=null;
+function openDrinkEdit(id){
+  var d=null; for(var i=0;i<DL.length;i++){if(DL[i].id===id){d=DL[i];break;}} if(!d) return;
+  _editDrinkId=id;
+  var info=g('de-info'); if(info) info.innerHTML=(d.e||'&#127866;')+' <strong>'+d.n+'</strong>';
+  var dc=g('de-cals'),du=g('de-units'),dq=g('de-qty'),dd=g('de-date');
+  if(dc) dc.value=d.c||0;
+  if(du) du.value=d.u||0;
+  if(dq) dq.value=1;
+  if(dd) dd.value=d.date||todayLocal();
+  openM('drink-edit-m');
+}
+function saveDrinkEdit(){
+  if(!_editDrinkId) return;
+  for(var i=0;i<DL.length;i++){
+    if(DL[i].id===_editDrinkId){
+      var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
+      if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
+      if(du) DL[i].u=parseFloat(du.value)||0;
+      if(dd&&dd.value) DL[i].date=dd.value;
+      break;
+    }
+  }
+  save(); closeM('drink-edit-m'); rDrinks(); toast('Drink updated');
+}
+function deleteDrinkEdit(){
+  if(!_editDrinkId) return;
+  DL=DL.filter(function(d){return d.id!==_editDrinkId;});
+  _editDrinkId=null;
+  save(); closeM('drink-edit-m'); rDrinks(); toast('Drink deleted');
+}
 function rDrChart(){
   var days=[],i; for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i); days.push(dt.toISOString().slice(0,10));}
   var data=days.map(function(date){return DL.filter(function(d){return d.date===date;}).reduce(function(a,d){return a+d.c;},0);});
@@ -1626,6 +1690,7 @@ var FI_FIELDS=[
   {key:'diastolic',l:'Diastolic BP',sub:'Blood pressure',u:'mmHg',mn:40,mx:140}
 ];
 function openFiModal() {
+  rFitness(); // ensure fi-edit is populated
   var di=g('fi-date-input'); if(di) di.value=todayLocal();
   loadFiSnap(todayLocal());
   openM('fi-m');
