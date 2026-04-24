@@ -490,7 +490,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div class="slbl">Last Night</div><div class="card" style="margin-bottom:13px" id="sl-last"></div>
         <div class="slbl">7-Day Chart</div>
         <div class="card" style="margin-bottom:13px">
-          <div style="display:flex;gap:5px;align-items:stretch;height:84px" id="sl-bars"></div>
+          <div style="display:flex;gap:5px;align-items:flex-end;height:84px" id="sl-bars"></div>
           <div style="display:flex;gap:5px;margin-top:5px" id="sl-lbls"></div>
         </div>
         <div class="g3" style="margin-bottom:13px">
@@ -1539,7 +1539,20 @@ function rSleep() {
   else { le.innerHTML=D('style="text-align:center;color:var(--dim);font-size:14px;padding:8px"','No sleep logged. Tap + to add.'); }
   var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<1)mxH=8;
   var be=g('sl-bars'), bl=g('sl-lbls');
-  if(be){var W=be.offsetWidth||280,H=78,pad=4,bw=Math.floor((W-pad*(recent.length+1))/recent.length);var svgBars=recent.map(function(e,i){var pc=e.hours/mxH;var bh=Math.max(Math.round(pc*(H-16)),3);var x=pad+i*(bw+pad);var y=H-bh;var col=ss=slSt(e.hours),color=col.c==='bg'?'#4da6ff':col.c==='ba'?'#ffb830':'#ff3b5c';return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+color+'" rx="3"/>'+'<text x="'+(x+bw/2)+'" y="'+(y-3)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+fD(e.hours,1)+'</text>';}).join('');be.innerHTML='<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">'+svgBars+'</svg>';}
+  if(be){
+  var VW=280,VH=80,n=recent.length;
+  if(n>0){
+    var colW=Math.floor(VW/n),bw=colW-3;
+    var rects=recent.map(function(e,i){
+      var pc=e.hours/mxH,bh=Math.max(Math.round(pc*62),3);
+      var x=i*colW+1,y=VH-bh-2;
+      var slS=slSt(e.hours),col=slS.c==='bg'?'#4da6ff':slS.c==='ba'?'#ffb830':'#ff3b5c';
+      return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+col+'" rx="2"/>'
+        +'<text x="'+(x+bw/2)+'" y="'+(y>12?y-2:y+bh+8)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+fD(e.hours,1)+'</text>';
+    }).join('');
+    be.innerHTML='<svg width="100%" height="'+VH+'" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+rects+'</svg>';
+  }
+}
   if(bl) bl.innerHTML=recent.map(function(e){return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
   var hrs=sorted.map(function(e){return e.hours;});
   set('sl-avg',hrs.length?hHM(hrs.reduce(function(a,b){return a+b;},0)/hrs.length):'--');
