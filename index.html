@@ -1402,11 +1402,27 @@ function rWtAnalysis(entries) {
     S('style="font-size:14px"','&#128161;')+S('style="font-size:12px;color:var(--dim)"',ins));
 }
 
+function rmWt(id) {
+  WL=WL.filter(function(e){return e.id!==id;}); save(); rWeight(); rHome(); toast('Entry removed');
+}
 function rWtLog() {
   var e2=g('wt-log'); if(!e2) return;
   var sorted=WL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   if(!sorted.length){e2.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No entries yet. Tap + to add.'); return;}
-  e2.innerHTML=sorted.map(function(e){var wlbs=k2l(e.weight),bmi=(P.heightCm>100?(e.weight/((P.heightCm/100)*(P.heightCm/100))):0),bs=bmiSt(bmi); return D('class="ritem"',D('style="text-align:center;width:36px;flex-shrink:0"',D('style="font-size:15px;font-weight:700"',e.date.slice(8))+D('style="font-size:11px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleString('en',{month:'short'})))+D('style="width:1px;height:32px;background:var(--b1);flex-shrink:0"','')+D('style="flex:1"',D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fD(wlbs,1)+' lbs')+(e.note?D('style="font-size:11px;color:var(--dim);margin-top:1px"',e.note):''))+D('class="badge '+bs.c+'" style="font-size:11px;font-family:var(--mn)"',bmi>0?'BMI '+fD(bmi,1):''));}).join('');
+  e2.innerHTML=sorted.map(function(e){
+    var wlbs=k2l(e.weight),bmi=(P.heightCm>100?(e.weight/((P.heightCm/100)*(P.heightCm/100))):0),bs=bmiSt(bmi);
+    return D('class="ritem"',
+      D('style="text-align:center;width:36px;flex-shrink:0"',
+        D('style="font-size:15px;font-weight:700"',e.date.slice(8))+
+        D('style="font-size:11px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleString('en',{month:'short'})))+
+      D('style="width:1px;height:32px;background:var(--b1);flex-shrink:0"','')+
+      D('style="flex:1"',
+        D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fD(wlbs,1)+' lbs')+
+        (e.note?D('style="font-size:11px;color:var(--dim);margin-top:1px"',e.note):''))+
+      D('style="display:flex;align-items:center;gap:8px;flex-shrink:0"',
+        D('class="badge '+bs.c+'" style="font-size:11px;font-family:var(--mn)"',bmi>0?'BMI '+fD(bmi,1):'')+
+        D('class="rmbtn" onclick="rmWt('+e.id+')"','&#215;')));
+  }).join('');
 }
 
 // ═══ SLEEP ═══
