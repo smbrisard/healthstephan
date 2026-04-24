@@ -314,6 +314,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="scr on" id="sc-home">
       <div class="phdr">
         <div><div class="ptitle" id="hm-greet">Good morning</div><div class="psub" id="hm-date"></div></div>
+          <div id="sync-badge" style="display:none;margin-top:5px;font-size:11px;color:var(--grn)">&#10003; </div>
+        <button onclick="openSyncSettings()" style="width:34px;height:34px;border-radius:50%;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation">&#9729;</button>
         <div id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff">ST</div>
       </div>
       <div class="sec" style="padding-top:6px">
@@ -756,6 +758,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <button class="btn btn-k" onclick="saveDrinkEdit()" style="margin-bottom:9px">Save Changes</button>
     <button onclick="deleteDrinkEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
     <button onclick="closeM('drink-edit-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
+
+<div class="modal" id="sync-m"><div class="mbg" onclick="closeM('sync-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">iPhone Health Sync</div>
+    <div class="callout ci" style="margin-bottom:14px"><span>&#128162;</span><span>Paste your Val Town URL to auto-sync Apple Health data.</span></div>
+    <div class="fw"><div class="flbl">Val Town URL</div>
+      <input class="fld" type="url" id="sync-url-input" placeholder="https://yourname--abc.web.val.run"></div>
+    <button class="btn btn-r" onclick="saveSyncSettings()" style="margin-bottom:9px">Save &amp; Sync Now</button>
+    <button onclick="fetchSync();closeM('sync-m');" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--grn);font-size:15px;font-weight:600;background:rgba(0,212,170,.06);margin-bottom:9px;touch-action:manipulation">Sync Now</button>
+    <button onclick="closeM('sync-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -1927,7 +1940,55 @@ function launch(){
 }
 if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}); }
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
+
+// === HEALTH SYNC ===
+var SYNC_URL='';
+function initSync(){try{var s=localStorage.getItem('hs_sync_url');if(s)SYNC_URL=s;}catch(e){}}
+function setSyncURL(url){SYNC_URL=url.trim();try{localStorage.setItem('hs_sync_url',SYNC_URL);}catch(e){}}
+function fetchSync(){
+  if(!SYNC_URL)return;
+  fetch(SYNC_URL.replace(/\/$/,''))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(!d||d.error)return;
+    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday'];
+    var updated=false;
+    fields.forEach(function(k){
+      if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
+        P[k]=parseFloat(d[k]);updated=true;
+      }
+    });
+    if(d.weightKg&&parseFloat(d.weightKg)>30){
+      var wkg=parseFloat(d.weightKg),dt=d.date||today();
+      if(!WL.filter(function(w){return w.date===dt;}).length){
+        WL.push({id:Date.now(),date:dt,weight:wkg,note:'Auto-synced'});updated=true;
+      }
+    }
+    if(updated){
+      var snap={date:d.date||today(),steps:P.stepsToday,burned:P.burned,
+        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
+      FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
+      save();rHome();rFitness();
+      var sb=g('sync-badge');
+      if(sb){var t=new Date(d.syncedAt||Date.now());
+        sb.textContent='Synced '+t.toLocaleTimeString('en',{hour:'numeric',minute:'2-digit'});
+        sb.style.display='block';}
+      toast('Health data synced');
+    }
+  }).catch(function(e){console.log('Sync failed:',e.message);});
+}
+function openSyncSettings(){
+  var inp=g('sync-url-input');if(inp)inp.value=SYNC_URL||'';
+  openM('sync-m');
+}
+function saveSyncSettings(){
+  var inp=g('sync-url-input');
+  if(inp&&inp.value.trim()){setSyncURL(inp.value.trim());closeM('sync-m');fetchSync();toast('Sync URL saved');}
+  else{SYNC_URL='';try{localStorage.removeItem('hs_sync_url');}catch(e){}closeM('sync-m');toast('Sync disabled');}
+}
+initSync();
 setTimeout(launch, 900);
+setTimeout(fetchSync, 2500);
 setTimeout(function(){ var l=g('loading'); if(l&&l.style.display!=='none') launch(); }, 1700);
 
 // ═══ HISTORY ═══
