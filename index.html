@@ -360,22 +360,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(255,184,48,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#127939;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb)" id="hm-steps">8,432</div>
-            <div style="font-size:11px;color:var(--dim);margin-top:3px">steps today</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">steps today</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-steps-yd"></div>
           </div>
           <div class="mtile" style="background:linear-gradient(135deg,rgba(180,77,255,.14),rgba(180,77,255,.03));border-color:rgba(180,77,255,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#9878;&#65039;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--pur)" id="hm-wtchg">--</div>
             <div style="font-size:11px;color:var(--dim);margin-top:3px" id="hm-wtchg-lbl">weight change</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-wt-yd"></div>
           </div>
           <div class="mtile" style="background:linear-gradient(135deg,rgba(77,166,255,.14),rgba(77,166,255,.03));border-color:rgba(77,166,255,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128564;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--blu)" id="hm-sleep">7.2</div>
-            <div style="font-size:11px;color:var(--dim);margin-top:3px">hrs sleep</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">hrs sleep</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-sleep-yd"></div>
           </div>
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,107,107,.14),rgba(255,107,107,.03));border-color:rgba(255,107,107,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128293;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#ff7070" id="hm-burned">389</div>
-            <div style="font-size:11px;color:var(--dim);margin-top:3px">kcal burned</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">kcal burned</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
           </div>
         </div>
         <!-- today meals -->
@@ -922,6 +926,38 @@ function rHome() {
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
   set('hm-steps',fN(P.stepsToday)); set('hm-burned',fN(P.burned));
+  // Yesterday fitness comparison
+  var _yd=new Date(); _yd.setDate(_yd.getDate()-1);
+  var _ydStr=_yd.toISOString().slice(0,10);
+  var _ydSnap=null;
+  for(var _fi=FL.length-1;_fi>=0;_fi--){if(FL[_fi].date===_ydStr){_ydSnap=FL[_fi];break;}}
+  function _hmD(id2,cur,prev,lb,unit){
+    var el2=g(id2); if(!el2) return;
+    if(prev===null||prev===undefined){el2.innerHTML='';return;}
+    var diff=Math.round((cur-prev)*10)/10;
+    if(Math.abs(diff)<0.05){el2.innerHTML='';return;}
+    var better=lb?diff<0:diff>0;
+    var col=better?'var(--grn)':'var(--red)';
+    el2.innerHTML=S('style="color:'+col+'"',(diff>0?'&#9650;':'&#9660;')+' '+Math.abs(diff)+(unit||''))+S('style="color:var(--dim2)"',' yd');
+  }
+  if(_ydSnap){
+    _hmD('hm-steps-yd',P.stepsToday||0,_ydSnap.steps,false,'');
+    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
+    _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
+  } else {var _yde=g('hm-steps-yd');if(_yde)_yde.innerHTML='';}
+  // Weight vs yesterday (from WL entries)
+  var _ydWEl=g('hm-wt-yd');
+  if(_ydWEl){
+    var _ydWts=WL.filter(function(w){return w.date===_ydStr;});
+    var _todWts=WL.filter(function(w){return w.date===today();});
+    if(_ydWts.length&&_todWts.length){
+      var _wdiff=Math.round((k2l(_todWts[_todWts.length-1].weight)-k2l(_ydWts[_ydWts.length-1].weight))*10)/10;
+      if(Math.abs(_wdiff)>=0.1){
+        var _wc=_wdiff<0?'var(--grn)':'var(--red)';
+        _ydWEl.innerHTML=S('style="color:'+_wc+'"',(_wdiff>0?'&#9650;':'&#9660;')+' '+Math.abs(_wdiff)+' lbs')+S('style="color:var(--dim2)"',' vs yd');
+      } else {_ydWEl.innerHTML='';}
+    } else {_ydWEl.innerHTML='';}
+  }
 
   // Weight change on quick stats
   var wtChgEl=g('hm-wtchg'), wtChgLbl=g('hm-wtchg-lbl');
@@ -1367,30 +1403,33 @@ function drawWtChart(entries) {
 }
 function rWtAnalysis(entries) {
   var e2=g('wt-analysis'); if(!e2) return;
-  // Use ALL weight entries for since-start and range; use filtered entries for per-week
-  var allWL=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
-  var rangeWL=entries.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
-  if(allWL.length<1){e2.innerHTML=D('style="color:var(--dim);font-size:13px;text-align:center"','No weight entries yet.'); return;}
-  var allLbs=allWL.map(function(e){return k2l(e.weight);});
-  var firstLbs=allLbs[0], lastLbs=allLbs[allLbs.length-1];
-  var wsLbs=rangeWL.length>=2?rangeWL.map(function(e){return k2l(e.weight);}):allLbs;
-  // Stub out entries ref so rest of fn uses wsLbs for range stats
-  var entries=rangeWL.length>=2?rangeWL:allWL;
-  var totLbs=lastLbs-firstLbs;
-  var dd=(new Date(entries[entries.length-1].date)-new Date(entries[0].date))/86400000;
-  var wklyLbs=dd>0?(totLbs/(dd/7)):0;
-  var lowestLbs=Math.min.apply(null,wsLbs);
-  var highestLbs=Math.max.apply(null,wsLbs);
+  // Always use ALL entries sorted by timestamp for accurate history
+  var allSorted=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
+  if(allSorted.length<1){e2.innerHTML=D('style="color:var(--dim);font-size:13px;text-align:center"','No weight entries yet.'); return;}
+  if(allSorted.length<2){e2.innerHTML=D('style="color:var(--dim);font-size:13px;text-align:center"','Add a second entry to see analysis.'); return;}
+  var allLbs=allSorted.map(function(e){return k2l(e.weight);});
+  // Since start: oldest entry vs newest entry
+  var firstLbs=allLbs[0];
+  var lastLbs=allLbs[allLbs.length-1];
+  var totLbs=lastLbs-firstLbs; // negative = lost weight
+  // Per week: total change divided by total elapsed weeks
+  var firstDate=new Date(allSorted[0].date+'T12:00');
+  var lastDate=new Date(allSorted[allSorted.length-1].date+'T12:00');
+  var totalDays=(lastDate-firstDate)/86400000;
+  var wklyLbs=totalDays>6?(totLbs/(totalDays/7)):0;
+  // Range: highest minus lowest across all entries
+  var lowestLbs=Math.min.apply(null,allLbs);
+  var highestLbs=Math.max.apply(null,allLbs);
   var rangeLbs=highestLbs-lowestLbs;
-  var ins=wklyLbs<-1?'Losing quickly. Consider eating a little more.':wklyLbs<-0.1?'Steady loss. Great work!':wklyLbs<0.1?'Weight stable. Adjust deficit if needed.':'Slight upward trend. Review intake.';
+  var ins=wklyLbs<-1?'Strong loss pace.':wklyLbs<-0.1?'Steady loss. Great work!':wklyLbs<0.1?'Weight stable.':'Slight upward trend. Review intake.';
   var totCol=totLbs<=0?'var(--grn)':'var(--red)';
   var wkCol=wklyLbs<=0?'var(--grn)':'var(--red)';
   e2.innerHTML=D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"',
     D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
-      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+totCol+'"',(totLbs>0?'+':'')+fD(totLbs,1)+' lbs')+
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+totCol+'"',(totLbs<=0?'':'+')+''+fD(totLbs,1)+' lbs')+
       D('style="font-size:11px;color:var(--dim);margin-top:2px"','Since start'))+
     D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
-      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+wkCol+'"',(wklyLbs>0?'+':'')+fD(wklyLbs,1)+' lbs')+
+      D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+wkCol+'"',(wklyLbs>0?'+':'')+''+fD(wklyLbs,1)+' lbs')+
       D('style="font-size:11px;color:var(--dim);margin-top:2px"','Per week'))+
     D('style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center"',
       D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',fD(lowestLbs,1)+' lbs')+
