@@ -533,7 +533,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- FITNESS -->
     <div class="scr" id="sc-fitness">
       <div class="phdr"><div><div class="ptitle">Fitness</div><div class="psub" id="fi-date"></div></div>
-        <button onclick="openM('fi-m')" style="font-size:12px;font-weight:700;color:var(--amb);padding:6px 13px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.25)">Edit</button>
+        <button onclick="openFiModal()" style="font-size:12px;font-weight:700;color:var(--amb);padding:6px 13px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.25)">Edit</button>
       </div>
       <div class="sec" style="padding-top:8px">
         <div class="callout ci" style="margin-bottom:13px"><span style="font-size:16px">&#128162;</span><span>Tap Edit to enter your Apple Watch readings. HealthKit requires a native app.</span></div>
@@ -666,6 +666,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   </div>
 </div>
 
+<div class="modal" id="meal-edit-m"><div class="mbg" onclick="closeM('meal-edit-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Meal Entry</div>
+    <div id="meal-edit-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
+    <div class="fw"><div class="flbl">Calories</div><input class="fld" type="number" id="me-cals" step="1"></div>
+    <div class="fw"><div class="flbl">Protein (g)</div><input class="fld" type="number" id="me-prot" step="0.1"></div>
+    <div class="fw"><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="me-carbs" step="0.1"></div>
+    <div class="fw"><div class="flbl">Fat (g)</div><input class="fld" type="number" id="me-fat" step="0.1"></div>
+    <div class="fw"><div class="flbl">Meal Type</div>
+      <select class="fld" id="me-type">
+        <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+      </select>
+    </div>
+    <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="me-date"></div>
+    <button class="btn btn-r" onclick="saveMealEdit()" style="margin-bottom:9px">Save Changes</button>
+    <button onclick="deleteMealEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
+  </div>
+</div>
+
 <div class="modal" id="dr-m"><div class="mbg" onclick="closeM('dr-m')"></div>
   <div class="msheet"><div class="mhandle"></div>
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:12px">
@@ -686,10 +704,35 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 </div>
 
 <div class="modal" id="fi-m"><div class="mbg" onclick="closeM('fi-m')"></div>
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Update Metrics</div>
-    <div class="callout ci" style="margin-bottom:14px"><span>&#128162;</span><span>Enter readings from your Apple Watch or iPhone Health app.</span></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Log Fitness Metrics</div>
+    <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="fi-date-input" oninput="loadFiSnap(this.value)" style="margin-bottom:0"></div>
+    <div class="callout ci" style="margin:10px 0 14px"><span>&#128162;</span><span>Enter from your Apple Watch or iPhone Health app. Change date to log or edit past days.</span></div>
     <div id="fi-edit"></div>
     <button class="btn btn-r" onclick="saveFiEdit()" style="margin-top:6px">Save Metrics</button>
+  </div>
+</div>
+
+<div class="modal" id="medit-m"><div class="mbg" onclick="closeM('medit-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Meal</div>
+    <input type="hidden" id="medit-id">
+    <div class="fw"><div class="flbl">Food Name</div><input class="fld" id="medit-name" type="text"></div>
+    <div style="display:flex;gap:8px">
+      <div class="fw" style="flex:1"><div class="flbl">Calories</div><input class="fld" id="medit-cals" type="number" min="0"></div>
+      <div class="fw" style="flex:1"><div class="flbl">Protein (g)</div><input class="fld" id="medit-prot" type="number" min="0"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="fw" style="flex:1"><div class="flbl">Carbs (g)</div><input class="fld" id="medit-carbs" type="number" min="0"></div>
+      <div class="fw" style="flex:1"><div class="flbl">Fat (g)</div><input class="fld" id="medit-fat" type="number" min="0"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="fw" style="flex:1"><div class="flbl">Meal Type</div>
+        <select class="fld" id="medit-type">
+          <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+        </select>
+      </div>
+      <div class="fw" style="flex:1"><div class="flbl">Date</div><input class="fld" type="date" id="medit-date"></div>
+    </div>
+    <button class="btn btn-r" onclick="saveMealEdit()">Save Changes</button>
   </div>
 </div>
 
@@ -773,7 +816,7 @@ function save() {
 }
 
 // ═══ UTILS ═══
-function today() { return new Date().toISOString().slice(0,10); }
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fN(n) { return Number(n).toLocaleString(); }
 function fD(n,d) { return Number(n).toFixed(d===undefined?1:d); }
 function k2l(k) { return k * 2.20462; }
@@ -1285,7 +1328,7 @@ function rFoodLog() {
   var col=secColors[mealTab]||'var(--txt)';
   var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
   items.forEach(function(m){
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals))+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:26px;height:26px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="editMeal('+m.id+')"','&#9998;')+D('style="display:flex;gap:5px;flex-shrink:0"',D('style="width:26px;height:26px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;'))));
   });
   le.innerHTML=html;
 }
@@ -1582,6 +1625,23 @@ var FI_FIELDS=[
   {key:'systolic',l:'Systolic BP',sub:'Blood pressure',u:'mmHg',mn:70,mx:220},
   {key:'diastolic',l:'Diastolic BP',sub:'Blood pressure',u:'mmHg',mn:40,mx:140}
 ];
+function openFiModal() {
+  var di=g('fi-date-input'); if(di) di.value=todayLocal();
+  loadFiSnap(todayLocal());
+  openM('fi-m');
+}
+function loadFiSnap(dt) {
+  // Load values from FL snapshot for given date, or current P values if today
+  var snap=null;
+  for(var i=FL.length-1;i>=0;i--){if(FL[i].date===dt){snap=FL[i];break;}}
+  var isToday=(dt===today());
+  FI_FIELDS.forEach(function(f){
+    var e2=g('fif-'+f.key);
+    if(!e2) return;
+    var val=isToday?P[f.key]:(snap?snap[f.key]:P[f.key]);
+    if(val!==undefined) e2.value=val;
+  });
+}
 function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var tiles=[
@@ -1626,10 +1686,21 @@ function rFitness(){
   fe.innerHTML=FI_FIELDS.map(function(f){return D('style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--b1)"',D('',D('style="font-size:14px;font-weight:500"',f.l)+D('style="font-size:11px;color:var(--dim);margin-top:1px"',f.sub))+D('style="display:flex;align-items:center;gap:7px"','<input type="number" id="fif-'+f.key+'" value="'+P[f.key]+'" min="'+f.mn+'" max="'+f.mx+'" style="width:82px;padding:8px 10px;background:var(--s3);border:1.5px solid var(--b2);border-radius:10px;color:var(--txt);font-size:15px;font-family:var(--mn);font-weight:700;text-align:center;-webkit-appearance:none;outline:none">'+D('style="font-size:11px;color:var(--dim);white-space:nowrap"',f.u)));}).join('');
 }
 function saveFiEdit(){
-  FI_FIELDS.forEach(function(f){var e2=g('fif-'+f.key); if(e2&&e2.value!==''){var v=parseFloat(e2.value); if(!isNaN(v))P[f.key]=Math.max(f.mn,Math.min(f.mx,v));}});
-  // Save daily fitness snapshot (keyed by today's date)
-  var snap={date:today(),steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
-  FL=FL.filter(function(f){return f.date!==today();});
+  // Save daily fitness snapshot
+  var fiDt=(g('fi-date-input')&&g('fi-date-input').value)?g('fi-date-input').value:today();
+  var isToday2=(fiDt===today());
+  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
+  // For past days: save to snapshot but don't overwrite today's P values
+  FI_FIELDS.forEach(function(f){
+    var e2=g('fif-'+f.key);
+    if(!e2||e2.value==='') return;
+    var v=parseFloat(e2.value);
+    if(isNaN(v)) return;
+    v=Math.max(f.mn,Math.min(f.mx,v));
+    snap[f.key]=v;
+    if(isToday2) P[f.key]=v;
+  });
+  FL=FL.filter(function(fi){return fi.date!==fiDt;});
   FL.push(snap);
   save(); closeM('fi-m'); rFitness(); rHome(); rHealth(); toast('Metrics updated!');
 }
@@ -1720,6 +1791,41 @@ function saveProfile(){
   save(); rProfile(); rHome(); toast('Profile saved!');
 }
 function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localStorage.clear(); location.reload();}}
+
+function editMeal(id) {
+  var m = null;
+  for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}}
+  if(!m) return;
+  var em=g('medit-m'); if(!em) return;
+  // Populate fields
+  var en=g('medit-name'); if(en) en.value=m.name||'';
+  var ec=g('medit-cals'); if(ec) ec.value=m.cals||0;
+  var ep=g('medit-prot'); if(ep) ep.value=Math.round(m.protein||0);
+  var ecb=g('medit-carbs'); if(ecb) ecb.value=Math.round(m.carbs||0);
+  var ef=g('medit-fat'); if(ef) ef.value=Math.round(m.fat||0);
+  var et=g('medit-type'); if(et) et.value=m.type||'Dinner';
+  var ed=g('medit-date'); if(ed) ed.value=m.date||today();
+  var eid=g('medit-id'); if(eid) eid.value=m.id;
+  openM('medit-m');
+}
+function saveMealEdit() {
+  var eid=g('medit-id'); if(!eid) return;
+  var id=parseInt(eid.value);
+  for(var i=0;i<ML.length;i++){
+    if(ML[i].id===id){
+      var en=g('medit-name'); if(en&&en.value) ML[i].name=en.value;
+      var ec=g('medit-cals'); if(ec) ML[i].cals=parseInt(ec.value)||ML[i].cals;
+      var ep=g('medit-prot'); if(ep) ML[i].protein=parseFloat(ep.value)||0;
+      var ecb=g('medit-carbs'); if(ecb) ML[i].carbs=parseFloat(ecb.value)||0;
+      var ef=g('medit-fat'); if(ef) ML[i].fat=parseFloat(ef.value)||0;
+      var et=g('medit-type'); if(et) ML[i].type=et.value;
+      var ed=g('medit-date'); if(ed&&ed.value) ML[i].date=ed.value;
+      break;
+    }
+  }
+  save(); closeM('medit-m'); rFood(); rHome();
+  toast('Meal updated');
+}
 
 // ═══ LAUNCH ═══
 function launchApp(){
