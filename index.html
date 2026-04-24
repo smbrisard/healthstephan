@@ -211,7 +211,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 .ringmid{position:absolute;text-align:center;pointer-events:none}
 
 /* SL BAR */
-.slbarcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.slbarcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
 
 /* DR TILE */
 .dtile{background:var(--s2);border-radius:13px;border:.5px solid var(--b1);padding:13px;cursor:pointer;touch-action:manipulation}
@@ -759,8 +759,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   </div>
 </div>
 
-<div id="toast"></div>
-<script>
+<div id="toast
 // ═══ SINGLE PERSISTENT KEY - survives all rebuilds ═══
 var STORE_KEY = 'hs_v1';
 
@@ -1539,7 +1538,14 @@ function rSleep() {
   else { le.innerHTML=D('style="text-align:center;color:var(--dim);font-size:14px;padding:8px"','No sleep logged. Tap + to add.'); }
   var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<1)mxH=8;
   var be=g('sl-bars'), bl=g('sl-lbls');
-  if(be) be.innerHTML=recent.map(function(e){var pc=e.hours/mxH,ss=slSt(e.hours),c=ss.c==='bg'?'var(--blu)':ss.c==='ba'?'var(--amb)':'var(--red)'; return D('class="slbarcol"',D('style="font-size:9px;font-family:var(--mn);color:var(--dim)"',fD(e.hours,1))+D('style="width:100%;background:'+c+';border-radius:3px 3px 0 0;flex:'+pc+'"','')); }).join('');
+  if(be) be.innerHTML=recent.map(function(e){
+    var pc=e.hours/mxH, ss=slSt(e.hours);
+    var c=ss.c==='bg'?'var(--blu)':ss.c==='ba'?'var(--amb)':'var(--red)';
+    var barH=Math.max(Math.round(pc*70),3);
+    return D('class="slbarcol"',
+      D('style="font-size:9px;font-family:var(--mn);color:var(--dim);margin-bottom:2px"',fD(e.hours,1))+
+      D('style="width:85%;background:'+c+';border-radius:3px 3px 0 0;height:'+barH+'px"',''));
+  }).join('');
   if(bl) bl.innerHTML=recent.map(function(e){return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
   var hrs=sorted.map(function(e){return e.hours;});
   set('sl-avg',hrs.length?hHM(hrs.reduce(function(a,b){return a+b;},0)/hrs.length):'--');
@@ -2105,6 +2111,9 @@ function getWeekStats(startDateStr) {
       logged: meals.length + drinks.length > 0
     });
   }
+  return out;
+}
+
   return out;
 }
 
