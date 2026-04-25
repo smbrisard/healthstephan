@@ -312,9 +312,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
     <!-- HOME -->
     <div class="scr on" id="sc-home">
-      <div class="phdr">
-        <div><div class="ptitle" id="hm-greet">Good morning</div><div class="psub" id="hm-date"></div></div>
-          <div id="sync-badge" style="display:none;margin-top:5px;font-size:11px;color:var(--grn)">&#10003; </div>
+      <div class="phdr" style="align-items:center">
+        <div>
+          <div id="hm-date" style="font-size:22px;font-weight:800;color:var(--txt);font-family:var(--mn);line-height:1.2"></div>
+          <div id="sync-badge" style="display:none;margin-top:4px;font-size:11px;color:var(--grn)">&#10003; </div>
+        </div>
         <button onclick="openSyncSettings()" style="width:34px;height:34px;border-radius:50%;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation">&#9729;</button>
         <div id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff">ST</div>
       </div>
@@ -358,6 +360,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
         <!-- quick stats -->
         <div class="slbl">Quick Stats</div>
+        <div style="display:flex;align-items:center;gap:14px;background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px">
+          <div id="hm-cal-ring" style="position:relative;width:72px;height:72px;flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:12px;color:var(--dim);margin-bottom:3px">Today's calories</div>
+            <div style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--grn)" id="hm-deficit-lbl"></div>
+          </div>
+        </div>
         <div class="g2" style="margin-bottom:14px">
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(255,184,48,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#127939;</div>
@@ -453,7 +462,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="scr" id="sc-nutrition">
       <div class="phdr"><div><div class="ptitle">Nutrition</div><div class="psub">Macros and micros</div></div></div>
       <div class="sec" style="padding-top:8px">
-        <div class="slbl">BMI</div><div class="card" style="margin-bottom:13px" id="bmi-card"></div>
+        <div class="slbl">BMI<div id="nut-body"></div></div><div class="card" style="margin-bottom:13px" id="bmi-card"></div>
         <div class="slbl">Macros</div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
         <div class="slbl">Sugar &amp; Fat</div><div class="card" style="margin-bottom:13px" id="sugfat-card"></div>
         <div class="slbl">Micronutrients</div><div class="card" id="micro-card"></div>
@@ -602,13 +611,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <div id="tabs">
     <div class="tab on" id="tab-home" onclick="showTab('home')"><svg><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</div>
     <div class="tab t-pr" id="tab-profile" onclick="showTab('profile')"><svg><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+    <div class="tab" id="tab-fitness" onclick="showTab('fitness')"><svg><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><circle cx="12" cy="4" r="2"/></svg>Fitness</div>
+    <div class="tab" id="tab-health" onclick="showTab('health')"><svg><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Health</div>
     <div class="tab" id="tab-food" onclick="showTab('food')"><svg><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>Food</div>
     <div class="tab" id="tab-nutrition" onclick="showTab('nutrition')"><svg><circle cx="12" cy="12" r="9"/><path d="M12 3v9l4 2"/></svg>Nutrition</div>
     <div class="tab t-wt" id="tab-weight" onclick="showTab('weight')"><svg><path d="M12 2a5 5 0 015 5H7a5 5 0 015-5zM3 7h18l-2 13H5L3 7z"/></svg>Weight</div>
     <div class="tab t-sl" id="tab-sleep" onclick="showTab('sleep')"><svg><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Sleep</div>
     <div class="tab t-dr" id="tab-drinks" onclick="showTab('drinks')"><svg><path d="M8 22h8M12 11v11M20 2H4l2 8c0 3.3 2.7 6 6 6s6-2.7 6-6l2-8z"/></svg>Drinks</div>
-    <div class="tab t-fi" id="tab-fitness" onclick="showTab('fitness')"><svg><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Fitness</div>
-    <div class="tab t-hl" id="tab-health" onclick="showTab('health')"><svg><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Health</div>
     <div class="tab" id="tab-tips" onclick="showTab('tips')"><svg><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Tips</div>
     <div class="tab" id="tab-targets" onclick="showTab('targets')"><svg><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Targets</div>
     <div class="tab t-hl" id="tab-history" onclick="showTab('history')"><svg><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="17" x2="8" y2="17"/><line x1="12" y1="17" x2="12" y2="17"/></svg>History</div>
@@ -990,9 +999,8 @@ function obNext() {
 // ═══ HOME ═══
 function rHome() {
   try {
-  var h=new Date().getHours(), gr=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  set('hm-greet',gr+', '+String(P.name||'Stephan'));
-  set('hm-date',new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'}));
+  var _hd=g('hm-date');
+  if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
   set('hm-av',init);
 
@@ -1047,6 +1055,8 @@ function rHome() {
     var chgKg=lastWtKg-firstWtKg, chgLbs=k2l(Math.abs(chgKg));
     if(wtChgEl){wtChgEl.textContent=(chgKg<=0?'-':'+')+fD(chgLbs,1)+' lbs'; wtChgEl.style.color=chgKg<=0?'var(--grn)':'var(--red)';}
     if(wtChgLbl) wtChgLbl.textContent=chgKg<=0?'lost since start':'gained since start';
+  var _dl=g('hm-deficit-lbl');
+  if(_dl){var _def=P.calTarget-_cals; _dl.textContent=(_def>=0?'-':'+')+fN(Math.abs(_def))+' kcal '+(_def>=0?'remaining':'over goal');}
   } else if(WL.length===1) {
     if(wtChgEl){wtChgEl.textContent=fW(WL[0].weight); wtChgEl.style.color='var(--pur)';}
     if(wtChgLbl) wtChgLbl.textContent='current weight';
@@ -1374,6 +1384,42 @@ function rmMeal(id) {
   ML=ML.filter(function(m){return m.id!==id;}); save(); rFood(); rHome();
   toast('Meal removed');
 }
+var _editMealId=null;
+function openMealEdit(id) {
+  var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
+  _editMealId=id;
+  var info=g('meal-edit-info'); if(info) info.innerHTML=(m.emoji||'&#127829;')+' <strong>'+m.name+'</strong>';
+  var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
+  if(mc) mc.value=m.cals||0;
+  if(mp) mp.value=Math.round((m.protein||0)*10)/10;
+  if(mcb) mcb.value=Math.round((m.carbs||0)*10)/10;
+  if(mf) mf.value=Math.round((m.fat||0)*10)/10;
+  if(mt) mt.value=m.type||'Dinner';
+  if(md) md.value=m.date||todayLocal();
+  openM('meal-edit-m');
+}
+function saveMealEdit() {
+  if(!_editMealId) return;
+  for(var i=0;i<ML.length;i++){
+    if(ML[i].id===_editMealId){
+      var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
+      if(mc) ML[i].cals=parseInt(mc.value)||ML[i].cals;
+      if(mp) ML[i].protein=parseFloat(mp.value)||0;
+      if(mcb) ML[i].carbs=parseFloat(mcb.value)||0;
+      if(mf) ML[i].fat=parseFloat(mf.value)||0;
+      if(mt) ML[i].type=mt.value;
+      if(md&&md.value) ML[i].date=md.value;
+      break;
+    }
+  }
+  save(); closeM('meal-edit-m'); rFood(); rHome(); toast('Meal updated');
+}
+function deleteMealEdit() {
+  if(!_editMealId) return;
+  ML=ML.filter(function(m){return m.id!==_editMealId;});
+  _editMealId=null;
+  save(); closeM('meal-edit-m'); rFood(); rHome(); toast('Meal deleted');
+}
 
 function openFood(idx) {
   selF=FOODS[idx]; fSrv=1.0;
@@ -1406,30 +1452,85 @@ function addFood() {
 }
 
 // ═══ NUTRITION ═══
-function rNutrition() { rBMI(); rNutCards(); }
-function rBMI() {
-  var lw=latWt(), e2=g('bmi-card'); if(!e2) return;
-  if(!lw){e2.innerHTML=D('style="color:var(--dim);text-align:center;font-size:14px"','Log your weight first.'); return;}
-  var bmi=calcBMI(lw.weight), bs=bmiSt(bmi), h2=P.heightCm/100, htr={mn:18.5*h2*h2,mx:24.9*h2*h2};
-  var np=Math.min(Math.max((bmi-10)/35*100,0),100);
-  e2.innerHTML=D('style="display:flex;gap:13px;align-items:flex-start"',D('',D('style="font-family:var(--mn);font-size:50px;font-weight:800;color:'+bs.col+';line-height:1;letter-spacing:-1px"',fD(bmi))+D('class="badge '+bs.c+'" style="margin-top:6px"',bs.l))+D('style="flex:1"',D('style="position:relative;margin-bottom:8px"',D('style="display:flex;height:11px;border-radius:6px;overflow:hidden;gap:1px"',D('style="width:15%;background:var(--blu);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:25%;background:var(--grn);opacity:.7"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-14px;left:'+np+'%;transform:translateX(-50%);width:3px;height:16px;background:#fff;border-radius:2px"','')))+D('style="font-size:12px;color:var(--dim)"','Healthy for '+cm2fi(P.heightCm)+': '+Math.round(k2l(htr.mn))+'-'+Math.round(k2l(htr.mx))+' lbs')));
-}
-function rNutCards() {
-  var n={cals:tTotal(),pr:tN('protein'),cb:tN('carbs'),f:tN('fat'),fi:tN('fiber'),su:tN('sugar'),as:tN('addedSugar'),sf:tN('satFat'),na:tN('sodium'),ch:tN('cholesterol'),po:tN('potassium'),ca:tN('calcium'),ir:tN('iron'),vc:tN('vitC'),vd:tN('vitD'),va:tN('vitA')};
-  sH('macro-card',[{l:'Calories',v:n.cals,t:P.calTarget,c:'var(--red)',u:'kcal',ov:true},{l:'Protein',v:n.pr,t:P.protein,c:'var(--grn)',u:'g',ov:false},{l:'Carbs',v:n.cb,t:P.carbs,c:'var(--blu)',u:'g',ov:false},{l:'Fat',v:n.f,t:P.fat,c:'var(--amb)',u:'g',ov:false},{l:'Fiber',v:n.fi,t:P.fiber,c:'#4ade80',u:'g',ov:false}].map(nRow).join(''));
-  sH('sugfat-card',[{l:'Total Sugar',v:n.su,t:P.sugar,c:'var(--pnk)',u:'g',ov:true},{l:'Added Sugar',v:n.as,t:25,c:'var(--pnk)',u:'g',ov:true},{l:'Saturated Fat',v:n.sf,t:20,c:'var(--red)',u:'g',ov:true}].map(nRow).join(''));
-  sH('micro-card',[{l:'Sodium',v:n.na,t:P.sodium,c:'var(--red)',u:'mg',ov:true},{l:'Cholesterol',v:n.ch,t:300,c:'var(--amb)',u:'mg',ov:true},{l:'Potassium',v:n.po,t:P.potassium,c:'var(--blu)',u:'mg',ov:false},{l:'Calcium',v:n.ca,t:P.calcium,c:'var(--amb)',u:'mg',ov:false},{l:'Iron',v:n.ir,t:18,c:'var(--red)',u:'mg',ov:false},{l:'Vitamin C',v:n.vc,t:90,c:'var(--amb)',u:'mg',ov:false},{l:'Vitamin D',v:n.vd,t:20,c:'var(--blu)',u:'mcg',ov:false}].map(nRow).join(''));
-}
-function nRow(r) {
-  var pct=r.t>0?Math.min(r.v/r.t,1.3):0, ov2=r.v>r.t&&r.ov, lw=!r.ov&&r.v<r.t*.5;
-  var st=ov2?'+'+fn2(r.v-r.t,r.u)+' over':lw?fn2(r.t-r.v,r.u)+' to go':r.v>=r.t*.8?'On target':fn2(r.t-r.v,r.u)+' to go';
-  var sc=ov2?'var(--red)':lw?'var(--amb)':r.v>=r.t*.8?'var(--grn)':r.c;
-  return D('class="prow"',D('class="pt"',D('class="pname"',r.l)+D('style="display:flex;align-items:center;gap:8px"',S('style="font-size:12px;font-weight:700;color:'+sc+'"',st)+S('class="pinfo"',Math.round(r.v)+'/'+Math.round(r.t)+r.u)))+D('class="ptrack"',D('class="pfill" style="width:'+Math.min(pct*100,100)+'%;background:'+(ov2?'var(--red)':r.c)+'"','')));
-}
-function fn2(v,u) { var n=Math.round(v); if(u==='mg'&&n>=1000)return(n/1000).toFixed(1)+'g'; return n+u; }
+function rNutrition() {
+  try {
+    var meals=tMeals(), drinks=tDrinks();
+    var cals=meals.reduce(function(a,m){return a+(m.cals||0);},0)+drinks.reduce(function(a,d){return a+(d.c||0);},0);
+    var prot=meals.reduce(function(a,m){return a+(m.protein||0);},0);
+    var carbs=meals.reduce(function(a,m){return a+(m.carbs||0);},0);
+    var fat=meals.reduce(function(a,m){return a+(m.fat||0);},0);
+    var fiber=meals.reduce(function(a,m){return a+(m.fiber||0);},0);
+    var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0);
+    var sod=meals.reduce(function(a,m){return a+(m.sodium||0);},0);
+    var deficit=P.calTarget-cals;
+    var calPct=Math.min(cals/(P.calTarget||2200),1);
+    var defCol=deficit>=0?'var(--grn)':'var(--red)';
 
-// ═══ WEIGHT ═══
-var wtR='7d', wtLbs=172;
+    function ring(pct,col,size,sw){
+      var r=(size-sw)/2, circ=2*Math.PI*r;
+      var dash=Math.min(pct,1)*circ, gap=circ-dash;
+      return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" style="transform:rotate(-90deg)">'
+        +'<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="'+sw+'"/>'
+        +'<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-dasharray="'+dash+' '+gap+'" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+
+    function bar(pct,col){
+      var p=Math.min(pct,1)*100;
+      var over=pct>1;
+      return '<div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:6px">'
+        +'<div style="height:100%;width:'+p+'%;background:'+(over?'var(--red)':col)+';border-radius:3px;transition:width .4s"></div></div>';
+    }
+
+    var nb=g('nut-body'); if(!nb) return;
+    nb.innerHTML=
+      // Calorie ring + deficit
+      D('style="display:flex;align-items:center;gap:16px;background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:16px;margin-bottom:13px"',
+        D('style="position:relative;flex-shrink:0"',
+          ring(calPct,'var(--amb)',100,10)+
+          D('style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"',
+            D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--txt);line-height:1"',fN(cals))+
+            D('style="font-size:9px;color:var(--dim)"','kcal')))+
+        D('style="flex:1"',
+          D('style="font-size:13px;color:var(--dim);margin-bottom:4px"','of '+fN(P.calTarget)+' goal')+
+          D('style="font-family:var(--mn);font-size:24px;font-weight:800;color:'+defCol+';line-height:1"',(deficit>=0?'-':'+')+fN(Math.abs(deficit)))+
+          D('style="font-size:12px;color:var(--dim);margin-top:2px"',deficit>=0?'kcal remaining':'kcal over')))+
+      // Macro bars
+      D('class="slbl"','Macros')+
+      D('style="background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px"',
+        [['Protein',prot,P.protein,'var(--grn)','g'],
+         ['Carbs',carbs,P.carbs,'var(--blu)','g'],
+         ['Fat',fat,P.fat,'var(--amb)','g'],
+         ['Fiber',fiber,P.fiber,'#4ade80','g'],
+         ['Sugar',sug,P.sugar,'var(--pnk)','g'],
+         ['Sodium',sod,P.sodium,'var(--red)','mg']].map(function(r){
+          var v=Math.round(r[1]),t=r[2]||1,pct=v/t,over=v>t;
+          return D('style="margin-bottom:12px"',
+            D('style="display:flex;justify-content:space-between;align-items:baseline"',
+              D('style="font-size:13px;color:var(--dim)"',r[0])+
+              D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:'+(over?'var(--red)':r[3])+'"',v+r[4]+' / '+t+r[4]+(over?' &#9650;':'')))+
+            bar(pct,r[3]));
+        }).join(''));
+  } catch(e) { console.error('rNutrition',e); }
+}
+
+var wtR='7d';
+function setWtR(r){
+  wtR=r;
+  ['7d','1m','3m','all'].forEach(function(x){
+    var b=g('wtr-'+x); if(b){b.classList.remove('on');}
+  });
+  var btn=g('wtr-'+r); if(btn) btn.classList.add('on');
+  rWeight();
+}
+function getWtR(){
+  var sorted=WL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  if(wtR==='all') return sorted;
+  var days=wtR==='7d'?7:wtR==='1m'?30:90;
+  var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
+  var cutStr=cutoff.toISOString().slice(0,10);
+  return sorted.filter(function(e){return e.date>=cutStr;});
+}
 function rWeight() {
   var lw=latWt();
   set('wt-cur',lw?fW(lw.weight):'--'); set('wt-goal',fW(P.goalKg));
