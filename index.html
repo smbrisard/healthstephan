@@ -488,7 +488,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
         <div class="wchart" style="margin-bottom:13px"><canvas id="wt-canvas" style="width:100%;height:100%"></canvas></div>
         <div class="card" style="margin-bottom:13px" id="wt-analysis"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Log</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div id="wt-log"></div>
+        <div class="slbl">Log</div><div id="wt-log"></div>
       </div>
     </div>
 
@@ -534,7 +534,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('cocktail',this)">Cocktails</div>
           <div class="pill" onclick="drCat('soft',this)">Soft</div>
         </div>
-        <div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
         <div class="slbl" style="margin-top:10px">7-Day Calories</div>
         <div class="card"><div style="display:flex;gap:5px;align-items:flex-end;height:64px" id="dr-chart"></div><div style="display:flex;gap:5px;margin-top:4px" id="dr-chart-lbl"></div></div>
@@ -1120,7 +1120,7 @@ function rHome() {
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
-  if(_ske){_ske.innerHTML=_sk>0?'🔥 '+_sk+' day streak':'';}  
+  if(_ske){_ske.innerHTML='';if(_sk>0){var _sn=document.createElement('span');_sn.textContent='🔥 '+_sk+' day streak';_ske.appendChild(_sn);}}
   // Calorie bar
   var _eaten=tTotal(),_rem=P.calTarget-_eaten,_pct=Math.min(_eaten/(P.calTarget||2200),1);
   var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
@@ -2312,9 +2312,12 @@ function fetchSync(){
       }
     });
     if(d.weightKg&&parseFloat(d.weightKg)>30){
-      var wkg=parseFloat(d.weightKg),dt=d.date||today();
-      if(dt===today()&&!WL.filter(function(w){return w.date===dt;}).length){
-        WL.push({id:Date.now(),date:dt,weight:wkg,note:'Auto-synced'});updated=true;
+      var wkg=parseFloat(d.weightKg);
+      // Only log weight if synced today AND no entry exists for today
+      var syncAge=d.syncedAt?((Date.now()-new Date(d.syncedAt).getTime())/3600000):999;
+      var syncDate=d.syncedAt?new Date(d.syncedAt).toISOString().slice(0,10):'';
+      if(syncDate===today()&&syncAge<12&&!WL.filter(function(w){return w.date===today();}).length){
+        WL.push({id:Date.now(),date:today(),weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
     // Auto-create sleep log entry from sync
