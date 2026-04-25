@@ -1142,7 +1142,7 @@ function rHome() {
   // Streak
   var sk=calcStreak();
   var ske=g('hm-streak');
-  if(ske) ske.textContent=sk>0?'&#128293; '+sk+' day streak':(sk===0?'Log a meal to start your streak':'');
+  if(ske) ske.textContent=sk>0?'⚡ '+sk+' day streak':'';
 
   // Calorie summary bar
   var _eaten=tTotal(), _rem=P.calTarget-_eaten, _pct=Math.min(_eaten/(P.calTarget||2200),1);
