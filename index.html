@@ -534,7 +534,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('cocktail',this)">Cocktails</div>
           <div class="pill" onclick="drCat('soft',this)">Soft</div>
         </div>
-        <div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
         <div class="slbl" style="margin-top:10px">7-Day Calories</div>
         <div class="card"><div style="display:flex;gap:5px;align-items:flex-end;height:64px" id="dr-chart"></div><div style="display:flex;gap:5px;margin-top:4px" id="dr-chart-lbl"></div></div>
@@ -857,6 +857,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
 <div class="modal" id="custom-drink-m"><div class="mbg" onclick="closeM('custom-drink-m')"></div>
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Custom Drink</div>
+    <div style="margin-bottom:13px">
+      <input class="fld" type="text" id="cd-search" placeholder="Search drinks database..." style="margin-bottom:6px" oninput="cdSearchInput(this.value)">
+      <div id="cd-results"></div>
+    </div>
     <div class="fw"><div class="flbl">Drink Name</div>
       <input class="fld" type="text" id="cd-name" placeholder="e.g. Margarita, Craft Beer...">
     </div>
@@ -1120,7 +1124,7 @@ function rHome() {
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
-  if(_ske) _ske.innerHTML=_sk>0?'&#128293; '+_sk+' day streak':'';
+  if(_ske) _ske.textContent=_sk>0?'⚡ '+_sk+' day streak':'';
   // Calorie bar
   var _eaten=tTotal(),_rem=P.calTarget-_eaten,_pct=Math.min(_eaten/(P.calTarget||2200),1);
   var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
@@ -1138,7 +1142,7 @@ function rHome() {
   // Streak
   var sk=calcStreak();
   var ske=g('hm-streak');
-  if(ske) ske.textContent=sk>0?'&#128293; '+sk+' day streak':(sk===0?'Log a meal to start your streak':'');
+  if(ske) ske.textContent=sk>0?'⚡ '+sk+' day streak':'';
 
   // Calorie summary bar
   var _eaten=tTotal(), _rem=P.calTarget-_eaten, _pct=Math.min(_eaten/(P.calTarget||2200),1);
@@ -2294,6 +2298,53 @@ function addCustomDrink(){
   save();closeM('custom-drink-m');rDrinks();toast(name+' added');
 }
 
+
+// === DRINK SEARCH ===
+var _cdTimeout=null;
+function cdSearchInput(val){
+  if(_cdTimeout)clearTimeout(_cdTimeout);
+  var sr=g('cd-results');
+  if(!val||val.length<2){if(sr)sr.innerHTML='';return;}
+  _cdTimeout=setTimeout(function(){cdSearch(val);},600);
+}
+function cdSearch(query){
+  var sr=g('cd-results'); if(!sr)return;
+  if(!SYNC_URL){sr.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px">Set up sync URL to enable search.</div>';return;}
+  sr.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px">Searching...</div>';
+  var base=SYNC_URL.replace(/\/$/,'');
+  // Search for beverages specifically
+  fetch(base+'/food/search?q='+encodeURIComponent(query)+'+drink+beverage')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.products||!data.products.length){
+        sr.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px">No results. Enter manually below.</div>';
+        return;
+      }
+      window._cdProducts=data.products;
+      sr.innerHTML=data.products.map(function(p,i){
+        return '<div onclick="cdSelect('+i+')" style="padding:9px 10px;border-bottom:.5px solid var(--b1);'
+          +'cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
+          +'<div><div style="font-size:13px;font-weight:600;color:var(--txt)">'+p.name+'</div>'
+          +(p.brand?'<div style="font-size:11px;color:var(--dim)">'+p.brand+'</div>':'')+'</div>'
+          +'<div style="font-size:12px;font-weight:700;color:var(--pnk);flex-shrink:0;margin-left:8px">'+p.cals+' kcal</div>'
+          +'</div>';
+      }).join('');
+    })
+    .catch(function(){
+      sr.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px">Search failed. Enter manually.</div>';
+    });
+}
+function cdSelect(idx){
+  var p=window._cdProducts&&window._cdProducts[idx]; if(!p)return;
+  var en=g('cd-name'); if(en) en.value=p.name;
+  var ec=g('cd-cals'); if(ec) ec.value=p.cals||0;
+  var ep=g('cd-carbs'); if(ep) ep.value=p.carbs||0;
+  var es=g('cd-sugar'); if(es) es.value=p.fiber||0; // use fiber field for sugar approximation
+  var eu=g('cd-units'); if(eu) eu.value=0;
+  var sr=g('cd-results'); if(sr) sr.innerHTML='';
+  var si=g('cd-search'); if(si) si.value='';
+}
+
 // === HEALTH SYNC ===
 var SYNC_URL='';
 function initSync(){try{var s=localStorage.getItem('hs_sync_url');if(s)SYNC_URL=s;}catch(e){}}
@@ -2312,9 +2363,12 @@ function fetchSync(){
       }
     });
     if(d.weightKg&&parseFloat(d.weightKg)>30){
-      var wkg=parseFloat(d.weightKg),dt=d.date||today();
-      if(dt===today()&&!WL.filter(function(w){return w.date===dt;}).length){
-        WL.push({id:Date.now(),date:dt,weight:wkg,note:'Auto-synced'});updated=true;
+      var wkg=parseFloat(d.weightKg);
+      // Only log weight if synced today AND no entry exists for today
+      var syncAge=d.syncedAt?((Date.now()-new Date(d.syncedAt).getTime())/3600000):999;
+      var syncDate=d.syncedAt?new Date(d.syncedAt).toISOString().slice(0,10):'';
+      if(syncDate===today()&&syncAge<12&&!WL.filter(function(w){return w.date===today();}).length){
+        WL.push({id:Date.now(),date:today(),weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
     // Auto-create sleep log entry from sync
