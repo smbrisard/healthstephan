@@ -441,6 +441,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <!-- Today log for active meal tab -->
         <div id="food-log" style="margin-bottom:13px"></div>
         <button onclick="openFoodBrowser()" style="width:100%;padding:13px;border-radius:13px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:700;margin-bottom:13px;touch-action:manipulation">+ Add Food to <span id="add-meal-label">Breakfast</span></button>
+        <button onclick="openCustomFood()" style="width:100%;padding:13px;border-radius:13px;background:rgba(0,212,170,.06);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:15px;font-weight:600;margin-top:8px;touch-action:manipulation">&#43; Custom / Search Food</button>
         <div style="position:relative;margin-bottom:10px">
           <input class="fld" id="food-search" type="search" placeholder="Search 500+ foods..." oninput="rFoodGrid()" style="padding-left:40px;font-size:15px">
           <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">&#128269;</span>
@@ -788,6 +789,69 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <button onclick="closeM('macro-calc-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
+<div class="modal" id="custom-food-m"><div class="mbg" onclick="closeM('custom-food-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Food</div>
+
+    <!-- Search / Barcode -->
+    <div style="display:flex;gap:8px;margin-bottom:13px">
+      <input class="fld" type="text" id="cf-search" placeholder="Search food or brand..." style="flex:1;margin-bottom:0" oninput="cfSearchInput(this.value)">
+      <button onclick="cfBarcode()" style="width:44px;height:44px;border-radius:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);font-size:20px;flex-shrink:0;touch-action:manipulation">&#128247;</button>
+    </div>
+
+    <!-- Search results -->
+    <div id="cf-results" style="max-height:200px;overflow-y:auto;margin-bottom:13px"></div>
+
+    <!-- Manual entry form -->
+    <div id="cf-form" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input class="fld" type="text" id="cf-emoji" placeholder="&#127829;" style="width:56px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
+        <input class="fld" type="text" id="cf-name" placeholder="Food name" style="flex:1;margin-bottom:0">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="cf-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Sodium (mg)</div><input class="fld" type="number" id="cf-sodium" placeholder="0" style="margin-bottom:0"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1"><div class="flbl">Meal Type</div>
+          <select class="fld" id="cf-type" style="margin-bottom:0">
+            <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+          </select>
+        </div>
+        <div style="flex:1"><div class="flbl">Date</div>
+          <input class="fld" type="date" id="cf-date" style="margin-bottom:0">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dim);cursor:pointer">
+          <input type="checkbox" id="cf-save" style="width:16px;height:16px"> Save to my foods
+        </label>
+      </div>
+      <button class="btn btn-r" onclick="cfAdd()" style="margin-bottom:9px">Add to Log</button>
+    </div>
+
+    <button onclick="cfManual()" id="cf-manual-btn" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-bottom:9px;touch-action:manipulation">Enter manually</button>
+    <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
+
+<!-- Barcode scanner modal -->
+<div class="modal" id="barcode-m"><div class="mbg" onclick="cfStopScan()"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Scan Barcode</div>
+    <div style="position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:14px;overflow:hidden;margin-bottom:13px">
+      <video id="bc-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover"></video>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+        <div style="width:60%;height:40%;border:2px solid var(--grn);border-radius:8px;box-shadow:0 0 0 1000px rgba(0,0,0,.4)"></div>
+      </div>
+    </div>
+    <div id="bc-status" style="text-align:center;font-size:13px;color:var(--dim);margin-bottom:13px">Point at barcode</div>
+    <button onclick="cfStopScan()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
+
 
 <div id="toast"></div>
 <script>
@@ -2180,6 +2244,197 @@ function saveSyncSettings(){
   else{SYNC_URL='';try{localStorage.removeItem('hs_sync_url');}catch(e){}closeM('sync-m');toast('Sync disabled');}
 }
 initSync();
+// ═══ CUSTOM FOOD & OPEN FOOD FACTS ═══
+var _cfTimeout = null;
+
+function openCustomFood() {
+  // Reset form
+  var sr=g('cf-results'); if(sr) sr.innerHTML='';
+  var frm=g('cf-form'); if(frm) frm.style.display='none';
+  var mb=g('cf-manual-btn'); if(mb) mb.style.display='block';
+  var si=g('cf-search'); if(si){si.value=''; setTimeout(function(){si.focus();},300);}
+  var dt=g('cf-date'); if(dt) dt.value=todayLocal();
+  var ct=g('cf-type'); if(ct) ct.value=mealTab;
+  openM('custom-food-m');
+}
+
+function cfManual() {
+  var frm=g('cf-form'); if(frm) frm.style.display='block';
+  var mb=g('cf-manual-btn'); if(mb) mb.style.display='none';
+  // Clear fields
+  ['cf-name','cf-cals','cf-prot','cf-carbs','cf-fat','cf-fiber','cf-sodium'].forEach(function(id){
+    var e=g(id); if(e) e.value='';
+  });
+  var em=g('cf-emoji'); if(em) em.value='';
+}
+
+function cfSearchInput(val) {
+  if(_cfTimeout) clearTimeout(_cfTimeout);
+  if(!val||val.length<2){var sr=g('cf-results');if(sr)sr.innerHTML='';return;}
+  _cfTimeout=setTimeout(function(){cfSearch(val);},600);
+}
+
+function cfSearch(query) {
+  var sr=g('cf-results');
+  if(!sr) return;
+  sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
+  var url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(query)+'&search_simple=1&action=process&json=1&page_size=8&fields=product_name,brands,nutriments,image_small_url,code';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.products||!data.products.length){
+        sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results. Try entering manually.</div>';
+        return;
+      }
+      sr.innerHTML=data.products.map(function(p,i){
+        var name=(p.product_name||'Unknown').slice(0,40);
+        var brand=p.brands?p.brands.slice(0,20):'';
+        var n=p.nutriments||{};
+        var cals=Math.round(n['energy-kcal_100g']||n['energy-kcal']||0);
+        return '<div onclick="cfSelect('+i+')" data-idx="'+i+'" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
+          +'<div><div style="font-size:14px;font-weight:600;color:var(--txt)">'+name+'</div>'
+          +(brand?'<div style="font-size:11px;color:var(--dim)">'+brand+'</div>':'')+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--amb);flex-shrink:0;margin-left:8px">'+cals+' kcal</div>'
+          +'</div>';
+      }).join('');
+      // Store products for selection
+      window._cfProducts=data.products;
+    })
+    .catch(function(){
+      sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Search failed. Check connection.</div>';
+    });
+}
+
+function cfSelect(idx) {
+  var p=window._cfProducts&&window._cfProducts[idx];
+  if(!p) return;
+  var n=p.nutriments||{};
+  var name=(p.product_name||'').slice(0,50);
+  var cals=Math.round(n['energy-kcal_100g']||n['energy-kcal']||0);
+  var prot=Math.round((n['proteins_100g']||0)*10)/10;
+  var carbs=Math.round((n['carbohydrates_100g']||0)*10)/10;
+  var fat=Math.round((n['fat_100g']||0)*10)/10;
+  var fiber=Math.round((n['fiber_100g']||0)*10)/10;
+  var sodium=Math.round((n['sodium_100g']||0)*1000);
+  // Fill form
+  var frm=g('cf-form'); if(frm) frm.style.display='block';
+  var mb=g('cf-manual-btn'); if(mb) mb.style.display='none';
+  var en=g('cf-name'); if(en) en.value=name;
+  var ec=g('cf-cals'); if(ec) ec.value=cals;
+  var ep=g('cf-prot'); if(ep) ep.value=prot;
+  var ecb=g('cf-carbs'); if(ecb) ecb.value=carbs;
+  var ef=g('cf-fat'); if(ef) ef.value=fat;
+  var efb=g('cf-fiber'); if(efb) efb.value=fiber;
+  var es=g('cf-sodium'); if(es) es.value=sodium;
+  var eem=g('cf-emoji'); if(eem) eem.value='&#127829;';
+  // Clear results
+  var sr=g('cf-results'); if(sr) sr.innerHTML='';
+}
+
+function cfAdd() {
+  var name=(g('cf-name')||{value:''}).value.trim();
+  var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
+  var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
+  var carbs=parseFloat((g('cf-carbs')||{value:0}).value)||0;
+  var fat=parseFloat((g('cf-fat')||{value:0}).value)||0;
+  var fiber=parseFloat((g('cf-fiber')||{value:0}).value)||0;
+  var sodium=parseFloat((g('cf-sodium')||{value:0}).value)||0;
+  var emoji=(g('cf-emoji')||{value:''}).value||'&#127829;';
+  var type=(g('cf-type')||{value:mealTab}).value||mealTab;
+  var date=(g('cf-date')||{value:''}).value||todayLocal();
+  if(!name){toast('Please enter a food name',true);return;}
+  if(!cals){toast('Please enter calories',true);return;}
+
+  // Save to custom foods if checkbox checked
+  var saveChk=g('cf-save');
+  if(saveChk&&saveChk.checked&&name){
+    var custom=[];
+    try{custom=JSON.parse(localStorage.getItem('hs_custom_foods')||'[]');}catch(e){}
+    var exists=custom.some(function(f){return f.n===name;});
+    if(!exists){
+      custom.push({n:name,e:emoji,c:cals,pr:prot,cb:carbs,f:fat,fi:fiber,na:sodium,p:'1 serving',cat:'custom'});
+      try{localStorage.setItem('hs_custom_foods',JSON.stringify(custom));}catch(e){}
+    }
+  }
+
+  ML.push({id:Date.now(),date:date,name:name,emoji:emoji,type:type,
+    cals:Math.round(cals),protein:prot,carbs:carbs,fat:fat,
+    fiber:fiber,sugar:0,satFat:0,sodium:sodium,
+    cholest:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0});
+  P.mealsLogged=(P.mealsLogged||0)+1;
+  save(); closeM('custom-food-m'); rFood(); rHome();
+  toast(name+' added');
+}
+
+// Barcode scanning via camera
+var _bcStream=null;
+var _bcInterval=null;
+
+function cfBarcode() {
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    toast('Camera not supported on this device',true); return;
+  }
+  openM('barcode-m');
+  var status=g('bc-status');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(function(stream){
+      _bcStream=stream;
+      var video=g('bc-video');
+      if(video){video.srcObject=stream; video.play();}
+      if(status) status.textContent='Point camera at barcode';
+      // Use BarcodeDetector if available (iOS 17+)
+      if('BarcodeDetector' in window){
+        var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39']});
+        _bcInterval=setInterval(function(){
+          var video=g('bc-video');
+          if(!video||!video.videoWidth) return;
+          detector.detect(video).then(function(barcodes){
+            if(barcodes.length>0){
+              clearInterval(_bcInterval);
+              var code=barcodes[0].rawValue;
+              if(status) status.textContent='Found: '+code+' — looking up...';
+              cfLookupBarcode(code);
+            }
+          }).catch(function(){});
+        },500);
+      } else {
+        if(status) status.textContent='BarcodeDetector not supported. Try searching by name instead.';
+      }
+    })
+    .catch(function(e){
+      cfStopScan();
+      toast('Camera access denied. Allow camera in Settings.',true);
+    });
+}
+
+function cfStopScan() {
+  if(_bcInterval){clearInterval(_bcInterval);_bcInterval=null;}
+  if(_bcStream){_bcStream.getTracks().forEach(function(t){t.stop();});_bcStream=null;}
+  var video=g('bc-video'); if(video) video.srcObject=null;
+  closeM('barcode-m');
+}
+
+function cfLookupBarcode(code) {
+  var status=g('bc-status');
+  fetch('https://world.openfoodfacts.org/api/v0/product/'+code+'.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      cfStopScan();
+      if(data.status!==1||!data.product){
+        toast('Product not found in database',true); return;
+      }
+      window._cfProducts=[data.product];
+      cfSelect(0);
+      openM('custom-food-m');
+      var si=g('cf-search');
+      if(si) si.value=data.product.product_name||'';
+    })
+    .catch(function(){
+      cfStopScan();
+      toast('Lookup failed. Try searching by name.',true);
+    });
+}
+
 setTimeout(launch, 900);
 setTimeout(fetchSync, 2500);
 setTimeout(function(){ var l=g('loading'); if(l&&l.style.display!=='none') launch(); }, 1700);
