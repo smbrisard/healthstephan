@@ -2277,45 +2277,41 @@ function cfSearchInput(val) {
 function cfSearch(query) {
   var sr=g('cf-results');
   if(!sr) return;
+  if(!SYNC_URL){sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Set up your sync URL in Settings first, or enter food manually.</div>';return;}
   sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
-  var url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(query)+'&search_simple=1&action=process&json=1&page_size=8&fields=product_name,brands,nutriments,image_small_url,code';
-  fetch(url)
+  var base=SYNC_URL.replace(/\/$/,'');
+  fetch(base+'/food/search?q='+encodeURIComponent(query))
     .then(function(r){return r.json();})
     .then(function(data){
       if(!data.products||!data.products.length){
-        sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results. Try entering manually.</div>';
+        sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results found. Try a different search or enter manually.</div>';
         return;
       }
+      window._cfProducts=data.products;
       sr.innerHTML=data.products.map(function(p,i){
-        var name=(p.product_name||'Unknown').slice(0,40);
-        var brand=p.brands?p.brands.slice(0,20):'';
-        var n=p.nutriments||{};
-        var cals=Math.round(n['energy-kcal_100g']||n['energy-kcal']||0);
-        return '<div onclick="cfSelect('+i+')" data-idx="'+i+'" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
-          +'<div><div style="font-size:14px;font-weight:600;color:var(--txt)">'+name+'</div>'
-          +(brand?'<div style="font-size:11px;color:var(--dim)">'+brand+'</div>':'')+'</div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--amb);flex-shrink:0;margin-left:8px">'+cals+' kcal</div>'
+        return '<div onclick="cfSelect('+i+')" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
+          +'<div><div style="font-size:14px;font-weight:600;color:var(--txt)">'+(p.name||'Unknown')+'</div>'
+          +(p.brand?'<div style="font-size:11px;color:var(--dim)">'+p.brand+'</div>':'')+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--amb);flex-shrink:0;margin-left:8px">'+p.cals+' kcal</div>'
           +'</div>';
       }).join('');
-      // Store products for selection
-      window._cfProducts=data.products;
     })
-    .catch(function(){
-      sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Search failed. Check connection.</div>';
+    .catch(function(e){
+      sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Search failed. Try entering manually.</div>';
     });
 }
 
 function cfSelect(idx) {
   var p=window._cfProducts&&window._cfProducts[idx];
   if(!p) return;
-  var n=p.nutriments||{};
-  var name=(p.product_name||'').slice(0,50);
-  var cals=Math.round(n['energy-kcal_100g']||n['energy-kcal']||0);
-  var prot=Math.round((n['proteins_100g']||0)*10)/10;
-  var carbs=Math.round((n['carbohydrates_100g']||0)*10)/10;
-  var fat=Math.round((n['fat_100g']||0)*10)/10;
-  var fiber=Math.round((n['fiber_100g']||0)*10)/10;
-  var sodium=Math.round((n['sodium_100g']||0)*1000);
+  // Products from proxy are already normalized
+  var name=p.name||p.product_name||'';
+  var cals=p.cals||(function(){var n=p.nutriments||{};return Math.round(n['energy-kcal_100g']||n['energy-kcal']||0);})();
+  var prot=p.protein||(function(){var n=p.nutriments||{};return Math.round((n['proteins_100g']||0)*10)/10;})();
+  var carbs=p.carbs||(function(){var n=p.nutriments||{};return Math.round((n['carbohydrates_100g']||0)*10)/10;})();
+  var fat=p.fat||(function(){var n=p.nutriments||{};return Math.round((n['fat_100g']||0)*10)/10;})();
+  var fiber=p.fiber||(function(){var n=p.nutriments||{};return Math.round((n['fiber_100g']||0)*10)/10;})();
+  var sodium=p.sodium||(function(){var n=p.nutriments||{};return Math.round((n['sodium_100g']||0)*1000);})();
   // Fill form
   var frm=g('cf-form'); if(frm) frm.style.display='block';
   var mb=g('cf-manual-btn'); if(mb) mb.style.display='none';
@@ -2416,18 +2412,17 @@ function cfStopScan() {
 
 function cfLookupBarcode(code) {
   var status=g('bc-status');
-  fetch('https://world.openfoodfacts.org/api/v0/product/'+code+'.json')
+  if(!SYNC_URL){cfStopScan();toast('Set up sync URL first',true);return;}
+  var base=SYNC_URL.replace(/\/$/,'');
+  fetch(base+'/food/barcode?code='+encodeURIComponent(code))
     .then(function(r){return r.json();})
-    .then(function(data){
+    .then(function(p){
       cfStopScan();
-      if(data.status!==1||!data.product){
-        toast('Product not found in database',true); return;
-      }
-      window._cfProducts=[data.product];
+      if(p.error){toast('Product not found in database',true);return;}
+      window._cfProducts=[p];
       cfSelect(0);
       openM('custom-food-m');
-      var si=g('cf-search');
-      if(si) si.value=data.product.product_name||'';
+      var si=g('cf-search'); if(si) si.value=p.name||'';
     })
     .catch(function(){
       cfStopScan();
