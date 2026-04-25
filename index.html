@@ -533,6 +533,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('spirits',this)">Spirits</div>
           <div class="pill" onclick="drCat('cocktail',this)">Cocktails</div>
           <div class="pill" onclick="drCat('soft',this)">Soft</div>
+          <div class="pill" onclick="drCat('coffee',this)">Coffee</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
@@ -874,7 +875,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <span>1 standard drink = 0.6 fl oz (14g) of pure alcohol. A 5oz glass of 12% wine = 1.0 standard drink. Formula: fl oz x ABV% x 0.059 = standard drinks.</span></div>
     <div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
-    <button class="btn btn-r" onclick="addCustomDrink()" style="margin-top:13px;margin-bottom:9px">Add to Log</button>
+    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
@@ -961,7 +962,11 @@ function save() {
 
 // ═══ UTILS ═══
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function fN(n) { return Number(n).toLocaleString(); }
+function fN(n) {
+  var v=Number(n);
+  if(v<0) return '-'+Math.abs(v).toLocaleString();
+  return v.toLocaleString();
+}
 function fD(n,d) { return Number(n).toFixed(d===undefined?1:d); }
 function k2l(k) { return k * 2.20462; }
 function l2k(l) { return l / 2.20462; }
@@ -1881,6 +1886,18 @@ var DRINKS=[
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'soft',w:''},
   {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
   {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
+  {n:'Drip Coffee 8oz',e:'&#9749;',p:'8oz black',c:2,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Espresso',e:'&#9749;',p:'1oz shot',c:3,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Double Espresso',e:'&#9749;',p:'2oz',c:6,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Cappuccino',e:'&#9749;',p:'6oz whole milk',c:74,u:0,cb:6,sg:5,cat:'coffee',w:''},
+  {n:'Latte 12oz',e:'&#9749;',p:'12oz whole milk',c:150,u:0,cb:13,sg:12,cat:'coffee',w:''},
+  {n:'Oat Milk Latte 12oz',e:'&#9749;',p:'12oz oat milk',c:130,u:0,cb:16,sg:7,cat:'coffee',w:''},
+  {n:'Flat White',e:'&#9749;',p:'5oz whole milk',c:120,u:0,cb:9,sg:8,cat:'coffee',w:''},
+  {n:'Americano',e:'&#9749;',p:'8oz',c:10,u:0,cb:2,sg:0,cat:'coffee',w:''},
+  {n:'Cold Brew 12oz',e:'&#9749;',p:'12oz black',c:5,u:0,cb:0,sg:0,cat:'coffee',w:'Higher caffeine'},
+  {n:'Macchiato',e:'&#9749;',p:'2oz espresso + milk',c:35,u:0,cb:3,sg:2,cat:'coffee',w:''},
+  {n:'Mocha 12oz',e:'&#9749;',p:'12oz whole milk + chocolate',c:290,u:0,cb:35,sg:30,cat:'coffee',w:'High sugar'},
+  {n:'Frappuccino 16oz',e:'&#9749;',p:'16oz blended',c:380,u:0,cb:52,sg:48,cat:'coffee',w:'Very high sugar'},
 ];
 
 function drCat(cat,btn){dCat=cat; document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');}); btn.classList.add('on'); rDrGrid();}
@@ -2347,6 +2364,27 @@ function cdSelect(idx){
 
 // === HEALTH SYNC ===
 var SYNC_URL='';
+function loadCustomFoods(){
+  try{
+    var cf=JSON.parse(localStorage.getItem('hs_custom_foods')||'[]');
+    cf.forEach(function(f){
+      if(!FOODS.some(function(fd){return fd.n===f.n;})){
+        FOODS.push({n:f.n,e:f.e||'&#127829;',p:f.p||'1 serving',c:f.c||0,
+          pr:f.pr||0,cb:f.cb||0,f:f.f||0,fi:f.fi||0,na:f.na||0,cat:'custom'});
+      }
+    });
+  }catch(e){}
+}
+function loadCustomDrinks(){
+  try{
+    var cd=JSON.parse(localStorage.getItem('hs_custom_drinks')||'[]');
+    cd.forEach(function(d){
+      if(!DRINKS.some(function(dr){return dr.n===d.n;})){
+        DRINKS.push(d);
+      }
+    });
+  }catch(e){}
+}
 function initSync(){try{var s=localStorage.getItem('hs_sync_url');if(s)SYNC_URL=s;}catch(e){}}
 function setSyncURL(url){SYNC_URL=url.trim();try{localStorage.setItem('hs_sync_url',SYNC_URL);}catch(e){}}
 function fetchSync(){
