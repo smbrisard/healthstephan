@@ -456,10 +456,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="sec" style="padding-top:8px">
         <div id="nut-body"></div>
         <div class="slbl">BMI</div><div class="card" style="margin-bottom:13px" id="bmi-card"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="slbl" style="margin-bottom:0">Macros</div>
-          <button onclick="calcMacros()" style="padding:6px 14px;border-radius:20px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">&#9889; Calculate for me</button>
-        </div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
+        <div class="slbl">Macros</div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
         <div class="slbl">Sugar &amp; Fat</div><div class="card" style="margin-bottom:13px" id="sugfat-card"></div>
         <div class="slbl">Micronutrients</div><div class="card" id="micro-card"></div>
       </div>
@@ -579,7 +576,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <button onclick="tcPreset('build')" style="flex:1;padding:10px;border-radius:11px;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:13px;font-weight:700;touch-action:manipulation">Build</button>
           </div>
         </div>
-        <div class="slbl">Macros</div><div class="card" style="margin-bottom:13px" id="t-macros"></div>
+        <div class="slbl">Macros</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="slbl" style="margin-bottom:0">Macros</div>
+          <button onclick="calcMacros()" style="padding:6px 14px;border-radius:20px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">&#9889; Calculate for me</button>
+        </div>
+        <div class="card" style="margin-bottom:13px" id="t-macros"></div>
         <div class="slbl">Other</div><div class="card" style="margin-bottom:13px" id="t-other"></div>
         <button class="btn btn-r" onclick="saveTargets()">Save All Targets</button>
       </div>
@@ -1491,7 +1493,7 @@ function rNutrition() {
         D('style="height:100%;width:'+Math.min(calPct*100,100)+'%;background:'+(cals>P.calTarget?'var(--red)':'var(--grn)')+';border-radius:3px"','')));
 
     // BMI
-    var curBmi=P.heightCm>0?(latWt()||0)/((P.heightCm/100)*(P.heightCm/100)):0;
+    var _lw=latWt(); var curBmi=(P.heightCm>0&&_lw&&_lw.weight)?_lw.weight/((P.heightCm/100)*(P.heightCm/100)):0;
     var curBs=bmiSt(curBmi);
     var goalBmi=P.heightCm>0?P.goalKg/((P.heightCm/100)*(P.heightCm/100)):0;
     var goalBs=bmiSt(goalBmi);
