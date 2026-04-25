@@ -456,7 +456,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="sec" style="padding-top:8px">
         <div id="nut-body"></div>
         <div class="slbl">BMI</div><div class="card" style="margin-bottom:13px" id="bmi-card"></div>
-        <div class="slbl">Macros</div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="slbl" style="margin-bottom:0">Macros</div>
+          <button onclick="calcMacros()" style="padding:6px 14px;border-radius:20px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">&#9889; Calculate for me</button>
+        </div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
         <div class="slbl">Sugar &amp; Fat</div><div class="card" style="margin-bottom:13px" id="sugfat-card"></div>
         <div class="slbl">Micronutrients</div><div class="card" id="micro-card"></div>
       </div>
@@ -771,6 +774,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <button class="btn btn-r" onclick="saveSyncSettings()" style="margin-bottom:9px">Save &amp; Sync Now</button>
     <button onclick="fetchSync();closeM('sync-m');" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--grn);font-size:15px;font-weight:600;background:rgba(0,212,170,.06);margin-bottom:9px;touch-action:manipulation">Sync Now</button>
     <button onclick="closeM('sync-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
+<div class="modal" id="macro-calc-m"><div class="mbg" onclick="closeM('macro-calc-m')"></div>
+  <div class="msheet"><div class="mhandle"></div>
+    <div class="mtitle">Calculated Macro Targets</div>
+    <div class="callout ci" style="margin-bottom:14px">
+      <span>&#128161;</span>
+      <span>Calculated from your current weight, calorie goal and body goal. You can edit them after applying.</span>
+    </div>
+    <div id="macro-preview"></div>
+    <button class="btn btn-r" onclick="applyMacros()" style="margin-bottom:9px">Apply These Targets</button>
+    <button onclick="closeM('macro-calc-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -1964,6 +1979,69 @@ function adjT(key,delta,mn,mx){
 function tcSlide(v){P.calTarget=parseInt(v); set('tc-disp',fN(parseInt(v)));}
 function tcPreset(t){var v=t==='cut'?P.tdee-500:t==='build'?P.tdee+300:P.tdee; v=Math.max(1200,Math.min(3500,v)); P.calTarget=v; var sl=g('tc-slider'); if(sl)sl.value=v; set('tc-disp',fN(v));}
 function saveTargets(){save(); toast('All targets saved!');}
+
+function calcMacros(){
+  // Get current weight in lbs
+  var allWL=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);});
+  var wtLbs=allWL.length?k2l(allWL[allWL.length-1].weight):k2l(P.goalKg);
+  var cal=P.calTarget||2200;
+  var goal=P.goal||'lose';
+
+  // Protein: 0.8g/lb for lose, 0.7g/lb for maintain, 1g/lb for gain
+  var protMult=goal==='gain'?1.0:goal==='lose'?0.8:0.7;
+  var prot=Math.round(wtLbs*protMult);
+
+  // Fat: 25% of calories for lose, 30% for maintain/gain
+  var fatPct=goal==='lose'?0.25:0.30;
+  var fat=Math.round((cal*fatPct)/9);
+
+  // Carbs: remaining calories after protein and fat
+  var protCal=prot*4, fatCal=fat*9;
+  var carbs=Math.round((cal-protCal-fatCal)/4);
+  if(carbs<50) carbs=50;
+
+  // Fiber: 14g per 1000 kcal
+  var fiber=Math.round(cal/1000*14);
+
+  // Sugar: max 10% of calories
+  var sugar=Math.round((cal*0.10)/4);
+
+  // Sodium: standard 2300mg
+  var sodium=2300;
+
+  // Potassium and calcium
+  var potassium=P.potassium||4700;
+  var calcium=P.calcium||1300;
+
+  // Show preview modal
+  var prev=g('macro-preview');
+  if(prev) prev.innerHTML=
+    D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
+      [['Protein',prot,'g','var(--grn)'],
+       ['Carbs',carbs,'g','var(--blu)'],
+       ['Fat',fat,'g','var(--amb)'],
+       ['Fiber',fiber,'g','#4ade80'],
+       ['Sugar',sugar,'g','var(--pnk)'],
+       ['Sodium',sodium,'mg','var(--red)']].map(function(r){
+        return D('style="background:var(--s2);border-radius:10px;padding:10px;text-align:center"',
+          D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:'+r[3]+'"',r[1]+r[2])+
+          D('style="font-size:11px;color:var(--dim);margin-top:2px"',r[0]));
+      }).join(''))+
+    D('style="font-size:11px;color:var(--dim);text-align:center;line-height:1.5"',
+      'Based on '+fD(wtLbs,0)+' lbs, '+fN(cal)+' kcal goal, '+goal+' weight');
+
+  // Store calculated values for apply
+  window._calcMacros={protein:prot,carbs:carbs,fat:fat,fiber:fiber,sugar:sugar,sodium:sodium};
+  openM('macro-calc-m');
+}
+
+function applyMacros(){
+  if(!window._calcMacros) return;
+  var m=window._calcMacros;
+  P.protein=m.protein; P.carbs=m.carbs; P.fat=m.fat;
+  P.fiber=m.fiber; P.sugar=m.sugar; P.sodium=m.sodium;
+  save(); closeM('macro-calc-m'); rTargets(); toast('Macro targets updated!');
+}
 
 // ═══ PROFILE ═══
 function rProfile(){
