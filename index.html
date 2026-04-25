@@ -488,7 +488,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
         <div class="wchart" style="margin-bottom:13px"><canvas id="wt-canvas" style="width:100%;height:100%"></canvas></div>
         <div class="card" style="margin-bottom:13px" id="wt-analysis"></div>
-        <div class="slbl">Log</div><div id="wt-log"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Log</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div id="wt-log"></div>
       </div>
     </div>
 
@@ -1120,7 +1120,7 @@ function rHome() {
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
-  if(_ske) _ske.innerHTML=_sk>0?'&#128293; '+_sk+' day streak':'';
+  if(_ske){_ske.innerHTML=_sk>0?'🔥 '+_sk+' day streak':'';}  
   // Calorie bar
   var _eaten=tTotal(),_rem=P.calTarget-_eaten,_pct=Math.min(_eaten/(P.calTarget||2200),1);
   var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
