@@ -963,9 +963,10 @@ function save() {
 // ═══ UTILS ═══
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fN(n) {
-  var v=Number(n);
-  if(v<0) return '-'+Math.abs(v).toLocaleString();
-  return v.toLocaleString();
+  var v=Math.round(Number(n));
+  var neg=v<0; v=Math.abs(v);
+  var s=String(v).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  return neg?'-'+s:s;
 }
 function fD(n,d) { return Number(n).toFixed(d===undefined?1:d); }
 function k2l(k) { return k * 2.20462; }
