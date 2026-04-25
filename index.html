@@ -2272,6 +2272,25 @@ function launch(){
 if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}); }
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
 
+// === CUSTOM DRINK ===
+function openCustomDrink(){
+  var inp=g('cd-name');if(inp)inp.value='';
+  var dt=g('cd-date');if(dt)dt.value=todayLocal();
+  ['cd-cals','cd-units','cd-carbs','cd-sugar'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  openM('custom-drink-m');
+}
+function addCustomDrink(){
+  var name=(g('cd-name')||{value:''}).value.trim();
+  var cals=parseFloat((g('cd-cals')||{value:0}).value)||0;
+  var units=parseFloat((g('cd-units')||{value:0}).value)||0;
+  var carbs=parseFloat((g('cd-carbs')||{value:0}).value)||0;
+  var sugar=parseFloat((g('cd-sugar')||{value:0}).value)||0;
+  var date=(g('cd-date')||{value:''}).value||todayLocal();
+  if(!name){toast('Please enter a drink name',true);return;}
+  DL.push({id:Date.now(),date:date,n:name,e:'\u0026#127867;',c:Math.round(cals),u:units,cat:'custom',sugar:sugar,carbs:carbs});
+  save();closeM('custom-drink-m');rDrinks();toast(name+' added');
+}
+
 // === HEALTH SYNC ===
 var SYNC_URL='';
 function initSync(){try{var s=localStorage.getItem('hs_sync_url');if(s)SYNC_URL=s;}catch(e){}}
