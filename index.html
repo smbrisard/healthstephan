@@ -793,9 +793,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Food</div>
 
     <!-- Search / Barcode -->
-    <div style="display:flex;gap:8px;margin-bottom:13px">
+    <div style="margin-bottom:13px">
       <input class="fld" type="text" id="cf-search" placeholder="Search food or brand..." style="flex:1;margin-bottom:0" oninput="cfSearchInput(this.value)">
-      <button onclick="cfBarcode()" style="width:44px;height:44px;border-radius:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);font-size:20px;flex-shrink:0;touch-action:manipulation">&#128247;</button>
     </div>
 
     <!-- Search results -->
@@ -837,21 +836,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
-
-<!-- Barcode scanner modal -->
-<div class="modal" id="barcode-m"><div class="mbg" onclick="cfStopScan()"></div>
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Scan Barcode</div>
-    <div style="position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:14px;overflow:hidden;margin-bottom:13px">
-      <video id="bc-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover"></video>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-        <div style="width:60%;height:40%;border:2px solid var(--grn);border-radius:8px;box-shadow:0 0 0 1000px rgba(0,0,0,.4)"></div>
-      </div>
-    </div>
-    <div id="bc-status" style="text-align:center;font-size:13px;color:var(--dim);margin-bottom:13px">Point at barcode</div>
-    <button onclick="cfStopScan()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
-  </div>
-</div>
-
 
 <div id="toast"></div>
 <script>
