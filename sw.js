@@ -1,3 +1,3 @@
 self.addEventListener('install',function(){self.skipWaiting();});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));}).then(function(){return self.clients.claim();}));});
-// v12c 1777088176
+// v12d 1777088339
