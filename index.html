@@ -2068,6 +2068,17 @@ function fetchSync(){
         WL.push({id:Date.now(),date:dt,weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
+    // Auto-create sleep log entry from sync
+    if(d.sleepLast&&parseFloat(d.sleepLast)>0){
+      var slDt=d.sleepDate||today();
+      var slBed=d.sleepBedtime||'23:00';
+      var slWake=d.sleepWake||'07:00';
+      var slHrs=parseFloat(d.sleepLast);
+      if(!SL.filter(function(s){return s.date===slDt;}).length){
+        SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs});
+        updated=true;
+      }
+    }
     if(updated){
       var snap={date:d.date||today(),steps:P.stepsToday,burned:P.burned,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
