@@ -968,7 +968,17 @@ function fN(n) {
   var s=String(v).replace(/\B(?=(\d{3})+(?!\d))/g,',');
   return neg?'-'+s:s;
 }
-function fD(n,d) { return Number(n).toFixed(d===undefined?1:d); }
+function fD(n,d) {
+  var dp=d===undefined?1:d;
+  var v=Number(n);
+  var neg=v<0; v=Math.abs(v);
+  var factor=Math.pow(10,dp);
+  var rounded=Math.round(v*factor)/factor;
+  var parts=rounded.toFixed(dp).split('.');
+  var intPart=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  var result=dp>0?intPart+'.'+parts[1]:intPart;
+  return neg?'-'+result:result;
+}
 function k2l(k) { return k * 2.20462; }
 function l2k(l) { return l / 2.20462; }
 function cm2fi(c) { var t=c/2.54; return Math.floor(t/12)+"'"+Math.round(t%12)+'"'; }
