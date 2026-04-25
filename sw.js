@@ -7,3 +7,5 @@ self.addEventListener('activate', function(e) {
     }).then(function() { return self.clients.claim(); })
   );
 });
+
+"force rebuild"
