@@ -523,7 +523,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <div style="font-family:var(--mn);font-size:46px;font-weight:800;color:var(--pnk);line-height:1" id="dr-units">0.0</div>
             <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;margin-bottom:4px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px">WATER TODAY</div><div style="font-size:13px;font-weight:700;color:#38bdf8" id="dr-water">0.0L / 3.0L</div></div><div style="height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-bottom:10px"><div id="dr-water-bar" style="height:100%;width:0%;background:#38bdf8;border-radius:3px;transition:width .4s"></div></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;margin-bottom:4px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px">WATER TODAY</div><div style="font-size:13px;font-weight:700;color:#38bdf8" id="dr-water">0.0 / 101.4 fl oz</div></div><div style="height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-bottom:10px"><div id="dr-water-bar" style="height:100%;width:0%;background:#38bdf8;border-radius:3px;transition:width .4s"></div></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
           <div style="font-size:11px;color:var(--dim2);margin-top:4px;text-align:right;font-family:var(--mn)">14 units / week max</div>
         </div>
         <div class="pills" id="dr-cats">
@@ -1009,7 +1009,15 @@ function calcWaterL() {
     if(d.cat==='water') ml+=(d.vol||0);
     else if(d.cat==='coffee') ml+=(d.vol||0)*0.8;
   });
-  return Math.round(ml/100)/10;
+  return Math.round(ml/100)/10; // litres
+}
+function calcWaterOz() {
+  var ml=0;
+  tDrinks().forEach(function(d){
+    if(d.cat==='water') ml+=(d.vol||0);
+    else if(d.cat==='coffee') ml+=(d.vol||0)*0.8;
+  });
+  return Math.round(ml/29.5735*10)/10; // fl oz
 }
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
 function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.cals||0);},0); }
@@ -2043,7 +2051,7 @@ function rFitness(){
     {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:fD(P.sleepLast,1),u:'hrs',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
-    {e:'&#128167;',key:'water',raw:calcWaterL(),lb:false,v:fD(calcWaterL(),1),u:'L',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)}
+    {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)}
   ];
   var ge=g('fi-grid'); if(!ge) return;
   // Get yesterday's snapshot
