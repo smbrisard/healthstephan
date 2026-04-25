@@ -515,10 +515,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Drinks</div><div class="psub">Alcohol and beverages</div></div></div>
       <div class="sec" style="padding-top:8px">
         <div class="card" style="margin-bottom:13px;border-color:rgba(255,77,184,.2)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">TODAY'S UNITS</div><div class="badge bg" id="dr-bdg">Within limit</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">TODAY'S UNITS</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="badge bg" id="dr-bdg">Within limit</div><div style="font-size:10px;color:var(--dim)">14 std drinks/week</div></div></div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div style="font-family:var(--mn);font-size:46px;font-weight:800;color:var(--pnk);line-height:1" id="dr-units">0.0</div>
-            <div><div style="font-size:14px;color:var(--dim)">units</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
+            <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
           </div>
           <div style="margin-top:10px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
           <div style="font-size:11px;color:var(--dim2);margin-top:4px;text-align:right;font-family:var(--mn)">14 units / week max</div>
@@ -852,6 +852,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   </div>
 </div>
 
+<div class="modal" id="custom-drink-m"><div class="mbg" onclick="closeM('custom-drink-m')"></div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Custom Drink</div>
+    <div class="fw"><div class="flbl">Drink Name</div>
+      <input class="fld" type="text" id="cd-name" placeholder="e.g. Margarita, Craft Beer...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div><div class="flbl">Calories</div><input class="fld" type="number" id="cd-cals" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">Std Drinks</div><input class="fld" type="number" id="cd-units" placeholder="0.0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cd-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sugar (g)</div><input class="fld" type="number" id="cd-sugar" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+    </div>
+    <div class="callout ci" style="margin-bottom:10px"><span>&#128161;</span>
+      <span>1 standard drink = 0.6 fl oz (14g) of pure alcohol. A 5oz glass of 12% wine = 1.0 standard drink. Formula: fl oz x ABV% x 0.059 = standard drinks.</span></div>
+    <div class="fw"><div class="flbl">Date</div>
+      <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
+    <button class="btn btn-r" onclick="addCustomDrink()" style="margin-top:13px;margin-bottom:9px">Add to Log</button>
+    <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
+
 
 <div id="toast"></div>
 <script>
@@ -941,6 +961,13 @@ function l2k(l) { return l / 2.20462; }
 function cm2fi(c) { var t=c/2.54; return Math.floor(t/12)+"'"+Math.round(t%12)+'"'; }
 function fi2cm(f,i) { return (f*12+i)*2.54; }
 function fW(k) { return fD(k2l(k),1)+' lbs'; }
+function cmToFtIn(cm) {
+  var totalIn = cm / 2.54;
+  var ft = Math.floor(totalIn / 12);
+  var inch = Math.round(totalIn % 12);
+  if (inch === 12) { ft++; inch = 0; }
+  return ft+"'"+inch+'"';
+}
 function hHM(h) { var t=Math.round(h*60); return Math.floor(t/60)+'h '+(t%60)+'m'; }
 function g(id) { return document.getElementById(id); }
 function set(id,v) { var e=g(id); if(e) e.textContent=v; }
@@ -1090,7 +1117,7 @@ function rHome() {
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
-  if(_ske) _ske.textContent=_sk>0?'&#128293; '+_sk+' day streak':'';
+  if(_ske) _ske.innerHTML=_sk>0?'&#128293; '+_sk+' day streak':'';
   // Calorie bar
   var _eaten=tTotal(),_rem=P.calTarget-_eaten,_pct=Math.min(_eaten/(P.calTarget||2200),1);
   var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
@@ -1559,10 +1586,10 @@ function rNutrition() {
     var meals=tMeals(), drinks=tDrinks();
     var cals=meals.reduce(function(a,m){return a+(m.cals||0);},0)+drinks.reduce(function(a,d){return a+(d.c||0);},0);
     var prot=meals.reduce(function(a,m){return a+(m.protein||0);},0);
-    var carb=meals.reduce(function(a,m){return a+(m.carbs||0);},0);
+    var carb=meals.reduce(function(a,m){return a+(m.carbs||0);},0)+tDrinks().reduce(function(a,d){return a+(d.carbs||0);},0);
     var fat=meals.reduce(function(a,m){return a+(m.fat||0);},0);
     var fib=meals.reduce(function(a,m){return a+(m.fiber||0);},0);
-    var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0);
+    var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0)+tDrinks().reduce(function(a,d){return a+(d.sugar||0);},0);
     var sod=meals.reduce(function(a,m){return a+(m.sodium||0);},0);
     var chol=meals.reduce(function(a,m){return a+(m.cholest||0);},0);
     var pot=meals.reduce(function(a,m){return a+(m.potassium||0);},0);
@@ -1811,36 +1838,42 @@ function saveSleep() {
 // ═══ DRINKS ═══
 var dCat='all', selDr=null, dQty=1;
 var DRINKS=[
-  {n:'Lager Pint',e:'&#127866;',p:'568ml 4% ABV',c:182,u:2.3,cb:13,cat:'beer',w:''},
-  {n:'Craft IPA Pint',e:'&#127866;',p:'568ml 6% ABV',c:220,u:3.4,cb:16,cat:'beer',w:'Higher ABV than standard'},
-  {n:'Guinness Pint',e:'&#127866;',p:'568ml',c:195,u:2.3,cb:18,cat:'beer',w:''},
-  {n:'Red Wine 175ml',e:'&#127863;',p:'175ml 13% ABV',c:119,u:2.3,cb:4,cat:'wine',w:''},
-  {n:'White Wine 175ml',e:'&#127863;',p:'175ml 12% ABV',c:114,u:2.1,cb:3,cat:'wine',w:''},
-  {n:'Champagne Flute',e:'&#127870;',p:'125ml 12% ABV',c:89,u:1.5,cb:3,cat:'wine',w:''},
-  {n:'Prosecco 150ml',e:'&#127870;',p:'150ml 11% ABV',c:108,u:1.7,cb:5,cat:'wine',w:''},
-  {n:'Rose Wine 175ml',e:'&#127863;',p:'175ml 12.5% ABV',c:116,u:2.2,cb:4,cat:'wine',w:''},
-  {n:'Whisky Single',e:'&#129347;',p:'25ml 40% ABV',c:55,u:1.0,cb:0,cat:'spirits',w:''},
-  {n:'Gin and Tonic',e:'&#127864;',p:'50ml gin + tonic',c:120,u:1.7,cb:9,cat:'spirits',w:''},
-  {n:'Vodka Soda',e:'&#129749;',p:'50ml + soda',c:64,u:1.4,cb:0,cat:'spirits',w:''},
-  {n:'Mojito',e:'&#127865;',p:'300ml',c:168,u:1.4,cb:24,cat:'spirits',w:'High sugar 24g'},
-  {n:'Old Fashioned',e:'&#129347;',p:'90ml bourbon + bitters',c:154,u:2.5,cb:4,cat:'cocktail',w:''},
-  {n:'Negroni',e:'&#127864;',p:'75ml classic',c:196,u:2.3,cb:6,cat:'cocktail',w:''},
-  {n:'Aperol Spritz',e:'&#127864;',p:'200ml',c:125,u:1.3,cb:14,cat:'cocktail',w:''},
-  {n:'Margarita',e:'&#127864;',p:'150ml standard',c:168,u:2.0,cb:14,cat:'cocktail',w:''},
-  {n:'Cosmopolitan',e:'&#127864;',p:'120ml',c:146,u:1.9,cb:10,cat:'cocktail',w:''},
-  {n:'Espresso Martini',e:'&#127864;',p:'120ml',c:185,u:1.8,cb:12,cat:'cocktail',w:'High sugar 12g'},
-  {n:'Manhattan',e:'&#129347;',p:'80ml rye + vermouth',c:164,u:2.6,cb:3,cat:'cocktail',w:''},
-  {n:'Daiquiri',e:'&#127864;',p:'120ml',c:175,u:1.9,cb:14,cat:'cocktail',w:''},
-  {n:'Paloma',e:'&#127864;',p:'200ml tequila + grapefruit',c:142,u:1.4,cb:18,cat:'cocktail',w:''},
-  {n:'Whisky Sour',e:'&#127864;',p:'120ml',c:160,u:1.8,cb:10,cat:'cocktail',w:''},
-  {n:'Pina Colada',e:'&#127865;',p:'200ml',c:245,u:2.0,cb:32,cat:'cocktail',w:'High sugar and calories'},
-  {n:'Long Island Iced Tea',e:'&#127866;',p:'350ml',c:275,u:4.5,cb:20,cat:'cocktail',w:'Very high alcohol'},
-  {n:'Coke 330ml',e:'&#129380;',p:'330ml can',c:139,u:0,cb:35,cat:'soft',w:'High sugar 35g'},
-  {n:'Diet Coke',e:'&#129380;',p:'330ml',c:1,u:0,cb:0,cat:'soft',w:''},
-  {n:'Sparkling Water',e:'&#128167;',p:'330ml',c:0,u:0,cb:0,cat:'soft',w:''},
-  {n:'Oat Milk Latte',e:'&#9749;',p:'350ml',c:130,u:0,cb:16,cat:'soft',w:''},
-  {n:'Orange Juice',e:'&#129381;',p:'330ml',c:153,u:0,cb:36,cat:'soft',w:'High sugar'},
-  {n:'Energy Drink',e:'&#9889;',p:'250ml',c:113,u:0,cb:28,cat:'soft',w:'High caffeine + sugar'}
+  {n:'Beer 12oz Can',e:'&#127866;',p:'12 fl oz, 5% ABV',c:153,u:1.0,cb:13,sg:0,cat:'beer',w:''},
+  {n:'Beer 16oz Pint',e:'&#127866;',p:'16 fl oz, 5% ABV',c:204,u:1.3,cb:17,sg:0,cat:'beer',w:''},
+  {n:'Craft IPA 12oz',e:'&#127866;',p:'12 fl oz, 7% ABV',c:210,u:1.4,cb:18,sg:0,cat:'beer',w:'Higher ABV'},
+  {n:'Light Beer 12oz',e:'&#127866;',p:'12 fl oz, 4.2% ABV',c:103,u:0.8,cb:6,sg:0,cat:'beer',w:''},
+  {n:'Guinness 14.9oz',e:'&#127866;',p:'14.9 fl oz can',c:179,u:1.3,cb:18,sg:0,cat:'beer',w:''},
+  {n:'Red Wine 5oz',e:'&#127863;',p:'5 fl oz, 13% ABV',c:125,u:1.0,cb:4,sg:1,cat:'wine',w:''},
+  {n:'White Wine 5oz',e:'&#127863;',p:'5 fl oz, 12% ABV',c:121,u:1.0,cb:4,sg:1,cat:'wine',w:''},
+  {n:'Rose Wine 5oz',e:'&#127863;',p:'5 fl oz, 12.5% ABV',c:121,u:1.0,cb:5,sg:1,cat:'wine',w:''},
+  {n:'Champagne 4oz',e:'&#127870;',p:'4 fl oz, 12% ABV',c:84,u:0.8,cb:3,sg:1,cat:'wine',w:''},
+  {n:'Prosecco 4oz',e:'&#127870;',p:'4 fl oz, 11% ABV',c:98,u:0.7,cb:5,sg:1,cat:'wine',w:''},
+  {n:'Whiskey 1.5oz',e:'&#129347;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Vodka 1.5oz',e:'&#129749;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Gin 1.5oz',e:'&#127864;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Tequila 1.5oz',e:'&#129347;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Rum 1.5oz',e:'&#129347;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Gin and Tonic',e:'&#127864;',p:'1.5oz gin + 4oz tonic',c:148,u:1.0,cb:11,sg:10,cat:'spirits',w:''},
+  {n:'Vodka Soda',e:'&#129749;',p:'1.5oz vodka + soda',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Whiskey Sour',e:'&#127864;',p:'3oz cocktail',c:160,u:1.2,cb:10,sg:8,cat:'cocktail',w:''},
+  {n:'Old Fashioned',e:'&#129347;',p:'3oz bourbon + bitters',c:154,u:1.5,cb:4,sg:3,cat:'cocktail',w:''},
+  {n:'Negroni',e:'&#127864;',p:'3oz classic',c:196,u:1.5,cb:6,sg:3,cat:'cocktail',w:''},
+  {n:'Aperol Spritz',e:'&#127864;',p:'8oz',c:125,u:0.9,cb:14,sg:12,cat:'cocktail',w:''},
+  {n:'Margarita',e:'&#127864;',p:'5oz standard',c:168,u:1.5,cb:14,sg:10,cat:'cocktail',w:''},
+  {n:'Cosmopolitan',e:'&#127864;',p:'4oz',c:146,u:1.2,cb:10,sg:8,cat:'cocktail',w:''},
+  {n:'Espresso Martini',e:'&#127864;',p:'4oz',c:185,u:1.2,cb:12,sg:10,cat:'cocktail',w:'High sugar'},
+  {n:'Manhattan',e:'&#129347;',p:'3oz rye + vermouth',c:164,u:1.5,cb:3,sg:2,cat:'cocktail',w:''},
+  {n:'Daiquiri',e:'&#127864;',p:'4oz',c:175,u:1.2,cb:14,sg:10,cat:'cocktail',w:''},
+  {n:'Mojito',e:'&#127865;',p:'8oz',c:168,u:1.0,cb:24,sg:20,cat:'cocktail',w:'High sugar'},
+  {n:'Paloma',e:'&#127864;',p:'8oz tequila + grapefruit',c:142,u:1.0,cb:18,sg:14,cat:'cocktail',w:''},
+  {n:'Pina Colada',e:'&#127865;',p:'8oz',c:245,u:1.3,cb:32,sg:26,cat:'cocktail',w:'High sugar and calories'},
+  {n:'Long Island Iced Tea',e:'&#127866;',p:'12oz',c:275,u:3.0,cb:20,sg:15,cat:'cocktail',w:'Very high alcohol'},
+  {n:'Coke 12oz',e:'&#129380;',p:'12oz can',c:140,u:0,cb:39,sg:39,cat:'soft',w:'High sugar'},
+  {n:'Diet Coke 12oz',e:'&#129380;',p:'12oz can',c:0,u:0,cb:0,sg:0,cat:'soft',w:''},
+  {n:'Sparkling Water',e:'&#128167;',p:'12oz',c:0,u:0,cb:0,sg:0,cat:'soft',w:''},
+  {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'soft',w:''},
+  {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
+  {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
 ];
 
 function drCat(cat,btn){dCat=cat; document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');}); btn.classList.add('on'); rDrGrid();}
@@ -1849,7 +1882,7 @@ function rDrBanner(){
   var td=tDrinks(),u2=td.reduce(function(a,d){return a+d.u;},0),c2=td.reduce(function(a,d){return a+d.c;},0);
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
   var bar=g('dr-bar'); if(bar) bar.style.width=Math.min(u2/7*100,100)+'%';
-  var bdg=g('dr-bdg'); if(bdg){if(u2>=14){bdg.className='badge br';bdg.textContent='Over limit';}else if(u2>=7){bdg.className='badge ba';bdg.textContent='Approaching';}else{bdg.className='badge bg';bdg.textContent='Within limit';}}
+  var bdg=g('dr-bdg'); if(bdg){var _wkLim=14;if(u2>=_wkLim){bdg.className='badge br';bdg.textContent='Over weekly limit';}else if(u2>=_wkLim*0.5){bdg.className='badge ba';bdg.textContent='Nearing limit';}else{bdg.className='badge bg';bdg.textContent='Within limit';}}
 }
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
@@ -1923,7 +1956,7 @@ function adjDQ(d){dQty=Math.max(1,dQty+d); set('dm-qty',dQty); if(selDr) set('dm
 function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
-  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,e:selDr.e,c:selDr.c,u:selDr.u,cat:selDr.cat});
+  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,e:selDr.e,c:selDr.c,u:selDr.u,cat:selDr.cat,sugar:selDr.sg||0,carbs:selDr.cb||0});
   save(); closeM('dr-m'); rDrinks(); toast('Drink logged!');
 }
 
@@ -2258,7 +2291,7 @@ function fetchSync(){
     });
     if(d.weightKg&&parseFloat(d.weightKg)>30){
       var wkg=parseFloat(d.weightKg),dt=d.date||today();
-      if(!WL.filter(function(w){return w.date===dt;}).length){
+      if(dt===today()&&!WL.filter(function(w){return w.date===dt;}).length){
         WL.push({id:Date.now(),date:dt,weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
