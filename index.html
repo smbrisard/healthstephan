@@ -523,7 +523,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <div style="font-family:var(--mn);font-size:46px;font-weight:800;color:var(--pnk);line-height:1" id="dr-units">0.0</div>
             <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
           </div>
-          <div style="margin-top:10px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;margin-bottom:4px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px">WATER TODAY</div><div style="font-size:13px;font-weight:700;color:#38bdf8" id="dr-water">0.0L / 3.0L</div></div><div style="height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-bottom:10px"><div id="dr-water-bar" style="height:100%;width:0%;background:#38bdf8;border-radius:3px;transition:width .4s"></div></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
           <div style="font-size:11px;color:var(--dim2);margin-top:4px;text-align:right;font-family:var(--mn)">14 units / week max</div>
         </div>
         <div class="pills" id="dr-cats">
@@ -534,6 +534,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('cocktail',this)">Cocktails</div>
           <div class="pill" onclick="drCat('soft',this)">Soft</div>
           <div class="pill" onclick="drCat('coffee',this)">Coffee</div>
+          <div class="pill" onclick="drCat('water',this)">Water</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
@@ -1002,6 +1003,14 @@ function toImperial(p) {
 function todayLocal(){var d=new Date();var yr=d.getFullYear();var mo=String(d.getMonth()+1).padStart(2,'0');var dy=String(d.getDate()).padStart(2,'0');return yr+'-'+mo+'-'+dy;}
 
 function tDrinks() { return DL.filter(function(d){return d.date===today();}); }
+function calcWaterL() {
+  var ml=0;
+  tDrinks().forEach(function(d){
+    if(d.cat==='water') ml+=(d.vol||0);
+    else if(d.cat==='coffee') ml+=(d.vol||0)*0.8;
+  });
+  return Math.round(ml/100)/10;
+}
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
 function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.cals||0);},0); }
 function tTotal() { return tCals()+tDCals(); }
@@ -1886,18 +1895,25 @@ var DRINKS=[
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'soft',w:''},
   {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
   {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
-  {n:'Drip Coffee 8oz',e:'&#9749;',p:'8oz black',c:2,u:0,cb:0,sg:0,cat:'coffee',w:''},
-  {n:'Espresso',e:'&#9749;',p:'1oz shot',c:3,u:0,cb:0,sg:0,cat:'coffee',w:''},
-  {n:'Double Espresso',e:'&#9749;',p:'2oz',c:6,u:0,cb:0,sg:0,cat:'coffee',w:''},
-  {n:'Cappuccino',e:'&#9749;',p:'6oz whole milk',c:74,u:0,cb:6,sg:5,cat:'coffee',w:''},
-  {n:'Latte 12oz',e:'&#9749;',p:'12oz whole milk',c:150,u:0,cb:13,sg:12,cat:'coffee',w:''},
-  {n:'Oat Milk Latte 12oz',e:'&#9749;',p:'12oz oat milk',c:130,u:0,cb:16,sg:7,cat:'coffee',w:''},
-  {n:'Flat White',e:'&#9749;',p:'5oz whole milk',c:120,u:0,cb:9,sg:8,cat:'coffee',w:''},
-  {n:'Americano',e:'&#9749;',p:'8oz',c:10,u:0,cb:2,sg:0,cat:'coffee',w:''},
-  {n:'Cold Brew 12oz',e:'&#9749;',p:'12oz black',c:5,u:0,cb:0,sg:0,cat:'coffee',w:'Higher caffeine'},
-  {n:'Macchiato',e:'&#9749;',p:'2oz espresso + milk',c:35,u:0,cb:3,sg:2,cat:'coffee',w:''},
-  {n:'Mocha 12oz',e:'&#9749;',p:'12oz whole milk + chocolate',c:290,u:0,cb:35,sg:30,cat:'coffee',w:'High sugar'},
-  {n:'Frappuccino 16oz',e:'&#9749;',p:'16oz blended',c:380,u:0,cb:52,sg:48,cat:'coffee',w:'Very high sugar'},
+  {n:'Water 8oz',e:'&#128167;',p:'8 fl oz',c:0,u:0,cb:0,sg:0,vol:237,cat:'water',w:''},
+  {n:'Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
+  {n:'Water 16oz',e:'&#128167;',p:'16 fl oz',c:0,u:0,cb:0,sg:0,vol:473,cat:'water',w:''},
+  {n:'Water 20oz',e:'&#128167;',p:'20 fl oz bottle',c:0,u:0,cb:0,sg:0,vol:591,cat:'water',w:''},
+  {n:'Water 32oz',e:'&#128167;',p:'32 fl oz Nalgene',c:0,u:0,cb:0,sg:0,vol:946,cat:'water',w:''},
+  {n:'Sparkling Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
+  {n:'Coconut Water 11oz',e:'&#127850;',p:'11 fl oz',c:60,u:0,cb:15,sg:12,vol:325,cat:'water',w:''},
+  {n:'Drip Coffee 8oz',vol:237,e:'&#9749;',p:'8oz black',c:2,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Espresso',vol:30,e:'&#9749;',p:'1oz shot',c:3,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Double Espresso',vol:60,e:'&#9749;',p:'2oz',c:6,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Cappuccino',vol:177,e:'&#9749;',p:'6oz whole milk',c:74,u:0,cb:6,sg:5,cat:'coffee',w:''},
+  {n:'Latte 12oz',vol:355,e:'&#9749;',p:'12oz whole milk',c:150,u:0,cb:13,sg:12,cat:'coffee',w:''},
+  {n:'Oat Milk Latte 12oz',vol:355,e:'&#9749;',p:'12oz oat milk',c:130,u:0,cb:16,sg:7,cat:'coffee',w:''},
+  {n:'Flat White',vol:148,e:'&#9749;',p:'5oz whole milk',c:120,u:0,cb:9,sg:8,cat:'coffee',w:''},
+  {n:'Americano',vol:237,e:'&#9749;',p:'8oz',c:10,u:0,cb:2,sg:0,cat:'coffee',w:''},
+  {n:'Cold Brew 12oz',vol:355,e:'&#9749;',p:'12oz black',c:5,u:0,cb:0,sg:0,cat:'coffee',w:'Higher caffeine'},
+  {n:'Macchiato',vol:60,e:'&#9749;',p:'2oz espresso + milk',c:35,u:0,cb:3,sg:2,cat:'coffee',w:''},
+  {n:'Mocha 12oz',vol:355,e:'&#9749;',p:'12oz whole milk + chocolate',c:290,u:0,cb:35,sg:30,cat:'coffee',w:'High sugar'},
+  {n:'Frappuccino 16oz',vol:473,e:'&#9749;',p:'16oz blended',c:380,u:0,cb:52,sg:48,cat:'coffee',w:'Very high sugar'},
 ];
 
 function drCat(cat,btn){dCat=cat; document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');}); btn.classList.add('on'); rDrGrid();}
@@ -1905,6 +1921,9 @@ function rDrinks(){rDrBanner();rDrGrid();rDrLog();rDrChart();}
 function rDrBanner(){
   var td=tDrinks(),u2=td.reduce(function(a,d){return a+d.u;},0),c2=td.reduce(function(a,d){return a+d.c;},0);
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
+  var _wl=calcWaterL(),_we=g('dr-water'),_wb=g('dr-water-bar');
+  if(_we) _we.textContent=fD(_wl,1)+'L / '+fD(P.water||3,1)+'L';
+  if(_wb) _wb.style.width=Math.min(_wl/(P.water||3)*100,100)+'%';
   var bar=g('dr-bar'); if(bar) bar.style.width=Math.min(u2/7*100,100)+'%';
   var bdg=g('dr-bdg'); if(bdg){var _wkLim=14;if(u2>=_wkLim){bdg.className='badge br';bdg.textContent='Over weekly limit';}else if(u2>=_wkLim*0.5){bdg.className='badge ba';bdg.textContent='Nearing limit';}else{bdg.className='badge bg';bdg.textContent='Within limit';}}
 }
@@ -1980,7 +1999,7 @@ function adjDQ(d){dQty=Math.max(1,dQty+d); set('dm-qty',dQty); if(selDr) set('dm
 function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
-  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,e:selDr.e,c:selDr.c,u:selDr.u,cat:selDr.cat,sugar:selDr.sg||0,carbs:selDr.cb||0});
+  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,e:selDr.e,c:selDr.c,u:selDr.u,cat:selDr.cat,sugar:selDr.sg||0,carbs:selDr.cb||0,vol:selDr.vol||0});
   save(); closeM('dr-m'); rDrinks(); toast('Drink logged!');
 }
 
@@ -1994,8 +2013,6 @@ var FI_FIELDS=[
   {key:'rr',l:'Respiratory rate',sub:'Apple Watch sleep',u:'br/min',mn:8,mx:30},
   {key:'sleepLast',l:'Last night sleep',sub:'Hours slept',u:'hrs',mn:0,mx:14},
   {key:'waterToday',l:'Water intake',sub:'Litres today',u:'L',mn:0,mx:6},
-  {key:'systolic',l:'Systolic BP',sub:'Blood pressure',u:'mmHg',mn:70,mx:220},
-  {key:'diastolic',l:'Diastolic BP',sub:'Blood pressure',u:'mmHg',mn:40,mx:140}
 ];
 function openFiModal() {
   rFitness(); // ensure fi-edit is populated
@@ -2016,6 +2033,7 @@ function loadFiSnap(dt) {
   });
 }
 function rFitness(){
+  P.waterToday=calcWaterL();
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var tiles=[
     {e:'&#127939;',key:'steps',raw:P.stepsToday,lb:false,v:fN(P.stepsToday),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:P.stepsToday/(P.steps||10000)},
@@ -2025,7 +2043,7 @@ function rFitness(){
     {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:fD(P.sleepLast,1),u:'hrs',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
-    {e:'&#128167;',key:'water',raw:P.waterToday,lb:false,v:fD(P.waterToday,1),u:'L',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.waterToday||0)/(P.water||3)}
+    {e:'&#128167;',key:'water',raw:calcWaterL(),lb:false,v:fD(calcWaterL(),1),u:'L',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)}
   ];
   var ge=g('fi-grid'); if(!ge) return;
   // Get yesterday's snapshot
