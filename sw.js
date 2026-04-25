@@ -1,3 +1,12 @@
-self.addEventListener('install',function(){self.skipWaiting();});
-self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));}).then(function(){return self.clients.claim();}));});
-// v16b 1777126926
+const CACHE_VERSION = 'v1777130110';
+self.addEventListener('install', function(e) { self.skipWaiting(); });
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(keys.map(function(key) { return caches.delete(key); }));
+    }).then(function() { return self.clients.claim(); })
+  );
+});
+self.addEventListener('fetch', function(e) {
+  e.respondWith(fetch(e.request, {cache: 'no-store'}));
+});
