@@ -837,7 +837,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <input type="checkbox" id="cf-save" style="width:16px;height:16px"> Save to my foods
         </label>
       </div>
-      <button class="btn btn-r" onclick="cfAdd()" style="margin-bottom:9px">Add to Log</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-radius:13px;border:.5px solid var(--b2);margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--dim)">Servings</div><div style="display:flex;align-items:center;gap:13px"><div onclick="cfAdjSrv(-0.5)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">-</div><div style="font-family:var(--mn);font-size:20px;font-weight:800;min-width:36px;text-align:center" id="cf-srv-disp">1.0</div><div onclick="cfAdjSrv(0.5)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">+</div></div></div><button class="btn btn-r" onclick="cfAdd()" style="margin-bottom:9px">Add to Log</button>
     </div>
 
     <button onclick="cfManual()" id="cf-manual-btn" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-bottom:9px;touch-action:manipulation">Enter manually</button>
@@ -868,13 +868,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div><div class="flbl">Calories</div><input class="fld" type="number" id="cd-cals" placeholder="0" style="margin-bottom:0"></div>
-      <div><div class="flbl">Std Drinks</div><input class="fld" type="number" id="cd-units" placeholder="0.0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Std Drinks (alcohol)</div><input class="fld" type="number" id="cd-units" placeholder="0.0" step="0.1" style="margin-bottom:0"><div style="font-size:10px;color:var(--dim);margin-top:3px">0 if non-alcoholic</div></div>
       <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cd-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
       <div><div class="flbl">Sugar (g)</div><input class="fld" type="number" id="cd-sugar" placeholder="0" step="0.1" style="margin-bottom:0"></div>
     </div>
     <div class="callout ci" style="margin-bottom:10px"><span>&#128161;</span>
       <span>1 standard drink = 0.6 fl oz (14g) of pure alcohol. A 5oz glass of 12% wine = 1.0 standard drink. Formula: fl oz x ABV% x 0.059 = standard drinks.</span></div>
-    <div class="fw"><div class="flbl">Date</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-radius:13px;border:.5px solid var(--b2);margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--dim)">Quantity</div><div style="display:flex;align-items:center;gap:13px"><div onclick="cdAdjQty(-1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">-</div><div style="font-family:var(--mn);font-size:20px;font-weight:800;min-width:36px;text-align:center" id="cd-qty-disp">1</div><div onclick="cdAdjQty(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">+</div></div></div><div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
     <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
@@ -1020,7 +1020,7 @@ function calcWaterOz() {
   return Math.round(ml/29.5735*10)/10; // fl oz
 }
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
-function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.cals||0);},0); }
+function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.c||d.cals||0);},0); }
 function tTotal() { return tCals()+tDCals(); }
 function tN(k) { return tMeals().reduce(function(a,m){return a+(m[k]||0);},0); }
 function latWt() { return WL.length ? WL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0] : null; }
@@ -2323,7 +2323,13 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().the
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
 
 // === CUSTOM DRINK ===
+var cdQty=1;
+function cdAdjQty(d){
+  cdQty=Math.max(1,Math.min(10,cdQty+d));
+  var e=g('cd-qty-disp'); if(e) e.textContent=cdQty;
+}
 function openCustomDrink(){
+  cdQty=1; var qd=g('cd-qty-disp'); if(qd) qd.textContent='1';
   var inp=g('cd-name');if(inp)inp.value='';
   var dt=g('cd-date');if(dt)dt.value=todayLocal();
   ['cd-cals','cd-units','cd-carbs','cd-sugar'].forEach(function(id){var e=g(id);if(e)e.value='';});
@@ -2577,6 +2583,8 @@ initSync();
 var _cfTimeout = null;
 
 function openCustomFood() {
+  cfSrv=1;
+  var sd=g('cf-srv-disp'); if(sd) sd.textContent='1.0';
   // Reset form
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
   var frm=g('cf-form'); if(frm) frm.style.display='none';
@@ -2682,9 +2690,10 @@ function cfAdd() {
     }
   }
 
-  ML.push({id:Date.now(),date:date,name:name,emoji:emoji,type:type,
-    cals:Math.round(cals),protein:prot,carbs:carbs,fat:fat,
-    fiber:fiber,sugar:0,satFat:0,sodium:sodium,
+  var _srv=cfSrv||1;
+  ML.push({id:Date.now(),date:date,name:name+(cfSrv!==1?' x'+fD(cfSrv,1):''),emoji:emoji,type:type,
+    cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
+    fiber:Math.round(fiber*_srv*10)/10,sugar:0,satFat:0,sodium:Math.round(sodium*_srv),
     cholest:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0});
   P.mealsLogged=(P.mealsLogged||0)+1;
   save(); closeM('custom-food-m'); rFood(); rHome();
