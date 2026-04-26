@@ -366,7 +366,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div class="slbl">Quick Stats</div>
         <div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:12px 14px;margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-size:12px;color:var(--dim)">Calories today</div><div style="font-size:12px;font-weight:700;color:var(--txt)" id="hm-cal-lbl">-- kcal</div></div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="hm-cal-bar" style="height:100%;width:0%;background:var(--grn);border-radius:3px;transition:width .4s"></div></div></div>
         <div class="g2" style="margin-bottom:14px">
-          <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(255,184,48,.18)">
+          <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
+            <div style="font-size:20px;margin-bottom:7px">&#128205;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#38bdf8" id="hm-dist">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">mi total</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-dist-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(255,184,48,.18)" id="hm-steps-tile">
             <div style="font-size:20px;margin-bottom:7px">&#127939;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb)" id="hm-steps">8,432</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px">steps today</div>
@@ -1145,6 +1151,8 @@ function rHome() {
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
   set('hm-steps',fN(P.stepsToday)); set('hm-burned',fN(P.burned));
+  var _dist=P.distMiles||0;
+  set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
   // Streak
   var _sk=calcStreak();
@@ -1211,6 +1219,7 @@ function rHome() {
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
+    _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
   } else {
     ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
       var e=g(id); if(e) e.innerHTML='';
@@ -2054,7 +2063,8 @@ function rFitness(){
   P.waterToday=calcWaterL();
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var tiles=[
-    {e:'&#127939;',key:'steps',raw:P.stepsToday,lb:false,v:fN(P.stepsToday),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:P.stepsToday/(P.steps||10000)},
+    {e:'&#128205;',key:'dist',raw:P.distMiles,lb:false,v:P.distMiles?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
+  {e:'&#127939;',key:'steps',raw:P.stepsToday,lb:false,v:fN(P.stepsToday),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:P.stepsToday/(P.steps||10000)},
     {e:'&#128293;',key:'burned',raw:P.burned,lb:false,v:fN(P.burned),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr,lb:true,v:P.rhr,u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:.6},
     {e:'&#9889;',key:'hrv',raw:P.hrv,lb:false,v:P.hrv,u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.hrv||0)/100},
@@ -2080,7 +2090,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water'};
+  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb):'';
@@ -2510,7 +2520,7 @@ function fetchSync(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(!d||d.error)return;
-    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday'];
+    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles'];
     var updated=false;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
@@ -2539,7 +2549,7 @@ function fetchSync(){
     }
     if(updated){
       var snap={date:today(),steps:P.stepsToday,burned:P.burned,
-        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
+        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
       // Auto-create yesterday snap from FL if missing (needed for delta arrows)
