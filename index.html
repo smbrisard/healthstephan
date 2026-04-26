@@ -418,8 +418,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div class="slbl" style="margin-bottom:0">Today's Meals</div>
           <button onclick="showTab('food')" style="font-size:13px;font-weight:700;color:var(--red);padding:5px 12px;background:rgba(255,59,92,.1);border-radius:20px;border:.5px solid rgba(255,59,92,.25)">+ Log Food</button>
+          <button onclick="showTab('drinks')" style="padding:5px 12px;background:rgba(56,189,248,.1);border-radius:20px;border:.5px solid rgba(56,189,248,.25);color:#38bdf8;font-size:13px;font-weight:700;touch-action:manipulation">+ Log Drink</button>
         </div>
-        <div id="hm-meals"></div>
       </div>
     </div>
 
@@ -1171,7 +1171,7 @@ function rHome() {
   var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
-  set('hm-steps',fN(P.stepsToday)); set('hm-burned',fN(P.burned));
+  set('hm-steps',fN(Math.round(P.stepsToday||0))); set('hm-burned',fN(Math.round(P.burned||0)));
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
@@ -1239,7 +1239,7 @@ function rHome() {
     el2.innerHTML=S('style="color:'+col+'"',(diff>0?'&#9650;':'&#9660;')+' '+Math.abs(diff)+(unit||''))+S('style="color:var(--dim2)"',' yd');
   }
   if(_ydSnap){
-    _hmD('hm-steps-yd',P.stepsToday||0,_ydSnap.steps,false,'');
+    _hmD('hm-steps-yd',Math.round(P.stepsToday||0),Math.round(_ydSnap.steps||0),false,'');
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
@@ -2251,7 +2251,10 @@ function fetchSync(){
     var updated=false;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
-        P[k]=parseFloat(d[k]);updated=true;
+        var _v=parseFloat(d[k]);
+        // Round whole-number metrics
+        if(k==='stepsToday'||k==='burned'||k==='standHours'||k==='exerciseMins') _v=Math.round(_v);
+        P[k]=_v; updated=true;
       }
     });
     if(d.weightKg&&parseFloat(d.weightKg)>30){
