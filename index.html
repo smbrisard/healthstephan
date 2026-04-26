@@ -1145,8 +1145,11 @@ function rHome() {
   var _hd=g('hm-date');
   if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
-  var _savedAv=localStorage.getItem('hs_avatar');
-  if(_savedAv){updateAvatar(_savedAv);}else{var _avEl=g('hm-av');if(_avEl){_avEl.textContent=init;_avEl.style.background='linear-gradient(135deg,var(--red),#880033)';}}
+  // Set initials only if no photo saved
+  if(!localStorage.getItem('hs_avatar')){
+    var _avEl=g('hm-av');
+    if(_avEl){_avEl.textContent=init;_avEl.style.background='linear-gradient(135deg,var(--red),#880033)';}
+  }
 
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+P.burned, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
@@ -1227,7 +1230,7 @@ function rHome() {
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
-    _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
+    _hmD('hm-dist-yd',P.distMiles||0,(_ydSnap.dist||null),false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
   } else {
     ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
@@ -2102,6 +2105,8 @@ function rFitness(){
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
   var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water'};
+  // For dist: only compare if yesterday had actual dist data
+  if(ydSnap&&(ydSnap.dist===undefined||ydSnap.dist===null)) ydSnap.dist=undefined;
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb):'';
@@ -2479,13 +2484,14 @@ function openAvatarUpload() {
 
 function updateAvatar(dataUrl) {
   ['hm-av','pr-av'].forEach(function(id) {
-    var av = g(id); if (!av) return;
+    var av = g(id);
+    if (!av) return;
     if (dataUrl) {
+      // Only update if not already showing this photo
+      var existing = av.querySelector('img');
+      if (existing && existing.src === dataUrl) return;
       av.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
       av.style.background = 'none';
-    } else {
-      av.innerHTML = id==='pr-av'?'ST':'';
-      av.style.background = 'linear-gradient(135deg,var(--red),#880033)';
     }
   });
 }
@@ -2590,6 +2596,17 @@ function fetchSync(){
       toast('Health data synced');
     }
   }).catch(function(e){console.log('Sync failed:',e.message);});
+}
+
+function backfillDistToFL() {
+  // Update FL entries that have no dist field with distMiles from P
+  // This runs after sync so today's dist is in P.distMiles
+  FL.forEach(function(snap) {
+    if(snap.dist===undefined||snap.dist===null) {
+      if(snap.date===today()) snap.dist=P.distMiles||0;
+    }
+  });
+  save();
 }
 function openSyncSettings(){
   var inp=g('sync-url-input');if(inp)inp.value=SYNC_URL||'';
