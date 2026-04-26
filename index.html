@@ -395,6 +395,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <div style="font-size:11px;color:var(--dim);margin-top:2px">kcal burned</div>
             <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
           </div>
+          <div class="mtile" style="background:rgba(255,59,92,.12)">
+            <div style="font-size:20px;margin-bottom:7px">&#10084;&#65039;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--red);line-height:1" id="hm-rhr">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">bpm RHR</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-rhr-yd"></div>
+          </div>
         </div>
         <!-- today meals -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -2533,10 +2539,15 @@ function fetchSync(){
     });
     if(d.weightKg&&parseFloat(d.weightKg)>30){
       var wkg=parseFloat(d.weightKg);
-      // Only log weight if synced today AND no entry exists for today
+      // Only log weight if: synced within 12hrs AND data date matches local today
       var syncAge=d.syncedAt?((Date.now()-new Date(d.syncedAt).getTime())/3600000):999;
-      var syncDate=d.syncedAt?new Date(d.syncedAt).toISOString().slice(0,10):'';
-      if(syncDate===today()&&syncAge<12&&!WL.filter(function(w){return w.date===today();}).length){
+      // Use local date for comparison, not UTC
+      var _ld=new Date(d.syncedAt||Date.now());
+      var syncDateLocal=_ld.getFullYear()+'-'+String(_ld.getMonth()+1).padStart(2,'0')+'-'+String(_ld.getDate()).padStart(2,'0');
+      // Only add if: synced today (local), fresh (<12hr), no today entry exists, AND HAE data date matches today
+      var dataDate=d.date||'';
+      var noTodayEntry=!WL.some(function(w){return w.date===today();});
+      if(syncDateLocal===today()&&syncAge<12&&noTodayEntry&&dataDate===today()){
         WL.push({id:Date.now(),date:today(),weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
@@ -3127,9 +3138,3 @@ function getWeekStats(startDateStr) {
 </script>
 </body>
 </html>
-          <div class="mtile" style="background:rgba(255,59,92,.12)">
-            <div style="font-size:20px;margin-bottom:7px">&#10084;&#65039;</div>
-            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--red);line-height:1" id="hm-rhr">--</div>
-            <div style="font-size:13px;color:var(--dim);margin-top:4px">bpm RHR</div>
-            <div style="font-size:13px;color:var(--dim);margin-top:3px" id="hm-rhr-yd"></div>
-          </div>
