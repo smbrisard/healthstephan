@@ -322,7 +322,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div id="hm-streak" style="font-size:12px;color:var(--amb);margin-top:3px"></div>
         </div>
         <button onclick="openSyncSettings()" style="width:34px;height:34px;border-radius:50%;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation">&#9729;</button>
-        <div id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff">ST</div>
+        <div onclick="openAvatarUpload()" id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;overflow:hidden;cursor:pointer;color:#fff">ST</div>
       </div>
       <div class="sec" style="padding-top:6px">
         <!-- deficit -->
@@ -427,7 +427,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="fw" style="margin-bottom:0"><div class="flbl">Goal Weight (lbs)</div><input class="fld" id="ed-gwt" type="number" step="0.1"></div>
         </div>
         <button class="btn btn-r" onclick="saveProfile()" style="margin-bottom:9px">Save Profile</button>
-        <div style="display:flex;gap:8px;margin-top:8px"><button onclick="exportData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:700;touch-action:manipulation">&#128190; Export Data</button><button onclick="importData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(77,166,255,.08);border:.5px solid rgba(77,166,255,.25);color:var(--blu);font-size:14px;font-weight:700;touch-action:manipulation">&#128228; Import Data</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px"><button onclick="openAvatarUpload()" style="width:100%;padding:13px;border-radius:13px;background:rgba(255,59,92,.08);border:.5px solid rgba(255,59,92,.25);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation;margin-bottom:8px">&#128247; Change Profile Photo</button>
+        <button onclick="exportData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:700;touch-action:manipulation">&#128190; Export Data</button><button onclick="importData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(77,166,255,.08);border:.5px solid rgba(77,166,255,.25);color:var(--blu);font-size:14px;font-weight:700;touch-action:manipulation">&#128228; Import Data</button></div>
         <button onclick="resetApp()" style="width:100%;padding:14px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Reset All Data</button>
       </div>
     </div>
@@ -558,6 +559,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Health</div><div class="psub">Vitals and classification</div></div><div class="badge bg" id="hl-score">--</div></div>
       <div class="sec" style="padding-top:8px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Blood Pressure</div><button onclick="openM('bp-m')" style="padding:6px 14px;border-radius:20px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:12px;font-weight:700;touch-action:manipulation">+ Log BP</button></div><div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)" id="bp-card"></div>
+        <div id="bp-gauge" style="margin-bottom:13px"></div>
         <div class="slbl">Cardiovascular</div><div id="cv-metrics"></div>
         <div class="slbl" style="margin-top:8px">Activity</div><div id="act-metrics"></div>
         <div class="slbl" style="margin-top:8px">Flags</div><div id="hl-flags"></div>
@@ -1130,7 +1132,8 @@ function rHome() {
   var _hd=g('hm-date');
   if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
-  set('hm-av',init);
+  var _savedAv=localStorage.getItem('hs_avatar');
+  if(_savedAv){updateAvatar(_savedAv);}else{set('hm-av',init);}
 
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+P.burned, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
@@ -2150,7 +2153,7 @@ function rHealth(){
         D('style="font-size:11px;color:var(--dim);margin-top:2px"',r.date+(r.pulse?' · '+r.pulse+' bpm':'')))+
         D('class="badge '+cat.c+'"',cat.l));}).join('');
   }
-  bpe.innerHTML=D('style="display:flex;gap:12px;align-items:center;margin-bottom:11px"',D('',D('style="display:flex;align-items:baseline"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.systolic)+S('style="font-size:22px;color:var(--dim2);margin:0 3px"','/')+D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.diastolic)+S('style="font-size:13px;color:var(--dim);margin-left:5px"','mmHg'))+D('class="badge '+bp.c+'" style="margin-top:5px"',bp.l))+D('style="flex:1"',D('style="position:relative"',D('style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px"',D('style="width:25%;background:var(--grn);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="width:20%;background:#f97316;opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-13px;left:'+bpP+'%;transform:translateX(-50%);width:3px;height:15px;background:#fff;border-radius:2px"','')))))+D('class="callout '+(bp.c==='br'?'cd':bp.c==='ba'?'cw':'ci')+'" style="margin-top:10px"',S('','&#128161;')+S('',bp.adv));
+  var bpge=g('bp-gauge'); if(bpge) bpge.innerHTML=D('style="display:flex;gap:12px;align-items:center;margin-bottom:11px"',D('',D('style="display:flex;align-items:baseline"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.systolic)+S('style="font-size:22px;color:var(--dim2);margin:0 3px"','/')+D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.diastolic)+S('style="font-size:13px;color:var(--dim);margin-left:5px"','mmHg'))+D('class="badge '+bp.c+'" style="margin-top:5px"',bp.l))+D('style="flex:1"',D('style="position:relative"',D('style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px"',D('style="width:25%;background:var(--grn);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="width:20%;background:#f97316;opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-13px;left:'+bpP+'%;transform:translateX(-50%);width:3px;height:15px;background:#fff;border-radius:2px"','')))))+D('class="callout '+(bp.c==='br'?'cd':bp.c==='ba'?'cw':'ci')+'" style="margin-top:10px"',S('','&#128161;')+S('',bp.adv));
   function hmcRow(em,nm,val,sub,st,delta){var col=stCol(st.c); return D('class="hmc"',D('class="hmic" style="background:'+col+'18"',em)+D('style="flex:1"',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',nm)+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+col+'"',val)+(delta||'')+D('style="font-size:11px;color:var(--dim);margin-top:2px"',sub))+D('class="badge '+st.c+'" style="flex-shrink:0"',st.l));}
   var cve=g('cv-metrics'); if(cve) cve.innerHTML=
     hmcRow('&#10084;&#65039;','Resting HR',P.rhr+' bpm','60-100 bpm normal',hr,_ydSnapH?hlDelta(P.rhr,_ydSnapH.rhr,true):'')
@@ -2428,6 +2431,49 @@ function cdSelect(idx){
   var eu=g('cd-units'); if(eu) eu.value=0;
   var sr=g('cd-results'); if(sr) sr.innerHTML='';
   var si=g('cd-search'); if(si) si.value='';
+}
+
+
+// === AVATAR / PROFILE PHOTO ===
+function openAvatarUpload() {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 500000) { toast('Image too large. Please use a smaller photo (under 500KB)', true); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var dataUrl = ev.target.result;
+      try { localStorage.setItem('hs_avatar', dataUrl); } catch(e) { toast('Photo too large to save', true); return; }
+      updateAvatar(dataUrl);
+      toast('Profile photo updated');
+    };
+    reader.readAsDataURL(file);
+  };
+  document.body.appendChild(inp);
+  inp.click();
+  document.body.removeChild(inp);
+}
+
+function updateAvatar(dataUrl) {
+  var av = g('hm-av');
+  if (!av) return;
+  if (dataUrl) {
+    av.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    av.style.background = 'none';
+  } else {
+    av.innerHTML = '';
+    av.style.background = 'linear-gradient(135deg,var(--red),#880033)';
+  }
+}
+
+function loadAvatar() {
+  try {
+    var dataUrl = localStorage.getItem('hs_avatar');
+    if (dataUrl) updateAvatar(dataUrl);
+  } catch(e) {}
 }
 
 // === HEALTH SYNC ===
