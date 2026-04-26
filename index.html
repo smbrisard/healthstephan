@@ -2459,7 +2459,22 @@ function fetchSync(){
     if(updated){
       var snap={date:d.date||today(),steps:P.stepsToday,burned:P.burned,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
+      // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
+      // Auto-create yesterday snap from FL if missing (needed for delta arrows)
+      var _yd2=new Date(); _yd2.setDate(_yd2.getDate()-1);
+      var _ydStr2=_yd2.toISOString().slice(0,10);
+      var _hasYd=FL.some(function(f){return f.date===_ydStr2;});
+      if(!_hasYd&&FL.length>1){
+        // Use second most recent FL entry as yesterday proxy
+        var _sorted=FL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+        var _prev=_sorted[_sorted.length-2];
+        if(_prev&&_prev.date<snap.date){
+          var _ydProxy=JSON.parse(JSON.stringify(_prev));
+          _ydProxy.date=_ydStr2;
+          if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
+        }
+      }
       save();rHome();rFitness();
       var sb=g('sync-badge');
       if(sb){var t=new Date(d.syncedAt||Date.now());
