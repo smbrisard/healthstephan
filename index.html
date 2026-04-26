@@ -1186,9 +1186,12 @@ function rHome() {
       }).join('');
   } else if(suggEl) suggEl.innerHTML='';
   } catch(e){}
-  // Yesterday fitness comparison
-  var _yd=new Date(); _yd.setDate(_yd.getDate()-1);
-  var _ydStr=_yd.toISOString().slice(0,10);
+  // Yesterday fitness comparison - use local date to avoid UTC offset issues
+  var _ydStr=(function(){
+    var d=new Date();
+    d.setDate(d.getDate()-1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  })();
   var _ydSnap=null;
   for(var _fi=FL.length-1;_fi>=0;_fi--){if(FL[_fi].date===_ydStr){_ydSnap=FL[_fi];break;}}
   function _hmD(id2,cur,prev,lb,unit){
@@ -2457,7 +2460,7 @@ function fetchSync(){
       }
     }
     if(updated){
-      var snap={date:d.date||today(),steps:P.stepsToday,burned:P.burned,
+      var snap={date:today(),steps:P.stepsToday,burned:P.burned,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
