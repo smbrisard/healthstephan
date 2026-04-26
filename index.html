@@ -620,10 +620,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="tab t-pr" id="tab-profile" onclick="showTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
     <div class="tab" id="tab-fitness" onclick="showTab('fitness')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Fitness</div>
     <div class="tab" id="tab-health" onclick="showTab('health')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Health</div>
-    <div class="tab" id="tab-food" onclick="showTab('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Food</div>
+    <div class="tab" id="tab-food" onclick="showTab('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="5" y1="5" x2="5" y2="2"/><path d="M3 5h4"/><line x1="5" y1="9" x2="5" y2="22"/><line x1="19" y1="2" x2="19" y2="22"/></svg>Food</div>
     <div class="tab t-dr" id="tab-drinks" onclick="showTab('drinks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l1 7H7L8 2z"/><path d="M7 9c0 5 2 9 5 9s5-4 5-9"/></svg>Drinks</div>
-    <div class="tab" id="tab-nutrition" onclick="showTab('nutrition')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 6v6l4 2"/></svg>Nutrition</div>
-    <div class="tab t-wt" id="tab-weight" onclick="showTab('weight')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Weight</div>
+    <div class="tab" id="tab-nutrition" onclick="showTab('nutrition')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1-1 3-1 3 1"/><path d="M8 6c-3 1-5 4-5 8 0 5 3 8 6 8 1 0 2-.5 3-.5s2 .5 3 .5c3 0 6-3 6-8 0-4-2-7-5-8-1 0-2 .5-3 .5S9 6 8 6z"/></svg>Nutrition</div>
+    <div class="tab t-wt" id="tab-weight" onclick="showTab('weight')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12l2 7H4L6 2z"/><path d="M4 9c0 6 2.5 11 8 11s8-5 8-11"/><path d="M10 13l2-3 2 3"/></svg>Weight</div>
     <div class="tab t-sl" id="tab-sleep" onclick="showTab('sleep')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Sleep</div>
     <div class="tab" id="tab-tips" onclick="showTab('tips')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Tips</div>
     <div class="tab" id="tab-targets" onclick="showTab('targets')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Targets</div>
@@ -2139,19 +2139,16 @@ function rHealth(){
   var se=g('hl-score'); if(se){se.textContent=sc; se.className='badge '+(sc>=80?'bg':sc>=55?'ba':'br');}
   var bpP=Math.min(Math.max((P.systolic-90)/110*100,0),100);
   loadBPL(); var bpe=g('bp-card'); if(!bpe) return;
-  if(!BPL.length){bpe.innerHTML='<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No BP readings yet. Tap + Log BP.</div>';}
-  else{
-    var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,5);
-    bpe.innerHTML=recentBP.map(function(r,ri){
-      var cat=bpCategory(r.sys,r.dia);
-      var prev=recentBP[ri+1];
-      var sysDiff=prev?Math.round(r.sys-prev.sys):null;
-      var col=sysDiff!==null?(sysDiff<0?'var(--grn)':'var(--red)'):'';
-      var bpDelta=sysDiff!==null&&Math.abs(sysDiff)>0?D('style="font-size:10px;color:'+col+';margin-left:6px"',(sysDiff<0?'&#9660;':'&#9650;')+' '+Math.abs(sysDiff)):'';
-      return D('style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--b1)"',
-        D('',D('style="display:flex;align-items:center;gap:4px"',D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--txt)"',r.sys+'/'+r.dia)+bpDelta)+
-        D('style="font-size:11px;color:var(--dim);margin-top:2px"',r.date+(r.pulse?' · '+r.pulse+' bpm':'')))+
-        D('class="badge '+cat.c+'"',cat.l));}).join('');
+  if(!BPL.length){
+    bpe.innerHTML='<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No readings yet. Tap + Log BP.</div>';
+  } else {
+    var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var lastBP=recentBP[0], prevBP=recentBP[1];
+    var sysDiff=prevBP?Math.round(lastBP.sys-prevBP.sys):null;
+    var diaStr=sysDiff!==null&&Math.abs(sysDiff)>0?(sysDiff<0?' &#9660; '+Math.abs(sysDiff):' &#9650; '+Math.abs(sysDiff))+' vs prev':'';
+    var dCol=sysDiff!==null?(sysDiff<0?'var(--grn)':'var(--red)'):'var(--dim)';
+    bpe.innerHTML=D('style="font-size:12px;color:var(--dim)"',lastBP.date+(lastBP.pulse?' · '+lastBP.pulse+' bpm':''))
+      +(recentBP.length>1?D('style="font-size:11px;color:'+dCol+';margin-top:3px"',diaStr):'');
   }
   var bpge=g('bp-gauge'); if(bpge) bpge.innerHTML=D('style="display:flex;gap:12px;align-items:center;margin-bottom:11px"',D('',D('style="display:flex;align-items:baseline"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.systolic)+S('style="font-size:22px;color:var(--dim2);margin:0 3px"','/')+D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.diastolic)+S('style="font-size:13px;color:var(--dim);margin-left:5px"','mmHg'))+D('class="badge '+bp.c+'" style="margin-top:5px"',bp.l))+D('style="flex:1"',D('style="position:relative"',D('style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px"',D('style="width:25%;background:var(--grn);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="width:20%;background:#f97316;opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-13px;left:'+bpP+'%;transform:translateX(-50%);width:3px;height:15px;background:#fff;border-radius:2px"','')))))+D('class="callout '+(bp.c==='br'?'cd':bp.c==='ba'?'cw':'ci')+'" style="margin-top:10px"',S('','&#128161;')+S('',bp.adv));
   function hmcRow(em,nm,val,sub,st,delta){var col=stCol(st.c); return D('class="hmc"',D('class="hmic" style="background:'+col+'18"',em)+D('style="flex:1"',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',nm)+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+col+'"',val)+(delta||'')+D('style="font-size:11px;color:var(--dim);margin-top:2px"',sub))+D('class="badge '+st.c+'" style="flex-shrink:0"',st.l));}
