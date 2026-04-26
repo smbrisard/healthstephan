@@ -1133,7 +1133,7 @@ function rHome() {
   if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
   var _savedAv=localStorage.getItem('hs_avatar');
-  if(_savedAv){updateAvatar(_savedAv);}else{set('hm-av',init);}
+  if(_savedAv){updateAvatar(_savedAv);}else{var _avEl=g('hm-av');if(_avEl){_avEl.textContent=init;_avEl.style.background='linear-gradient(135deg,var(--red),#880033)';}}
 
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+P.burned, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
@@ -2281,7 +2281,9 @@ function applyMacros(){
 // ═══ PROFILE ═══
 function rProfile(){loadAvatar();
   var lw=latWt(), _nm2=String(P.name||'Stephan'); var init=_nm2.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
-  set('pr-av',init); set('pr-name',_nm2); set('pr-streak',P.streak||0); set('pr-meals',P.mealsLogged||0);
+  var _av2=localStorage.getItem('hs_avatar');
+  if(!_av2) set('pr-av',init);
+  set('pr-name',_nm2); set('pr-streak',P.streak||0); set('pr-meals',P.mealsLogged||0);
   if(WL.length>=2){var s=WL.slice().sort(function(a,b){return (a.id||0)-(b.id||0);}),ch=s[s.length-1].weight-s[0].weight,ce=g('pr-change'); if(ce){ce.textContent=(ch>=0?'+':'')+fD(k2l(Math.abs(ch)),1); ce.style.color=ch<0?'var(--grn)':'var(--red)';}}
   var bmi=lw?calcBMI(lw.weight):null, bs=bmi?bmiSt(bmi):null;
   sH('pr-stats',D('class="g2"',D('',D('style="font-size:11px;color:var(--dim)"','Weight')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:var(--grn)"',lw?fW(lw.weight):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','BMI')+D('style="font-family:var(--mn);font-size:19px;font-weight:800;color:'+(bs?bs.col:'var(--dim)')+';"',bmi?fD(bmi):'--'))+D('',D('style="font-size:11px;color:var(--dim)"','Height')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',cm2fi(P.heightCm)))+D('',D('style="font-size:11px;color:var(--dim)"','Age')+D('style="font-family:var(--mn);font-size:19px;font-weight:800"',P.age+' yrs'))+D('',D('style="font-size:11px;color:var(--dim)"','Goal weight')+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fW(P.goalKg)))+D('',D('style="font-size:11px;color:var(--dim)"','Goal')+D('style="font-size:13px;font-weight:600;margin-top:3px"',P.goal==='lose'?'Lose weight':P.goal==='build'?'Build muscle':'Maintain'))));
@@ -2472,20 +2474,8 @@ function loadAvatar() {
     var dataUrl = localStorage.getItem('hs_avatar');
     if (dataUrl) {
       updateAvatar(dataUrl);
-    } else {
-      // Restore initials if no photo
-      var av=g('hm-av');
-      var prav=g('pr-av');
-      if(av&&!av.querySelector('img')){
-        var nm=String(P.name||'Stephan');
-        var init=nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
-        av.textContent=init;
-        av.style.background='linear-gradient(135deg,var(--red),#880033)';
-      }
-      if(prav&&!prav.querySelector('img')){
-        prav.style.background='linear-gradient(135deg,var(--red),#880033)';
-      }
     }
+    // Don't touch elements if no photo - rHome/rProfile handle initials
   } catch(e) {}
 }
 
