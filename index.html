@@ -2144,9 +2144,9 @@ function rHealth(){
       var prev=recentBP[ri+1];
       var sysDiff=prev?Math.round(r.sys-prev.sys):null;
       var col=sysDiff!==null?(sysDiff<0?'var(--grn)':'var(--red)'):'';
-      var bpDelta=sysDiff!==null&&Math.abs(sysDiff)>0?(' '+D('style="font-size:10px;color:'+col+'"',(sysDiff<0?'&#9660;':'&#9650;')+' '+Math.abs(sysDiff))):'';
+      var bpDelta=sysDiff!==null&&Math.abs(sysDiff)>0?D('style="font-size:10px;color:'+col+';margin-left:6px"',(sysDiff<0?'&#9660;':'&#9650;')+' '+Math.abs(sysDiff)):'';
       return D('style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--b1)"',
-        D('',D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--txt)"',r.sys+'/'+r.dia+bpDelta)+
+        D('',D('style="display:flex;align-items:center;gap:4px"',D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--txt)"',r.sys+'/'+r.dia)+bpDelta)+
         D('style="font-size:11px;color:var(--dim);margin-top:2px"',r.date+(r.pulse?' · '+r.pulse+' bpm':'')))+
         D('class="badge '+cat.c+'"',cat.l));}).join('');
   }
@@ -2626,7 +2626,8 @@ function addBPReading(){
   var date=(g('bp-date-inp')||{value:''}).value||todayLocal();
   if(!sys||!dia){toast('Enter systolic and diastolic',true);return;}
   BPL.push({id:Date.now(),date:date,sys:sys,dia:dia,pulse:pulse});
-  P.systolic=sys; P.diastolic=dia;
+  // Only update profile BP if reading is for today
+  if(date===todayLocal()||date===today()){P.systolic=sys; P.diastolic=dia;}
   saveBPL(); save(); closeM('bp-m'); rHealth(); toast('BP reading saved');
 }
 initSync();
