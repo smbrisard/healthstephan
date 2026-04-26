@@ -1128,7 +1128,7 @@ function obNext() {
 function rHome() {
   try {
   var _hd=g('hm-date');
-  if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
   set('hm-av',init);
 
@@ -1152,7 +1152,7 @@ function rHome() {
   var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
   var _cl=g('hm-cal-lbl'); if(_cl) _cl.textContent=fN(_eaten)+' / '+fN(P.calTarget)+' kcal • '+(_rem>=0?fN(_rem)+' left':fN(Math.abs(_rem))+' over');
   // Suggestions
-  var _sugg=getMealSuggestions(), _se=g('hm-suggestions');
+  try { var _sugg=getMealSuggestions(), _se=g('hm-suggestions');
   if(_se&&_sugg.length){
     _se.innerHTML=D('class="slbl"','Suggested for you')+_sugg.map(function(f){
       return D('style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid var(--b1);cursor:pointer;touch-action:manipulation" onclick="openFoodBrowser()"',
@@ -1185,6 +1185,7 @@ function rHome() {
           +'<div style="font-size:13px;font-weight:700;color:var(--amb)">'+fN(f.c)+' kcal</div></div>';
       }).join('');
   } else if(suggEl) suggEl.innerHTML='';
+  } catch(e){}
   // Yesterday fitness comparison
   var _yd=new Date(); _yd.setDate(_yd.getDate()-1);
   var _ydStr=_yd.toISOString().slice(0,10);
@@ -1202,10 +1203,13 @@ function rHome() {
   if(_ydSnap){
     _hmD('hm-steps-yd',P.stepsToday||0,_ydSnap.steps,false,'');
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
-    _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
-  } else {var _yde=g('hm-steps-yd');if(_yde)_yde.innerHTML='';}
+  } else {
+    ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
+      var e=g(id); if(e) e.innerHTML='';
+    });
+  }
   // Weight vs yesterday (from WL entries)
   var _ydWEl=g('hm-wt-yd');
   if(_ydWEl){
