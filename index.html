@@ -1,4 +1,4 @@
-<div style="display:flex;gap:10px;margin:4px 0 16px 0"><button onclick="openFoodBrowser()" style="flex:1;padding:12px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button><button onclick="showTab('drinks')" style="flex:1;padding:12px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button></div><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -46,7 +46,7 @@ input,select{font-family:var(--fn)}
 
 /* APP */
 #app{display:none;flex-direction:column;height:100vh;height:100dvh;padding-top:var(--st)}
-#screens{flex:1;overflow:hidden}
+#screens{flex:1;overflow:hidden;padding-bottom:calc(62px + var(--sb))}
 .scr{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .scr.on{display:block}
 
@@ -71,7 +71,7 @@ input,select{font-family:var(--fn)}
 .psub{font-size:13px;color:var(--dim);margin-top:2px}
 
 /* COMMON */
-.sec{padding:0 15px 18px}
+.sec{padding:0 15px 100px}
 .slbl{font-size:12px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
 .card{background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:15px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -324,7 +324,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <button onclick="openSyncSettings()" style="width:34px;height:34px;border-radius:50%;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;touch-action:manipulation">&#9729;</button>
         <div onclick="openAvatarUpload()" id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;overflow:hidden;cursor:pointer;color:#fff">ST</div>
       </div>
-      <div class="sec" style="padding-top:6px;padding-bottom:100px">
+      <div class="sec" style="padding-top:6px">
         <!-- deficit -->
         <div class="def-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
@@ -401,6 +401,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <div style="font-size:11px;color:var(--dim);margin-top:3px">bpm RHR</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-rhr-yd"></div>
           </div>
+        </div>
           <div class="mtile" style="background:rgba(0,212,170,.12)">
             <div style="font-size:20px;margin-bottom:7px">🧍</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--grn);line-height:1" id="hm-stand">--</div>
@@ -419,14 +420,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <button onclick="openFoodBrowser()" style="flex:1;padding:13px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button>
           <button onclick="showTab('drinks')" style="flex:1;padding:13px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button>
         </div>
-
       </div>
     </div>
 
     <!-- PROFILE -->
     <div class="scr" id="sc-profile">
       <div class="phdr"><div class="ptitle">Profile</div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="card" style="text-align:center;margin-bottom:14px">
           <div class="avatar" id="pr-av" onclick="openAvatarUpload()" style="cursor:pointer;overflow:hidden;position:relative">ST<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);font-size:9px;color:#fff;text-align:center;padding:3px;font-weight:600">EDIT</div></div>
           <div style="font-size:21px;font-weight:800" id="pr-name">Stephan</div>
@@ -459,7 +459,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- FOOD -->
     <div class="scr" id="sc-food">
       <div class="phdr"><div><div class="ptitle">Food</div><div class="psub" id="food-sub">0 / 2,200 kcal</div></div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="card" style="margin-bottom:13px" id="food-summary"></div>
         <!-- Meal sub-tabs -->
         <div class="meal-tabs" id="meal-tabs">
@@ -484,7 +484,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- NUTRITION -->
     <div class="scr" id="sc-nutrition">
       <div class="phdr"><div><div class="ptitle">Nutrition</div><div class="psub">Macros and micros</div></div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div id="nut-body"></div>
         <div class="slbl">BMI</div><div class="card" style="margin-bottom:13px" id="bmi-card"></div>
         <div class="slbl">Macros</div><div class="card" style="margin-bottom:13px" id="macro-card"></div>
@@ -498,7 +498,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Weight</div><div class="psub">Tracking in lbs</div></div>
         <button onclick="openWtModal()" style="width:36px;height:36px;background:linear-gradient(135deg,var(--pur),#7722aa);border-radius:50%;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center">+</button>
       </div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="g3" style="margin-bottom:13px">
           <div class="card" style="text-align:center;padding:12px 8px"><div style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--grn)" id="wt-cur">--</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Current</div></div>
           <div class="card" style="text-align:center;padding:12px 8px"><div style="font-family:var(--mn);font-size:17px;font-weight:800" id="wt-chg">--</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Change</div></div>
@@ -521,7 +521,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Sleep</div><div class="psub">Log and track</div></div>
         <button onclick="openM('sl-m')" style="width:36px;height:36px;background:linear-gradient(135deg,var(--blu),#2255cc);border-radius:50%;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center">+</button>
       </div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="slbl">Last Night</div><div class="card" style="margin-bottom:13px" id="sl-last"></div>
         <div class="slbl">7-Day Chart</div>
         <div class="card" style="margin-bottom:13px">
@@ -540,7 +540,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- DRINKS -->
     <div class="scr" id="sc-drinks">
       <div class="phdr"><div><div class="ptitle">Drinks</div><div class="psub">Alcohol and beverages</div></div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="card" style="margin-bottom:13px;border-color:rgba(255,77,184,.2)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">TODAY'S UNITS</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="badge bg" id="dr-bdg">Within limit</div><div style="font-size:10px;color:var(--dim)">14 std drinks/week</div></div></div>
           <div style="display:flex;align-items:baseline;gap:8px">
@@ -572,7 +572,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Fitness</div><div class="psub" id="fi-date"></div></div>
         <button onclick="openFiModal()" style="font-size:12px;font-weight:700;color:var(--amb);padding:6px 13px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.25)">Edit</button>
       </div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
                 <div class="slbl">Today's Metrics</div><div class="g2" id="fi-grid" style="margin-bottom:13px"></div>
       </div>
     </div>
@@ -580,7 +580,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- HEALTH -->
     <div class="scr" id="sc-health">
       <div class="phdr"><div><div class="ptitle">Health</div><div class="psub">Vitals and classification</div></div><div class="badge bg" id="hl-score">--</div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Blood Pressure</div><button onclick="openM('bp-m')" style="padding:6px 14px;border-radius:20px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:12px;font-weight:700;touch-action:manipulation">+ Log BP</button></div><div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)" id="bp-card"></div>
         <div id="bp-gauge" style="margin-bottom:13px"></div>
         <div class="slbl">Cardiovascular</div><div id="cv-metrics"></div>
@@ -598,7 +598,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <!-- TARGETS -->
     <div class="scr" id="sc-targets">
       <div class="phdr"><div><div class="ptitle">Targets</div><div class="psub">Customise your goals</div></div></div>
-      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+      <div class="sec" style="padding-top:8px">
         <div class="slbl">Daily Calories</div>
         <div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)">
           <div style="text-align:center;margin-bottom:12px"><div style="font-family:var(--mn);font-size:48px;font-weight:800;color:var(--red);letter-spacing:-1px" id="tc-disp">2,200</div><div style="font-size:13px;color:var(--dim)">kcal / day</div></div>
@@ -1175,6 +1175,8 @@ function rHome() {
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=P.standHours?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=P.exerciseMins?Math.round(P.exerciseMins):'--';
+  var _stel=g('hm-stand'); if(_stel) _stel.textContent=P.standHours?Math.round(P.standHours):'--';
+  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=P.exerciseMins?Math.round(P.exerciseMins):'--';
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
@@ -1242,6 +1244,8 @@ function rHome() {
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
+    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
     _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
     _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
   } else {
@@ -2118,7 +2122,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins',wt:'wt'};
+  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb):'';
@@ -3158,4 +3162,5 @@ function getWeekStats(startDateStr) {
 
 </script>
 </body>
-</html>
+</html>    <div class="tab t-pr" id="tab-profile" onclick="showTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+
