@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<div style="display:flex;gap:10px;margin:4px 0 16px 0"><button onclick="openFoodBrowser()" style="flex:1;padding:12px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button><button onclick="showTab('drinks')" style="flex:1;padding:12px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button></div><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -401,6 +401,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
             <div style="font-size:11px;color:var(--dim);margin-top:3px">bpm RHR</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-rhr-yd"></div>
           </div>
+          <div class="mtile" style="background:rgba(0,212,170,.12)">
+            <div style="font-size:20px;margin-bottom:7px">🧍</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--grn);line-height:1" id="hm-stand">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">stand hrs</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-stand-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(255,184,48,.12)">
+            <div style="font-size:20px;margin-bottom:7px">⏱</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb);line-height:1" id="hm-exmin">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">exercise min</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-exmin-yd"></div>
+          </div>
         </div>
         <!-- today meals -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -408,7 +420,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <button onclick="showTab('food')" style="font-size:13px;font-weight:700;color:var(--red);padding:5px 12px;background:rgba(255,59,92,.1);border-radius:20px;border:.5px solid rgba(255,59,92,.25)">+ Log Food</button>
           <button onclick="showTab('drinks')" style="padding:5px 12px;background:rgba(56,189,248,.1);border-radius:20px;border:.5px solid rgba(56,189,248,.25);color:#38bdf8;font-size:13px;font-weight:700;touch-action:manipulation">+ Log Drink</button>
         </div>
-        <div id="hm-meals"></div>
+
       </div>
     </div>
 
@@ -629,7 +641,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <!-- TAB BAR -->
   <div id="tabs">
     <div class="tab on" id="tab-home" onclick="showTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home</div>
-    <div class="tab t-pr" id="tab-profile" onclick="showTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
     <div class="tab" id="tab-fitness" onclick="showTab('fitness')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Fitness</div>
     <div class="tab" id="tab-health" onclick="showTab('health')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Health</div>
     <div class="tab" id="tab-food" onclick="showTab('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><line x1="5" y1="5" x2="5" y2="2"/><path d="M3 5h4"/><line x1="5" y1="9" x2="5" y2="22"/><line x1="19" y1="2" x2="19" y2="22"/></svg>Food</div>
@@ -1163,6 +1174,8 @@ function rHome() {
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
+  var _stel=g('hm-stand'); if(_stel) _stel.textContent=P.standHours?Math.round(P.standHours):'--';
+  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=P.exerciseMins?Math.round(P.exerciseMins):'--';
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
@@ -1230,6 +1243,8 @@ function rHome() {
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
+    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
   } else {
     ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
       var e=g(id); if(e) e.innerHTML='';
@@ -2083,6 +2098,8 @@ function rFitness(){
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:fD(P.sleepLast,1),u:'hrs',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
     {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
+  {e:'🧍',key:'standHours',raw:P.standHours,lb:false,v:P.standHours?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
+  {e:'⏱',key:'exerciseMins',raw:P.exerciseMins,lb:false,v:P.exerciseMins?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
   {e:'&#9878;&#65039;',key:'wt',raw:0,lb:false,v:_lwLbs,u:'',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1}
   ];
   var ge=g('fi-grid'); if(!ge) return;
@@ -2102,7 +2119,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water'};
+  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins',wt:'wt'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb):'';
@@ -2532,7 +2549,7 @@ function fetchSync(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(!d||d.error)return;
-    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles'];
+    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles','standHours','exerciseMins'];
     var updated=false;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
@@ -2568,7 +2585,7 @@ function fetchSync(){
     }
     if(updated){
       var snap={date:today(),steps:P.stepsToday,burned:P.burned,
-        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0};
+        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
       // Auto-create yesterday snap from FL if missing (needed for delta arrows)
@@ -3023,8 +3040,9 @@ function rHistory() {
             (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):''))+
-          (selFlSnap?D('style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"',
-            [['&#127939;',fN(selFlSnap.steps||0),'steps','var(--amb)'],
+          (selFlSnap?D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
+            [['&#128205;',selFlSnap.dist?fD(selFlSnap.dist,1)+' mi':'--','dist','#38bdf8'],
+             ['&#127939;',fN(selFlSnap.steps||0),'steps','var(--amb)'],
              ['&#9889;',fD(selFlSnap.hrv||0,1),'HRV ms','var(--grn)'],
              ['&#10084;&#65039;',Math.round(selFlSnap.rhr||0),'RHR','var(--red)'],
              ['&#128167;',fD((selFlSnap.water||0)*33.814,0)+' oz','water','var(--cyn)']]
