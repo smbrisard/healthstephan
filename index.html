@@ -2062,8 +2062,10 @@ function rFitness(){
   ];
   var ge=g('fi-grid'); if(!ge) return;
   // Get yesterday's snapshot
-  var yd=new Date(); yd.setDate(yd.getDate()-1);
-  var ydStr=yd.toISOString().slice(0,10);
+  var ydStr=(function(){
+    var d=new Date(); d.setDate(d.getDate()-1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  })();
   var ydSnap=null;
   for(var fi=FL.length-1;fi>=0;fi--){if(FL[fi].date===ydStr){ydSnap=FL[fi];break;}}
   function fiDelta(cur,prev,lowerBetter){
@@ -2113,6 +2115,22 @@ function saveFiEdit(){
 
 // ═══ HEALTH ═══
 function rHealth(){
+  // Yesterday snapshot for delta arrows
+  var _ydH=(function(){
+    var d=new Date(); d.setDate(d.getDate()-1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  })();
+  var _ydSnapH=null;
+  for(var _fih=FL.length-1;_fih>=0;_fih--){if(FL[_fih].date===_ydH){_ydSnapH=FL[_fih];break;}}
+  function hlDelta(cur,prev,lowerBetter){
+    if(prev===null||prev===undefined||isNaN(prev)||isNaN(cur)) return '';
+    var diff=Math.round((cur-prev)*10)/10;
+    if(Math.abs(diff)<0.05) return '';
+    var better=lowerBetter?diff<0:diff>0;
+    var col=better?'var(--grn)':'var(--red)';
+    var arrow=diff>0?'&#9650;':'&#9660;';
+    return D('style="font-size:10px;color:'+col+';margin-top:2px"',arrow+' '+Math.abs(diff)+' vs yd');
+  }
   var bp=bpSt(P.systolic,P.diastolic),hr=hrSt(P.rhr),hrv=hrvSt(P.hrv),spo=spo2St(P.spo2),rr2=rrSt(P.rr),sl=slSt(P.sleepLast);
   var sc=0; if(bp.l==='Normal')sc+=25; else if(bp.c==='ba')sc+=12; if(hr.c==='bg')sc+=15; if(hrv.c==='bg')sc+=15; if(spo.c==='bg')sc+=20; if(sl.c==='bg')sc+=15; if(rr2.c==='bg')sc+=10;
   var se=g('hl-score'); if(se){se.textContent=sc; se.className='badge '+(sc>=80?'bg':sc>=55?'ba':'br');}
@@ -2129,10 +2147,17 @@ function rHealth(){
         D('class="badge '+cat.c+'"',cat.l));}).join('');
   }
   bpe.innerHTML=D('style="display:flex;gap:12px;align-items:center;margin-bottom:11px"',D('',D('style="display:flex;align-items:baseline"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.systolic)+S('style="font-size:22px;color:var(--dim2);margin:0 3px"','/')+D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.diastolic)+S('style="font-size:13px;color:var(--dim);margin-left:5px"','mmHg'))+D('class="badge '+bp.c+'" style="margin-top:5px"',bp.l))+D('style="flex:1"',D('style="position:relative"',D('style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px"',D('style="width:25%;background:var(--grn);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="width:20%;background:#f97316;opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-13px;left:'+bpP+'%;transform:translateX(-50%);width:3px;height:15px;background:#fff;border-radius:2px"','')))))+D('class="callout '+(bp.c==='br'?'cd':bp.c==='ba'?'cw':'ci')+'" style="margin-top:10px"',S('','&#128161;')+S('',bp.adv));
-  function hmcRow(em,nm,val,sub,st){var col=stCol(st.c); return D('class="hmc"',D('class="hmic" style="background:'+col+'18"',em)+D('style="flex:1"',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',nm)+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+col+'"',val)+D('style="font-size:11px;color:var(--dim);margin-top:2px"',sub))+D('class="badge '+st.c+'" style="flex-shrink:0"',st.l));}
-  var cve=g('cv-metrics'); if(cve) cve.innerHTML=hmcRow('&#10084;&#65039;','Resting HR',P.rhr+' bpm','60-100 bpm normal',hr)+hmcRow('&#9889;','HRV',P.hrv+' ms','Higher = better recovery',hrv)+hmcRow('&#129441;','SpO2',fD(P.spo2,0)+'%','95-100% normal',spo)+hmcRow('&#127774;&#65039;','Resp Rate',fD(P.rr,0)+' br/min','12-20 normal',rr2);
+  function hmcRow(em,nm,val,sub,st,delta){var col=stCol(st.c); return D('class="hmc"',D('class="hmic" style="background:'+col+'18"',em)+D('style="flex:1"',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',nm)+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+col+'"',val)+(delta||'')+D('style="font-size:11px;color:var(--dim);margin-top:2px"',sub))+D('class="badge '+st.c+'" style="flex-shrink:0"',st.l));}
+  var cve=g('cv-metrics'); if(cve) cve.innerHTML=
+    hmcRow('&#10084;&#65039;','Resting HR',P.rhr+' bpm','60-100 bpm normal',hr,_ydSnapH?hlDelta(P.rhr,_ydSnapH.rhr,true):'')
+    +hmcRow('&#9889;','HRV',P.hrv+' ms','Higher = better recovery',hrv,_ydSnapH?hlDelta(P.hrv,_ydSnapH.hrv,false):'')
+    +hmcRow('&#129441;','SpO2',fD(P.spo2,0)+'%','95-100% normal',spo,_ydSnapH?hlDelta(P.spo2,_ydSnapH.spo2,false):'')
+    +hmcRow('&#127774;&#65039;','Resp Rate',fD(P.rr,0)+' br/min','12-20 normal',rr2,_ydSnapH?hlDelta(P.rr,_ydSnapH.rr,true):'');
   var stSt=P.stepsToday/P.steps>=1?{l:'Goal hit',c:'bg'}:P.stepsToday/P.steps>=.7?{l:'Good',c:'bg'}:{l:'Low',c:'ba'};
-  var ae=g('act-metrics'); if(ae) ae.innerHTML=hmcRow('&#127939;','Steps',fN(P.stepsToday),'Target: '+fN(P.steps),stSt)+hmcRow('&#128564;','Sleep',fD(P.sleepLast,1)+' hrs','7-9 hrs recommended',sl)+hmcRow('&#128167;','Water',fD(P.waterToday,1)+' L','Target: '+fD(P.water,1)+' L',P.waterToday/P.water>=1?{l:'Goal met',c:'bg'}:{l:'In progress',c:'ba'});
+  var ae=g('act-metrics'); if(ae) ae.innerHTML=
+    hmcRow('&#127939;','Steps',fN(P.stepsToday),'Target: '+fN(P.steps),stSt,_ydSnapH?hlDelta(P.stepsToday,_ydSnapH.steps,false):'')
+    +hmcRow('&#128564;','Sleep',fD(P.sleepLast,1)+' hrs','7-9 hrs recommended',sl,_ydSnapH?hlDelta(P.sleepLast,_ydSnapH.sleep,false):'')
+    +hmcRow('&#128167;','Water',fD(calcWaterOz(),1)+' fl oz','Target: '+fD((P.water||3)*33.814,1)+' fl oz',P.waterToday/(P.water||3)>=1?{l:'Goal met',c:'bg'}:{l:'In progress',c:'ba'},_ydSnapH?hlDelta(calcWaterOz(),((_ydSnapH.water||0)*33.814),false):'');
   var flags=[];
   if(bp.c!=='bg') flags.push({e:'&#129658;',t:'BP '+bp.l+' ('+P.systolic+'/'+P.diastolic+')',col:bp.col});
   if(hrv.c==='br') flags.push({e:'&#9889;',t:'HRV Low - rest needed',col:'var(--red)'});
