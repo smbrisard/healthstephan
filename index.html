@@ -2139,10 +2139,14 @@ function rHealth(){
   if(!BPL.length){bpe.innerHTML='<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No BP readings yet. Tap + Log BP.</div>';}
   else{
     var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,5);
-    bpe.innerHTML=recentBP.map(function(r){
+    bpe.innerHTML=recentBP.map(function(r,ri){
       var cat=bpCategory(r.sys,r.dia);
+      var prev=recentBP[ri+1];
+      var sysDiff=prev?Math.round(r.sys-prev.sys):null;
+      var col=sysDiff!==null?(sysDiff<0?'var(--grn)':'var(--red)'):'';
+      var bpDelta=sysDiff!==null&&Math.abs(sysDiff)>0?(' '+D('style="font-size:10px;color:'+col+'"',(sysDiff<0?'&#9660;':'&#9650;')+' '+Math.abs(sysDiff))):'';
       return D('style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--b1)"',
-        D('',D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--txt)"',r.sys+'/'+r.dia)+
+        D('',D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--txt)"',r.sys+'/'+r.dia+bpDelta)+
         D('style="font-size:11px;color:var(--dim);margin-top:2px"',r.date+(r.pulse?' · '+r.pulse+' bpm':'')))+
         D('class="badge '+cat.c+'"',cat.l));}).join('');
   }
