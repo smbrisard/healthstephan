@@ -604,7 +604,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div onclick="histNav(1)" style="width:32px;height:32px;border-radius:50%;background:var(--s2);border:.5px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">&#8250;</div>
         </div>
       </div>
-      <div class="sec" style="padding-top:8px">
+      <div class="sec" style="padding-top:8px;padding-bottom:90px">
         <input type="date" id="hist-date" oninput="rHistory()" class="fld" style="margin-bottom:13px;font-size:15px">
         <div id="hist-body"></div>
       </div>
@@ -2857,6 +2857,8 @@ function rHistory() {
       var cals=dm.reduce(function(a,m){return a+(m.cals||0);},0)+dr.reduce(function(a,d){return a+(d.c||0);},0);
       var wts=WL.filter(function(w){return w.date===dt;});
       var sls=SL.filter(function(s){return s.date===dt;});
+      var fls=FL.filter(function(f){return f.date===dt;});
+      var flSnap=fls.length?fls[fls.length-1]:null;
       days30.push({
         dt:dt,
         lbl:dd.toLocaleDateString('en',{month:'short',day:'numeric'}),
@@ -2886,7 +2888,9 @@ function rHistory() {
       var selSl=SL.filter(function(s){return s.date===histDate;});
       var selCals=selDm.reduce(function(a,m){return a+(m.cals||0);},0)+selDr.reduce(function(a,d){return a+(d.c||0);},0);
       var selDef=P.calTarget-selCals;
-      var hasData=selDm.length||selDr.length||selWt.length||selSl.length;
+      var selFl=FL.filter(function(f){return f.date===histDate;});
+      var selFlSnap=selFl.length?selFl[selFl.length-1]:null;
+      var hasData=selDm.length||selDr.length||selWt.length||selSl.length||selFlSnap;
 
       if(hasData){
         var defCol2=selDef>=0?'var(--grn)':'var(--red)';
@@ -2898,7 +2902,7 @@ function rHistory() {
             D('style="text-align:right"',
               D('style="font-size:11px;color:var(--dim)"',selDef>=0?'deficit':'surplus')+
               D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:'+defCol2+';display:block"',(selDef>=0?'-':'+')+fN(Math.abs(selDef)))))+
-          D('style="display:flex;gap:10px"',
+          D('style="display:flex;gap:10px;margin-bottom:'+(selFlSnap?'10px':'0')+'"',
             (selWt.length?D('style="flex:1;background:rgba(180,77,255,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','weight')):'')+
@@ -2907,7 +2911,17 @@ function rHistory() {
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','sleep')):'')+
             (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
-              D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):'')));
+              D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):''))+
+          (selFlSnap?D('style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"',
+            [['&#127939;',fN(selFlSnap.steps||0),'steps','var(--amb)'],
+             ['&#9889;',fD(selFlSnap.hrv||0,1),'HRV ms','var(--grn)'],
+             ['&#10084;&#65039;',Math.round(selFlSnap.rhr||0),'RHR','var(--red)'],
+             ['&#128167;',fD((selFlSnap.water||0)*33.814,0)+' oz','water','var(--cyn)']]
+            .map(function(r){return D('style="background:rgba(255,255,255,.04);border-radius:9px;padding:7px;text-align:center"',
+              D('style="font-size:13px"',r[0])+
+              D('style="font-family:var(--mn);font-size:13px;font-weight:800;color:'+r[3]+';margin:2px 0;display:block"',r[1])+
+              D('style="font-size:9px;color:var(--dim)"',r[2]));}).join('')
+          ):''));
       } else {
         html+=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px;margin-bottom:13px"','No data for this day. Use arrows to navigate.');
       }
