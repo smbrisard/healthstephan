@@ -1154,6 +1154,7 @@ function rHome() {
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
+  var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
@@ -1220,6 +1221,7 @@ function rHome() {
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
+    _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
   } else {
     ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
       var e=g(id); if(e) e.innerHTML='';
@@ -2062,6 +2064,7 @@ function loadFiSnap(dt) {
 function rFitness(){
   P.waterToday=calcWaterL();
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
+  var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+' lbs':'--';
   var tiles=[
     {e:'&#128205;',key:'dist',raw:P.distMiles,lb:false,v:P.distMiles?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday,lb:false,v:fN(P.stepsToday),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:P.stepsToday/(P.steps||10000)},
@@ -2071,7 +2074,8 @@ function rFitness(){
     {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:fD(P.sleepLast,1),u:'hrs',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
-    {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)}
+    {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
+  {e:'&#9878;&#65039;',key:'wt',raw:0,lb:false,v:_lwLbs,u:'',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1}
   ];
   var ge=g('fi-grid'); if(!ge) return;
   // Get yesterday's snapshot
@@ -3123,3 +3127,9 @@ function getWeekStats(startDateStr) {
 </script>
 </body>
 </html>
+          <div class="mtile" style="background:rgba(255,59,92,.12)">
+            <div style="font-size:20px;margin-bottom:7px">&#10084;&#65039;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--red);line-height:1" id="hm-rhr">--</div>
+            <div style="font-size:13px;color:var(--dim);margin-top:4px">bpm RHR</div>
+            <div style="font-size:13px;color:var(--dim);margin-top:3px" id="hm-rhr-yd"></div>
+          </div>
