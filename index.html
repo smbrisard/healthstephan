@@ -1194,12 +1194,6 @@ function rHome() {
   })();
   var _ydSnap=null;
   for(var _fi=FL.length-1;_fi>=0;_fi--){if(FL[_fi].date===_ydStr){_ydSnap=FL[_fi];break;}}
-  // DEBUG
-  var _dbgEl=g('hm-streak');
-  if(_dbgEl&&!_ydSnap){
-    var _flDates=FL.map(function(f){return f.date;}).join(',');
-    console.log('ydStr:',_ydStr,'FL dates:',_flDates,'FL len:',FL.length);
-  }
   function _hmD(id2,cur,prev,lb,unit){
     var el2=g(id2); if(!el2) return;
     if(prev===null||prev===undefined){el2.innerHTML='';return;}
