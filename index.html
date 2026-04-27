@@ -3070,7 +3070,7 @@ function rHistory() {
           D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"',
             D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:var(--txt);line-height:1"',fN(selCals))+
             D('style="font-size:12px;color:var(--dim)"','kcal')+
-            ((selDm.length||selDr.length)?D('style="text-align:right"',
+            ((selDm.length||selDr.some(function(d){return (d.c||d.cals||0)>0;}))?D('style="text-align:right"',
               D('style="font-size:11px;color:var(--dim)"',selDef>=0?'deficit':'surplus')+
               D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:'+defCol2+';display:block"',(selDef>=0?'-':'+')+fN(Math.abs(selDef)))):''))+
           D('style="display:flex;gap:10px;margin-bottom:'+(selFlSnap?'10px':'0')+'"',
