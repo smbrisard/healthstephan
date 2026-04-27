@@ -2104,7 +2104,12 @@ function rFitness(){
     {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:P.standHours?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
   {e:'⏱',key:'exerciseMins',raw:P.exerciseMins||null,lb:false,v:P.exerciseMins?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
-  {e:'&#9878;&#65039;',key:'wt',raw:null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1}
+  (function(){
+  var _ydWL=WL.filter(function(w){return w.date===ydStr;});
+  var _tdWL=WL.filter(function(w){return w.date===today();});
+  var _wtDelta=(_ydWL.length&&_tdWL.length)?Math.round((k2l(_tdWL[_tdWL.length-1].weight)-k2l(_ydWL[_ydWL.length-1].weight))*10)/10:null;
+  return {e:'&#9878;&#65039;',key:'wt',raw:_wtDelta,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
+})()
   ];
   var ge=g('fi-grid'); if(!ge) return;
   try {
