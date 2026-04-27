@@ -416,7 +416,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
         <!-- log buttons -->
         <div style="display:flex;gap:10px;margin-bottom:16px">
-          <button onclick="openFoodBrowser()" style="flex:1;padding:13px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button>
+          <button onclick="showTab('food')" style="flex:1;padding:13px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button>
           <button onclick="showTab('drinks')" style="flex:1;padding:13px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button>
         </div>
       </div>
@@ -2069,7 +2069,7 @@ var FI_FIELDS=[
   {key:'rr',l:'Respiratory rate',sub:'Apple Watch sleep',u:'br/min',mn:8,mx:30},
   {key:'sleepLast',l:'Last night sleep',sub:'Hours slept',u:'hrs',mn:0,mx:14},
   {key:'waterToday',l:'Water intake',sub:'Litres today',u:'L',mn:0,mx:6},
-  {key:'distMiles',l:'Distance (mi)',sub:'Walk + Run + Cycle — override if needed',u:'mi',mn:0,mx:200}
+  {key:'dist',l:'Distance (mi)',sub:'Walk + Run + Cycle — override if needed',u:'mi',mn:0,mx:200}
 ];
 function openFiModal() {
   rFitness(); // ensure fi-edit is populated
@@ -2160,7 +2160,10 @@ function saveFiEdit(){
     if(isNaN(v)) return;
     v=Math.max(f.mn,Math.min(f.mx,v));
     snap[f.key]=v;
-    if(isToday2) P[f.key]=v;
+    if(isToday2) {
+      P[f.key]=v;
+      if(f.key==='dist') P.distMiles=v;
+    }
   });
   FL=FL.filter(function(fi){return fi.date!==fiDt;});
   FL.push(snap);
@@ -2458,8 +2461,16 @@ function cdSearch(query){
         sr.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px">No results. Enter manually below.</div>';
         return;
       }
-      window._cdProducts=data.products;
-      sr.innerHTML=data.products.map(function(p,i){
+      var _cdNorm=data.products.map(function(p){
+        var nm=p.product_name||p.name||'Unknown';
+        var nu=p.nutriments||{};
+        var kcal=Math.round(nu['energy-kcal_100g']||nu['energy-kcal']||nu['energy_100g']/4.184||0);
+        var carb=Math.round((nu['carbohydrates_100g']||0)*10)/10;
+        var sug=Math.round((nu['sugars_100g']||0)*10)/10;
+        return {name:nm,brand:p.brands||'',cals:kcal,carbs:carb,sugar:sug,sg:sug};
+      });
+      window._cdProducts=_cdNorm;
+      sr.innerHTML=_cdNorm.map(function(p,i){
         return '<div onclick="cdSelect('+i+')" style="padding:9px 10px;border-bottom:.5px solid var(--b1);'
           +'cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
           +'<div><div style="font-size:13px;font-weight:600;color:var(--txt)">'+p.name+'</div>'
@@ -2783,8 +2794,19 @@ function cfSearch(query) {
         sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results found. Try a different search or enter manually.</div>';
         return;
       }
-      window._cfProducts=data.products;
-      sr.innerHTML=data.products.map(function(p,i){
+      var _cfNorm=data.products.map(function(p){
+        var nm=p.product_name||p.name||'Unknown';
+        var nu=p.nutriments||{};
+        var kcal=Math.round(nu['energy-kcal_100g']||nu['energy-kcal']||nu['energy_100g']/4.184||0);
+        var prot=Math.round((nu['proteins_100g']||0)*10)/10;
+        var carb=Math.round((nu['carbohydrates_100g']||0)*10)/10;
+        var fat=Math.round((nu['fat_100g']||0)*10)/10;
+        var fib=Math.round((nu['fiber_100g']||0)*10)/10;
+        var sod=Math.round(nu['sodium_100g']||0);
+        return {name:nm,brand:p.brands||'',cals:kcal,protein:prot,carbs:carb,fat:fat,fiber:fib,sodium:sod};
+      });
+      window._cfProducts=_cfNorm;
+      sr.innerHTML=_cfNorm.map(function(p,i){
         return '<div onclick="cfSelect('+i+')" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
           +'<div><div style="font-size:14px;font-weight:600;color:var(--txt)">'+(p.name||'Unknown')+'</div>'
           +(p.brand?'<div style="font-size:11px;color:var(--dim)">'+p.brand+'</div>':'')+'</div>'
