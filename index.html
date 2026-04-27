@@ -2998,28 +2998,6 @@ function rHistory() {
          ['&#128164;',fD(ws.avgSleep,1)+'h','avg sleep','var(--blu)'],['&#9881;',wtTxt,'wt change',wtCol]]
         .map(function(r){return D('',D('style="font-size:18px"',r[0])+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+r[3]+';margin:4px 0"',r[1])+D('style="font-size:10px;color:var(--dim)"',r[2]));}).join(''));
   }
-  // Weekly summary
-  var ws = getWeeklySummary();
-  var wse = g('weekly-summary');
-  if (wse && (ws.avgCals||ws.avgSteps||ws.avgSleep)) {
-    var wtChgTxt = ws.wtChange!==null ? (ws.wtChange>0?'+':'')+fD(ws.wtChange,1)+' lbs this week' : 'No weight data';
-    var wtCol = ws.wtChange!==null?(ws.wtChange<=0?'var(--grn)':'var(--red)'):'var(--dim)';
-    wse.innerHTML = D('class="slbl"','This Week')+
-      D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px"',
-        D('style="display:grid;grid-template-columns:1fr 1fr;gap:10px"',
-          D('style="text-align:center"',
-            D('style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb)"',fN(ws.avgCals))+
-            D('style="font-size:11px;color:var(--dim);margin-top:2px"','avg kcal/day'))+
-          D('style="text-align:center"',
-            D('style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--grn)"',fN(ws.avgSteps))+
-            D('style="font-size:11px;color:var(--dim);margin-top:2px"','avg steps/day'))+
-          D('style="text-align:center"',
-            D('style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--blu)"',fD(ws.avgSleep,1)+'h')+
-            D('style="font-size:11px;color:var(--dim);margin-top:2px"','avg sleep'))+
-          D('style="text-align:center"',
-            D('style="font-family:var(--mn);font-size:24px;font-weight:800;color:'+wtCol+'"',wtChgTxt.split(' ')[0])+
-            D('style="font-size:11px;color:var(--dim);margin-top:2px"','weight change'))));
-  }
   try {
     var de = g('hist-date');
     if(de && de.value) histDate = de.value;
@@ -3088,7 +3066,7 @@ function rHistory() {
             (selWt.length?D('style="flex:1;background:rgba(180,77,255,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','weight')):'')+
-            (selSl.length?D('style="flex:1;background:rgba(77,166,255,.1);border-radius:10px;padding:9px;text-align:center"',
+            ((selSl.length||(selFlSnap&&selFlSnap.sleep>0))?D('style="flex:1;background:rgba(77,166,255,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap&&selFlSnap.sleep>0?selFlSnap.sleep:0)))+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','sleep')):'')+
             (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
