@@ -3084,11 +3084,14 @@ function rHistory() {
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):''))+
           (selFlSnap?D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
-            [['&#128205;',(histDate===today()&&P.distMiles?P.distMiles:selFlSnap.dist)?fD(histDate===today()&&P.distMiles?P.distMiles:selFlSnap.dist,1)+' mi':'--','dist','#38bdf8'],
-             ['&#127939;',fN(Math.round(selFlSnap.steps||0)),'steps','var(--amb)'],
+            [['&#128205;',fD(histDate===today()?(P.distMiles||0):(selFlSnap?selFlSnap.dist||0:0),1)+' mi','dist','#38bdf8'],
+             ['&#127939;',fN(Math.round(histDate===today()?(P.stepsToday||selFlSnap&&selFlSnap.steps||0):(selFlSnap&&selFlSnap.steps||0))),'steps','var(--amb)'],
              ['&#9889;',selFlSnap.hrv?fD(selFlSnap.hrv,1)+' ms':'--','HRV','var(--grn)'],
              ['&#10084;&#65039;',selFlSnap.rhr?Math.round(selFlSnap.rhr)+' bpm':'--','RHR','var(--red)'],
-             ['&#128167;',fD((selFlSnap.water||0)*33.814,0)+' oz','water','var(--cyn)']]
+             ['&#128167;',(function(){
+               var wOz=histDate===today()?calcWaterOz():(selFlSnap?(selFlSnap.water||0)*33.814:0);
+               return fD(wOz,0)+' oz';
+             })(),'water','var(--cyn)']]
             .map(function(r){return D('style="background:rgba(255,255,255,.04);border-radius:9px;padding:7px;text-align:center"',
               D('style="font-size:13px"',r[0])+
               D('style="font-family:var(--mn);font-size:13px;font-weight:800;color:'+r[3]+';margin:2px 0;display:block"',r[1])+
