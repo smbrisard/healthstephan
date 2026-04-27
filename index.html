@@ -1102,6 +1102,8 @@ function showTab(name) {
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   var sc = g('sc-'+name); if(sc) sc.classList.add('on');
   var tb = g('tab-'+name); if(tb) tb.classList.add('on');
+  // Reset history to today when opening tab
+  if(name==='history') histDate=today();
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
   if (r[name]) r[name]();
 }
@@ -2614,6 +2616,11 @@ function fetchSync(){
       var _existingDist=_existingSnap.length?(_existingSnap[_existingSnap.length-1].dist||0):0;
       var _syncDist=P.distMiles||0;
       var _finalDist=_existingDist>_syncDist?_existingDist:_syncDist;
+      // Also update yesterday's FL snap with sleep if sleepDate is yesterday
+      if(d.sleepDate&&d.sleepDate!==today()&&d.sleepLast>0){
+        var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
+        if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
+      }
       var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
       // Save today's snap — also save yesterday's if it doesn't exist yet
@@ -2992,7 +2999,7 @@ function rHistory() {
   if(wse){
     var wtTxt=ws.wtChange!==null?(ws.wtChange>0?'+':'')+fD(ws.wtChange,1)+' lbs':'No data';
     var wtCol=ws.wtChange!==null?(ws.wtChange<=0?'var(--grn)':'var(--red)'):'var(--dim)';
-    wse.innerHTML=D('class="slbl"','This Week')+
+    wse.innerHTML=D('class="slbl"','Last 7 Days')+
       D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center"',
         [['&#128293;',fN(ws.avgCals),'avg kcal','var(--amb)'],['&#127939;',fN(ws.avgSteps),'avg steps','var(--grn)'],
          ['&#128164;',fD(ws.avgSleep,1)+'h','avg sleep','var(--blu)'],['&#9881;',wtTxt,'wt change',wtCol]]
