@@ -2665,28 +2665,41 @@ function calcStreak() {
 }
 
 // === WEEKLY SUMMARY ===
-function getWeeklySummary() {
-  var now = new Date(), days = [];
+function getWeeklySummary(anchorDate) {
+  // Build 7-day window ending on anchorDate (or today if not provided)
+  var anchor = anchorDate ? new Date(anchorDate+'T12:00') : new Date();
+  var days = [];
   for (var i = 6; i >= 0; i--) {
-    var d = new Date(now); d.setDate(d.getDate()-i);
+    var d = new Date(anchor); d.setDate(d.getDate()-i);
     days.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
   }
-  var avgCals=0, avgSteps=0, avgSleep=0, daysLogged=0;
+  var totalCals=0, totalSteps=0, totalSleep=0;
+  var daysWithCals=0, daysWithSteps=0, daysWithSleep=0;
   days.forEach(function(dt) {
     var dm = ML.filter(function(m){return m.date===dt;});
-    if (dm.length) { avgCals += dm.reduce(function(a,m){return a+(m.cals||0);},0); daysLogged++; }
+    var dr = DL.filter(function(d){return d.date===dt;});
+    var dayCals = dm.reduce(function(a,m){return a+(m.cals||0);},0) + dr.reduce(function(a,d){return a+(d.c||0);},0);
+    if (dayCals>0) { totalCals+=dayCals; daysWithCals++; }
     var snap = FL.find(function(f){return f.date===dt;});
-    if (snap) { if(snap.steps) avgSteps+=snap.steps; if(snap.sleep) avgSleep+=snap.sleep; }
+    if (snap) {
+      if(snap.steps>0) { totalSteps+=snap.steps; daysWithSteps++; }
+      if(snap.sleep>0) { totalSleep+=snap.sleep; daysWithSleep++; }
+    }
+    // Also check SL for sleep
+    var sl = SL.find(function(s){return s.date===dt;});
+    if(sl&&sl.hours>0&&daysWithSleep===0) { totalSleep+=sl.hours; daysWithSleep++; }
   });
-  if (daysLogged) avgCals = Math.round(avgCals/daysLogged);
-  avgSteps = Math.round(avgSteps/7); avgSleep = Math.round((avgSleep/7)*10)/10;
+  var avgCals = daysWithCals ? Math.round(totalCals/daysWithCals) : 0;
+  var avgSteps = daysWithSteps ? Math.round(totalSteps/daysWithSteps) : 0;
+  var avgSleep = daysWithSleep ? Math.round((totalSleep/daysWithSleep)*10)/10 : 0;
   var wtChange = null;
   var wkWts = WL.filter(function(w){return w.date>=days[0]&&w.date<=days[6];});
   if (wkWts.length>=2) {
     var sorted = wkWts.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
-    wtChange = k2l(sorted[sorted.length-1].weight)-k2l(sorted[0].weight);
+    wtChange = Math.round((k2l(sorted[sorted.length-1].weight)-k2l(sorted[0].weight))*10)/10;
+    wtChange = isNaN(wtChange)?null:wtChange;
   }
-  return {avgCals:avgCals, avgSteps:avgSteps, avgSleep:avgSleep, wtChange:wtChange, daysLogged:daysLogged};
+  return {avgCals:avgCals, avgSteps:avgSteps, avgSleep:avgSleep, wtChange:wtChange, daysLogged:daysWithCals, days:days};
 }
 
 // === DATA EXPORT / IMPORT ===
@@ -2965,7 +2978,7 @@ function histNav(dir) {
   try {
     var d = new Date(histDate + 'T12:00');
     d.setDate(d.getDate() + dir);
-    histDate = d.toISOString().slice(0,10);
+    histDate = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     var de = g('hist-date');
     if (de) de.value = histDate;
     rHistory();
@@ -2973,7 +2986,7 @@ function histNav(dir) {
 }
 
 function rHistory() {
-  var ws=getWeeklySummary(), wse=g('weekly-summary');
+  var ws=getWeeklySummary(histDate), wse=g('weekly-summary');
   if(wse){
     var wtTxt=ws.wtChange!==null?(ws.wtChange>0?'+':'')+fD(ws.wtChange,1)+' lbs':'No data';
     var wtCol=ws.wtChange!==null?(ws.wtChange<=0?'var(--grn)':'var(--red)'):'var(--dim)';
@@ -3018,7 +3031,7 @@ function rHistory() {
     var days30=[], i;
     for(i=29;i>=0;i--){
       var dd=new Date(); dd.setDate(dd.getDate()-i);
-      var dt=dd.toISOString().slice(0,10);
+      var dt=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
       var dm=ML.filter(function(m){return m.date===dt;});
       var dr=DL.filter(function(d){return d.date===dt;});
       var cals=dm.reduce(function(a,m){return a+(m.cals||0);},0)+dr.reduce(function(a,d){return a+(d.c||0);},0);
