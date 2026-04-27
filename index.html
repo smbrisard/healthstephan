@@ -1756,7 +1756,7 @@ function getWtR(){
   if(wtR==='all') return sorted;
   var days=wtR==='7d'?7:wtR==='1m'?30:90;
   var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
-  var cutStr=cutoff.toISOString().slice(0,10);
+  var cutStr=cutoff.getFullYear()+'-'+String(cutoff.getMonth()+1).padStart(2,'0')+'-'+String(cutoff.getDate()).padStart(2,'0');
   return sorted.filter(function(e){return e.date>=cutStr;});
 }
 function rWeight() {
@@ -2036,7 +2036,7 @@ function deleteDrinkEdit(){
   save(); closeM('drink-edit-m'); rDrinks(); toast('Drink deleted');
 }
 function rDrChart(){
-  var days=[],i; for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i); days.push(dt.toISOString().slice(0,10));}
+  var days=[],i; for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i); days.push(dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'));}
   var data=days.map(function(date){return DL.filter(function(d){return d.date===date;}).reduce(function(a,d){return a+d.c;},0);});
   var mx=Math.max.apply(null,data.concat([100]));
   var ce=g('dr-chart'),cl=g('dr-chart-lbl');
@@ -2618,7 +2618,7 @@ function fetchSync(){
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
       // Auto-create yesterday snap from FL if missing (needed for delta arrows)
       var _yd2=new Date(); _yd2.setDate(_yd2.getDate()-1);
-      var _ydStr2=_yd2.toISOString().slice(0,10);
+      var _ydStr2=_yd2.getFullYear()+'-'+String(_yd2.getMonth()+1).padStart(2,'0')+'-'+String(_yd2.getDate()).padStart(2,'0');
       var _hasYd=FL.some(function(f){return f.date===_ydStr2;});
       if(!_hasYd&&FL.length>1){
         // Use second most recent FL entry as yesterday proxy
@@ -3190,7 +3190,7 @@ function getWeekStats(startDateStr) {
   for (var i = 0; i < 7; i++) {
     var d = new Date(startDateStr + 'T12:00');
     d.setDate(d.getDate() + i);
-    var dt = d.toISOString().slice(0,10);
+    var dt = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     var meals = ML.filter(function(m){ return m.date===dt; });
     var drinks = DL.filter(function(dr){ return dr.date===dt; });
     var cals = meals.reduce(function(a,m){ return a+(m.cals||0); },0) + drinks.reduce(function(a,dr){ return a+(dr.c||0); },0);
