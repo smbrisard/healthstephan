@@ -629,7 +629,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
       </div>
       <div class="sec" style="padding-top:8px;padding-bottom:90px">
-        <input type="date" id="hist-date" oninput="rHistory()" class="fld" style="margin-bottom:13px;font-size:15px">
+        <input type="date" id="hist-date" oninput="rHistory()" style="display:none">
         <div id="weekly-summary"></div>
         <div id="hist-body"></div>
       </div>
@@ -3061,7 +3061,11 @@ function rHistory() {
 
       if(hasData){
         var defCol2=selDef>=0?'var(--grn)':'var(--red)';
-        html+=D('class="slbl"','Selected Day');
+        // Only show deficit if food was logged that day
+        var showDeficit=selDm.length>0||selDr.length>0;
+        var _hd=new Date(histDate+'T12:00');
+        var _hdStr=_hd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();
+        html+=D('class="slbl" style="margin-top:28px;margin-bottom:4px"',_hdStr);
         html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px"',
           D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"',
             D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:var(--txt);line-height:1"',fN(selCals))+
