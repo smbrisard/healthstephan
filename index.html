@@ -1160,16 +1160,16 @@ function rHome() {
   var _savedAv=localStorage.getItem('hs_avatar');
   if(_savedAv){updateAvatar(_savedAv);}else{var _avEl=g('hm-av');if(_avEl){_avEl.textContent=init;_avEl.style.background='linear-gradient(135deg,var(--red),#880033)';}}
 
-  var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+P.burned, pct=Math.min(eaten/P.calTarget,1);
+  var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+(P.totalBurned||P.burned), pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
-  set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.burned)); set('eq-net',fN(Math.abs(deficit)));
+  set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.totalBurned||P.burned)); set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
   if(db){if(deficit>=700){db.className='badge bg';db.textContent='Great day';}else if(deficit>=400){db.className='badge bp';db.textContent='On track';}else if(deficit>=0){db.className='badge ba';db.textContent='Under target';}else{db.className='badge br';db.textContent='Over limit';}}
   var dbar=g('hm-dbar'); if(dbar) dbar.style.width=Math.min(Math.max(deficit/1000*100,0),100)+'%';
   var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
-  set('hm-steps',fN(Math.round(P.stepsToday||0))); set('hm-burned',fN(Math.round(P.burned||0)));
+  set('hm-steps',fN(Math.round(P.stepsToday||0))); set('hm-burned',fN(Math.round(P.totalBurned||P.burned||0)));
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
@@ -2093,8 +2093,8 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var tiles=[
-    {e:'&#128205;',key:'dist',raw:P.distMiles,lb:false,v:P.distMiles?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
-  {e:'&#127939;',key:'steps',raw:P.stepsToday,lb:false,v:fN(P.stepsToday),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:P.stepsToday/(P.steps||10000)},
+    {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
+  {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'burned',raw:P.burned,lb:false,v:fN(P.burned),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr,lb:true,v:P.rhr,u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:.6},
     {e:'&#9889;',key:'hrv',raw:P.hrv,lb:false,v:P.hrv,u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.hrv||0)/100},
@@ -2104,9 +2104,10 @@ function rFitness(){
     {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:P.standHours?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
   {e:'⏱',key:'exerciseMins',raw:P.exerciseMins||null,lb:false,v:P.exerciseMins?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
-  {e:'&#9878;&#65039;',key:'wt',raw:null,lb:false,v:_lwLbs,u:'',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1}
+  {e:'&#9878;&#65039;',key:'wt',raw:null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1}
   ];
   var ge=g('fi-grid'); if(!ge) return;
+  try {
   // Get yesterday's snapshot
   var ydStr=(function(){
     var d=new Date(); d.setDate(d.getDate()-1);
@@ -2136,6 +2137,7 @@ function rFitness(){
       D('style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:8px;overflow:hidden"',
         D('style="height:100%;background:'+m.c+';width:'+Math.min(m.pct*100,100)+'%;border-radius:2px"','')));
   }).join('');
+  } catch(e){ console.error('fi-grid error',e); }
   var fe=g('fi-edit'); if(!fe) return;
   fe.innerHTML=FI_FIELDS.map(function(f){return D('style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--b1)"',D('',D('style="font-size:14px;font-weight:500"',f.l)+D('style="font-size:11px;color:var(--dim);margin-top:1px"',f.sub))+D('style="display:flex;align-items:center;gap:7px"','<input type="number" id="fif-'+f.key+'" value="'+P[f.key]+'" min="'+f.mn+'" max="'+f.mx+'" style="width:82px;padding:8px 10px;background:var(--s3);border:1.5px solid var(--b2);border-radius:10px;color:var(--txt);font-size:15px;font-family:var(--mn);font-weight:700;text-align:center;-webkit-appearance:none;outline:none">'+D('style="font-size:11px;color:var(--dim);white-space:nowrap"',f.u)));}).join('');
 }
@@ -2553,7 +2555,7 @@ function fetchSync(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(!d||d.error)return;
-    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles','standHours','exerciseMins'];
+    var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles','standHours','exerciseMins','restingEnergy','totalBurned'];
     var updated=false;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
@@ -2588,7 +2590,7 @@ function fetchSync(){
       }
     }
     if(updated){
-      var snap={date:today(),steps:P.stepsToday,burned:P.burned,
+      var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
