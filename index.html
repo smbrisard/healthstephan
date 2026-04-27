@@ -2069,6 +2069,7 @@ var FI_FIELDS=[
   {key:'rr',l:'Respiratory rate',sub:'Apple Watch sleep',u:'br/min',mn:8,mx:30},
   {key:'sleepLast',l:'Last night sleep',sub:'Hours slept',u:'hrs',mn:0,mx:14},
   {key:'waterToday',l:'Water intake',sub:'Litres today',u:'L',mn:0,mx:6},
+  {key:'distMiles',l:'Distance (mi)',sub:'Walk + Run + Cycle — override if needed',u:'mi',mn:0,mx:200}
 ];
 function openFiModal() {
   rFitness(); // ensure fi-edit is populated
@@ -2150,7 +2151,7 @@ function saveFiEdit(){
   // Save daily fitness snapshot
   var fiDt=(g('fi-date-input')&&g('fi-date-input').value)?g('fi-date-input').value:today();
   var isToday2=(fiDt===today());
-  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday};
+  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
   // For past days: save to snapshot but don't overwrite today's P values
   FI_FIELDS.forEach(function(f){
     var e2=g('fif-'+f.key);
