@@ -2603,10 +2603,10 @@ function fetchSync(){
       var slBed=d.sleepBedtime||'23:00';
       var slWake=d.sleepWake||'07:00';
       var slHrs=parseFloat(d.sleepLast);
-      if(!SL.filter(function(s){return s.date===slDt;}).length){
-        SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs});
-        updated=true;
-      }
+      // Always overwrite sleep entry for this date with latest sync data
+      SL=SL.filter(function(s){return s.date!==slDt;});
+      SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs});
+      updated=true;
     }
     if(updated){
       // Preserve manual distance if it's higher than synced (indoor cycling workaround)
@@ -3089,7 +3089,7 @@ function rHistory() {
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','weight')):'')+
             (selSl.length?D('style="flex:1;background:rgba(77,166,255,.1);border-radius:10px;padding:9px;text-align:center"',
-              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap?(selFlSnap.sleep||0):0)))+
+              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap&&selFlSnap.sleep>0?selFlSnap.sleep:0)))+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','sleep')):'')+
             (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
