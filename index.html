@@ -1241,7 +1241,7 @@ function rHome() {
   if(_ydSnap){
     _hmD('hm-steps-yd',Math.round(P.stepsToday||0),Math.round(_ydSnap.steps||0),false,'');
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
-    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep,false,'h');
+    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep||0,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
@@ -1273,7 +1273,9 @@ function rHome() {
 
   // Sleep
   var lsl=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0];
-  set('hm-sleep',lsl?fD(lsl.hours,1):fD(P.sleepLast,1));
+  // Use P.sleepLast (from sync) as primary, SL entry as fallback
+  var _sleepVal=P.sleepLast>0?P.sleepLast:(lsl?lsl.hours:0);
+  set('hm-sleep',_sleepVal>0?fD(_sleepVal,1):'--');
 
   // Meals
   var meals=tMeals(), mEl=g('hm-meals');
@@ -3087,13 +3089,13 @@ function rHistory() {
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','weight')):'')+
             (selSl.length?D('style="flex:1;background:rgba(77,166,255,.1);border-radius:10px;padding:9px;text-align:center"',
-              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap?selFlSnap.sleep:0)))+
+              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap?(selFlSnap.sleep||0):0)))+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','sleep')):'')+
             (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):''))+
           (selFlSnap?D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
-            [['&#128205;',selFlSnap.dist?fD(selFlSnap.dist,1)+' mi':'--','dist','#38bdf8'],
+            [['&#128205;',(histDate===today()&&P.distMiles?P.distMiles:selFlSnap.dist)?fD(histDate===today()&&P.distMiles?P.distMiles:selFlSnap.dist,1)+' mi':'--','dist','#38bdf8'],
              ['&#127939;',fN(Math.round(selFlSnap.steps||0)),'steps','var(--amb)'],
              ['&#9889;',selFlSnap.hrv?fD(selFlSnap.hrv,1)+' ms':'--','HRV','var(--grn)'],
              ['&#10084;&#65039;',selFlSnap.rhr?Math.round(selFlSnap.rhr)+' bpm':'--','RHR','var(--red)'],
