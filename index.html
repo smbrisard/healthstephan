@@ -392,7 +392,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,107,107,.14),rgba(255,107,107,.03));border-color:rgba(255,107,107,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128293;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#ff7070" id="hm-burned">389</div>
-            <div style="font-size:11px;color:var(--dim);margin-top:2px">kcal burned</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">total burned</div>
             <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
           </div>
           <div class="mtile" style="background:rgba(255,59,92,.12)">
@@ -1543,7 +1543,7 @@ function setMealTab(tab, btn) {
 function getRecentFoods(){
   var seen={},recent=[];
   ML.slice().sort(function(a,b){return b.id-a.id;}).forEach(function(m){
-    if(!seen[m.name]&&recent.length<8){seen[m.name]=1;recent.push(m);}
+    if(!seen[m.name]&&recent.length<4){seen[m.name]=1;recent.push(m);}
   });
   return recent;
 }
@@ -1553,10 +1553,10 @@ function renderRecentFoods(){
   var recent=getRecentFoods();
   if(!recent.length){el.innerHTML='';return;}
   el.innerHTML=D('class="slbl"','Recent Foods')+
-    D('style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px"',
+    D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
       recent.map(function(m){
         var safeName=m.name.replace(/"/g,'&quot;');
-        return D('style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:var(--s2);border-radius:18px;border:.5px solid var(--b1);cursor:pointer;touch-action:manipulation" onclick="quickAddFood(this)" data-n="'+safeName+'" data-c="'+m.cals+'" data-p="'+(m.protein||0)+'" data-cb="'+(m.carbs||0)+'" data-f="'+(m.fat||0)+'"',
+        return D('style="display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:16px;border:.5px solid rgba(255,255,255,.1);cursor:pointer;touch-action:manipulation" onclick="quickAddFood(this)" data-n="'+safeName+'" data-c="'+m.cals+'" data-p="'+(m.protein||0)+'" data-cb="'+(m.carbs||0)+'" data-f="'+(m.fat||0)+'"',
           D('style="font-size:15px"',m.emoji||'&#127869;')+
           D('style="font-size:12px;font-weight:600;color:var(--txt)"',(m.name.length>14?m.name.slice(0,14)+'...':m.name))+
           D('style="font-size:11px;color:var(--dim)"',fN(m.cals)+'k'));
@@ -2194,7 +2194,7 @@ function rFitness(){
   var tiles=[
     {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
-    {e:'&#128293;',key:'burned',raw:P.burned,lb:false,v:fN(P.burned),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
+    {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr,lb:true,v:P.rhr,u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:.6},
     {e:'&#9889;',key:'hrv',raw:P.hrv,lb:false,v:P.hrv,u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.hrv||0)/100},
     {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
@@ -2228,7 +2228,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={dist:'dist',steps:'steps',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
+  var yd_k={dist:'dist',steps:'steps',activeBurned:'activeBurned',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb):'';
@@ -2715,7 +2715,7 @@ function fetchSync(){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
-      var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,
+      var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
@@ -3374,25 +3374,6 @@ function saveRecipe(){
 }
 </script>
 
-  <!-- RECIPE BUILDER MODAL -->
-  <div id="recipe-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;overflow-y:auto;padding:20px">
-    <div style="background:var(--bg2);border-radius:18px;padding:20px;max-width:420px;margin:0 auto">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:18px;font-weight:800">&#127859; Recipe Builder</div>
-        <button onclick="closeRecipeModal()" style="font-size:22px;color:var(--dim);background:none;border:none">&#215;</button>
-      </div>
-      <input id="recipe-name" class="fld" placeholder="Recipe name..." style="margin-bottom:10px">
-      <div style="font-size:12px;color:var(--dim);margin-bottom:6px">SERVINGS</div>
-      <input id="recipe-servings" class="fld" type="number" min="1" value="1" style="margin-bottom:12px;width:80px">
-      <div style="font-size:12px;color:var(--dim);margin-bottom:6px">INGREDIENTS</div>
-      <div id="recipe-ingredients" style="margin-bottom:10px"></div>
-      <button onclick="addRecipeIngredient()" style="width:100%;padding:10px;background:var(--s2);border-radius:12px;border:.5px solid var(--b1);color:var(--txt);font-size:13px;margin-bottom:12px;touch-action:manipulation">+ Add Ingredient</button>
-      <div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:12px" id="recipe-totals">
-        <div style="font-size:12px;color:var(--dim);margin-bottom:6px">TOTALS PER SERVING</div>
-        <div id="recipe-total-display" style="font-size:14px;color:var(--txt)">0 kcal</div>
-      </div>
-      <button onclick="saveRecipe()" class="btn btn-r" style="width:100%">Save & Log This Recipe</button>
-    </div>
-  </div>
+  <div id="recipe-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px"><div style="background:var(--bg2,#16162a);border-radius:18px;padding:20px;max-width:420px;margin:0 auto"><div style="font-size:18px;font-weight:800;margin-bottom:16px">&#127859; Recipe Builder</div><div style="font-size:12px;color:var(--dim);margin-bottom:4px">RECIPE NAME</div><input id="recipe-name" class="fld" placeholder="e.g. Chicken Stir Fry" style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="font-size:12px;color:var(--dim)">SERVINGS</div><input id="recipe-servings" class="fld" type="number" min="1" value="1" style="width:70px" oninput="_updateRecipeTotals()"></div><div style="font-size:12px;color:var(--dim);margin-bottom:6px">INGREDIENTS</div><div id="recipe-ings" style="margin-bottom:8px"></div><button onclick="addRecipeIng()" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;margin-bottom:12px;touch-action:manipulation">+ Add Ingredient</button><div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:14px"><div style="font-size:11px;color:var(--dim);margin-bottom:5px">TOTALS PER SERVING</div><div id="recipe-total-display" style="font-size:13px;font-weight:600;color:var(--txt)">0 kcal</div></div><div style="display:flex;gap:10px"><button onclick="closeRecipeModal()" style="flex:1;padding:14px;background:var(--s2);border-radius:14px;border:.5px solid var(--b1);color:var(--dim);font-size:14px;font-weight:700;touch-action:manipulation">Cancel</button><button onclick="saveRecipe()" style="flex:2;padding:14px;background:var(--red);border-radius:14px;border:none;color:white;font-size:14px;font-weight:700;touch-action:manipulation">Log Recipe</button></div></div></div>
 </body>
 </html>
