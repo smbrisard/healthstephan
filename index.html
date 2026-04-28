@@ -563,6 +563,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('coffee',this)">Coffee</div>
           <div class="pill" onclick="drCat('water',this)">Water</div>
           <div class="pill" onclick="drCat('choc',this)">Chocolate</div>
+          <div class="pill" onclick="drCat('tea',this)">Tea</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
@@ -2047,6 +2048,16 @@ var DRINKS=[
   {n:'Chocolate Milk',e:'&#129361;',p:'8 fl oz 2% milk',c:208,u:0,cb:30,sg:25,cat:'choc',vol:240},
   {n:'Chocolate Protein Shake',e:'&#129361;',p:'12 fl oz',c:160,u:0,cb:8,sg:4,cat:'choc',vol:355},
   {n:'Mocha Latte',e:'&#9749;',p:'12 fl oz',c:197,u:0,cb:27,sg:23,cat:'choc',vol:355},
+  {n:'Mint Tea',e:'&#127807;',p:'8 fl oz, no sugar',c:0,u:0,cb:0,sg:0,cat:'tea',vol:240},
+  {n:'Green Tea',e:'&#127808;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
+  {n:'Black Tea',e:'&#9749;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
+  {n:'Chamomile Tea',e:'&#127841;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
+  {n:'Ginger Tea',e:'&#127807;',p:'8 fl oz, no sugar',c:3,u:0,cb:1,sg:0,cat:'tea',vol:240},
+  {n:'Matcha Latte',e:'&#127808;',p:'12 fl oz with milk',c:180,u:0,cb:18,sg:14,cat:'tea',vol:355},
+  {n:'Mint Tea with Honey',e:'&#127807;',p:'8 fl oz, 1 tsp honey',c:21,u:0,cb:6,sg:6,cat:'tea',vol:240},
+  {n:'Chai Latte',e:'&#9749;',p:'12 fl oz with milk',c:196,u:0,cb:30,sg:25,cat:'tea',vol:355},
+  {n:'Iced Tea',e:'&#127784;',p:'12 fl oz, unsweetened',c:3,u:0,cb:1,sg:0,cat:'tea',vol:355},
+  {n:'Herbal Tea',e:'&#127807;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'soft',w:''},
   {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
   {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
