@@ -586,7 +586,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       <div class="phdr"><div><div class="ptitle">Health</div><div class="psub">Vitals and classification</div></div><div class="badge bg" id="hl-score">--</div></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Blood Pressure</div><button onclick="openM('bp-m')" style="padding:6px 14px;border-radius:20px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:12px;font-weight:700;touch-action:manipulation">+ Log BP</button></div><div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)" id="bp-card"></div>
-        <div id="bp-gauge" style="margin-bottom:13px"></div>
+        <div id="bp-gauge" style="margin-bottom:8px"></div>
+        <div id="bp-history" style="margin-bottom:13px"></div>
         <div class="slbl">Cardiovascular</div><div id="cv-metrics"></div>
         <div class="slbl" style="margin-top:8px">Activity</div><div id="act-metrics"></div>
         <div class="slbl" style="margin-top:8px">Flags</div><div id="hl-flags"></div>
@@ -2306,6 +2307,20 @@ function rHealth(){
   }
   var bpge=g('bp-gauge'); if(bpge) bpge.innerHTML=D('style="display:flex;gap:12px;align-items:center;margin-bottom:11px"',D('',D('style="display:flex;align-items:baseline"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.systolic)+S('style="font-size:22px;color:var(--dim2);margin:0 3px"','/')+D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:'+bp.col+';line-height:1;letter-spacing:-1px"',P.diastolic)+S('style="font-size:13px;color:var(--dim);margin-left:5px"','mmHg'))+D('class="badge '+bp.c+'" style="margin-top:5px"',bp.l))+D('style="flex:1"',D('style="position:relative"',D('style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px"',D('style="width:25%;background:var(--grn);opacity:.7;border-radius:3px 0 0 3px"','')+D('style="width:20%;background:var(--amb);opacity:.7"','')+D('style="width:20%;background:#f97316;opacity:.7"','')+D('style="flex:1;background:var(--red);opacity:.7;border-radius:0 3px 3px 0"',''))+D('style="position:relative;height:0"',D('style="position:absolute;top:-13px;left:'+bpP+'%;transform:translateX(-50%);width:3px;height:15px;background:#fff;border-radius:2px"','')))))+D('class="callout '+(bp.c==='br'?'cd':bp.c==='ba'?'cw':'ci')+'" style="margin-top:10px"',S('','&#128161;')+S('',bp.adv));
   function hmcRow(em,nm,val,sub,st,delta){var col=stCol(st.c); return D('class="hmc"',D('class="hmic" style="background:'+col+'18"',em)+D('style="flex:1"',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',nm)+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+col+'"',val)+(delta||'')+D('style="font-size:11px;color:var(--dim);margin-top:2px"',sub))+D('class="badge '+st.c+'" style="flex-shrink:0"',st.l));}
+  var bpHist=g('bp-history');
+  if(bpHist){
+    if(BPL.length>1){
+      var _bpHist=BPL.slice().sort(function(a,b){return b.id-a.id;}).slice(0,5);
+      bpHist.innerHTML=D('class="slbl" style="margin-bottom:6px"','Recent Readings')+
+        _bpHist.map(function(b){
+          return D('class="ritem"',
+            D('class="rmain"',
+              D('class="rname"',b.sys+'/'+b.dia+' mmHg')+
+              D('class="rsub"',b.date+(b.note?' · '+b.note:'')))+
+            D('class="rmbtn" onclick="deleteBP('+b.id+')"','&#215;'));
+        }).join('');
+    } else bpHist.innerHTML='';
+  }
   var cve=g('cv-metrics'); if(cve) cve.innerHTML=
     hmcRow('&#10084;&#65039;','Resting HR',P.rhr+' bpm','60-100 bpm normal',hr,_ydSnapH?hlDelta(P.rhr,_ydSnapH.rhr,true):'')
     +hmcRow('&#9889;','HRV',P.hrv+' ms','Higher = better recovery',hrv,_ydSnapH?hlDelta(P.hrv,_ydSnapH.hrv,false):'')
