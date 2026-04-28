@@ -2296,7 +2296,7 @@ function rHealth(){
   if(!BPL.length){
     bpe.innerHTML='<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No readings yet. Tap + Log BP.</div>';
   } else {
-    var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
     var lastBP=recentBP[0], prevBP=recentBP[1];
     var sysDiff=prevBP?Math.round(lastBP.sys-prevBP.sys):null;
     var diaStr=sysDiff!==null&&Math.abs(sysDiff)>0?(sysDiff<0?' &#9660; '+Math.abs(sysDiff):' &#9650; '+Math.abs(sysDiff))+' vs prev':'';
@@ -2715,6 +2715,7 @@ function fetchSync(){
       _bpArr=_bpArr.filter(function(b){return b.date!==_bpDate;});
       _bpArr.push({id:Date.now(),date:_bpDate,sys:d.bpSystolic,dia:d.bpDiastolic,note:'Auto-synced'});
       localStorage.setItem('hs_bpl',JSON.stringify(_bpArr));
+      toast('BP synced: '+d.bpSystolic+'/'+d.bpDiastolic);
       updated=true;
     }
     if(updated){
