@@ -2296,7 +2296,7 @@ function rHealth(){
   if(!BPL.length){
     bpe.innerHTML='<div style="text-align:center;color:var(--dim);font-size:13px;padding:8px">No readings yet. Tap + Log BP.</div>';
   } else {
-    var recentBP=BPL.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
+    var recentBP=BPL.slice().sort(function(a,b){return b.id-a.id;});
     var lastBP=recentBP[0], prevBP=recentBP[1];
     var sysDiff=prevBP?Math.round(lastBP.sys-prevBP.sys):null;
     var diaStr=sysDiff!==null&&Math.abs(sysDiff)>0?(sysDiff<0?' &#9660; '+Math.abs(sysDiff):' &#9650; '+Math.abs(sysDiff))+' vs prev':'';
@@ -2712,11 +2712,13 @@ function fetchSync(){
       if(_bs&&_bd&&Number(_bs)>60&&Number(_bd)>40){
         var _ba=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
         var _bt=today();
-        // Remove today AND any future entries (UTC date artifacts)
-        _ba=_ba.filter(function(x){return x.date<_bt;});
+        // Remove all auto-synced entries, keep only manual ones from past dates
+        _ba=_ba.filter(function(x){return x.note!=='Auto-synced';});
         _ba.push({id:Date.now(),date:_bt,sys:Math.round(Number(_bs)),dia:Math.round(Number(_bd)),note:'Auto-synced'});
         localStorage.setItem('hs_bpl',JSON.stringify(_ba));
         loadBPL(); // Reload global BPL array
+        P.systolic=Math.round(Number(_bs)); // Update display
+        P.diastolic=Math.round(Number(_bd));
         updated=true;
       }
     }catch(bpErr){console.log('BP err',bpErr);}
@@ -2867,6 +2869,12 @@ function getMealSuggestions() {
 var BPL=[];
 function loadBPL(){try{var s=localStorage.getItem('hs_bpl');BPL=s?JSON.parse(s):[];}catch(e){BPL=[];}}
 function saveBPL(){try{localStorage.setItem('hs_bpl',JSON.stringify(BPL));}catch(e){}}
+function deleteBP(id){
+  BPL=BPL.filter(function(b){return b.id!==id;});
+  saveBPL();
+  rHealth();
+  toast('Reading deleted');
+}
 function bpCategory(sys,dia){
   if(sys<120&&dia<80)return{l:'Normal',c:'grn'};
   if(sys<130&&dia<80)return{l:'Elevated',c:'amb'};
