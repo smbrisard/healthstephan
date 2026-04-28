@@ -2745,7 +2745,7 @@ function fetchSync(){
           if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
         }
       }
-      save();rHome();rFitness();
+      save();rHome();rFitness();rHealth();
       var sb=g('sync-badge');
       if(sb){var t=new Date(d.syncedAt||Date.now());
         sb.textContent='Synced '+t.toLocaleTimeString('en',{hour:'numeric',minute:'2-digit'});
