@@ -2208,7 +2208,7 @@ function rFitness(){
   var _ydWL=WL.filter(function(w){return w.date===ydStr;});
   var _tdWL=WL.filter(function(w){return w.date===today();});
   var _wtDelta=(_ydWL.length&&_tdWL.length)?Math.round((k2l(_tdWL[_tdWL.length-1].weight)-k2l(_ydWL[_ydWL.length-1].weight))*10)/10:null;
-  return {e:'&#9878;&#65039;',key:'wt',raw:_wtDelta,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
+  return {e:'&#9878;&#65039;',key:'wt',raw:_lw?k2l(_lw.weight):null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
 })()
   ];
   var ge=g('fi-grid'); if(!ge) return;
@@ -2229,7 +2229,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={dist:'dist',steps:'steps',activeBurned:'activeBurned',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
+  var yd_k={dist:'dist',steps:'steps',activeBurned:'activeBurned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
     // Fallback: activeBurned -> burned for old snaps
@@ -2252,7 +2252,8 @@ function saveFiEdit(){
   // Save daily fitness snapshot
   var fiDt=(g('fi-date-input')&&g('fi-date-input').value)?g('fi-date-input').value:today();
   var isToday2=(fiDt===today());
-  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
+  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
+        wt:(function(){var _lws=latWt();return _lws?k2l(_lws.weight):null;})()};
   // For past days: save to snapshot but don't overwrite today's P values
   FI_FIELDS.forEach(function(f){
     var e2=g('fif-'+f.key);
