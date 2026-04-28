@@ -1284,7 +1284,7 @@ function rHome() {
   var lsl=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   // Use P.sleepLast (from sync) as primary, SL entry as fallback
   var _sleepVal=P.sleepLast>0?P.sleepLast:(lsl?lsl.hours:0);
-  set('hm-sleep',_sleepVal>0?fD(_sleepVal,1):'--');
+  set('hm-sleep',_sleepVal>0?hHM(_sleepVal):'--');
 
   // Meals
   var meals=tMeals(), mEl=g('hm-meals');
@@ -2211,7 +2211,7 @@ function rFitness(){
     {e:'&#9889;',key:'hrv',raw:P.hrv,lb:false,v:P.hrv,u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.hrv||0)/100},
     {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
-    {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:fD(P.sleepLast,1),u:'hrs',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
+    {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
     {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:P.standHours?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
   {e:'⏱',key:'exerciseMins',raw:P.exerciseMins||null,lb:false,v:P.exerciseMins?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
@@ -2341,13 +2341,13 @@ function rHealth(){
   var stSt=P.stepsToday/P.steps>=1?{l:'Goal hit',c:'bg'}:P.stepsToday/P.steps>=.7?{l:'Good',c:'bg'}:{l:'Low',c:'ba'};
   var ae=g('act-metrics'); if(ae) ae.innerHTML=
     hmcRow('&#127939;','Steps',fN(P.stepsToday),'Target: '+fN(P.steps),stSt,_ydSnapH?hlDelta(P.stepsToday,_ydSnapH.steps,false):'')
-    +hmcRow('&#128564;','Sleep',fD(P.sleepLast,1)+' hrs','7-9 hrs recommended',sl,_ydSnapH?hlDelta(P.sleepLast,_ydSnapH.sleep,false):'')
+    +hmcRow('&#128564;','Sleep',(P.sleepLast>0?hHM(P.sleepLast):'--'),'7-9 hrs recommended',sl,_ydSnapH?hlDelta(P.sleepLast,_ydSnapH.sleep,false):'')
     +hmcRow('&#128167;','Water',fD(calcWaterOz(),1)+' fl oz','Target: '+fD((P.water||3)*33.814,1)+' fl oz',P.waterToday/(P.water||3)>=1?{l:'Goal met',c:'bg'}:{l:'In progress',c:'ba'},_ydSnapH?hlDelta(calcWaterOz(),((_ydSnapH.water||0)*33.814),false):'');
   var flags=[];
   if(bp.c!=='bg') flags.push({e:'&#129658;',t:'BP '+bp.l+' ('+P.systolic+'/'+P.diastolic+')',col:bp.col});
   if(hrv.c==='br') flags.push({e:'&#9889;',t:'HRV Low - rest needed',col:'var(--red)'});
   if(spo.c!=='bg') flags.push({e:'&#129441;',t:'SpO2 '+spo.l,col:spo.c==='br'?'var(--red)':'var(--amb)'});
-  if(sl.c==='br') flags.push({e:'&#128564;',t:'Insufficient sleep ('+fD(P.sleepLast,1)+'h)',col:'var(--red)'});
+  if(sl.c==='br') flags.push({e:'&#128564;',t:'Insufficient sleep ('+hHM(P.sleepLast)+')',col:'var(--red)'});
   var fle=g('hl-flags'); if(!fle) return;
   fle.innerHTML=flags.length?flags.map(function(f){return D('style="display:flex;align-items:center;gap:11px;padding:13px;border-radius:13px;margin-bottom:8px;background:'+f.col+'12;border:.5px solid '+f.col+'40"',S('style="font-size:20px"',f.e)+S('style="font-size:14px;color:'+f.col+';font-weight:600"',f.t));}).join(''):D('class="callout ci"',S('','&#127973;')+S('',' All metrics healthy.'));
 }
@@ -2364,7 +2364,7 @@ function buildRecs(){
   if(P.waterToday<P.water*.5) recs.push({icon:'&#128167;',title:'Drink '+fD(P.water-P.waterToday,1)+'L more today',detail:'At '+fD(P.waterToday,1)+'L of '+fD(P.water,1)+'L. Hydration boosts metabolism.',pri:'high'});
   else if(P.water-P.waterToday>.3) recs.push({icon:'&#128167;',title:fD(P.water-P.waterToday,1)+'L remaining',detail:'Good progress! A glass with every meal.',pri:'low'});
   if(P.steps-P.stepsToday>3000) recs.push({icon:'&#127939;',title:fN(P.steps-P.stepsToday)+' steps to goal',detail:'A 20-min walk adds ~2,000 steps and burns ~120 kcal.',pri:'high'});
-  if(P.sleepLast<7) recs.push({icon:'&#128564;',title:'Prioritise sleep tonight',detail:'Got '+fD(P.sleepLast,1)+'h. Poor sleep increases hunger hormones.',pri:'high'});
+  if(P.sleepLast<7) recs.push({icon:'&#128564;',title:'Prioritise sleep tonight',detail:'Got '+hHM(P.sleepLast)+'. Poor sleep increases hunger hormones.',pri:'high'});
   if(n.pr<P.protein*.6) recs.push({icon:'&#129385;',title:'Low protein - '+Math.round(n.pr)+'g so far',detail:'Target: '+Math.round(P.protein)+'g. Try a Lean Body shake, eggs, or chicken.',pri:'high'});
   if(n.fi<P.fiber*.5) recs.push({icon:'&#129382;',title:'Low fiber today',detail:Math.round(n.fi)+'g of '+Math.round(P.fiber)+'g. Add broccoli, lentils, or an apple.',pri:'medium'});
   if(n.na>P.sodium*.8) recs.push({icon:'&#129381;',title:'Sodium high - '+Math.round(n.na)+'mg',detail:'Avoid processed meats for rest of day.',pri:'high'});
@@ -2760,10 +2760,14 @@ function fetchSync(){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
+      var _lwSync=latWt();
       var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
-        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0};
+        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
+        standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
+        wt:_lwSync?k2l(_lwSync.weight):null};
       // Save today's snap — also save yesterday's if it doesn't exist yet
       FL=FL.filter(function(f){return f.date!==snap.date;});FL.push(snap);
+      updated=true; // Always save snap
       // Auto-create yesterday snap from FL if missing (needed for delta arrows)
       var _yd2=new Date(); _yd2.setDate(_yd2.getDate()-1);
       var _ydStr2=_yd2.getFullYear()+'-'+String(_yd2.getMonth()+1).padStart(2,'0')+'-'+String(_yd2.getDate()).padStart(2,'0');
