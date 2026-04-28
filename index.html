@@ -2709,13 +2709,12 @@ function fetchSync(){
     // Auto-log BP from sync if received
     if(d.bpSystolic&&d.bpDiastolic&&d.bpSystolic>60&&d.bpDiastolic>40){
       var _bpArr=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
-      var _bpDate=today();
-      // Only add if no entry for today
-      if(!_bpArr.some(function(b){return b.date===_bpDate;})){
-        _bpArr.push({id:Date.now(),date:_bpDate,sys:d.bpSystolic,dia:d.bpDiastolic,note:'Auto-synced'});
-        localStorage.setItem('hs_bpl',JSON.stringify(_bpArr));
-        updated=true;
-      }
+      var _bpDate=d.sleepDate||today();
+      // Always update today's auto-synced entry with latest reading
+      _bpArr=_bpArr.filter(function(b){return b.date!==_bpDate||b.note!=='Auto-synced';});
+      _bpArr.push({id:Date.now(),date:_bpDate,sys:d.bpSystolic,dia:d.bpDiastolic,note:'Auto-synced'});
+      localStorage.setItem('hs_bpl',JSON.stringify(_bpArr));
+      updated=true;
     }
     if(updated){
       // Preserve manual distance if it's higher than synced (indoor cycling workaround)
