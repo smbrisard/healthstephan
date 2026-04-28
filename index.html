@@ -2711,7 +2711,8 @@ function fetchSync(){
       var _bpArr=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
       var _bpDate=d.sleepDate||today();
       // Always update today's auto-synced entry with latest reading
-      _bpArr=_bpArr.filter(function(b){return b.date!==_bpDate||b.note!=='Auto-synced';});
+      // Always overwrite today's BP with latest from iHealth
+      _bpArr=_bpArr.filter(function(b){return b.date!==_bpDate;});
       _bpArr.push({id:Date.now(),date:_bpDate,sys:d.bpSystolic,dia:d.bpDiastolic,note:'Auto-synced'});
       localStorage.setItem('hs_bpl',JSON.stringify(_bpArr));
       updated=true;
