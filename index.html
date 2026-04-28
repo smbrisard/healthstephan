@@ -2674,16 +2674,16 @@ function fetchSync(){
     if(!d||d.error)return;
     var fields=['stepsToday','burned','rhr','hrv','spo2','rr','sleepLast','waterToday','distMiles','walkMiles','cycleMiles','standHours','exerciseMins','restingEnergy','totalBurned','bpSystolic','bpDiastolic'];
     var updated=false;
-    // BP sync - run immediately on raw d before any processing
-    if(d.bpSystolic&&d.bpDiastolic&&parseFloat(d.bpSystolic)>60){
+    // BP - always log what we receive
+    toast('d.bp='+JSON.stringify({s:d.bpSystolic,d:d.bpDiastolic}));
+    var _bpS=parseFloat(d.bpSystolic||0),_bpD=parseFloat(d.bpDiastolic||0);
+    if(_bpS>60&&_bpD>40){
       var _bpArr2=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
-      var _bpDate2=today();
-      _bpArr2=_bpArr2.filter(function(b){return b.date!==_bpDate2;});
-      _bpArr2.push({id:Date.now(),date:_bpDate2,sys:Math.round(parseFloat(d.bpSystolic)),dia:Math.round(parseFloat(d.bpDiastolic)),note:'Auto-synced'});
+      _bpArr2=_bpArr2.filter(function(b){return b.date!==today();});
+      _bpArr2.push({id:Date.now(),date:today(),sys:Math.round(_bpS),dia:Math.round(_bpD),note:'Auto-synced'});
       localStorage.setItem('hs_bpl',JSON.stringify(_bpArr2));
-      toast('BP: '+Math.round(d.bpSystolic)+'/'+Math.round(d.bpDiastolic)+' saved');
       updated=true;
-    } else { toast('BP raw: sys='+d.bpSystolic+' dia='+d.bpDiastolic); }
+    }
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
         var _v=parseFloat(d[k]);
