@@ -2709,7 +2709,7 @@ function fetchSync(){
     // Auto-log BP from sync if received
     if(d.bpSystolic&&d.bpDiastolic&&d.bpSystolic>60&&d.bpDiastolic>40){
       var _bpArr=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
-      var _bpDate=d.sleepDate||today();
+      var _bpDate=today(); // Always log BP to today's date
       // Always update today's auto-synced entry with latest reading
       // Always overwrite today's BP with latest from iHealth
       _bpArr=_bpArr.filter(function(b){return b.date!==_bpDate;});
