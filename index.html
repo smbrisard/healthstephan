@@ -585,8 +585,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
     <div class="scr" id="sc-health">
       <div class="phdr"><div><div class="ptitle">Health</div><div class="psub">Vitals and classification</div></div><div class="badge bg" id="hl-score">--</div></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Blood Pressure</div><button onclick="openM('bp-m')" style="padding:6px 14px;border-radius:20px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:12px;font-weight:700;touch-action:manipulation">+ Log BP</button>
-          <button onclick="var x=localStorage.getItem('hs_bpl');toast('BPL:'+x)" style="padding:5px 10px;background:rgba(255,184,48,.1);border-radius:12px;border:.5px solid rgba(255,184,48,.25);color:var(--amb);font-size:11px;touch-action:manipulation">Debug BP</button></div><div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)" id="bp-card"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Blood Pressure</div><button onclick="openM('bp-m')" style="padding:6px 14px;border-radius:20px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:12px;font-weight:700;touch-action:manipulation">+ Log BP</button></div><div class="card" style="margin-bottom:13px;border-color:rgba(255,59,92,.2)" id="bp-card"></div>
         <div id="bp-gauge" style="margin-bottom:13px"></div>
         <div class="slbl">Cardiovascular</div><div id="cv-metrics"></div>
         <div class="slbl" style="margin-top:8px">Activity</div><div id="act-metrics"></div>
@@ -2713,7 +2712,8 @@ function fetchSync(){
       if(_bs&&_bd&&Number(_bs)>60&&Number(_bd)>40){
         var _ba=JSON.parse(localStorage.getItem('hs_bpl')||'[]');
         var _bt=today();
-        _ba=_ba.filter(function(x){return x.date!==_bt;});
+        // Remove today AND any future entries (UTC date artifacts)
+        _ba=_ba.filter(function(x){return x.date<_bt;});
         _ba.push({id:Date.now(),date:_bt,sys:Math.round(Number(_bs)),dia:Math.round(Number(_bd)),note:'Auto-synced'});
         localStorage.setItem('hs_bpl',JSON.stringify(_ba));
         loadBPL(); // Reload global BPL array
