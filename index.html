@@ -1221,13 +1221,15 @@ function rHome() {
   var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
+  var _isToday=!P.lastSyncDate||P.lastSyncDate===today();
   set('hm-steps',_isToday?fN(Math.round(P.stepsToday||0)):'--');
-  set('hm-burned',_isToday?fN(Math.round(P.totalBurned||P.burned||0)):'--');
+  // Show totalBurned if synced today, restingEnergy as baseline if not
+  var _burnedVal=_isToday?(P.totalBurned||P.burned||0):(P.restingEnergy||0);
+  set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
-  var _isToday=!P.lastSyncDate||P.lastSyncDate===today();
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=P.standHours?Math.round(P.standHours):'--';
