@@ -1761,6 +1761,7 @@ function saveMealEdit() {
   for(var i=0;i<ML.length;i++){
     if(ML[i].id===_editMealId){
       var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
+      // Values already scaled by updateMeServing - save as-is
       if(mc) ML[i].cals=parseInt(mc.value)||ML[i].cals;
       if(mp) ML[i].protein=parseFloat(mp.value)||0;
       if(mcb) ML[i].carbs=parseFloat(mcb.value)||0;
@@ -2994,7 +2995,7 @@ function openCustomFood() {
   ['cf-emoji','cf-name','cf-cals','cf-prot','cf-carbs','cf-fat'].forEach(function(id){
     var el=g(id); if(el) el.value='';
   });
-  var ct=g('cf-type'); if(ct) ct.value=curMealType||'snack';
+  var ct=g('cf-type'); if(ct) ct.value=mealTab||'snack';
   openM('custom-food-m');
 }
 function cfManual() {
@@ -3098,6 +3099,7 @@ function cfSelect(idx) {
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
 }
 
+function saveCustomFood(){cfAdd();}
 function cfAdd() {
   var name=(g('cf-name')||{value:''}).value.trim();
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
@@ -3124,8 +3126,8 @@ function cfAdd() {
     }
   }
 
-  var _srv=cfSrv||1;
-  ML.push({id:Date.now(),date:date,name:name+(cfSrv!==1?' x'+fD(cfSrv,1):''),emoji:emoji,type:type,
+  var _srv=parseFloat((g('cf-srv')||{value:1}).value)||1;
+  ML.push({id:Date.now(),date:date,name:name+(_srv!==1?' x'+fD(_srv,1):''),emoji:emoji,type:type,
     cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
     fiber:Math.round(fiber*_srv*10)/10,sugar:0,satFat:0,sodium:Math.round(sodium*_srv),
     cholest:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0});
