@@ -814,7 +814,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Drink Entry</div>
     <div id="de-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
     <div class="fw"><div class="flbl">Calories</div><input class="fld" type="number" id="de-cals" step="1"></div>
-    <div class="fw"><div class="flbl">Units (alcohol)</div><input class="fld" type="number" id="de-units" step="0.1"></div>
+    <div class="fw"><div id="de-units-label" class="flbl">Servings</div><input class="fld" type="number" id="de-units" step="0.5" min="0.5" oninput="updateDrinkEditCals()"></div>
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="de-date"></div>
     <button class="btn btn-k" onclick="saveDrinkEdit()" style="margin-bottom:9px">Save Changes</button>
     <button onclick="deleteDrinkEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
@@ -900,6 +900,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
 
       <!-- Meal type -->
+      <div class="flbl">Meal Type</div>
       <select class="fld" id="cf-type" style="margin-bottom:14px">
         <option value="breakfast">Breakfast</option>
         <option value="lunch">Lunch</option>
@@ -951,7 +952,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
 
 <div id="toast"></div>
-<script>
+<script>var _deBaseCals=0;
+function updateDrinkEditCals(){
+  var units=parseFloat((g('de-units')||{value:1}).value)||1;
+  var cc=g('de-cals'); if(cc&&_deBaseCals) cc.value=Math.round(_deBaseCals*units);
+}
+
+
 // ═══ SINGLE PERSISTENT KEY - survives all rebuilds ═══
 var STORE_KEY = 'hs_v1';
 
@@ -1758,6 +1765,8 @@ function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
   _editMealId=id;
   var info=g('meal-edit-info'); if(info) info.innerHTML=(m.emoji||'&#127829;')+' <strong>'+m.name+'</strong>';
+  _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
+  var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
   if(mc) mc.value=m.cals||0;
   if(mp) mp.value=Math.round((m.protein||0)*10)/10;
@@ -2190,8 +2199,12 @@ function openDrinkEdit(id){
   _editDrinkId=id;
   var info=g('de-info'); if(info) info.innerHTML=(d.e||'&#127866;')+' <strong>'+d.n+'</strong>';
   var dc=g('de-cals'),du=g('de-units'),dq=g('de-qty'),dd=g('de-date');
+  _deBaseCals=d.c||0;
   if(dc) dc.value=d.c||0;
-  if(du) du.value=d.u||0;
+  if(du) du.value=d.u||1;
+  var lbl=g('de-units-label');
+  var isAlc=d.cat&&['beer','wine','spirits','cocktail'].indexOf(d.cat)>=0;
+  if(lbl) lbl.textContent=isAlc?'Units (alcohol)':'Servings';
   if(dq) dq.value=1;
   if(dd) dd.value=d.date||todayLocal();
   openM('drink-edit-m');
