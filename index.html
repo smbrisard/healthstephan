@@ -462,6 +462,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
         <!-- Calorie summary bar -->
         <div id="food-summary" style="margin-bottom:14px"></div>
+        <!-- 7-day food chart -->
+        <div class="card" style="margin-bottom:14px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">7-DAY CALORIES</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:64px" id="food-chart"></div>
+          <div style="display:flex;gap:3px;margin-top:4px" id="food-chart-lbl"></div>
+        </div>
 
         <!-- Meal type tabs -->
         <div class="meal-tabs" id="meal-tabs" style="margin-bottom:12px">
@@ -483,13 +489,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div id="recent-foods-section" style="margin-bottom:16px"></div>
 
         <!-- Food database search -->
-        <div class="slbl" style="margin-bottom:8px">Food Database</div>
+        <!-- Food database - collapsed by default -->
         <div style="position:relative;margin-bottom:10px">
-          <input class="fld" id="food-search" type="search" placeholder="Search 500+ foods..." oninput="rFoodGrid()" style="padding-left:40px;font-size:15px">
-          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">&#128269;</span>
+          <input class="fld" id="food-search" type="search" placeholder="&#128269; Search 500+ foods..." oninput="rFoodGrid();showFoodGrid()" style="font-size:15px">
         </div>
-        <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
-        <div class="g2" id="food-grid"></div>
+        <div id="food-db-section" style="display:none">
+          <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
+          <div class="g2" id="food-grid"></div>
+        </div>
+        <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;touch-action:manipulation">&#128196; Browse 500+ foods ▼</button>
       </div>
     </div>
 
@@ -1694,8 +1702,35 @@ function saveRecipe(){
   toast(name+' logged ('+fN(per.cals)+' kcal)');
 }
 
+function rFoodChart(){
+  var days=[],i;
+  for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i);
+    days.push(dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'));}
+  var data=days.map(function(date){
+    var mCals=ML.filter(function(m){return m.date===date;}).reduce(function(a,m){return a+(m.cals||0);},0);
+    var dCals=DL.filter(function(d){return d.date===date;}).reduce(function(a,d){return a+(d.c||0);},0);
+    return mCals+dCals;
+  });
+  var mx=Math.max.apply(null,data.concat([P.calTarget||2000]));
+  var ce=g('food-chart'),cl=g('food-chart-lbl');
+  var target=P.calTarget||2000;
+  if(ce) ce.innerHTML=data.map(function(c,i2){
+    var over=c>target;
+    var col=over?'linear-gradient(0deg,var(--red),#ff9580)':'linear-gradient(0deg,var(--grn),#34d399)';
+    return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end"',
+      D('style="font-size:9px;font-family:var(--mn);color:var(--dim)"',c?fN(c):'')+
+      D('style="width:100%;background:'+col+';border-radius:3px 3px 0 0;height:'+Math.max(c/mx*56,c>0?3:1)+'px;opacity:'+(i2===6?1:.6)+'"',''));
+  }).join('');
+  // Goal line indicator
+  if(cl) cl.innerHTML=days.map(function(dt){
+    return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',
+      new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));
+  }).join('');
+}
+
 function rFood() {
   renderRecentFoods();
+  rFoodChart();
   var eaten=tTotal(), rem=P.calTarget-eaten, pct=Math.min(eaten/P.calTarget,1);
   set('food-sub',fN(eaten)+' / '+fN(P.calTarget)+' kcal');
   var ro=182-(182*pct);
@@ -1719,6 +1754,13 @@ function setFCat(cat, btn) {
   fCat=cat;
   document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
   btn.classList.add('on'); btn.style.background='var(--grn)'; btn.style.color='#000'; btn.style.borderColor='transparent';
+  rFoodGrid();
+}
+
+function showFoodGrid(){
+  var db=g('food-db-section'),btn=g('food-browse-btn');
+  if(db) db.style.display='block';
+  if(btn) btn.style.display='none';
   rFoodGrid();
 }
 
