@@ -723,6 +723,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 <div class="modal" id="meal-edit-m"><div class="mbg" onclick="closeM('meal-edit-m')"></div>
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Meal Entry</div>
     <div id="meal-edit-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:var(--s2);border-radius:12px;padding:10px">
+      <div style="font-size:13px;color:var(--dim);flex:1">Servings</div>
+      <button onclick="var si=g('me-srv');if(si&&parseFloat(si.value)>0.5){si.value=Math.round((parseFloat(si.value)-0.5)*10)/10;updateMeServing();}" style="width:32px;height:32px;background:var(--s3,var(--bg2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">−</button>
+      <input id="me-srv" type="number" value="1" min="0.5" step="0.5" oninput="updateMeServing()" style="width:60px;text-align:center;background:none;border:none;font-size:16px;font-weight:700;color:var(--txt)">
+      <button onclick="var si=g('me-srv');if(si){si.value=Math.round((parseFloat(si.value||1)+0.5)*10)/10;updateMeServing();}" style="width:32px;height:32px;background:var(--s3,var(--bg2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">+</button>
+    </div>
     <div class="fw"><div class="flbl">Calories</div><input class="fld" type="number" id="me-cals" step="1"></div>
     <div class="fw"><div class="flbl">Protein (g)</div><input class="fld" type="number" id="me-prot" step="0.1"></div>
     <div class="fw"><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="me-carbs" step="0.1"></div>
@@ -848,6 +854,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;background:var(--s2);border-radius:12px;padding:10px">
+        <div style="font-size:13px;color:var(--dim);flex:1">Servings</div>
+        <button onclick="var si=g('cf-srv');if(si&&parseFloat(si.value)>0.5)si.value=Math.round((parseFloat(si.value)-0.5)*10)/10;updateCfServing()" style="width:32px;height:32px;background:var(--s3,var(--s2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">−</button>
+        <input id="cf-srv" type="number" value="1" min="0.5" step="0.5" oninput="updateCfServing()" style="width:60px;text-align:center;background:none;border:none;font-size:16px;font-weight:700;color:var(--txt)">
+        <button onclick="var si=g('cf-srv');if(si)si.value=Math.round((parseFloat(si.value||1)+0.5)*10)/10;updateCfServing()" style="width:32px;height:32px;background:var(--s3,var(--s2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">+</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="display:none"><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
         <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
         <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
         <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
@@ -1575,6 +1591,16 @@ function quickAddFood(el){
   ML.push(meal);save();rFood();rHome();rNutrition();
   toast(name+' added!');
 }
+function quickAddFoodById(id){
+  var src=ML.find(function(m){return m.id===id;});
+  if(!src){toast('Food not found');return;}
+  var meal=JSON.parse(JSON.stringify(src));
+  meal.id=Date.now();
+  meal.date=today();
+  meal.type=curMealType||meal.type||'snack';
+  ML.push(meal);save();rFood();rHome();rNutrition();
+  toast(src.name+' added!');
+}
 
 // Recipe Builder
 var _recipeIngs=[];
@@ -1685,6 +1711,16 @@ function rmMeal(id) {
   toast('Meal removed');
 }
 var _editMealId=null;
+var _meBase=null;
+function updateMeServing(){
+  if(!_meBase) return;
+  var srv=parseFloat((g('me-srv')||{value:1}).value)||1;
+  var cc=g('me-cals'),cp=g('me-prot'),cb=g('me-carbs'),cf=g('me-fat');
+  if(cc) cc.value=Math.round(_meBase.cals*srv);
+  if(cp) cp.value=Math.round(_meBase.protein*srv*10)/10;
+  if(cb) cb.value=Math.round(_meBase.carbs*srv*10)/10;
+  if(cf) cf.value=Math.round(_meBase.fat*srv*10)/10;
+}
 function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
   _editMealId=id;
@@ -2995,6 +3031,16 @@ function cfSearch(query) {
     });
 }
 
+var _cfBaseCals=0,_cfBaseProt=0,_cfBaseCarbs=0,_cfBaseFat=0;
+function updateCfServing(){
+  var srv=parseFloat((g('cf-srv')||{value:1}).value)||1;
+  var cc=g('cf-cals'),cp=g('cf-prot'),cb=g('cf-carbs'),cf=g('cf-fat');
+  if(cc) cc.value=Math.round(_cfBaseCals*srv);
+  if(cp) cp.value=Math.round(_cfBaseProt*srv*10)/10;
+  if(cb) cb.value=Math.round(_cfBaseCarbs*srv*10)/10;
+  if(cf) cf.value=Math.round(_cfBaseFat*srv*10)/10;
+}
+
 function cfSelect(idx) {
   var p=window._cfProducts&&window._cfProducts[idx];
   if(!p) return;
@@ -3010,6 +3056,8 @@ function cfSelect(idx) {
   var frm=g('cf-form'); if(frm) frm.style.display='block';
   var mb=g('cf-manual-btn'); if(mb) mb.style.display='none';
   var en=g('cf-name'); if(en) en.value=name;
+  _cfBaseCals=cals; _cfBaseProt=prot; _cfBaseCarbs=carbs; _cfBaseFat=fat;
+  var srv=g('cf-srv'); if(srv) srv.value=1;
   var ec=g('cf-cals'); if(ec) ec.value=cals;
   var ep=g('cf-prot'); if(ep) ep.value=prot;
   var ecb=g('cf-carbs'); if(ecb) ecb.value=carbs;
