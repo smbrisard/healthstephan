@@ -493,11 +493,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div style="position:relative;margin-bottom:10px">
           <input class="fld" id="food-search" type="search" placeholder="&#128269; Search 500+ foods..." oninput="rFoodGrid();showFoodGrid()" style="font-size:15px">
         </div>
+        <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;touch-action:manipulation">&#127869; Browse 500+ foods ▼</button>
         <div id="food-db-section" style="display:none">
           <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
           <div class="g2" id="food-grid"></div>
         </div>
-        <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;touch-action:manipulation">&#128196; Browse 500+ foods ▼</button>
+        
       </div>
     </div>
 
@@ -587,10 +588,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('choc',this)">Chocolate</div>
           <div class="pill" onclick="drCat('tea',this)">Tea</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div id="dr-db-section" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><button onclick="showDrinkGrid()" id="dr-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127864; Browse drinks &#9660;</button>
+        <div id="dr-db-section" style="display:none">
           <div class="g2" id="dr-grid" style="margin-bottom:10px"></div>
         </div>
-        <button onclick="showDrinkGrid()" id="dr-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127864; Browse drinks &#9660;</button>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
         <div class="slbl" style="margin-top:10px">7-Day Calories</div>
         
@@ -1178,7 +1179,7 @@ function showTab(name) {
   if(name==='food'){
     var _fdb=g('food-db-section'),_fbtn=g('food-browse-btn'),_fsrch=g('food-search');
     if(_fdb) _fdb.style.display='none';
-    if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83D\uDCC4 Browse 500+ foods \u25BC';}
+    if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83C\uDF7D Browse 500+ foods \u25BC';}
     if(_fsrch) _fsrch.value='';
   }
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
@@ -1781,7 +1782,7 @@ function showFoodGrid(){
   if(!db||!btn) return;
   var isOpen=db.style.display==='block';
   db.style.display=isOpen?'none':'block';
-  btn.textContent=isOpen?'\uD83D\uDCC4 Browse 500+ foods \u25BC':'\uD83D\uDCC4 Browse 500+ foods \u25B2';
+  btn.textContent=isOpen?'\uD83C\uDF7D Browse 500+ foods \u25BC':'\uD83C\uDF7D Browse 500+ foods \u25B2';
   if(!isOpen) rFoodGrid();
 }
 
