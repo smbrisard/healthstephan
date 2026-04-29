@@ -479,16 +479,27 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <!-- Today's log for selected meal -->
         <div id="food-log" style="margin-bottom:10px"></div>
 
-        <!-- Add food button -->
-        <button onclick="openFoodBrowser()" style="width:100%;padding:13px;border-radius:14px;background:rgba(255,59,92,.08);border:.5px solid rgba(255,59,92,.25);color:var(--red);font-size:14px;font-weight:700;margin-bottom:14px;touch-action:manipulation">
-          + Add to <span id="add-meal-label">Breakfast</span>
-        </button>
+        <!-- Search bar -->
+        <input class="fld" id="food-search" type="search" placeholder="&#128269; Search foods..." oninput="onFoodSearch(this.value)" onfocus="showFoodGrid()" style="font-size:14px;margin-bottom:14px">
+
 
         <!-- Recent foods -->
         <div id="recent-foods-section" style="margin-bottom:12px"></div>
 
         <!-- Food database - same layout as drinks -->
-        <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
+        <div class="pills" id="food-cats" style="margin-bottom:10px">
+          <div class="pill on" onclick="setFCat('all',this)">All</div>
+          <div class="pill" onclick="setFCat('eggs',this)">Eggs</div>
+          <div class="pill" onclick="setFCat('meat',this)">Meat &amp; Fish</div>
+          <div class="pill" onclick="setFCat('dairy',this)">Dairy</div>
+          <div class="pill" onclick="setFCat('grains',this)">Grains</div>
+          <div class="pill" onclick="setFCat('veg',this)">Vegetables</div>
+          <div class="pill" onclick="setFCat('fruit',this)">Fruit</div>
+          <div class="pill" onclick="setFCat('breakfast',this)">Breakfast</div>
+          <div class="pill" onclick="setFCat('snacks',this)">Snacks</div>
+          <div class="pill" onclick="setFCat('supplements',this)">Supplements</div>
+          <div class="pill" onclick="setFCat('starbucks',this)">Starbucks</div>
+        </div>
         <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127869; Browse foods &#9660;</button>
         <div id="food-db-section" style="display:none">
           <div class="g2" id="food-grid" style="margin-bottom:10px"></div>
@@ -1742,6 +1753,11 @@ function rFoodChart(){
   }).join('');
 }
 
+function onFoodSearch(q){
+  showFoodGrid();
+  rFoodGrid();
+}
+
 function showFoodGrid(){
   var db=g('food-db-section'),btn=g('food-browse-btn');
   if(!db||!btn) return;
@@ -1761,9 +1777,6 @@ function rFood() {
     D('style="position:relative;flex-shrink:0"','<svg width="72" height="72" viewBox="0 0 72 72" style="transform:rotate(-90deg)"><circle cx="36" cy="36" r="29" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/><circle cx="36" cy="36" r="29" fill="none" stroke="url(#fg2)" stroke-width="8" stroke-dasharray="182" stroke-dashoffset="'+ro+'" stroke-linecap="round"/><defs><linearGradient id="fg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs></svg>'+D('style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center"',S('style="font-family:var(--mn);font-size:13px;font-weight:800;color:var(--grn)"',Math.round(pct*100)+'%')))+
     D('',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"','Today')+D('style="font-family:var(--mn);font-size:22px;font-weight:800;letter-spacing:-.5px"',fN(eaten)+S('style="font-size:13px;color:var(--dim);font-weight:500"',' / '+fN(P.calTarget)))+D('style="font-size:13px;font-weight:600;margin-top:3px;color:'+(rem>=0?'var(--grn)':'var(--red)')+';"',rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal'))+
     D('style="margin-left:auto;display:flex;flex-direction:column;gap:5px;font-size:12px;font-family:var(--mn)"',S('style="color:var(--grn)"','P '+Math.round(tN('protein'))+'g')+S('style="color:var(--blu)"','C '+Math.round(tN('carbs'))+'g')+S('style="color:var(--amb)"','F '+Math.round(tN('fat'))+'g'))));
-  var cHtml='';
-  FCATS.forEach(function(c){cHtml+=D('class="pill'+(c.id===fCat?' on':'')+'" onclick="setFCat(\''+c.id+'\',this)"'+(c.id===fCat?' style="background:var(--grn);color:#000;border-color:transparent"':''),c.l);});
-  sH('food-cats',cHtml);
   rFoodGrid();
   rFoodLog();
 }
