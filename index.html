@@ -457,29 +457,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 
     <!-- FOOD -->
     <div class="scr" id="sc-food">
-      <div class="phdr"><div><div class="ptitle">Food</div><div class="psub" id="food-sub">0 / 2,200 kcal</div></div></div>
+      <div class="phdr">
+        <div><div class="ptitle">Food</div><div class="psub" id="food-sub">0 / 2,200 kcal</div></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="openCustomFood()" style="padding:8px 14px;background:rgba(0,212,170,.1);border-radius:20px;border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">+ Custom</button>
+          <button onclick="openRecipeBuilder()" style="padding:8px 14px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.3);color:var(--amb);font-size:12px;font-weight:700;touch-action:manipulation">&#127859; Recipe</button>
+        </div>
+      </div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
-        <div id="recent-foods-section" style="margin-bottom:4px"></div>
-        <div class="card" style="margin-bottom:13px" id="food-summary"></div>
-        <!-- Meal sub-tabs -->
-        <div class="meal-tabs" id="meal-tabs">
-          <div class="mtab on" onclick="setMealTab('Breakfast',this)">Breakfast</div>
-          <div class="mtab" onclick="setMealTab('Lunch',this)">Lunch</div>
-          <div class="mtab" onclick="setMealTab('Dinner',this)">Dinner</div>
-          <div class="mtab" onclick="setMealTab('Snack',this)">Snack</div>
+
+        <!-- Calorie summary bar -->
+        <div id="food-summary" style="margin-bottom:14px"></div>
+
+        <!-- Meal type tabs -->
+        <div class="meal-tabs" id="meal-tabs" style="margin-bottom:12px">
+          <div class="mtab on" onclick="setMealTab('Breakfast',this)">&#9728; Breakfast</div>
+          <div class="mtab" onclick="setMealTab('Lunch',this)">&#9728; Lunch</div>
+          <div class="mtab" onclick="setMealTab('Dinner',this)">&#127762; Dinner</div>
+          <div class="mtab" onclick="setMealTab('Snack',this)">&#127822; Snack</div>
         </div>
-        <!-- Today log for active meal tab -->
-        <div id="food-log" style="margin-bottom:13px"></div>
-        <button onclick="openFoodBrowser()" style="width:100%;padding:13px;border-radius:13px;background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:700;margin-bottom:13px;touch-action:manipulation">+ Add Food to <span id="add-meal-label">Breakfast</span></button>
-        <div style="display:flex;gap:8px;margin-bottom:4px">
-          <button onclick="openCustomFood()" style="flex:1;padding:13px;border-radius:13px;background:rgba(0,212,170,.06);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:15px;font-weight:600;margin-top:8px;touch-action:manipulation">&#43; Custom / Search Food</button>
-          <button onclick="openRecipeBuilder()" style="flex:1;padding:13px;background:rgba(255,184,48,.1);border-radius:13px;border:.5px solid rgba(255,184,48,.3);color:var(--amb);font-size:13px;font-weight:700;touch-action:manipulation">&#127859; Recipe</button>
-        </div>
+
+        <!-- Today's log for selected meal -->
+        <div id="food-log" style="margin-bottom:12px"></div>
+
+        <!-- Add food button -->
+        <button onclick="showTab('food');openFoodBrowser()" style="width:100%;padding:14px;border-radius:14px;background:rgba(255,59,92,.08);border:.5px solid rgba(255,59,92,.25);color:var(--red);font-size:14px;font-weight:700;margin-bottom:16px;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:8px">
+          <span style="font-size:18px">+</span> Add to <span id="add-meal-label">Breakfast</span>
+        </button>
+
+        <!-- Recent foods -->
+        <div id="recent-foods-section" style="margin-bottom:16px"></div>
+
+        <!-- Food database search -->
+        <div class="slbl" style="margin-bottom:8px">Food Database</div>
         <div style="position:relative;margin-bottom:10px">
           <input class="fld" id="food-search" type="search" placeholder="Search 500+ foods..." oninput="rFoodGrid()" style="padding-left:40px;font-size:15px">
           <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none">&#128269;</span>
         </div>
-        <div class="pills" id="food-cats"></div>
+        <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
         <div class="g2" id="food-grid"></div>
       </div>
     </div>
@@ -863,7 +878,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <button onclick="var si=g('cf-srv');if(si)si.value=Math.round((parseFloat(si.value||1)+0.5)*10)/10;updateCfServing()" style="width:32px;height:32px;background:var(--s3,var(--s2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">+</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div style="display:none"><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
         <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
         <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
         <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
