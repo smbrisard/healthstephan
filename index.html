@@ -570,6 +570,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;margin-bottom:4px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px">WATER TODAY</div><div style="font-size:13px;font-weight:700;color:#38bdf8" id="dr-water">0.0 / 101.4 fl oz</div></div><div style="height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-bottom:10px"><div id="dr-water-bar" style="height:100%;width:0%;background:#38bdf8;border-radius:3px;transition:width .4s"></div></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
           <div style="font-size:11px;color:var(--dim2);margin-top:4px;text-align:right;font-family:var(--mn)">14 units / week max</div>
         </div>
+        <div class="card" style="margin-bottom:14px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">7-DAY CALORIES</div>
+          <div style="display:flex;gap:5px;align-items:flex-end;height:64px" id="dr-chart"></div>
+          <div style="display:flex;gap:5px;margin-top:4px" id="dr-chart-lbl"></div>
+        </div>
         <div class="pills" id="dr-cats">
           <div class="pill on" onclick="drCat('all',this)">All</div>
           <div class="pill" onclick="drCat('beer',this)">Beer</div>
@@ -582,10 +587,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
           <div class="pill" onclick="drCat('choc',this)">Chocolate</div>
           <div class="pill" onclick="drCat('tea',this)">Tea</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div class="g2" id="dr-grid" style="margin-bottom:13px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><div id="dr-db-section" style="display:none">
+          <div class="g2" id="dr-grid" style="margin-bottom:10px"></div>
+        </div>
+        <button onclick="showDrinkGrid()" id="dr-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127864; Browse drinks &#9660;</button>
         <div class="slbl">Today's Log</div><div id="dr-log"></div>
         <div class="slbl" style="margin-top:10px">7-Day Calories</div>
-        <div class="card"><div style="display:flex;gap:5px;align-items:flex-end;height:64px" id="dr-chart"></div><div style="display:flex;gap:5px;margin-top:4px" id="dr-chart-lbl"></div></div>
+        
       </div>
     </div>
 
@@ -1162,6 +1170,17 @@ function showTab(name) {
   var tb = g('tab-'+name); if(tb) tb.classList.add('on');
   // Reset history to today when opening tab
   if(name==='history') histDate=today();
+  if(name==='drinks'){
+    var _ddb=g('dr-db-section'),_dbtn=g('dr-browse-btn');
+    if(_ddb) _ddb.style.display='none';
+    if(_dbtn){_dbtn.style.display='block';_dbtn.textContent='\uD83C\uDF77 Browse drinks \u25BC';}
+  }
+  if(name==='food'){
+    var _fdb=g('food-db-section'),_fbtn=g('food-browse-btn'),_fsrch=g('food-search');
+    if(_fdb) _fdb.style.display='none';
+    if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83D\uDCC4 Browse 500+ foods \u25BC';}
+    if(_fsrch) _fsrch.value='';
+  }
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
   if (r[name]) r[name]();
 }
@@ -1759,9 +1778,11 @@ function setFCat(cat, btn) {
 
 function showFoodGrid(){
   var db=g('food-db-section'),btn=g('food-browse-btn');
-  if(db) db.style.display='block';
-  if(btn) btn.style.display='none';
-  rFoodGrid();
+  if(!db||!btn) return;
+  var isOpen=db.style.display==='block';
+  db.style.display=isOpen?'none':'block';
+  btn.textContent=isOpen?'\uD83D\uDCC4 Browse 500+ foods \u25BC':'\uD83D\uDCC4 Browse 500+ foods \u25B2';
+  if(!isOpen) rFoodGrid();
 }
 
 function rFoodGrid() {
@@ -2218,6 +2239,15 @@ function rDrBanner(){
   var bar=g('dr-bar'); if(bar) bar.style.width=Math.min(u2/7*100,100)+'%';
   var bdg=g('dr-bdg'); if(bdg){var _wkLim=14;if(u2>=_wkLim){bdg.className='badge br';bdg.textContent='Over weekly limit';}else if(u2>=_wkLim*0.5){bdg.className='badge ba';bdg.textContent='Nearing limit';}else{bdg.className='badge bg';bdg.textContent='Within limit';}}
 }
+function showDrinkGrid(){
+  var db=g('dr-db-section'),btn=g('dr-browse-btn');
+  if(!db||!btn) return;
+  var isOpen=db.style.display==='block';
+  db.style.display=isOpen?'none':'block';
+  btn.textContent=isOpen?'\uD83C\uDF77 Browse drinks \u25BC':'\uD83C\uDF77 Browse drinks \u25B2';
+  if(!isOpen) rDrGrid();
+}
+
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
   var list=dCat==='all'?DRINKS:DRINKS.filter(function(d){return d.cat===dCat;});
