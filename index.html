@@ -1579,9 +1579,11 @@ function setMealTab(tab, btn) {
 }
 
 function getRecentFoods(){
+  var freq={};
+  ML.forEach(function(m){freq[m.name]=(freq[m.name]||0)+1;});
   var seen={},recent=[];
-  ML.slice().sort(function(a,b){return b.id-a.id;}).forEach(function(m){
-    if(!seen[m.name]&&recent.length<4){seen[m.name]=1;recent.push(m);}
+  ML.slice().sort(function(a,b){return (freq[b.name]||0)-(freq[a.name]||0)||b.id-a.id;}).forEach(function(m){
+    if(!seen[m.name]&&recent.length<4&&m.id){seen[m.name]=1;recent.push(m);}
   });
   return recent;
 }
@@ -1612,8 +1614,8 @@ function quickAddFood(el){
 }
 function quickAddFoodById(id){
   id=parseInt(id)||id;
-  var src=ML.find(function(m){return m.id===id||m.id==id;});
-  if(!src){toast('Food not found');return;}
+  var src=ML.find(function(m){return m.id===id||m.id==id||String(m.id)===String(id);});
+  if(!src){toast('Cannot find food id:'+id+' ML:'+ML.length);return;}
   var meal=JSON.parse(JSON.stringify(src));
   meal.id=Date.now();
   meal.date=today();
