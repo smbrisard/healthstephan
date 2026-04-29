@@ -460,9 +460,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
       </div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
 
-        <!-- Calorie summary bar -->
-        <div id="food-summary" style="margin-bottom:14px"></div>
-        <!-- 7-day food chart -->
+        <!-- Calorie summary + 7-day chart -->
+        <div id="food-summary" style="margin-bottom:10px"></div>
         <div class="card" style="margin-bottom:14px;padding:12px">
           <div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">7-DAY CALORIES</div>
           <div style="display:flex;align-items:flex-end;gap:3px;height:64px" id="food-chart"></div>
@@ -470,35 +469,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         </div>
 
         <!-- Meal type tabs -->
-        <div class="meal-tabs" id="meal-tabs" style="margin-bottom:12px">
-          <div class="mtab on" onclick="setMealTab('Breakfast',this)">&#9728; Breakfast</div>
-          <div class="mtab" onclick="setMealTab('Lunch',this)">&#9728; Lunch</div>
+        <div class="meal-tabs" id="meal-tabs" style="margin-bottom:10px">
+          <div class="mtab on" onclick="setMealTab('Breakfast',this)">&#127749; Breakfast</div>
+          <div class="mtab" onclick="setMealTab('Lunch',this)">&#127803; Lunch</div>
           <div class="mtab" onclick="setMealTab('Dinner',this)">&#127762; Dinner</div>
           <div class="mtab" onclick="setMealTab('Snack',this)">&#127822; Snack</div>
         </div>
 
         <!-- Today's log for selected meal -->
-        <div id="food-log" style="margin-bottom:12px"></div>
+        <div id="food-log" style="margin-bottom:10px"></div>
 
         <!-- Add food button -->
-        <button onclick="showTab('food');openFoodBrowser()" style="width:100%;padding:14px;border-radius:14px;background:rgba(255,59,92,.08);border:.5px solid rgba(255,59,92,.25);color:var(--red);font-size:14px;font-weight:700;margin-bottom:16px;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:8px">
-          <span style="font-size:18px">+</span> Add to <span id="add-meal-label">Breakfast</span>
+        <button onclick="openFoodBrowser()" style="width:100%;padding:13px;border-radius:14px;background:rgba(255,59,92,.08);border:.5px solid rgba(255,59,92,.25);color:var(--red);font-size:14px;font-weight:700;margin-bottom:14px;touch-action:manipulation">
+          + Add to <span id="add-meal-label">Breakfast</span>
         </button>
 
         <!-- Recent foods -->
-        <div id="recent-foods-section" style="margin-bottom:16px"></div>
+        <div id="recent-foods-section" style="margin-bottom:12px"></div>
 
-        <!-- Food database search -->
-        <!-- Food database - collapsed by default -->
-        <div style="position:relative;margin-bottom:10px">
-          <input class="fld" id="food-search" type="search" placeholder="&#128269; Search 500+ foods..." oninput="rFoodGrid();showFoodGrid()" style="font-size:15px">
-        </div>
-        <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;touch-action:manipulation">&#127869; Browse 500+ foods ▼</button>
-        <div id="food-db-section" style="display:none">
-          <div class="pills" id="food-cats" style="margin-bottom:10px"></div>
-          <div class="g2" id="food-grid"></div>
-        </div>
-        
+        <!-- Food database - drinks style with search + category pills -->
+        <div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">FOOD DATABASE</div>
+        <input class="fld" id="food-search" type="search" placeholder="&#128269; Search by name or brand..." oninput="rFoodGrid()" style="font-size:14px;margin-bottom:10px">
+        <div class="pills" id="food-cats" style="margin-bottom:10px;overflow-x:auto;flex-wrap:nowrap;display:flex"></div>
+        <div class="g2" id="food-grid"></div>
+
       </div>
     </div>
 
@@ -1177,9 +1171,7 @@ function showTab(name) {
     if(_dbtn){_dbtn.style.display='block';_dbtn.textContent='\uD83C\uDF77 Browse drinks \u25BC';}
   }
   if(name==='food'){
-    var _fdb=g('food-db-section'),_fbtn=g('food-browse-btn'),_fsrch=g('food-search');
-    if(_fdb) _fdb.style.display='none';
-    if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83C\uDF7D Browse 500+ foods \u25BC';}
+    var _fsrch=g('food-search');
     if(_fsrch) _fsrch.value='';
   }
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
@@ -1775,15 +1767,6 @@ function setFCat(cat, btn) {
   document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
   btn.classList.add('on'); btn.style.background='var(--grn)'; btn.style.color='#000'; btn.style.borderColor='transparent';
   rFoodGrid();
-}
-
-function showFoodGrid(){
-  var db=g('food-db-section'),btn=g('food-browse-btn');
-  if(!db||!btn) return;
-  var isOpen=db.style.display==='block';
-  db.style.display=isOpen?'none':'block';
-  btn.textContent=isOpen?'\uD83C\uDF7D Browse 500+ foods \u25BC':'\uD83C\uDF7D Browse 500+ foods \u25B2';
-  if(!isOpen) rFoodGrid();
 }
 
 function rFoodGrid() {
