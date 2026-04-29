@@ -226,13 +226,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 <!-- LOADING -->
 <div id="loading">
   <div class="ldpulse">
-    <svg width="76" height="76" viewBox="0 0 76 76" fill="none">
-      <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff3b5c"/><stop offset="100%" stop-color="#cc2244"/></linearGradient></defs>
-      <path d="M38 66L12 42C5 35 5 24 12 17C19 10 29 10 35 17L38 21L41 17C47 10 57 10 64 17C71 24 71 35 64 42Z" fill="url(#hg)"/>
-      <polyline points="18,43 27,31 33,40 41,27 47,36 56,24" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <line x1="59" y1="49" x2="59" y2="59" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-      <line x1="54" y1="54" x2="64" y2="54" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    </svg>
+    <img src="icon-192.png" width="80" height="80" style="border-radius:18px;box-shadow:0 8px 40px rgba(87,52,255,.5),0 2px 12px rgba(0,0,0,.4)">
   </div>
   <div style="font-size:24px;font-weight:800;letter-spacing:-.3px">Health Stephan</div>
   <div style="font-size:14px;color:var(--dim)">Your health companion</div>
@@ -851,60 +845,71 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
   </div>
 </div>
 <div class="modal" id="custom-food-m"><div class="mbg" onclick="closeM('custom-food-m')"></div>
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Food</div>
+  <div class="msheet"><div class="mhandle"></div>
+    <div class="mtitle">Add Food</div>
 
-    <!-- Search / Barcode -->
-    <div style="margin-bottom:13px">
-      <input class="fld" type="text" id="cf-search" placeholder="Search food or brand..." style="flex:1;margin-bottom:0" oninput="cfSearchInput(this.value)">
+    <!-- Search bar -->
+    <div style="position:relative;margin-bottom:10px">
+      <input class="fld" type="text" id="cf-search" placeholder="&#128269; Search food or brand..." style="padding-left:14px;margin-bottom:0" oninput="cfSearchInput(this.value)">
     </div>
 
     <!-- Search results -->
-    <div id="cf-results" style="max-height:200px;overflow-y:auto;margin-bottom:13px"></div>
+    <div id="cf-results" style="max-height:180px;overflow-y:auto;margin-bottom:4px"></div>
 
-    <!-- Manual entry form -->
-    <div id="cf-form" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input class="fld" type="text" id="cf-emoji" placeholder="&#127829;" style="width:56px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
-        <input class="fld" type="text" id="cf-name" placeholder="Food name" style="flex:1;margin-bottom:0">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0" oninput="_cfBaseCals=parseFloat(this.value)||0;updateCfServing()"></div>
-        <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseProt=parseFloat(this.value)||0"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;background:var(--s2);border-radius:12px;padding:10px">
-        <div style="font-size:13px;color:var(--dim);flex:1">Servings</div>
-        <button onclick="var si=g('cf-srv');if(si&&parseFloat(si.value)>0.5){if(!_cfBaseCals){var cc=g('cf-cals');_cfBaseCals=parseFloat(cc&&cc.value)||0;var cp=g('cf-prot');_cfBaseProt=parseFloat(cp&&cp.value)||0;var ccb=g('cf-carbs');_cfBaseCarbs=parseFloat(ccb&&ccb.value)||0;var cf2=g('cf-fat');_cfBaseFat=parseFloat(cf2&&cf2.value)||0;}si.value=Math.round((parseFloat(si.value)-0.5)*10)/10;updateCfServing()}" style="width:32px;height:32px;background:var(--s3,var(--s2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">−</button>
-        <input id="cf-srv" type="number" value="1" min="0.5" step="0.5" oninput="updateCfServing()" style="width:60px;text-align:center;background:none;border:none;font-size:16px;font-weight:700;color:var(--txt)">
-        <button onclick="var si=g('cf-srv');if(si){if(!_cfBaseCals){var cc=g('cf-cals');_cfBaseCals=parseFloat(cc&&cc.value)||0;var cp=g('cf-prot');_cfBaseProt=parseFloat(cp&&cp.value)||0;var ccb=g('cf-carbs');_cfBaseCarbs=parseFloat(ccb&&ccb.value)||0;var cf2=g('cf-fat');_cfBaseFat=parseFloat(cf2&&cf2.value)||0;}si.value=Math.round((parseFloat(si.value||1)+0.5)*10)/10;updateCfServing()}" style="width:32px;height:32px;background:var(--s3,var(--s2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">+</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div><div class="flbl">Calories</div><input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0"></div>
-        <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
-        <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
-        <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
-        <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="cf-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
-        <div><div class="flbl">Sodium (mg)</div><input class="fld" type="number" id="cf-sodium" placeholder="0" style="margin-bottom:0"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <div style="flex:1"><div class="flbl">Meal Type</div>
-          <select class="fld" id="cf-type" style="margin-bottom:0">
-            <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
-          </select>
-        </div>
-        <div style="flex:1"><div class="flbl">Date</div>
-          <input class="fld" type="date" id="cf-date" style="margin-bottom:0">
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dim);cursor:pointer">
-          <input type="checkbox" id="cf-save" style="width:16px;height:16px"> Save to my foods
-        </label>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-radius:13px;border:.5px solid var(--b2);margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--dim)">Servings</div><div style="display:flex;align-items:center;gap:13px"><div onclick="cfAdjSrv(-0.5)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">-</div><div style="font-family:var(--mn);font-size:20px;font-weight:800;min-width:36px;text-align:center" id="cf-srv-disp">1.0</div><div onclick="cfAdjSrv(0.5)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">+</div></div></div><button class="btn btn-r" onclick="cfAdd()" style="margin-bottom:9px">Add to Log</button>
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:8px;margin:12px 0">
+      <div style="flex:1;height:.5px;background:var(--b1)"></div>
+      <div style="font-size:11px;color:var(--dim);letter-spacing:.5px">OR ENTER MANUALLY</div>
+      <div style="flex:1;height:.5px;background:var(--b1)"></div>
     </div>
 
-    <button onclick="cfManual()" id="cf-manual-btn" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-bottom:9px;touch-action:manipulation">Enter manually</button>
-    <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+    <!-- Manual entry -->
+    <div id="cf-form">
+      <!-- Name row -->
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input class="fld" type="text" id="cf-emoji" placeholder="&#127829;" style="width:52px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
+        <input class="fld" type="text" id="cf-name" placeholder="Food name" style="flex:1;margin-bottom:0">
+      </div>
+
+      <!-- Servings control -->
+      <div style="display:flex;align-items:center;gap:10px;background:var(--s2);border-radius:13px;padding:11px 14px;margin-bottom:10px">
+        <span style="font-size:13px;color:var(--dim);flex:1">Servings</span>
+        <button onclick="var si=g('cf-srv');if(si&&parseFloat(si.value||1)>0.5){_cfReadBase();si.value=Math.round((parseFloat(si.value)-0.5)*10)/10;updateCfServing()}" style="width:34px;height:34px;background:var(--s3,rgba(255,255,255,.08));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:20px;line-height:1;touch-action:manipulation">−</button>
+        <input id="cf-srv" type="number" value="1" min="0.5" step="0.5" oninput="updateCfServing()" style="width:48px;text-align:center;background:none;border:none;font-size:17px;font-weight:800;color:var(--txt)">
+        <button onclick="var si=g('cf-srv');if(si){_cfReadBase();si.value=Math.round((parseFloat(si.value||1)+0.5)*10)/10;updateCfServing()}" style="width:34px;height:34px;background:var(--s3,rgba(255,255,255,.08));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:20px;line-height:1;touch-action:manipulation">+</button>
+      </div>
+
+      <!-- Macros grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <div class="flbl">Calories</div>
+          <input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0" oninput="_cfBaseCals=parseFloat(this.value)||0">
+        </div>
+        <div>
+          <div class="flbl">Protein (g)</div>
+          <input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseProt=parseFloat(this.value)||0">
+        </div>
+        <div>
+          <div class="flbl">Carbs (g)</div>
+          <input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseCarbs=parseFloat(this.value)||0">
+        </div>
+        <div>
+          <div class="flbl">Fat (g)</div>
+          <input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseFat=parseFloat(this.value)||0">
+        </div>
+      </div>
+
+      <!-- Meal type -->
+      <select class="fld" id="cf-type" style="margin-bottom:14px">
+        <option value="breakfast">Breakfast</option>
+        <option value="lunch">Lunch</option>
+        <option value="dinner">Dinner</option>
+        <option value="snack">Snack</option>
+      </select>
+
+      <button onclick="saveCustomFood()" class="btn btn-r" style="width:100%;margin-bottom:8px">Add Food</button>
+      <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+    </div>
   </div>
 </div>
 <div class="modal" id="bp-m"><div class="mbg" onclick="closeM('bp-m')"></div>
@@ -1606,7 +1611,8 @@ function quickAddFood(el){
   toast(name+' added!');
 }
 function quickAddFoodById(id){
-  var src=ML.find(function(m){return m.id===id;});
+  id=parseInt(id)||id;
+  var src=ML.find(function(m){return m.id===id||m.id==id;});
   if(!src){toast('Food not found');return;}
   var meal=JSON.parse(JSON.stringify(src));
   meal.id=Date.now();
@@ -2979,18 +2985,16 @@ initSync();
 var _cfTimeout = null;
 
 function openCustomFood() {
-  cfSrv=1;
-  var sd=g('cf-srv-disp'); if(sd) sd.textContent='1.0';
-  // Reset form
+  _cfBaseCals=0;_cfBaseProt=0;_cfBaseCarbs=0;_cfBaseFat=0;
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
-  var frm=g('cf-form'); if(frm) frm.style.display='none';
-  var mb=g('cf-manual-btn'); if(mb) mb.style.display='block';
-  var si=g('cf-search'); if(si){si.value=''; setTimeout(function(){si.focus();},300);}
-  var dt=g('cf-date'); if(dt) dt.value=todayLocal();
-  var ct=g('cf-type'); if(ct) ct.value=mealTab;
+  var cs=g('cf-search'); if(cs) cs.value='';
+  var srv=g('cf-srv'); if(srv) srv.value='1';
+  ['cf-emoji','cf-name','cf-cals','cf-prot','cf-carbs','cf-fat'].forEach(function(id){
+    var el=g(id); if(el) el.value='';
+  });
+  var ct=g('cf-type'); if(ct) ct.value=curMealType||'snack';
   openM('custom-food-m');
 }
-
 function cfManual() {
   var frm=g('cf-form'); if(frm) frm.style.display='block';
   var mb=g('cf-manual-btn'); if(mb) mb.style.display='none';
@@ -3046,6 +3050,15 @@ function cfSearch(query) {
 }
 
 var _cfBaseCals=0,_cfBaseProt=0,_cfBaseCarbs=0,_cfBaseFat=0;
+function _cfReadBase(){
+  // Read current field values as base if not already set
+  var srv=parseFloat((g('cf-srv')||{value:1}).value)||1;
+  var cc=g('cf-cals'),cp=g('cf-prot'),cb=g('cf-carbs'),cf=g('cf-fat');
+  _cfBaseCals=Math.round((parseFloat(cc&&cc.value)||0)/srv*100)/100||_cfBaseCals;
+  _cfBaseProt=Math.round((parseFloat(cp&&cp.value)||0)/srv*100)/100||_cfBaseProt;
+  _cfBaseCarbs=Math.round((parseFloat(cb&&cb.value)||0)/srv*100)/100||_cfBaseCarbs;
+  _cfBaseFat=Math.round((parseFloat(cf&&cf.value)||0)/srv*100)/100||_cfBaseFat;
+}
 function updateCfServing(){
   var srv=parseFloat((g('cf-srv')||{value:1}).value)||1;
   var cc=g('cf-cals'),cp=g('cf-prot'),cb=g('cf-carbs'),cf=g('cf-fat');
