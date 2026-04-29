@@ -1591,18 +1591,18 @@ function getRecentFoods(){
 function renderRecentFoods(){
   var el=g('recent-foods-section');if(!el)return;
   var recent=getRecentFoods();
+  window._recentFoods=recent; // Store globally for onclick access
   if(!recent.length){el.innerHTML='';return;}
   el.innerHTML=D('class="slbl"','Recent Foods')+
     D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
-      recent.map(function(m){
-        return D('style="display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:16px;border:.5px solid rgba(255,255,255,.1);cursor:pointer;touch-action:manipulation" onclick="quickAddFoodById('+m.id+')"',
+      recent.map(function(m,i){
+        return D('style="display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:16px;border:.5px solid rgba(255,255,255,.1);cursor:pointer;touch-action:manipulation" onclick="addRecentFood('+i+')"',
           D('style="font-size:15px"',m.emoji||'&#127869;')+
           D('style="font-size:12px;font-weight:600;color:var(--txt)"',(m.name.length>14?m.name.slice(0,14)+'...':m.name))+
           D('style="font-size:11px;color:var(--dim)"',fN(m.cals)+'k'));
       }).join('')
     );
 }
-
 function quickAddFood(el){
   var name=el.dataset.n,cals=parseInt(el.dataset.c)||0,prot=parseFloat(el.dataset.p)||0,
       carbs=parseFloat(el.dataset.cb)||0,fat=parseFloat(el.dataset.f)||0;
@@ -1611,6 +1611,17 @@ function quickAddFood(el){
     cholest:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0};
   ML.push(meal);save();rFood();rHome();rNutrition();
   toast(name+' added!');
+}
+function addRecentFood(i){
+  var m=window._recentFoods&&window._recentFoods[i];
+  if(!m){toast('Not found');return;}
+  var meal={id:Date.now(),date:today(),name:m.name,emoji:m.emoji||'&#127869;',
+    type:mealTab||m.type||'snack',cals:m.cals||0,protein:m.protein||0,
+    carbs:m.carbs||0,fat:m.fat||0,fiber:m.fiber||0,sugar:m.sugar||0,
+    satFat:m.satFat||0,sodium:m.sodium||0,cholest:0,potassium:0,
+    calcium:0,iron:0,vitC:0,vitD:0};
+  ML.push(meal);save();rFood();rHome();rNutrition();
+  toast(m.name+' added!');
 }
 function quickAddFoodById(id){
   id=parseInt(id)||id;
