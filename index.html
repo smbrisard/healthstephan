@@ -1893,7 +1893,11 @@ function saveMealEdit() {
       break;
     }
   }
-  save(); closeM('meal-edit-m'); rFood(); rHome(); toast('Meal updated');
+  save();
+  foodChartDate=null; // Reset to today so updated meal shows
+  closeM('meal-edit-m');
+  rFood(); rHome(); rNutrition();
+  toast('Meal updated ✓');
 }
 function deleteMealEdit() {
   if(!_editMealId) return;
@@ -2339,7 +2343,11 @@ function saveDrinkEdit(){
       break;
     }
   }
-  save(); closeM('drink-edit-m'); rDrinks(); toast('Drink updated');
+  save();
+  drChartDate=null; // Reset to today
+  closeM('drink-edit-m');
+  rDrinks();
+  toast('Drink updated ✓');
 }
 function deleteDrinkEdit(){
   if(!_editDrinkId) return;
