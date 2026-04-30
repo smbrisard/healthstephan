@@ -1059,7 +1059,17 @@ var ML = migrateArr('ml', ['hsml','hs_ml','hs_ml2']);
 var SL = migrateArr('sl', ['hssl','hs_sl','hs_sl2']);
 var DL = migrateArr('dl', ['hsdl','hs_dl','hs_dl2']);
 
+function dedupML(){
+  var seen={};
+  ML=ML.filter(function(m){if(seen[m.id])return false;seen[m.id]=true;return true;});
+}
+function dedupDL(){
+  var seen={};
+  DL=DL.filter(function(d){if(seen[d.id])return false;seen[d.id]=true;return true;});
+}
+
 function save() {
+  dedupML(); dedupDL();
   try { localStorage.setItem(STORE_KEY, JSON.stringify({profile:P,wt:WL,ml:ML,sl:SL,dl:DL,fl:FL})); } catch(e) {}
 }
 
@@ -1881,24 +1891,36 @@ function saveMealEdit() {
   var _idStore=g('me-id-store');
   if(!_editMealId && _idStore && _idStore.value) _editMealId=parseInt(_idStore.value);
   if(!_editMealId){ closeM('meal-edit-m'); return; }
+  var found=false;
   for(var i=0;i<ML.length;i++){
     if(ML[i].id===_editMealId){
+      found=true;
       var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
-      // Values already scaled by updateMeServing - save as-is
-      if(mc) ML[i].cals=parseInt(mc.value)||ML[i].cals;
-      if(mp) ML[i].protein=parseFloat(mp.value)||0;
-      if(mcb) ML[i].carbs=parseFloat(mcb.value)||0;
-      if(mf) ML[i].fat=parseFloat(mf.value)||0;
-      if(mt) ML[i].type=mt.value.toLowerCase();
-      if(md&&md.value) ML[i].date=md.value;
+      // Calories - only update if field has a valid positive number
+      var newCals=mc?parseInt(mc.value):NaN;
+      if(!isNaN(newCals)&&newCals>0) ML[i].cals=newCals;
+      // Macros
+      if(mp&&mp.value!=='') ML[i].protein=parseFloat(mp.value)||0;
+      if(mcb&&mcb.value!=='') ML[i].carbs=parseFloat(mcb.value)||0;
+      if(mf&&mf.value!=='') ML[i].fat=parseFloat(mf.value)||0;
+      // Type - keep original case pattern used elsewhere (lowercase)
+      if(mt&&mt.value) ML[i].type=mt.value.toLowerCase();
+      // Date - ONLY update if user changed it AND it's a valid date matching YYYY-MM-DD
+      if(md&&md.value&&/^\d{4}-\d{2}-\d{2}$/.test(md.value)){
+        ML[i].date=md.value;
+      }
+      // Reset serving counter
+      _editMealId=null;
+      var _idS=g('me-id-store'); if(_idS) _idS.value='';
       break;
     }
   }
+  if(!found){ closeM('meal-edit-m'); toast('Item not found',true); return; }
   save();
-  foodChartDate=null; // Reset to today so updated meal shows
+  foodChartDate=null;
   closeM('meal-edit-m');
   rFood(); rHome(); rNutrition();
-  toast('Meal updated ✓');
+  toast('Updated ✓');
 }
 function deleteMealEdit() {
   if(!_editMealId) return;
@@ -1931,7 +1953,7 @@ function buildNF(f) {
 function addFood() {
   if(!selF) return;
   var f=selF, de=g('fm-date'), ld=de&&de.value?de.value:today();
-  ML.push({id:Date.now(),date:ld,name:f.n,emoji:f.e,type:mealTab,cals:Math.round(f.c*fSrv),protein:f.pr*fSrv,carbs:f.cb*fSrv,fat:f.f*fSrv,fiber:f.fi*fSrv,sugar:f.su*fSrv,satFat:f.sf*fSrv,sodium:f.na*fSrv,cholest:f.ch*fSrv,potassium:f.po*fSrv,calcium:f.ca*fSrv,iron:f.ir*fSrv,vitC:f.vc*fSrv,vitD:f.vd*fSrv,vitA:f.va*fSrv,addedSugar:f.as*fSrv});
+  ML.push({id:Date.now(),date:ld,name:f.n,emoji:f.e,type:mealTab.toLowerCase(),cals:Math.round(f.c*fSrv),protein:f.pr*fSrv,carbs:f.cb*fSrv,fat:f.f*fSrv,fiber:f.fi*fSrv,sugar:f.su*fSrv,satFat:f.sf*fSrv,sodium:f.na*fSrv,cholest:f.ch*fSrv,potassium:f.po*fSrv,calcium:f.ca*fSrv,iron:f.ir*fSrv,vitC:f.vc*fSrv,vitD:f.vd*fSrv,vitA:f.va*fSrv,addedSugar:f.as*fSrv});
   P.mealsLogged=(P.mealsLogged||0)+1; save(); closeM('food-m');
   var rem=P.calTarget-tTotal(); toast(rem<0?'Added - '+fN(Math.abs(rem))+' over':'Added to '+mealTab+'!',rem<0);
   rFood(); rHome();
@@ -2713,6 +2735,8 @@ function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localS
 
 // ═══ LAUNCH ═══
 function launchApp(){
+  // Clean up any duplicate entries from previous bugs
+  dedupML(); dedupDL();
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
