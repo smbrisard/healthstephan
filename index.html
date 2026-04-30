@@ -1776,7 +1776,7 @@ function rFood() {
   sH('food-summary',D('style="display:flex;align-items:center;gap:14px"',
     D('style="position:relative;flex-shrink:0"','<svg width="72" height="72" viewBox="0 0 72 72" style="transform:rotate(-90deg)"><circle cx="36" cy="36" r="29" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/><circle cx="36" cy="36" r="29" fill="none" stroke="url(#fg2)" stroke-width="8" stroke-dasharray="182" stroke-dashoffset="'+ro+'" stroke-linecap="round"/><defs><linearGradient id="fg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs></svg>'+D('style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center"',S('style="font-family:var(--mn);font-size:13px;font-weight:800;color:var(--grn)"',Math.round(pct*100)+'%')))+
     D('',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"','Today')+D('style="font-family:var(--mn);font-size:22px;font-weight:800;letter-spacing:-.5px"',fN(eaten)+S('style="font-size:13px;color:var(--dim);font-weight:500"',' / '+fN(P.calTarget)))+D('style="font-size:13px;font-weight:600;margin-top:3px;color:'+(rem>=0?'var(--grn)':'var(--red)')+';"',rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal'))+
-    D('style="margin-left:auto;display:flex;flex-direction:column;gap:5px;font-size:12px;font-family:var(--mn)"',S('style="color:var(--grn)"','P '+Math.round(tN('protein'))+'g')+S('style="color:var(--blu)"','C '+Math.round(tN('carbs'))+'g')+S('style="color:var(--amb)"','F '+Math.round(tN('fat'))+'g'))));
+    D('style="margin-left:auto;display:flex;flex-direction:column;gap:5px;font-size:12px;font-family:var(--mn)"',S('style="color:var(--grn)"','P '+Math.round(tN('protein'))+'g/'+Math.round(P.protein||150)+'g')+S('style="color:var(--blu)"','C '+Math.round(tN('carbs'))+'g/'+Math.round(P.carbs||200)+'g')+S('style="color:var(--amb)"','F '+Math.round(tN('fat'))+'g/'+Math.round(P.fat||65)+'g'))));
   rFoodGrid();
   rFoodLog();
 }
@@ -1907,7 +1907,7 @@ function buildNF(f) {
 function addFood() {
   if(!selF) return;
   var f=selF, de=g('fm-date'), ld=de&&de.value?de.value:today();
-  ML.push({id:Date.now(),date:ld,name:f.n,emoji:f.e,type:mealTab,cals:Math.round(f.c*fSrv),protein:f.pr*fSrv,carbs:f.cb*fSrv,fat:f.f*fSrv,fiber:f.fi*fSrv,sugar:f.su*fSrv,satFat:f.sf*fSrv,sodium:f.na*fSrv,cholesterol:f.ch*fSrv,potassium:f.po*fSrv,calcium:f.ca*fSrv,iron:f.ir*fSrv,vitC:f.vc*fSrv,vitD:f.vd*fSrv,vitA:f.va*fSrv,addedSugar:f.as*fSrv});
+  ML.push({id:Date.now(),date:ld,name:f.n,emoji:f.e,type:mealTab,cals:Math.round(f.c*fSrv),protein:f.pr*fSrv,carbs:f.cb*fSrv,fat:f.f*fSrv,fiber:f.fi*fSrv,sugar:f.su*fSrv,satFat:f.sf*fSrv,sodium:f.na*fSrv,cholest:f.ch*fSrv,potassium:f.po*fSrv,calcium:f.ca*fSrv,iron:f.ir*fSrv,vitC:f.vc*fSrv,vitD:f.vd*fSrv,vitA:f.va*fSrv,addedSugar:f.as*fSrv});
   P.mealsLogged=(P.mealsLogged||0)+1; save(); closeM('food-m');
   var rem=P.calTarget-tTotal(); toast(rem<0?'Added - '+fN(Math.abs(rem))+' over':'Added to '+mealTab+'!',rem<0);
   rFood(); rHome();
@@ -2247,7 +2247,11 @@ var DRINKS=[
 function drCat(cat,btn){dCat=cat; document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');}); btn.classList.add('on'); rDrGrid();}
 function rDrinks(){rDrBanner();rDrGrid();rDrLog();rDrChart();}
 function rDrBanner(){
-  var td=tDrinks(),u2=td.reduce(function(a,d){return a+d.u;},0),c2=td.reduce(function(a,d){return a+d.c;},0);
+  var td=tDrinks(),c2=td.reduce(function(a,d){return a+d.c;},0);
+  // Weekly units - sum all alcohol from past 7 days
+  var _wkStart=new Date(); _wkStart.setDate(_wkStart.getDate()-6);
+  var _wkStr=_wkStart.getFullYear()+'-'+String(_wkStart.getMonth()+1).padStart(2,'0')+'-'+String(_wkStart.getDate()).padStart(2,'0');
+  var u2=DL.filter(function(d){return d.date>=_wkStr;}).reduce(function(a,d){return a+(d.u||0);},0);
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
   var _wl=calcWaterL(),_we=g('dr-water'),_wb=g('dr-water-bar');
   if(_we) _we.textContent=fD(_wl,1)+'L / '+fD(P.water||3,1)+'L';
