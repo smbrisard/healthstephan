@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
@@ -219,6 +219,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 /* DR TILE */
 .dtile{background:var(--s2);border-radius:13px;border:.5px solid var(--b1);padding:13px;cursor:pointer;touch-action:manipulation}
 .dtile:active{opacity:.7}
+
+/* Prevent iOS keyboard from resizing layout */
+@supports (-webkit-touch-callout: none) {
+  .sec { padding-bottom: 120px !important; }
+}
+#food-search:focus { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
@@ -480,7 +486,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div id="food-log" style="margin-bottom:10px"></div>
 
         <!-- Search bar -->
-        <input class="fld" id="food-search" type="search" placeholder="&#128269; Search foods..." oninput="onFoodSearch(this.value)" onfocus="showFoodGrid()" style="font-size:14px;margin-bottom:14px">
+        <input class="fld" id="food-search" type="search" placeholder="&#128269; Search foods..." oninput="onFoodSearch(this.value)" style="font-size:14px;margin-bottom:14px">
 
 
         <!-- Recent foods -->
@@ -1773,7 +1779,17 @@ function rFoodChart(){
 }
 
 function onFoodSearch(q){
-  showFoodGrid();
+  if(q&&q.length>0){
+    // Expand grid when user starts typing
+    var db=g('food-db-section'),btn=g('food-browse-btn');
+    if(db) db.style.display='block';
+    if(btn) btn.style.display='none';
+  } else {
+    // Collapse grid when search cleared
+    var db=g('food-db-section'),btn=g('food-browse-btn');
+    if(db) db.style.display='none';
+    if(btn){btn.style.display='block';btn.textContent='\uD83C\uDF7D Browse foods \u25BC';}
+  }
   rFoodGrid();
 }
 
