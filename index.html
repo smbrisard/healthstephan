@@ -3505,6 +3505,63 @@ function rHistory() {
       }
     }
 
+    // ── 7-day macro chart ────────────────────────────────────────
+    var last7days=days30.slice(-7);
+    var anyMacro=last7days.some(function(d){return ML.some(function(m){return m.date===d.dt;});});
+    if(anyMacro){
+      html+=D('class="slbl"','7-Day Macros');
+      var macroRows=[
+        {key:'protein',label:'Protein',target:P.protein||150,col:'var(--grn)'},
+        {key:'carbs',label:'Carbs',target:P.carbs||200,col:'var(--blu)'},
+        {key:'fat',label:'Fat',target:P.fat||65,col:'var(--amb)'}
+      ];
+      var macroCardHtml='<div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px">';
+      // Day header row
+      macroCardHtml+='<div style="display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;margin-bottom:8px">';
+      macroCardHtml+='<div style="font-size:10px;color:var(--dim)"></div>';
+      last7days.forEach(function(d){
+        var isSel=d.dt===histDate;
+        var wkd=new Date(d.dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,1);
+        var day=d.dt.slice(8);
+        macroCardHtml+='<div onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()" style="text-align:center;font-size:10px;font-weight:'+(isSel?700:400)+';color:'+(isSel?'var(--txt)':'var(--dim)')+';cursor:pointer">'+wkd+'<span style="display:block;font-size:9px;color:var(--dim2)">'+day+'</span></div>';
+      });
+      macroCardHtml+='</div>';
+      // Macro rows
+      macroRows.forEach(function(mr){
+        var dayVals=last7days.map(function(d){
+          return ML.filter(function(m){return m.date===d.dt;}).reduce(function(a,m){return a+(m[mr.key]||0);},0);
+        });
+        var maxVal=Math.max.apply(null,dayVals.concat([mr.target]));
+        macroCardHtml+='<div style="display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;margin-bottom:6px;align-items:center">';
+        macroCardHtml+='<div style="font-size:10px;color:var(--dim)">'+mr.label+'</div>';
+        dayVals.forEach(function(v,i2){
+          var d2=last7days[i2];
+          var pct=maxVal>0?v/maxVal:0;
+          var over=v>mr.target;
+          var isSel=d2.dt===histDate;
+          var barCol=over?'var(--red)':mr.col;
+          var targetPct=Math.min(mr.target/maxVal*100,100);
+          var valCol=v>0?(over?'var(--red)':mr.col):'var(--dim2)';
+          macroCardHtml+='<div onclick="histDate=\''+d2.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d2.dt+'\';rHistory()" style="cursor:pointer">'
+            +'<div style="background:rgba(255,255,255,.06);border-radius:4px;height:28px;position:relative;overflow:hidden;outline:'+(isSel?'1.5px solid '+mr.col:'none')+'">'
+            +'<div style="position:absolute;bottom:0;left:0;right:0;height:'+Math.max(pct*100,v>0?8:0)+'%;background:'+barCol+';border-radius:3px;opacity:'+(isSel?1:.7)+'"></div>'
+            +'<div style="position:absolute;left:0;right:0;top:'+(100-targetPct)+'%;height:1px;background:rgba(255,255,255,.3)"></div>'
+            +'</div>'
+            +'<div style="text-align:center;font-size:9px;font-family:var(--mn);color:'+valCol+';margin-top:2px">'+(v>0?Math.round(v)+'g':'')+'</div>'
+            +'</div>';
+        });
+        macroCardHtml+='</div>';
+      });
+      // Legend
+      macroCardHtml+='<div style="display:flex;gap:10px;margin-top:6px;padding-top:8px;border-top:.5px solid var(--b1);flex-wrap:wrap">';
+      macroRows.forEach(function(mr){
+        macroCardHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:'+mr.col+'"></div><span style="font-size:10px;color:var(--dim)">'+mr.label+' ('+mr.target+'g)</span></div>';
+      });
+      macroCardHtml+='<div style="display:flex;align-items:center;gap:4px;margin-left:auto"><div style="width:12px;height:1px;background:rgba(255,255,255,.3)"></div><span style="font-size:10px;color:var(--dim)">Target</span></div>';
+      macroCardHtml+='</div></div>';
+      html+=macroCardHtml;
+    }
+
     // ── 30-day calorie chart ─────────────────────────────────────
     var loggedDays=days30.filter(function(d){return d.logged;});
     if(loggedDays.length>0){
