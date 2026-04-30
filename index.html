@@ -598,7 +598,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
         <div id="dr-db-section" style="display:none">
           <div class="g2" id="dr-grid" style="margin-bottom:10px"></div>
         </div>
-        <div class="slbl">Today's Log</div><div id="dr-log"></div>
+        <div class="slbl" id="dr-log-hdr">Today's Log</div><div id="dr-log"></div>
         <div class="slbl" style="margin-top:10px">7-Day Calories</div>
         
       </div>
@@ -1178,11 +1178,13 @@ function showTab(name) {
   // Reset history to today when opening tab
   if(name==='history') histDate=today();
   if(name==='drinks'){
+    drChartDate=null;
     var _ddb=g('dr-db-section'),_dbtn=g('dr-browse-btn');
     if(_ddb) _ddb.style.display='none';
     if(_dbtn){_dbtn.style.display='block';_dbtn.textContent='\uD83C\uDF77 Browse drinks \u25BC';}
   }
   if(name==='food'){
+    foodChartDate=null;
     var _fdb=g('food-db-section'),_fbtn=g('food-browse-btn');
     if(_fdb) _fdb.style.display='none';
     if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83C\uDF7D Browse foods \u25BC';}
@@ -1727,6 +1729,19 @@ function saveRecipe(){
   toast(name+' logged ('+fN(per.cals)+' kcal)');
 }
 
+var foodChartDate=null;
+function fmtChartDate(dt){
+  if(dt===today()) return 'Today';
+  var d=new Date(dt+'T12:00');
+  return (d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
+}
+function selectFoodChartDay(date){
+  foodChartDate=date;
+  rFoodChart();
+  rFoodLog();
+  // Update meal tab labels
+  var lbl=g('food-log-date'); if(lbl) lbl.textContent=fmtChartDate(date);
+}
 function rFoodChart(){
   var days=[],i;
   for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i);
@@ -1739,16 +1754,19 @@ function rFoodChart(){
   var mx=Math.max.apply(null,data.concat([P.calTarget||2000]));
   var ce=g('food-chart'),cl=g('food-chart-lbl');
   var target=P.calTarget||2000;
+  var selDate=foodChartDate||today();
   if(ce) ce.innerHTML=data.map(function(c,i2){
     var over=c>target;
+    var isSelected=days[i2]===selDate;
     var col=over?'linear-gradient(0deg,var(--red),#ff9580)':'linear-gradient(0deg,var(--grn),#34d399)';
-    return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end"',
-      D('style="font-size:9px;font-family:var(--mn);color:var(--dim)"',c?fN(c):'')+
-      D('style="width:100%;background:'+col+';border-radius:3px 3px 0 0;height:'+Math.max(c/mx*56,c>0?3:1)+'px;opacity:'+(i2===6?1:.6)+'"',''));
+    var dt=days[i2];
+    return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end;cursor:pointer;touch-action:manipulation" onclick="selectFoodChartDay(\''+dt+'\')\"',
+      D('style="font-size:9px;font-family:var(--mn);color:'+(isSelected?'var(--txt)':'var(--dim)')+'"',c?fN(c):'')+
+      D('style="width:100%;background:'+col+';border-radius:3px 3px 0 0;height:'+Math.max(c/mx*56,c>0?3:1)+'px;opacity:'+(isSelected?1:.5)+';outline:'+(isSelected?'2px solid white':'none')+';outline-offset:-1px"',''));
   }).join('');
-  // Goal line indicator
-  if(cl) cl.innerHTML=days.map(function(dt){
-    return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',
+  if(cl) cl.innerHTML=days.map(function(dt,i2){
+    var isSelected=dt===selDate;
+    return D('style="flex:1;text-align:center;font-size:10px;color:'+(isSelected?'var(--txt)':'var(--dim)')+';font-weight:'+(isSelected?'700':'400')+'" onclick="selectFoodChartDay(\''+dt+'\')\"',
       new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));
   }).join('');
 }
@@ -1817,7 +1835,8 @@ function rFoodGrid() {
 
 function rFoodLog() {
   var le=g('food-log'); if(!le) return;
-  var items=tMeals().filter(function(m){return m.type===mealTab;});
+  var logDate=foodChartDate||today();
+  var items=ML.filter(function(m){return m.date===logDate&&m.type.toLowerCase()===mealTab.toLowerCase();});
   if(!items.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No '+mealTab+' logged today.');return;}
   var secCals=items.reduce(function(a,m){return a+(m.cals||0);},0);
   var secColors={Breakfast:'var(--amb)',Lunch:'var(--grn)',Dinner:'var(--blu)',Snack:'var(--pur)'};
@@ -2275,7 +2294,11 @@ function rDrGrid(){
 }
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
-  var td=DL.filter(function(d){return d.date===today();}).sort(function(a,b){return b.id-a.id;});
+  var _drDate=drChartDate||today();
+  var _drHdr=g('dr-log-hdr');
+  if(_drHdr) _drHdr.textContent=_drDate===today()?"Today's Log":fmtChartDate(_drDate)+' Log';
+  var _drDate=drChartDate||today();
+  var td=DL.filter(function(d){return d.date===_drDate;}).sort(function(a,b){return b.id-a.id;});
   if(!td.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No drinks logged yet.'); return;}
   le.innerHTML=td.map(function(d){
     var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',new Date(d.date+'T12:00').toLocaleDateString('en',{month:'short',day:'numeric'})):'';
@@ -2324,13 +2347,29 @@ function deleteDrinkEdit(){
   _editDrinkId=null;
   save(); closeM('drink-edit-m'); rDrinks(); toast('Drink deleted');
 }
+var drChartDate=null;
+function selectDrChartDay(date){
+  drChartDate=date;
+  rDrChart();
+  rDrLog();
+}
 function rDrChart(){
   var days=[],i; for(i=6;i>=0;i--){var dt=new Date(); dt.setDate(dt.getDate()-i); days.push(dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'));}
   var data=days.map(function(date){return DL.filter(function(d){return d.date===date;}).reduce(function(a,d){return a+d.c;},0);});
   var mx=Math.max.apply(null,data.concat([100]));
   var ce=g('dr-chart'),cl=g('dr-chart-lbl');
-  if(ce) ce.innerHTML=data.map(function(c2,i2){return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"',D('style="font-size:9px;font-family:var(--mn);color:var(--dim)"',c2||'')+D('style="width:100%;background:linear-gradient(0deg,var(--pnk),var(--pur));border-radius:3px 3px 0 0;height:'+Math.max(c2/mx*60,c2>0?3:1)+'px;opacity:'+(i2===6?1:.55)+'"',''));}).join('');
-  if(cl) cl.innerHTML=days.map(function(dt){return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
+  var selDate=drChartDate||today();
+  if(ce) ce.innerHTML=data.map(function(c2,i2){
+    var dt=days[i2]; var isSel=dt===selDate;
+    return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;touch-action:manipulation" onclick="selectDrChartDay(\''+dt+'\')"',
+      D('style="font-size:9px;font-family:var(--mn);color:'+(isSel?'var(--txt)':'var(--dim)')+'"',c2||'')+
+      D('style="width:100%;background:linear-gradient(0deg,var(--pnk),var(--pur));border-radius:3px 3px 0 0;height:'+Math.max(c2/mx*60,c2>0?3:1)+'px;opacity:'+(isSel?1:.45)+';outline:'+(isSel?'2px solid white':'none')+';outline-offset:-1px"',''));
+  }).join('');
+  if(cl) cl.innerHTML=days.map(function(dt,i2){
+    var isSel=dt===selDate;
+    return D('style="flex:1;text-align:center;font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?'700':'400')+'" onclick="selectDrChartDay(\''+dt+'\')"',
+      new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));
+  }).join('');
 }
 function openDrink(idx){
   selDr=DRINKS[idx]; dQty=1;
