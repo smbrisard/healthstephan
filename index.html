@@ -3213,8 +3213,7 @@ function cfSearch(query) {
         +'<div style="font-size:13px;font-weight:700;color:var(--amb);flex-shrink:0;margin-left:8px">'+p.cals+' kcal</div>'
         +'</div>';
     }).join('');
-    // Also try API if SYNC_URL set
-    if(!SYNC_URL) return;
+    return; // Local results found - no need for API
   } else {
     if(!SYNC_URL){
       sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No local results. Set up sync URL for Open Food Facts search.</div>';
@@ -3251,7 +3250,10 @@ function cfSearch(query) {
       }).join('');
     })
     .catch(function(e){
-      sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Search failed. Try entering manually.</div>';
+      // Only show error if no local results already displayed
+      if(!window._cfProducts||!window._cfProducts.length){
+        sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Search failed. Try entering manually.</div>';
+      }
     });
 }
 
