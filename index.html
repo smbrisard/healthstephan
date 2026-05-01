@@ -481,12 +481,9 @@ body { height: 100dvh; }
         </div>
 
         <!-- Recent foods -->
-        <div id="recent-foods-section" style="margin-bottom:12px"></div>
+        <div id="recent-foods-section" style="margin-bottom:10px"></div>
 
-        <!-- Today's log for selected meal -->
-        <div id="food-log" style="margin-bottom:10px"></div>
-
-        <!-- Food database - same layout as drinks -->
+        <!-- Food database - category pills + browse -->
         <div class="pills" id="food-cats" style="margin-bottom:10px">
           <div class="pill on" onclick="setFCat('all',this)">All</div>
           <div class="pill" onclick="setFCat('eggs',this)">Eggs</div>
@@ -504,6 +501,9 @@ body { height: 100dvh; }
         <div id="food-db-section" style="display:none">
           <div class="g2" id="food-grid" style="margin-bottom:10px"></div>
         </div>
+
+        <!-- Today's log for selected meal -->
+        <div id="food-log" style="margin-bottom:10px"></div>
 
       </div>
     </div>
@@ -1207,6 +1207,8 @@ function showTab(name) {
     document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
     var _allPill=document.querySelector('#food-cats .pill');
     if(_allPill){_allPill.classList.add('on');_allPill.style.background='var(--grn)';_allPill.style.color='#000';_allPill.style.borderColor='transparent';}
+    // Scroll food section to top
+    var _fsec=g('sc-food'); if(_fsec) _fsec.scrollTop=0;
   }
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
   if (r[name]) r[name]();
@@ -1422,7 +1424,7 @@ var FOOD_EMOJI_MAP = [
   ['cucumber','&#129362;'],['pepper','&#127798;'],['mushroom','&#129380;'],
   ['corn','&#127805;'],['pea','&#129367;'],['edamame','&#129375;'],
   // Meat - use food icons only, no animals
-  ['chicken','&#127831;'],['turkey','&#127831;'],['beef','&#129385;'],
+  ['chicken','&#127831;'],['turkey','&#129385;'],['beef','&#129385;'],
   ['steak','&#129385;'],['lamb','&#129385;'],['pork','&#129385;'],
   ['bacon','&#129385;'],['ham','&#129385;'],['salmon','&#129424;'],
   ['tuna','&#129424;'],['fish','&#129424;'],['shrimp','&#129416;'],
@@ -1502,7 +1504,7 @@ var FOODS=[
   {cat:'meat',n:'Beef Steak 200g',e:'&#129385;',p:'200g sirloin grilled',c:480,pr:52,cb:0,f:28,fi:0,su:0,as:0,sf:11,na:140,ch:160,po:600,ca:22,ir:5.2,vc:0,vd:0.4,va:0},
   {cat:'meat',n:'Tuna Tin 130g',e:'&#129424;',p:'1 tin in spring water',c:122,pr:28,cb:0,f:0.8,fi:0,su:0,as:0,sf:0.2,na:380,ch:54,po:284,ca:8,ir:1.4,vc:0,vd:4,va:10},
   {cat:'meat',n:'Cod Fillet 150g',e:'&#129424;',p:'150g baked',c:130,pr:28,cb:0,f:1,fi:0,su:0,as:0,sf:0.2,na:108,ch:63,po:556,ca:24,ir:0.5,vc:0,vd:1.5,va:10},
-  {cat:'meat',n:'Turkey Breast 150g',e:'&#127831;',p:'150g grilled',c:216,pr:44,cb:0,f:3,fi:0,su:0,as:0,sf:1,na:104,ch:111,po:457,ca:23,ir:1.8,vc:0,vd:0.3,va:0},
+  {cat:'meat',n:'Turkey Breast 150g',e:'&#129385;',p:'150g grilled',c:216,pr:44,cb:0,f:3,fi:0,su:0,as:0,sf:1,na:104,ch:111,po:457,ca:23,ir:1.8,vc:0,vd:0.3,va:0},
   {cat:'meat',n:'Bacon 2 rashers',e:'&#129385;',p:'2 back rashers grilled 50g',c:111,pr:9,cb:0,f:8,fi:0,su:0,as:0,sf:3,na:680,ch:37,po:165,ca:5,ir:0.4,vc:0,vd:0.2,va:0},
   {cat:'meat',n:'Pork Chop 150g',e:'&#129385;',p:'150g grilled lean',c:243,pr:34,cb:0,f:11,fi:0,su:0,as:0,sf:4,na:90,ch:91,po:455,ca:17,ir:1.1,vc:0,vd:0.7,va:2},
   // DAIRY
@@ -1618,7 +1620,7 @@ var FOODS=[
   {cat:'dairy',n:'Philadelphia 30g',e:'&#129471;',p:'2 tbsp 30g',c:90,pr:2,cb:1.5,f:8.5,fi:0,su:1,as:0,sf:5.5,na:130,ch:28,po:38,ca:40,ir:0,vc:0,vd:0.1,va:74},
   // ═══ DELI MEAT ═══
   {cat:'meat',n:'Ham slices 60g',e:'&#129385;',p:'2 slices 60g',c:62,pr:9.6,cb:0.8,f:2.1,fi:0,su:0.5,as:0,sf:0.7,na:800,ch:28,po:168,ca:5,ir:0.5,vc:0,vd:0.1,va:0},
-  {cat:'meat',n:'Turkey slices 60g',e:'&#127831;',p:'2 slices 60g',c:66,pr:12,cb:1,f:1.5,fi:0,su:0.5,as:0,sf:0.4,na:680,ch:26,po:174,ca:8,ir:0.6,vc:0,vd:0.1,va:0},
+  {cat:'meat',n:'Turkey slices 60g',e:'&#129385;',p:'2 slices 60g',c:66,pr:12,cb:1,f:1.5,fi:0,su:0.5,as:0,sf:0.4,na:680,ch:26,po:174,ca:8,ir:0.6,vc:0,vd:0.1,va:0},
   {cat:'meat',n:'Chicken slices 60g',e:'&#127831;',p:'2 slices 60g',c:66,pr:12.5,cb:1.2,f:1.2,fi:0,su:0.6,as:0,sf:0.3,na:620,ch:30,po:180,ca:6,ir:0.4,vc:0,vd:0.1,va:0},
   {cat:'meat',n:'Salami 30g',e:'&#129385;',p:'4 slices 30g',c:120,pr:7,cb:0.5,f:10,fi:0,su:0.3,as:0,sf:3.5,na:540,ch:30,po:130,ca:4,ir:0.6,vc:0,vd:0.1,va:0},
   {cat:'meat',n:'Prosciutto 30g',e:'&#129385;',p:'2 slices 30g',c:70,pr:8.4,cb:0.1,f:4,fi:0,su:0,as:0,sf:1.4,na:760,ch:20,po:130,ca:4,ir:0.4,vc:0,vd:0.2,va:0},
