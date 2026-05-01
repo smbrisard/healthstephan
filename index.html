@@ -3222,8 +3222,10 @@ function cfSearch(query) {
     sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
   }
   var base=SYNC_URL.replace(/\/$/,'');
-  fetch(base+'/food/search?q='+encodeURIComponent(query))
-    .then(function(r){return r.json();})
+  var _ctrl=new AbortController();
+  var _timer=setTimeout(function(){_ctrl.abort();},5000);
+  fetch(base+'/food/search?q='+encodeURIComponent(query),{signal:_ctrl.signal})
+    .then(function(r){clearTimeout(_timer);return r.json();})
     .then(function(data){
       if(!data.products||!data.products.length){
         sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results found. Try a different search or enter manually.</div>';
