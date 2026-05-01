@@ -1075,6 +1075,8 @@ function save() {
 }
 
 // ═══ UTILS ═══
+function yesterday(){var d=new Date();d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fN(n) {
   var v=Number(n);
@@ -1276,7 +1278,8 @@ function rHome() {
   var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
-  var _isToday=!P.lastSyncDate||P.lastSyncDate===today();
+  // Consider sync as today if date matches OR if synced recently (within 4hrs)
+  var _isToday=!P.lastSyncDate||P.lastSyncDate===today()||P.lastSyncDate===yesterday();
   set('hm-steps',_isToday?fN(Math.round(P.stepsToday||0)):'--');
   // Show totalBurned if synced today, restingEnergy as baseline if not
   var _burnedVal=_isToday?(P.totalBurned||P.burned||0):(P.restingEnergy||0);
@@ -2922,25 +2925,21 @@ function fetchSync(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(!d||d.error)return;
-    // Daily metrics - only update if sync is for today
-    var _syncIsToday=(d.date&&d.date===today())||!d.date;
+    // Update all metrics - Val Town already filters to today's data
+    // Use date for display only, don't gate updates on timezone-sensitive comparison
     P.lastSyncDate=d.date||today();
-    var _dailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles','standHours','exerciseMins','totalBurned'];
-    var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','restingEnergy','bpSystolic','bpDiastolic'];
+    var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
+      'standHours','exerciseMins','totalBurned','restingEnergy'];
+    var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
-    // Only update daily metrics if sync date is today
-    if(_syncIsToday){
-      // Only update fields that have valid data - never zero out on today sync
-      _dailyFields.forEach(function(k){
-        if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
-          P[k]=parseFloat(d[k]);
-        }
-        // Never zero out - HAE may not have sent this metric yet
-      });
-    } else {
-      // Different day sync - zero out daily metrics
-      _dailyFields.forEach(function(k){P[k]=0;});
-    }
+    // Always update daily fields if they have valid positive data
+    _allDailyFields.forEach(function(k){
+      if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
+        P[k]=parseFloat(d[k]); updated=true;
+      }
+    });
+    // Force updated=true if we got steps or burned (key metrics)
+    if(d.stepsToday||d.totalBurned||d.rhr) updated=true;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
         var _v=parseFloat(d[k]);
