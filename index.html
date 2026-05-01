@@ -3672,13 +3672,13 @@ function rHistory() {
       var bestDay=loggedLast7.reduce(function(a,d){return Math.abs(d.cals-P.calTarget)<Math.abs(a.cals-P.calTarget)?d:a;},loggedLast7[0]);
       var worstDay=loggedLast7.reduce(function(a,d){return d.cals>a.cals?d:a;},loggedLast7[0]);
       html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px">';
-      html+='<div onclick="histDate=\''+bestDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+bestDay.dt+'\';rHistory()" style="background:rgba(0,212,170,.12);border-radius:13px;border:.5px solid rgba(0,212,170,.35);padding:12px;cursor:pointer">';
+      html+='<div onclick="histDate=\''+bestDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+bestDay.dt+'\';rHistory()" style="background:rgba(0,212,170,.12);border-radius:13px;border:.5px solid rgba(0,212,170,.35);padding:12px;cursor:pointer;text-align:center">';
       html+='<div style="font-size:10px;color:var(--grn);font-weight:600;margin-bottom:4px">&#127942; Best day</div>';
       html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--grn)">'+fN(bestDay.cals)+' kcal</div>';
       html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(bestDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
       html+='</div>';
-      html+='<div onclick="histDate=\''+worstDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+worstDay.dt+'\';rHistory()" style="background:rgba(255,59,92,.08);border-radius:13px;border:.5px solid rgba(255,59,92,.2);padding:12px;cursor:pointer">';
-      html+='<div style="font-size:10px;color:var(--dim);margin-bottom:4px">&#128293; Most indulgent</div>';
+      html+='<div onclick="histDate=\''+worstDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+worstDay.dt+'\';rHistory()" style="background:rgba(255,59,92,.08);border-radius:13px;border:.5px solid rgba(255,59,92,.2);padding:12px;cursor:pointer;text-align:center">';
+      html+='<div style="font-size:10px;color:var(--red);font-weight:600;margin-bottom:4px">&#128293; Most indulgent</div>';
       html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--red)">'+fN(worstDay.cals)+' kcal</div>';
       html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(worstDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
       html+='</div></div>';
