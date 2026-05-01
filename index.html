@@ -1202,6 +1202,11 @@ function showTab(name) {
     var _fdb=g('food-db-section'),_fbtn=g('food-browse-btn');
     if(_fdb) _fdb.style.display='none';
     if(_fbtn){_fbtn.style.display='block';_fbtn.textContent='\uD83C\uDF7D Browse foods \u25BC';}
+    // Reset category pills to All
+    fCat='all';
+    document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
+    var _allPill=document.querySelector('#food-cats .pill');
+    if(_allPill){_allPill.classList.add('on');_allPill.style.background='var(--grn)';_allPill.style.color='#000';_allPill.style.borderColor='transparent';}
   }
   var r = {home:rHome,profile:rProfile,food:rFood,nutrition:rNutrition,weight:rWeight,sleep:rSleep,drinks:rDrinks,fitness:rFitness,health:rHealth,tips:rTips,targets:rTargets,history:rHistory};
   if (r[name]) r[name]();
@@ -1790,6 +1795,7 @@ function showFoodGrid(){
   if(!db||!btn) return;
   var isOpen=db.style.display==='block';
   db.style.display=isOpen?'none':'block';
+  btn.style.display='block'; // Always keep button visible
   btn.textContent=isOpen?'\uD83C\uDF7D Browse foods \u25BC':'\uD83C\uDF7D Browse foods \u25B2';
   if(!isOpen) rFoodGrid();
 }
@@ -1809,10 +1815,9 @@ function rFood() {
 }
 
 function openFoodBrowser() {
-  // Auto-expand food grid and scroll to it
   var db=g('food-db-section'),btn=g('food-browse-btn');
   if(db) db.style.display='block';
-  if(btn) btn.style.display='none';
+  if(btn){btn.style.display='block';btn.textContent='\uD83C\uDF7D Browse foods \u25B2';}
   rFoodGrid();
   var mEl=g('food-grid'); if(mEl) mEl.scrollIntoView({behavior:'smooth'});
 }
@@ -1821,10 +1826,10 @@ function setFCat(cat, btn) {
   fCat=cat;
   document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
   btn.classList.add('on'); btn.style.background='var(--grn)'; btn.style.color='#000'; btn.style.borderColor='transparent';
-  // Auto-expand grid on category select
+  // Show grid, update browse button text but keep it visible
   var db=g('food-db-section'),fbtn=g('food-browse-btn');
   if(db) db.style.display='block';
-  if(fbtn) fbtn.style.display='none';
+  if(fbtn){fbtn.style.display='block';fbtn.textContent='\uD83C\uDF7D Browse foods \u25B2';}
   rFoodGrid();
 }
 
@@ -3192,8 +3197,31 @@ function cfSearchInput(val) {
 function cfSearch(query) {
   var sr=g('cf-results');
   if(!sr) return;
-  if(!SYNC_URL){sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Set up your sync URL in Settings first, or enter food manually.</div>';return;}
-  sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
+  var q=query.toLowerCase();
+  // First search local FOODS database
+  var localResults=FOODS.filter(function(f){
+    return f.n.toLowerCase().indexOf(q)>=0;
+  }).slice(0,8);
+  if(localResults.length>0){
+    window._cfProducts=localResults.map(function(f){
+      return {name:f.n,brand:'Built-in',cals:f.c,protein:f.pr||0,carbs:f.cb||0,fat:f.f||0,fiber:f.fi||0,sodium:f.na||0};
+    });
+    sr.innerHTML=window._cfProducts.map(function(p,i){
+      return '<div onclick="cfSelect('+i+')" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
+        +'<div><div style="font-size:14px;font-weight:600;color:var(--txt)">'+p.name+'</div>'
+        +'<div style="font-size:11px;color:var(--dim)">'+p.brand+'</div></div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--amb);flex-shrink:0;margin-left:8px">'+p.cals+' kcal</div>'
+        +'</div>';
+    }).join('');
+    // Also try API if SYNC_URL set
+    if(!SYNC_URL) return;
+  } else {
+    if(!SYNC_URL){
+      sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No local results. Set up sync URL for Open Food Facts search.</div>';
+      return;
+    }
+    sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
+  }
   var base=SYNC_URL.replace(/\/$/,'');
   fetch(base+'/food/search?q='+encodeURIComponent(query))
     .then(function(r){return r.json();})
@@ -3560,6 +3588,72 @@ function rHistory() {
       macroCardHtml+='<div style="display:flex;align-items:center;gap:4px;margin-left:auto"><div style="width:12px;height:1px;background:rgba(255,255,255,.3)"></div><span style="font-size:10px;color:var(--dim)">Target</span></div>';
       macroCardHtml+='</div></div>';
       html+=macroCardHtml;
+    }
+
+    // ── Sleep trend ──────────────────────────────────────────────
+    var sleepDays=last7days.map(function(d){
+      var sl=SL.find(function(s){return s.date===d.dt;});
+      var flSnap=FL.find(function(f){return f.date===d.dt;});
+      return {dt:d.dt,hrs:sl?sl.hours:(flSnap&&flSnap.sleep?flSnap.sleep:0)};
+    });
+    var anySleep=sleepDays.some(function(d){return d.hrs>0;});
+    if(anySleep){
+      html+=D('class="slbl"','7-Day Sleep');
+      var sleepTarget=P.sleepTarget||8;
+      var maxSleep=Math.max.apply(null,sleepDays.map(function(d){return d.hrs;}).concat([sleepTarget]));
+      var sleepCardHtml='<div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px">';
+      sleepCardHtml+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:flex-end;height:70px;margin-bottom:4px">';
+      sleepDays.forEach(function(d){
+        var isSel=d.dt===histDate;
+        var pct=maxSleep>0?d.hrs/maxSleep:0;
+        var col=d.hrs>=7&&d.hrs<=9?'var(--blu)':d.hrs>=6?'var(--amb)':'var(--red)';
+        var targetPct=Math.min(sleepTarget/maxSleep*100,100);
+        sleepCardHtml+='<div onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">';
+        sleepCardHtml+='<div style="font-size:9px;font-family:var(--mn);color:'+(d.hrs>0?col:'var(--dim2)')+';margin-bottom:2px">'+(d.hrs>0?hHM(d.hrs):'')+'</div>';
+        sleepCardHtml+='<div style="width:100%;position:relative;background:rgba(255,255,255,.06);border-radius:4px 4px 0 0;height:'+Math.max(pct*56,d.hrs>0?4:1)+'px;outline:'+(isSel?'1.5px solid var(--blu)':'none')+'">';
+        sleepCardHtml+='<div style="position:absolute;bottom:0;left:0;right:0;height:100%;background:'+col+';border-radius:4px 4px 0 0;opacity:'+(isSel?1:.65)+'"></div>';
+        sleepCardHtml+='<div style="position:absolute;bottom:'+(targetPct)+'%;left:0;right:0;height:1px;background:rgba(255,255,255,.35)"></div>';
+        sleepCardHtml+='</div></div>';
+      });
+      sleepCardHtml+='</div>';
+      sleepCardHtml+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px">';
+      sleepDays.forEach(function(d){
+        var isSel=d.dt===histDate;
+        sleepCardHtml+='<div style="text-align:center;font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?700:400)+'">'+new Date(d.dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,1)+'</div>';
+      });
+      sleepCardHtml+='</div>';
+      // Avg + best/worst callout
+      var validSleep=sleepDays.filter(function(d){return d.hrs>0;});
+      if(validSleep.length){
+        var avgSl=validSleep.reduce(function(a,d){return a+d.hrs;},0)/validSleep.length;
+        var bestSl=validSleep.reduce(function(a,d){return d.hrs>a.hrs?d:a;},validSleep[0]);
+        var worstSl=validSleep.reduce(function(a,d){return d.hrs<a.hrs?d:a;},validSleep[0]);
+        sleepCardHtml+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+        sleepCardHtml+='<div style="text-align:center;background:rgba(77,166,255,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--blu)">'+hHM(avgSl)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">avg</div></div>';
+        sleepCardHtml+='<div style="text-align:center;background:rgba(0,212,170,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--grn)">'+hHM(bestSl.hrs)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">best</div></div>';
+        sleepCardHtml+='<div style="text-align:center;background:rgba(255,59,92,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--red)">'+hHM(worstSl.hrs)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">worst</div></div>';
+        sleepCardHtml+='</div>';
+      }
+      sleepCardHtml+='</div>';
+      html+=sleepCardHtml;
+    }
+
+    // ── Best / worst calorie day ──────────────────────────────────
+    var loggedLast7=last7days.filter(function(d){return d.logged;});
+    if(loggedLast7.length>=2){
+      var bestDay=loggedLast7.reduce(function(a,d){return Math.abs(d.cals-P.calTarget)<Math.abs(a.cals-P.calTarget)?d:a;},loggedLast7[0]);
+      var worstDay=loggedLast7.reduce(function(a,d){return d.cals>a.cals?d:a;},loggedLast7[0]);
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px">';
+      html+='<div onclick="histDate=\''+bestDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+bestDay.dt+'\';rHistory()" style="background:rgba(0,212,170,.08);border-radius:13px;border:.5px solid rgba(0,212,170,.2);padding:12px;cursor:pointer">';
+      html+='<div style="font-size:10px;color:var(--dim);margin-bottom:4px">&#127942; Best day</div>';
+      html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--grn)">'+fN(bestDay.cals)+' kcal</div>';
+      html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(bestDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
+      html+='</div>';
+      html+='<div onclick="histDate=\''+worstDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+worstDay.dt+'\';rHistory()" style="background:rgba(255,59,92,.08);border-radius:13px;border:.5px solid rgba(255,59,92,.2);padding:12px;cursor:pointer">';
+      html+='<div style="font-size:10px;color:var(--dim);margin-bottom:4px">&#128293; Most indulgent</div>';
+      html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--red)">'+fN(worstDay.cals)+' kcal</div>';
+      html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(worstDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
+      html+='</div></div>';
     }
 
     // ── 30-day calorie chart ─────────────────────────────────────
