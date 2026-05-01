@@ -1403,7 +1403,7 @@ function rHome() {
     var col=secColors[sec]||'var(--txt)';
     html+=D('style="font-size:11px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:.8px;margin:10px 0 6px"',sec);
     items.forEach(function(m){
-      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
+      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||m.emoji||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
     });
   });
   mEl.innerHTML=html;
@@ -1446,6 +1446,29 @@ var FOOD_EMOJI_MAP = [
   ['ketchup','&#127825;'],['sauce','&#129379;'],['dressing','&#129379;'],
   ['supplement','&#128138;'],['vitamin','&#128138;'],['whey','&#128138;'],
   ['protein shake','&#129371;'],['protein powder','&#128138;'],
+  ['shake','&#129371;'],['bar','&#129300;'],
+  ['bowl','&#127869;'],['stir fry','&#129368;'],['curry','&#129368;'],
+  ['sushi','&#127843;'],['burrito','&#127978;'],['taco','&#127790;'],
+  ['fries','&#127839;'],['chips','&#127839;'],
+  ['date','&#127815;'],['fig','&#127815;'],['cherry','&#127826;'],
+  ['pear','&#127824;'],['plum','&#127825;'],['kiwi','&#129381;'],
+  ['lime','&#129414;'],['coconut','&#129381;'],
+  ['corn','&#127805;'],['bean','&#129375;'],['lentil','&#129375;'],
+  ['tofu','&#129382;'],['tempeh','&#129382;'],
+  ['sausage','&#129386;'],['mince','&#129385;'],
+  ['cod','&#129424;'],['prawn','&#129416;'],['lobster','&#129416;'],
+  ['crab','&#129416;'],['oyster','&#129416;'],
+  ['raspberry','&#127827;'],['blackberry','&#129744;'],['blueberry','&#129744;'],
+  ['strawberry','&#127827;'],['pomegranate','&#129381;'],['papaya','&#129389;'],
+  ['passion fruit','&#129365;'],['fig','&#129382;'],['pear','&#127824;'],
+  ['plum','&#127826;'],['cherry','&#127826;'],['lime','&#129414;'],
+  ['lemon','&#129414;'],['coconut','&#129381;'],
+  ['cauliflower','&#129382;'],['beetroot','&#129382;'],['celery','&#129382;'],
+  ['lettuce','&#129382;'],['cabbage','&#129382;'],['leek','&#129382;'],
+  ['eggplant','&#129382;'],['brussels','&#129382;'],['artichoke','&#129382;'],
+  ['garlic','&#129382;'],['ginger','&#129382;'],['radish','&#129382;'],
+  ['ramen','&#127836;'],['pad thai','&#127836;'],['tom yum','&#127836;'],
+  ['taco','&#127790;'],['acai','&#127820;'],['shakshuka','&#129370;'],
 ];
 function getFoodEmoji(name) {
   if(!name) return '&#127869;';
@@ -1453,7 +1476,7 @@ function getFoodEmoji(name) {
   for(var i=0;i<FOOD_EMOJI_MAP.length;i++){
     if(low.indexOf(FOOD_EMOJI_MAP[i][0])>=0) return FOOD_EMOJI_MAP[i][1];
   }
-  return null; // no match
+  return '&#127869;'; // default plate emoji
 }
 
 var FOODS=[
@@ -1676,6 +1699,35 @@ var FOODS=[
   // ═══ DRINKS (non-alcoholic foods) ═══
   {cat:'snacks',n:'Protein Shake Ready-made',e:'&#128167;',p:'500ml bottle',c:130,pr:20,cb:12,f:1.5,fi:0,su:4,as:2,sf:0.5,na:240,ch:15,po:200,ca:280,ir:0.4,vc:0,vd:2,va:0},
   {cat:'snacks',n:'Trail Mix 40g',e:'&#129372;',p:'40g',c:210,pr:5.6,cb:18.4,f:13.5,fi:2.4,su:11,as:4,sf:2.5,na:40,ch:0,po:220,ca:26,ir:1.0,vc:0.4,vd:0,va:0},
+  // ── BERRIES ─────────────────────────────────────────────────────
+  {cat:'fruit',n:'Raspberries 100g',e:'&#127827;',p:'100g',c:52,pr:1.2,cb:11.9,f:0.7,fi:6.5,su:4.4,as:0,sf:0,na:1,ch:0,po:151,ca:25,ir:0.7,vc:26,vd:0,va:2},
+  {cat:'fruit',n:'Blackberries 100g',e:'&#129744;',p:'100g',c:43,pr:1.4,cb:9.6,f:0.5,fi:5.3,su:4.9,as:0,sf:0,na:1,ch:0,po:162,ca:29,ir:0.6,vc:21,vd:0,va:11},
+  {cat:'fruit',n:'Mixed Berries 100g',e:'&#127827;',p:'100g',c:45,pr:0.9,cb:10.5,f:0.4,fi:3.5,su:6,as:0,sf:0,na:1,ch:0,po:130,ca:20,ir:0.5,vc:30,vd:0,va:5},
+  {cat:'fruit',n:'Pomegranate 100g',e:'&#129381;',p:'100g',c:83,pr:1.7,cb:18.7,f:1.2,fi:4,su:13.7,as:0,sf:0.1,na:3,ch:0,po:236,ca:10,ir:0.3,vc:10,vd:0,va:0},
+  {cat:'fruit',n:'Papaya 100g',e:'&#129389;',p:'100g',c:43,pr:0.5,cb:11,f:0.3,fi:1.7,su:7.8,as:0,sf:0.1,na:8,ch:0,po:182,ca:20,ir:0.3,vc:62,vd:0,va:47},
+  {cat:'fruit',n:'Passion Fruit 2 pieces',e:'&#129365;',p:'36g',c:35,pr:0.8,cb:8.4,f:0.3,fi:3.9,su:4,as:0,sf:0,na:5,ch:0,po:121,ca:2,ir:0.3,vc:13,vd:0,va:6},
+  {cat:'fruit',n:'Pear medium',e:'&#127824;',p:'178g',c:101,pr:0.6,cb:27,f:0.2,fi:5.5,su:17,as:0,sf:0,na:2,ch:0,po:206,ca:16,ir:0.3,vc:7,vd:0,va:2},
+  {cat:'fruit',n:'Plum medium',e:'&#127826;',p:'66g',c:30,pr:0.5,cb:7.5,f:0.2,fi:0.9,su:6.6,as:0,sf:0,na:0,ch:0,po:104,ca:4,ir:0.1,vc:6,vd:0,va:11},
+  {cat:'fruit',n:'Cherries 100g',e:'&#127826;',p:'100g',c:63,pr:1.1,cb:16,f:0.2,fi:2.1,su:12.8,as:0,sf:0,na:0,ch:0,po:222,ca:13,ir:0.4,vc:7,vd:0,va:3},
+  {cat:'fruit',n:'Lemon 1 medium',e:'&#129414;',p:'58g',c:17,pr:0.6,cb:5.4,f:0.2,fi:1.6,su:1.5,as:0,sf:0,na:1,ch:0,po:80,ca:15,ir:0.4,vc:31,vd:0,va:1},
+  {cat:'fruit',n:'Lime 1 medium',e:'&#129414;',p:'44g',c:11,pr:0.2,cb:3.7,f:0.1,fi:1.1,su:1,as:0,sf:0,na:1,ch:0,po:50,ca:14,ir:0.2,vc:13,vd:0,va:1},
+  {cat:'fruit',n:'Fig 2 medium',e:'&#127815;',p:'100g',c:74,pr:0.8,cb:19.2,f:0.3,fi:2.9,su:16.3,as:0,sf:0,na:1,ch:0,po:232,ca:35,ir:0.4,vc:2,vd:0,va:7},
+  // ── VEGETABLES (MISSING) ────────────────────────────────────────
+  {cat:'veg',n:'Cauliflower 100g',e:'&#129382;',p:'100g',c:25,pr:2,cb:5,f:0.3,fi:2,su:1.9,as:0,sf:0.1,na:30,ch:0,po:299,ca:22,ir:0.4,vc:48,vd:0,va:0},
+  {cat:'veg',n:'Beetroot 100g',e:'&#129382;',p:'100g cooked',c:44,pr:1.7,cb:10,f:0.2,fi:2,su:7.9,as:0,sf:0,na:77,ch:0,po:305,ca:16,ir:0.8,vc:4,vd:0,va:2},
+  {cat:'veg',n:'Celery 2 stalks',e:'&#129382;',p:'80g',c:12,pr:0.6,cb:2.4,f:0.1,fi:1.3,su:1.2,as:0,sf:0,na:96,ch:0,po:228,ca:36,ir:0.1,vc:3,vd:0,va:22},
+  {cat:'veg',n:'Lettuce 2 cups',e:'&#129382;',p:'72g',c:10,pr:0.7,cb:1.7,f:0.2,fi:0.9,su:0.9,as:0,sf:0,na:14,ch:0,po:138,ca:20,ir:0.5,vc:6,vd:0,va:134},
+  {cat:'veg',n:'Artichoke medium',e:'&#129382;',p:'120g',c:64,pr:4.2,cb:14.3,f:0.4,fi:6.8,su:1.3,as:0,sf:0.1,na:72,ch:0,po:474,ca:56,ir:1.5,vc:12,vd:0,va:2},
+  {cat:'veg',n:'Leek 1 medium',e:'&#129382;',p:'89g',c:54,pr:1.3,cb:12.6,f:0.3,fi:1.6,su:3.5,as:0,sf:0,na:18,ch:0,po:180,ca:53,ir:2,vc:11,vd:0,va:47},
+  {cat:'veg',n:'Eggplant 100g',e:'&#129382;',p:'100g',c:25,pr:1,cb:5.9,f:0.2,fi:3,su:2.9,as:0,sf:0,na:2,ch:0,po:229,ca:9,ir:0.2,vc:2,vd:0,va:1},
+  {cat:'veg',n:'Cabbage 100g',e:'&#129382;',p:'100g',c:25,pr:1.3,cb:5.8,f:0.1,fi:2.5,su:3.2,as:0,sf:0,na:18,ch:0,po:170,ca:40,ir:0.5,vc:37,vd:0,va:5},
+  {cat:'veg',n:'Brussels Sprouts 100g',e:'&#129382;',p:'100g',c:43,pr:3.4,cb:8.9,f:0.3,fi:3.8,su:2.2,as:0,sf:0.1,na:25,ch:0,po:389,ca:42,ir:1.4,vc:85,vd:0,va:38},
+  {cat:'veg',n:'Garlic 2 cloves',e:'&#129382;',p:'6g',c:9,pr:0.4,cb:2,f:0,fi:0.1,su:0.1,as:0,sf:0,na:1,ch:0,po:24,ca:11,ir:0.1,vc:1,vd:0,va:0},
+  // ── EXTRA MEALS ─────────────────────────────────────────────────
+  {cat:'meals',n:'Ramen Bowl',e:'&#127836;',p:'500ml',c:440,pr:20,cb:60,f:14,fi:3,su:5,as:0,sf:5,na:1400,ch:60,po:300,ca:50,ir:2,vc:0,vd:0,va:0},
+  {cat:'meals',n:'Tacos x2 Corn',e:'&#127790;',p:'200g',c:360,pr:22,cb:38,f:13,fi:5,su:3,as:0,sf:4,na:580,ch:55,po:350,ca:120,ir:2.5,vc:5,vd:0,va:20},
+  {cat:'meals',n:'Acai Bowl',e:'&#127820;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
+  {cat:'meals',n:'Shakshuka 2 eggs',e:'&#129370;',p:'300g',c:280,pr:16,cb:18,f:16,fi:4,su:8,as:0,sf:4,na:650,ch:370,po:650,ca:80,ir:3,vc:25,vd:1.5,va:80},
 ];
 
 // ═══ FOOD TAB ═══
@@ -1902,7 +1954,7 @@ function rFoodLog() {
   var col=secColors[mealTab]||'var(--txt)';
   var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
   items.forEach(function(m){
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||m.emoji||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
   });
   le.innerHTML=html;
 }
@@ -1926,7 +1978,7 @@ function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
   _editMealId=id;
   var idStore=g('me-id-store'); if(idStore) idStore.value=id;
-  var info=g('meal-edit-info'); if(info) info.innerHTML=((getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+' <strong>'+m.name+'</strong>';
+  var info=g('meal-edit-info'); if(info) info.innerHTML=((getFoodEmoji(m.name)||m.emoji||'&#127869;'))+' <strong>'+m.name+'</strong>';
   _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
   var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
