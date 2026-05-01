@@ -1403,7 +1403,7 @@ function rHome() {
     var col=secColors[sec]||'var(--txt)';
     html+=D('style="font-size:11px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:.8px;margin:10px 0 6px"',sec);
     items.forEach(function(m){
-      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
+      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
     });
   });
   mEl.innerHTML=html;
@@ -1412,6 +1412,49 @@ function rHome() {
 
 // ═══ FOOD DATABASE ═══
 var FCATS=[{id:'all',l:'All'},{id:'eggs',l:'Eggs'},{id:'meat',l:'Meat & Fish'},{id:'dairy',l:'Dairy'},{id:'grains',l:'Grains'},{id:'veg',l:'Vegetables'},{id:'fruit',l:'Fruit'},{id:'breakfast',l:'Breakfast'},{id:'snacks',l:'Snacks'},{id:'starbucks',l:'Starbucks'},{id:'supplements',l:'Supplements'},{id:'fastfood',l:'Fast Food'},{id:'sauces',l:'Sauces'}];
+
+
+var FOOD_EMOJI_MAP = [
+  ['avocado','&#129361;'],['tomato','&#127825;'],['tomatoes','&#127825;'],
+  ['salad','&#129367;'],['banana','&#127820;'],['apple','&#127822;'],
+  ['orange','&#127818;'],['strawberr','&#127827;'],['blueberr','&#129744;'],
+  ['grape','&#127815;'],['mango','&#129389;'],['pineapple','&#127821;'],
+  ['watermelon','&#127817;'],['peach','&#127825;'],['lemon','&#129414;'],
+  ['broccoli','&#129382;'],['spinach','&#129382;'],['kale','&#129382;'],
+  ['carrot','&#129380;'],['potato','&#129364;'],['sweet potato','&#129360;'],
+  ['cucumber','&#129362;'],['pepper','&#127798;'],['mushroom','&#129380;'],
+  ['corn','&#127805;'],['pea','&#129367;'],['edamame','&#129375;'],
+  ['chicken','&#127831;'],['turkey','&#129411;'],['beef','&#129385;'],
+  ['steak','&#129385;'],['lamb','&#129385;'],['pork','&#129386;'],
+  ['bacon','&#129386;'],['ham','&#129386;'],['salmon','&#129424;'],
+  ['tuna','&#129424;'],['fish','&#129424;'],['shrimp','&#129416;'],
+  ['egg','&#129370;'],['milk','&#129371;'],['yogurt','&#129371;'],
+  ['cheese','&#129472;'],['butter','&#129472;'],['cream','&#129371;'],
+  ['rice','&#127834;'],['pasta','&#127837;'],['bread','&#129366;'],
+  ['oat','&#129379;'],['granola','&#129379;'],['wrap','&#129366;'],
+  ['pizza','&#127829;'],['burger','&#127828;'],['sandwich','&#129386;'],
+  ['soup','&#129380;'],['salsa','&#127825;'],['hummus','&#129375;'],
+  ['peanut','&#129372;'],['almond','&#129372;'],['walnut','&#129372;'],
+  ['nut','&#129372;'],['seed','&#129379;'],['protein bar','&#129300;'],
+  ['chocolate','&#127850;'],['cookie','&#127850;'],['cake','&#127856;'],
+  ['ice cream','&#127846;'],['honey','&#129362;'],['jam','&#127826;'],
+  ['coffee','&#9749;'],['latte','&#9749;'],['tea','&#127861;'],
+  ['water','&#128167;'],['juice','&#129381;'],['smoothie','&#129381;'],
+  ['pancake','&#129348;'],['waffle','&#129349;'],['cereal','&#127798;'],
+  ['bagel','&#129366;'],['croissant','&#129360;'],['muffin','&#129361;'],
+  ['olive oil','&#129361;'],['oil','&#129361;'],['vinegar','&#129379;'],
+  ['ketchup','&#127825;'],['sauce','&#129379;'],['dressing','&#129379;'],
+  ['supplement','&#128138;'],['vitamin','&#128138;'],['whey','&#128138;'],
+  ['protein shake','&#129371;'],['protein powder','&#128138;'],
+];
+function getFoodEmoji(name) {
+  if(!name) return '&#127869;';
+  var low = name.toLowerCase();
+  for(var i=0;i<FOOD_EMOJI_MAP.length;i++){
+    if(low.indexOf(FOOD_EMOJI_MAP[i][0])>=0) return FOOD_EMOJI_MAP[i][1];
+  }
+  return null; // no match
+}
 
 var FOODS=[
   // EGGS
@@ -1666,7 +1709,7 @@ function renderRecentFoods(){
     D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
       recent.map(function(m,i){
         return D('style="display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:16px;border:.5px solid rgba(255,255,255,.1);cursor:pointer;touch-action:manipulation" onclick="addRecentFood('+i+')"',
-          D('style="font-size:15px"',m.emoji||'&#127869;')+
+          D('style="font-size:15px"',getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;'))+
           D('style="font-size:12px;font-weight:600;color:var(--txt)"',(m.name.length>14?m.name.slice(0,14)+'...':m.name))+
           D('style="font-size:11px;color:var(--dim)"',fN(m.cals)+'k'));
       }).join('')
@@ -1684,7 +1727,7 @@ function quickAddFood(el){
 function addRecentFood(i){
   var m=window._recentFoods&&window._recentFoods[i];
   if(!m){toast('Not found');return;}
-  var meal={id:Date.now(),date:today(),name:m.name,emoji:m.emoji||'&#127869;',
+  var meal={id:Date.now(),date:today(),name:m.name,emoji:(getFoodEmoji(m.name)||m.emoji||'&#127869;'),
     type:mealTab||m.type||'snack',cals:m.cals||0,protein:m.protein||0,
     carbs:m.carbs||0,fat:m.fat||0,fiber:m.fiber||0,sugar:m.sugar||0,
     satFat:m.satFat||0,sodium:m.sodium||0,cholest:0,potassium:0,
@@ -1859,7 +1902,7 @@ function rFoodLog() {
   var col=secColors[mealTab]||'var(--txt)';
   var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
   items.forEach(function(m){
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',m.emoji||'&#127829;')+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
   });
   le.innerHTML=html;
 }
@@ -1883,7 +1926,7 @@ function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
   _editMealId=id;
   var idStore=g('me-id-store'); if(idStore) idStore.value=id;
-  var info=g('meal-edit-info'); if(info) info.innerHTML=(m.emoji||'&#127829;')+' <strong>'+m.name+'</strong>';
+  var info=g('meal-edit-info'); if(info) info.innerHTML=((getFoodEmoji(m.name)||(getFoodEmoji(m.name)||m.emoji||'&#127869;')))+' <strong>'+m.name+'</strong>';
   _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
   var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
@@ -2957,8 +3000,12 @@ function fetchSync(){
       // Only add if: synced today (local), fresh (<12hr), no today entry exists, AND HAE data date matches today
       var dataDate=d.date||'';
       var noTodayEntry=!WL.some(function(w){return w.date===today();});
-      if(syncDateLocal===today()&&syncAge<12&&noTodayEntry&&dataDate===today()){
-        WL.push({id:Date.now(),date:today(),weight:wkg,note:'Auto-synced'});updated=true;
+      // Accept weight from HAE if: fresh sync (<12hr) AND no entry for that data date yet
+      var noDataDateEntry=!WL.some(function(w){return w.date===(d.date||today());});
+      if(syncAge<12&&noDataDateEntry){
+        // Use HAE data date for weight, not local today (avoids timezone issues)
+        var _wtDate=d.date||today();
+        WL.push({id:Date.now(),date:_wtDate,weight:wkg,note:'Auto-synced'});updated=true;
       }
     }
     // Auto-create sleep log entry from sync
