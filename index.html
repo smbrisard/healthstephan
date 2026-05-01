@@ -2930,15 +2930,15 @@ function fetchSync(){
     var updated=false;
     // Only update daily metrics if sync date is today
     if(_syncIsToday){
+      // Only update fields that have valid data - never zero out on today sync
       _dailyFields.forEach(function(k){
-        if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
+        if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
           P[k]=parseFloat(d[k]);
-        } else if(_syncIsToday) {
-          P[k]=0; // Reset to 0 if sync is today but no data yet
         }
+        // Never zero out - HAE may not have sent this metric yet
       });
     } else {
-      // Yesterday's sync - zero out daily metrics
+      // Different day sync - zero out daily metrics
       _dailyFields.forEach(function(k){P[k]=0;});
     }
     fields.forEach(function(k){
@@ -3227,6 +3227,9 @@ function cfSearch(query) {
     }
     sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
   }
+  // API search disabled - use local database only
+  sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No matches in database. Try a different term or enter manually below.</div>';
+  return; // Skip API
   var base=SYNC_URL.replace(/\/$/,'');
   var _timeout=new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);});
   Promise.race([fetch(base+'/food/search?q='+encodeURIComponent(query)),_timeout])
