@@ -894,7 +894,7 @@ body { height: 100dvh; }
     <div id="cf-form">
       <!-- Name row -->
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input class="fld" type="text" id="cf-emoji" placeholder="&#127829;" style="width:52px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
+        <input class="fld" type="text" id="cf-emoji" placeholder="&#127869;" style="width:52px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
         <input class="fld" type="text" id="cf-name" placeholder="Food name" style="flex:1;margin-bottom:0">
       </div>
 
@@ -936,6 +936,7 @@ body { height: 100dvh; }
       </select>
 
       <button onclick="saveCustomFood()" class="btn btn-r" style="width:100%;margin-bottom:8px">Add Food</button>
+      <button onclick="saveToMyFoods()" style="width:100%;padding:12px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Foods</button>
       <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
     </div>
   </div>
@@ -3172,9 +3173,12 @@ function openCustomFood() {
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
   var cs=g('cf-search'); if(cs) cs.value='';
   var srv=g('cf-srv'); if(srv) srv.value='1';
-  ['cf-emoji','cf-name','cf-cals','cf-prot','cf-carbs','cf-fat'].forEach(function(id){
+  ['cf-name','cf-cals','cf-prot','cf-carbs','cf-fat'].forEach(function(id){
     var el=g(id); if(el) el.value='';
   });
+  var _cemoji=g('cf-emoji'); if(_cemoji) _cemoji.value='';
+  if(g('cf-cals')) g('cf-cals').value=''; if(g('cf-prot')) g('cf-prot').value='';
+  if(g('cf-carbs')) g('cf-carbs').value=''; if(g('cf-fat')) g('cf-fat').value='';
   var ct=g('cf-type'); if(ct) ct.value=mealTab||'snack';
   openM('custom-food-m');
 }
@@ -3198,8 +3202,10 @@ function cfSearch(query) {
   var sr=g('cf-results');
   if(!sr) return;
   var q=query.toLowerCase();
-  // First search local FOODS database
-  var localResults=FOODS.filter(function(f){
+  // Search My Foods + built-in FOODS database
+  var myFoods=loadMyFoods();
+  var allFoods=myFoods.concat(FOODS);
+  var localResults=allFoods.filter(function(f){
     return f.n.toLowerCase().indexOf(q)>=0;
   }).slice(0,12);
   if(localResults.length>0){
@@ -3222,10 +3228,9 @@ function cfSearch(query) {
     sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Searching...</div>';
   }
   var base=SYNC_URL.replace(/\/$/,'');
-  var _ctrl=new AbortController();
-  var _timer=setTimeout(function(){_ctrl.abort();},5000);
-  fetch(base+'/food/search?q='+encodeURIComponent(query),{signal:_ctrl.signal})
-    .then(function(r){clearTimeout(_timer);return r.json();})
+  var _timeout=new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);});
+  Promise.race([fetch(base+'/food/search?q='+encodeURIComponent(query)),_timeout])
+    .then(function(r){return r.json();})
     .then(function(data){
       if(!data.products||!data.products.length){
         sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">No results found. Try a different search or enter manually.</div>';
@@ -3306,6 +3311,23 @@ function cfSelect(idx) {
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
 }
 
+// Custom user food database stored separately
+function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
+function saveMyFoods(arr){try{localStorage.setItem('hs_myfoods',JSON.stringify(arr));}catch(e){}}
+function saveToMyFoods(){
+  var name=(g('cf-name')||{value:''}).value.trim();
+  if(!name){toast('Enter a food name first');return;}
+  var emoji=(g('cf-emoji')||{value:''}).value||'\uD83C\uDF7D';
+  var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
+  var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
+  var carbs=parseFloat((g('cf-carbs')||{value:0}).value)||0;
+  var fat=parseFloat((g('cf-fat')||{value:0}).value)||0;
+  var myFoods=loadMyFoods();
+  if(myFoods.find(function(f){return f.n.toLowerCase()===name.toLowerCase();})){toast('Already saved!');return;}
+  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,fi:0,su:0,as:0,sf:0,na:0,ch:0,po:0,ca:0,ir:0,vc:0,vd:0,va:0,custom:true});
+  saveMyFoods(myFoods);
+  toast('\u2713 '+name+' saved to My Foods!');
+}
 function saveCustomFood(){cfAdd();}
 function cfAdd() {
   var name=(g('cf-name')||{value:''}).value.trim();
