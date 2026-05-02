@@ -1289,8 +1289,8 @@ function rHome() {
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
-  var _stel=g('hm-stand'); if(_stel) _stel.textContent=P.standHours?Math.round(P.standHours):'--';
-  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=P.exerciseMins?Math.round(P.exerciseMins):'--';
+  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
+  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   // Streak
   var _sk=calcStreak();
   var _ske=g('hm-streak');
