@@ -1414,66 +1414,204 @@ var FCATS=[{id:'all',l:'All'},{id:'eggs',l:'Eggs'},{id:'meat',l:'Meat & Fish'},{
 
 
 var FOOD_EMOJI_MAP = [
-  ['avocado','&#129361;'],['tomato','&#127825;'],['tomatoes','&#127825;'],
-  ['salad','&#129367;'],['banana','&#127820;'],['apple','&#127822;'],
-  ['orange','&#127818;'],['strawberr','&#127827;'],['blueberr','&#129744;'],
-  ['grape','&#127815;'],['mango','&#129389;'],['pineapple','&#127821;'],
-  ['watermelon','&#127817;'],['peach','&#127825;'],['lemon','&#129414;'],
-  ['broccoli','&#129382;'],['spinach','&#129382;'],['kale','&#129382;'],
-  ['carrot','&#129380;'],['potato','&#129364;'],['sweet potato','&#129360;'],
-  ['cucumber','&#129362;'],['pepper','&#127798;'],['mushroom','&#129380;'],
-  ['corn','&#127805;'],['pea','&#129367;'],['edamame','&#129375;'],
-  // Meat - use food icons only, no animals
-  ['chicken','&#127831;'],['turkey','&#129385;'],['beef','&#129385;'],
-  ['steak','&#129385;'],['lamb','&#129385;'],['pork','&#129385;'],
-  ['bacon','&#129385;'],['ham','&#129385;'],['salmon','&#129424;'],
-  ['tuna','&#129424;'],['fish','&#129424;'],['shrimp','&#129416;'],
-  ['egg','&#129370;'],['milk','&#129371;'],['yogurt','&#129371;'],
-  ['cheese','&#129472;'],['parmigiano','&#129472;'],['parmesan','&#129472;'],
-  ['gruyere','&#129472;'],['brie','&#129472;'],['camembert','&#129472;'],
-  ['cheddar','&#129472;'],['mozzarella','&#129472;'],['feta','&#129472;'],
-  ['gouda','&#129472;'],['ricotta','&#129472;'],['blue cheese','&#129472;'],
-  ['butter','&#129347;'],['cream','&#129371;'],
-  ['rice','&#127834;'],['pasta','&#127837;'],['bread','&#129366;'],
-  ['oat','&#129379;'],['granola','&#129379;'],['wrap','&#129366;'],
-  ['pizza','&#127829;'],['burger','&#127828;'],['sandwich','&#129386;'],
-  ['soup','&#129380;'],['salsa','&#127825;'],['hummus','&#129375;'],
-  ['peanut','&#129372;'],['almond','&#129372;'],['walnut','&#129372;'],
-  ['nut','&#129372;'],['seed','&#129379;'],['protein bar','&#129300;'],
-  ['chocolate','&#127850;'],['cookie','&#127850;'],['cake','&#127856;'],
-  ['ice cream','&#127846;'],['honey','&#129362;'],['jam','&#127826;'],
-  ['coffee','&#9749;'],['latte','&#9749;'],['tea','&#127861;'],
-  ['water','&#128167;'],['juice','&#129381;'],['smoothie','&#129381;'],
-  ['pancake','&#129348;'],['waffle','&#129349;'],['cereal','&#127798;'],
-  ['bagel','&#129366;'],['croissant','&#129360;'],['muffin','&#129361;'],
-  ['olive oil','&#129361;'],['oil','&#129361;'],['vinegar','&#129379;'],
-  ['ketchup','&#127825;'],['sauce','&#129379;'],['dressing','&#129379;'],
-  ['supplement','&#128138;'],['vitamin','&#128138;'],['whey','&#128138;'],
-  ['protein shake','&#129371;'],['protein powder','&#128138;'],
-  ['shake','&#129371;'],['bar','&#129300;'],
-  ['bowl','&#127869;'],['stir fry','&#129368;'],['curry','&#129368;'],
-  ['sushi','&#127843;'],['burrito','&#127978;'],['taco','&#127790;'],
-  ['fries','&#127839;'],['chips','&#127839;'],
-  ['date','&#127815;'],['fig','&#127815;'],['cherry','&#127826;'],
-  ['pear','&#127824;'],['plum','&#127825;'],['kiwi','&#129381;'],
-  ['lime','&#129414;'],['coconut','&#129381;'],
-  ['corn','&#127805;'],['bean','&#129375;'],['lentil','&#129375;'],
-  ['tofu','&#129382;'],['tempeh','&#129382;'],
-  ['sausage','&#129386;'],['mince','&#129385;'],
-  ['cod','&#129424;'],['prawn','&#129416;'],['lobster','&#129416;'],
-  ['crab','&#127844;'],['oyster','&#127843;'],
-  ['raspberry','&#127827;'],['blackberry','&#129744;'],['blueberry','&#129744;'],
-  ['strawberry','&#127827;'],['pomegranate','&#129381;'],['papaya','&#129389;'],
-  ['passion fruit','&#129365;'],['fig','&#129382;'],['pear','&#127824;'],
-  ['plum','&#127826;'],['cherry','&#127826;'],['lime','&#129414;'],
-  ['lemon','&#129414;'],['coconut','&#129381;'],
-  ['cauliflower','&#129382;'],['beetroot','&#129382;'],['celery','&#129382;'],
-  ['lettuce','&#129382;'],['cabbage','&#129382;'],['leek','&#129382;'],
-  ['eggplant','&#129382;'],['brussels','&#129382;'],['artichoke','&#129382;'],
-  ['garlic','&#129382;'],['ginger','&#129382;'],['radish','&#129382;'],
-  ['ramen','&#127836;'],['pad thai','&#127836;'],['tom yum','&#127836;'],
-  ['taco','&#127790;'],['acai','&#127820;'],['shakshuka','&#129370;'],
+  // 🍎 FRUITS - all verified codepoints
+  ['avocado','&#129361;'],       // 🥑 U+1F951
+  ['tomato','&#127813;'],        // 🍅 U+1F345
+  ['tomatoes','&#127813;'],      // 🍅
+  ['banana','&#127820;'],        // 🍌 U+1F34C
+  ['apple','&#127822;'],         // 🍎 U+1F34E
+  ['orange','&#127818;'],        // 🍊 U+1F34A
+  ['lemon','&#127819;'],         // 🍋 U+1F34B
+  ['lime','&#127819;'],          // 🍋 use lemon (no lime emoji)
+  ['strawberr','&#127827;'],     // 🍓 U+1F353
+  ['raspberry','&#127827;'],     // 🍓 closest to raspberry
+  ['blueberr','&#129744;'],      // 🫐 U+1FAD0
+  ['blackberr','&#129744;'],     // 🫐
+  ['cherr','&#127826;'],         // 🍒 U+1F352
+  ['peach','&#127825;'],         // 🍑 U+1F351
+  ['plum','&#127825;'],          // 🍑 U+1F351
+  ['pear','&#127824;'],          // 🍐 U+1F350
+  ['mango','&#129389;'],         // 🥭 U+1F96D
+  ['papaya','&#129389;'],        // 🥭 closest
+  ['pineapple','&#127821;'],     // 🍍 U+1F34D
+  ['watermelon','&#127817;'],    // 🍉 U+1F349
+  ['grape','&#127815;'],         // 🍇 U+1F347
+  ['kiwi','&#129373;'],          // 🥝 U+1F95D
+  ['coconut','&#129381;'],       // 🥥 U+1F965
+  ['melon','&#127816;'],         // 🍈 U+1F348
+  ['fig','&#127815;'],           // 🍇 use grapes (no fig emoji)
+  ['date ','&#127815;'],         // 🍇 medjool dates
+  ['passion','&#127818;'],       // 🍊 closest to passion fruit
+  ['pomegranate','&#127822;'],   // 🍎 use apple (no pomegranate)
+  ['mixed berr','&#127827;'],    // 🍓
+
+  // 🥦 VEGETABLES - all verified
+  ['broccoli','&#129382;'],      // 🥦 U+1F966
+  ['spinach','&#129388;'],       // 🥬 U+1F96C
+  ['kale','&#129388;'],          // 🥬
+  ['lettuce','&#129388;'],       // 🥬
+  ['cabbage','&#129388;'],       // 🥬
+  ['carrot','&#129365;'],        // 🥕 U+1F955
+  ['beetroot','&#129365;'],      // 🥕 use carrot
+  ['potato','&#129364;'],        // 🥔 U+1F954
+  ['sweet potato','&#127840;'],  // 🍠 U+1F360
+  ['yam','&#127840;'],           // 🍠
+  ['cucumber','&#129362;'],      // 🥒 U+1F952
+  ['zucchini','&#129362;'],      // 🥒
+  ['courgette','&#129362;'],     // 🥒
+  ['pepper','&#129745;'],        // 🫑 U+1FAD1
+  ['capsicum','&#129745;'],      // 🫑
+  ['mushroom','&#127812;'],      // 🍄 U+1F344
+  ['corn','&#127805;'],          // 🌽 U+1F33D
+  ['edamame','&#129752;'],       // 🫘 U+1FAD8
+  ['bean','&#129752;'],          // 🫘
+  ['lentil','&#129752;'],        // 🫘
+  ['pea ','&#129382;'],          // 🥦
+  ['eggplant','&#127814;'],      // 🍆 U+1F346
+  ['aubergine','&#127814;'],     // 🍆
+  ['artichoke','&#129382;'],     // 🥦
+  ['garlic','&#129476;'],        // 🧄 U+1F9C4
+  ['onion','&#129477;'],         // 🧅 U+1F9C5
+  ['leek','&#129477;'],          // 🧅
+  ['celery','&#129382;'],        // 🥦
+  ['cauliflower','&#129382;'],   // 🥦
+  ['brussels','&#129382;'],      // 🥦
+  ['radish','&#129362;'],        // 🥒
+
+  // 🍗 MEAT & FISH - food icons only, no animals
+  ['chicken','&#127831;'],       // 🍗 U+1F357
+  ['turkey','&#129385;'],        // 🥩 U+1F969
+  ['beef','&#129385;'],          // 🥩
+  ['steak','&#129385;'],         // 🥩
+  ['lamb','&#129385;'],          // 🥩
+  ['pork','&#129385;'],          // 🥩
+  ['bacon','&#129385;'],         // 🥩
+  ['ham','&#129385;'],           // 🥩
+  ['sausage','&#129385;'],       // 🥩
+  ['mince','&#129385;'],         // 🥩
+  ['salmon','&#129424;'],        // 🐟 U+1F420 - use fish
+  ['tuna','&#129424;'],          // 🐟
+  ['cod','&#129424;'],           // 🐟
+  ['fish','&#129424;'],          // 🐟
+  ['shrimp','&#127844;'],        // 🍤 U+1F364
+  ['prawn','&#127844;'],         // 🍤
+  ['lobster','&#127844;'],       // 🍤
+  ['crab','&#127844;'],          // 🍤
+
+  // 🥛 DAIRY
+  ['milk','&#129371;'],          // 🥛 U+1F95B
+  ['yogurt','&#129371;'],        // 🥛
+  ['yoghurt','&#129371;'],       // 🥛
+  ['kefir','&#129371;'],         // 🥛
+  ['cheese','&#129472;'],        // 🧀 U+1F9C0
+  ['parmigiano','&#129472;'],    // 🧀
+  ['parmesan','&#129472;'],      // 🧀
+  ['mozzarella','&#129472;'],    // 🧀
+  ['cheddar','&#129472;'],       // 🧀
+  ['feta','&#129472;'],          // 🧀
+  ['brie','&#129472;'],          // 🧀
+  ['gruyere','&#129472;'],       // 🧀
+  ['ricotta','&#129472;'],       // 🧀
+  ['butter','&#129347;'],        // 🧈 U+1F9C8
+  ['cream','&#129371;'],         // 🥛
+  ['ghee','&#129347;'],          // 🧈
+
+  // 🌾 GRAINS & BREAD
+  ['rice','&#127834;'],          // 🍚 U+1F35A
+  ['pasta','&#127837;'],         // 🍝 U+1F35D
+  ['spaghetti','&#127837;'],     // 🍝
+  ['noodle','&#127836;'],        // 🍜 U+1F35C
+  ['bread','&#129366;'],         // 🍞 U+1F35E
+  ['toast','&#129366;'],         // 🍞
+  ['bagel','&#129366;'],         // 🍞
+  ['sourdough','&#129366;'],     // 🍞
+  ['wrap','&#129366;'],          // 🍞
+  ['tortilla','&#129366;'],      // 🍞
+  ['oat','&#129379;'],           // 🥣 U+1F963
+  ['granola','&#129379;'],       // 🥣
+  ['cereal','&#129379;'],        // 🥣
+  ['quinoa','&#129379;'],        // 🥣
+  ['couscous','&#129379;'],      // 🥣
+  ['croissant','&#129360;'],     // 🥐 U+1F950
+  ['pancake','&#129348;'],       // 🥞 U+1F95E
+  ['waffle','&#129349;'],        // 🧇 U+1F9C7
+
+  // 🥜 NUTS & SNACKS
+  ['almond','&#129372;'],        // 🥜 U+1F95C
+  ['peanut','&#129372;'],        // 🥜
+  ['walnut','&#129372;'],        // 🥜
+  ['cashew','&#129372;'],        // 🥜
+  ['pistachio','&#129372;'],     // 🥜
+  ['nut','&#129372;'],           // 🥜
+  ['seed','&#129379;'],          // 🥣
+  ['hummus','&#129752;'],        // 🫘
+  ['popcorn','&#127871;'],       // 🍿 U+1F37F
+  ['pretzel','&#129384;'],       // 🥨 U+1F968
+  ['chip','&#129364;'],          // 🥔 potato
+  ['crisp','&#129364;'],         // 🥔
+  ['cracker','&#129379;'],       // 🥣
+
+  // 🍫 SWEETS & DESSERTS
+  ['chocolate','&#127850;'],     // 🍫 U+1F36B
+  ['cookie','&#127850;'],        // 🍫
+  ['cake','&#127856;'],          // 🎂 U+1F382
+  ['ice cream','&#127846;'],     // 🍦 U+1F366
+  ['honey','&#129362;'],         // 🫒? use 🍯 
+  ['jam','&#127826;'],           // 🍒
+
+  // ☕ DRINKS & CONDIMENTS
+  ['coffee','&#9749;'],          // ☕ U+2615
+  ['latte','&#9749;'],           // ☕
+  ['espresso','&#9749;'],        // ☕
+  ['cappuccino','&#9749;'],      // ☕
+  ['tea','&#127861;'],           // 🍵 U+1F375
+  ['water','&#128167;'],         // 💧 U+1F4A7
+  ['juice','&#129381;'],         // 🥥? use 🥤
+  ['smoothie','&#129380;'],      // 🥤 U+1F964
+  ['shake','&#129371;'],         // 🥛
+  ['protein shake','&#129371;'], // 🥛
+
+  // 💊 SUPPLEMENTS
+  ['supplement','&#128138;'],    // 💊 U+1F48A
+  ['vitamin','&#128138;'],       // 💊
+  ['whey','&#128138;'],          // 💊
+  ['protein powder','&#128138;'],// 💊
+  ['creatine','&#128138;'],      // 💊
+  ['protein bar','&#129300;'],   // 🥴? use 🍫
+
+  // 🍽 MEALS
+  ['salad','&#129367;'],         // 🥗 U+1F957
+  ['caesar','&#129367;'],        // 🥗
+  ['soup','&#129380;'],          // 🥣? use 🍲
+  ['pizza','&#127829;'],         // 🍕 U+1F355
+  ['burger','&#127828;'],        // 🍔 U+1F354
+  ['sandwich','&#129386;'],      // 🥪 U+1F96A
+  ['sushi','&#127843;'],         // 🍣 U+1F363
+  ['ramen','&#127836;'],         // 🍜
+  ['taco','&#127790;'],          // 🌮 U+1F32E
+  ['burrito','&#127791;'],       // 🌯 U+1F32F
+  ['bowl','&#129379;'],          // 🥣
+  ['stir fry','&#129368;'],      // 🥘 U+1F958
+  ['curry','&#129368;'],         // 🥘
+  ['acai','&#127820;'],          // 🍌 use banana
+  ['shakshuka','&#129370;'],     // 🥚 use egg
+
+  // 🥚 EGGS
+  ['egg','&#129370;'],           // 🥚 U+1F95A
+
+  // 🫒 OILS & CONDIMENTS
+  ['olive oil','&#129362;'],     // 🫒 U+1FAD2
+  ['oil','&#129362;'],           // 🫒
+  ['ketchup','&#127813;'],       // 🍅
+  ['sauce','&#129379;'],         // 🥣
+  ['dressing','&#129379;'],      // 🥣
+  ['mayo','&#129371;'],          // 🥛
+  ['mustard','&#129379;'],       // 🥣
+  ['bbq','&#129379;'],           // 🥣
+  ['salsa','&#127813;'],         // 🍅
+  ['guacamole','&#129361;'],     // 🥑
 ];
+
 function getFoodEmoji(name) {
   if(!name) return '&#127869;';
   var low = name.toLowerCase();
@@ -1707,14 +1845,14 @@ var FOODS=[
   {cat:'fruit',n:'Raspberries 100g',e:'&#127827;',p:'100g',c:52,pr:1.2,cb:11.9,f:0.7,fi:6.5,su:4.4,as:0,sf:0,na:1,ch:0,po:151,ca:25,ir:0.7,vc:26,vd:0,va:2},
   {cat:'fruit',n:'Blackberries 100g',e:'&#129744;',p:'100g',c:43,pr:1.4,cb:9.6,f:0.5,fi:5.3,su:4.9,as:0,sf:0,na:1,ch:0,po:162,ca:29,ir:0.6,vc:21,vd:0,va:11},
   {cat:'fruit',n:'Mixed Berries 100g',e:'&#127827;',p:'100g',c:45,pr:0.9,cb:10.5,f:0.4,fi:3.5,su:6,as:0,sf:0,na:1,ch:0,po:130,ca:20,ir:0.5,vc:30,vd:0,va:5},
-  {cat:'fruit',n:'Pomegranate 100g',e:'&#129381;',p:'100g',c:83,pr:1.7,cb:18.7,f:1.2,fi:4,su:13.7,as:0,sf:0.1,na:3,ch:0,po:236,ca:10,ir:0.3,vc:10,vd:0,va:0},
+  {cat:'fruit',n:'Pomegranate 100g',e:'&#127822;',p:'100g',c:83,pr:1.7,cb:18.7,f:1.2,fi:4,su:13.7,as:0,sf:0.1,na:3,ch:0,po:236,ca:10,ir:0.3,vc:10,vd:0,va:0},
   {cat:'fruit',n:'Papaya 100g',e:'&#129389;',p:'100g',c:43,pr:0.5,cb:11,f:0.3,fi:1.7,su:7.8,as:0,sf:0.1,na:8,ch:0,po:182,ca:20,ir:0.3,vc:62,vd:0,va:47},
-  {cat:'fruit',n:'Passion Fruit 2 pieces',e:'&#129365;',p:'36g',c:35,pr:0.8,cb:8.4,f:0.3,fi:3.9,su:4,as:0,sf:0,na:5,ch:0,po:121,ca:2,ir:0.3,vc:13,vd:0,va:6},
+  {cat:'fruit',n:'Passion Fruit 2 pieces',e:'&#127818;',p:'36g',c:35,pr:0.8,cb:8.4,f:0.3,fi:3.9,su:4,as:0,sf:0,na:5,ch:0,po:121,ca:2,ir:0.3,vc:13,vd:0,va:6},
   {cat:'fruit',n:'Pear medium',e:'&#127824;',p:'178g',c:101,pr:0.6,cb:27,f:0.2,fi:5.5,su:17,as:0,sf:0,na:2,ch:0,po:206,ca:16,ir:0.3,vc:7,vd:0,va:2},
   {cat:'fruit',n:'Plum medium',e:'&#127826;',p:'66g',c:30,pr:0.5,cb:7.5,f:0.2,fi:0.9,su:6.6,as:0,sf:0,na:0,ch:0,po:104,ca:4,ir:0.1,vc:6,vd:0,va:11},
   {cat:'fruit',n:'Cherries 100g',e:'&#127826;',p:'100g',c:63,pr:1.1,cb:16,f:0.2,fi:2.1,su:12.8,as:0,sf:0,na:0,ch:0,po:222,ca:13,ir:0.4,vc:7,vd:0,va:3},
-  {cat:'fruit',n:'Lemon 1 medium',e:'&#129414;',p:'58g',c:17,pr:0.6,cb:5.4,f:0.2,fi:1.6,su:1.5,as:0,sf:0,na:1,ch:0,po:80,ca:15,ir:0.4,vc:31,vd:0,va:1},
-  {cat:'fruit',n:'Lime 1 medium',e:'&#129414;',p:'44g',c:11,pr:0.2,cb:3.7,f:0.1,fi:1.1,su:1,as:0,sf:0,na:1,ch:0,po:50,ca:14,ir:0.2,vc:13,vd:0,va:1},
+  {cat:'fruit',n:'Lemon 1 medium',e:'&#127819;',p:'58g',c:17,pr:0.6,cb:5.4,f:0.2,fi:1.6,su:1.5,as:0,sf:0,na:1,ch:0,po:80,ca:15,ir:0.4,vc:31,vd:0,va:1},
+  {cat:'fruit',n:'Lime 1 medium',e:'&#127819;',p:'44g',c:11,pr:0.2,cb:3.7,f:0.1,fi:1.1,su:1,as:0,sf:0,na:1,ch:0,po:50,ca:14,ir:0.2,vc:13,vd:0,va:1},
   {cat:'fruit',n:'Fig 2 medium',e:'&#127815;',p:'100g',c:74,pr:0.8,cb:19.2,f:0.3,fi:2.9,su:16.3,as:0,sf:0,na:1,ch:0,po:232,ca:35,ir:0.4,vc:2,vd:0,va:7},
   // ── VEGETABLES (MISSING) ────────────────────────────────────────
   {cat:'veg',n:'Cauliflower 100g',e:'&#129382;',p:'100g',c:25,pr:2,cb:5,f:0.3,fi:2,su:1.9,as:0,sf:0.1,na:30,ch:0,po:299,ca:22,ir:0.4,vc:48,vd:0,va:0},
@@ -1730,7 +1868,7 @@ var FOODS=[
   // ── EXTRA MEALS ─────────────────────────────────────────────────
   {cat:'meals',n:'Ramen Bowl',e:'&#127836;',p:'500ml',c:440,pr:20,cb:60,f:14,fi:3,su:5,as:0,sf:5,na:1400,ch:60,po:300,ca:50,ir:2,vc:0,vd:0,va:0},
   {cat:'meals',n:'Tacos x2 Corn',e:'&#127790;',p:'200g',c:360,pr:22,cb:38,f:13,fi:5,su:3,as:0,sf:4,na:580,ch:55,po:350,ca:120,ir:2.5,vc:5,vd:0,va:20},
-  {cat:'meals',n:'Acai Bowl',e:'&#127820;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
+  {cat:'meals',n:'Acai Bowl',e:'&#129744;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
   {cat:'meals',n:'Shakshuka 2 eggs',e:'&#129370;',p:'300g',c:280,pr:16,cb:18,f:16,fi:4,su:8,as:0,sf:4,na:650,ch:370,po:650,ca:80,ir:3,vc:25,vd:1.5,va:80},
 ];
 
@@ -2431,7 +2569,7 @@ var DRINKS=[
   // ── SOFT DRINKS ───────────────────────────────────────────────
   {n:'Sprite 12oz',e:'&#129380;',p:'12 fl oz',c:140,u:0,cb:38,sg:38,cat:'soft',w:''},
   {n:'Ginger Ale 12oz',e:'&#129380;',p:'12 fl oz',c:124,u:0,cb:32,sg:32,cat:'soft',w:''},
-  {n:'Lemonade 12oz',e:'&#129414;',p:'12 fl oz',c:148,u:0,cb:40,sg:38,cat:'soft',w:''},
+  {n:'Lemonade 12oz',e:'&#127819;',p:'12 fl oz',c:148,u:0,cb:40,sg:38,cat:'soft',w:''},
   {n:'Apple Juice 8oz',e:'&#127822;',p:'8 fl oz',c:114,u:0,cb:28,sg:24,cat:'soft',w:''},
   {n:'Cranberry Juice 8oz',e:'&#127827;',p:'8 fl oz',c:116,u:0,cb:30,sg:28,cat:'soft',w:''},
   {n:'Kombucha 16oz',e:'&#129518;',p:'16 fl oz',c:60,u:0,cb:14,sg:8,cat:'soft',w:'Fermented'},
@@ -2449,7 +2587,7 @@ var DRINKS=[
   // ── WATER ─────────────────────────────────────────────────────
   {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'With electrolytes'},
   {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'pH 9+'},
-  {n:'Lemon Water 16oz',e:'&#129414;',p:'16 fl oz',c:10,u:0,cb:3,sg:0,cat:'water',w:''},
+  {n:'Lemon Water 16oz',e:'&#127819;',p:'16 fl oz',c:10,u:0,cb:3,sg:0,cat:'water',w:''},
   // ── TEA ───────────────────────────────────────────────────────
   {n:'Earl Grey',e:'&#9749;',p:'8 fl oz',c:2,u:0,cb:0,sg:0,cat:'tea',w:'Black tea + bergamot'},
   {n:'Turmeric Latte',e:'&#129361;',p:'8 fl oz',c:80,u:0,cb:8,sg:6,cat:'tea',w:'Golden milk'},
