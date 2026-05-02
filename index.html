@@ -569,7 +569,7 @@ body { height: 100dvh; }
       <div class="phdr"><div><div class="ptitle">Drinks</div><div class="psub">Alcohol and beverages</div></div></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
         <div class="card" style="margin-bottom:13px;border-color:rgba(255,77,184,.2)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">TODAY'S UNITS</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="badge bg" id="dr-bdg">Within limit</div><div style="font-size:10px;color:var(--dim)">14 std drinks/week</div></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">THIS WEEK'S UNITS</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="badge bg" id="dr-bdg">Within limit</div><div style="font-size:10px;color:var(--dim)">14 std drinks/week</div></div></div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div style="font-family:var(--mn);font-size:46px;font-weight:800;color:var(--pnk);line-height:1" id="dr-units">0.0</div>
             <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
@@ -2615,8 +2615,8 @@ function rDrBanner(){
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
   var _wl=calcWaterL(),_we=g('dr-water'),_wb=g('dr-water-bar');
   if(_we) _we.textContent=fD(_wl,1)+'L / '+fD(P.water||3,1)+'L';
-  if(_wb) _wb.style.width=Math.min(_wl/(P.water||3)*100,100)+'%';
-  var bar=g('dr-bar'); if(bar) bar.style.width=Math.min(u2/7*100,100)+'%';
+  if(_wb) _wb.style.width=Math.min(_wl/(P.water||3)*100,100)+'%'; if(_wb) _wb.style.transition='width 0.3s';
+  var bar=g('dr-bar'); if(bar) bar.style.width=Math.min(u2/14*100,100)+'%';
   var bdg=g('dr-bdg'); if(bdg){var _wkLim=14;if(u2>=_wkLim){bdg.className='badge br';bdg.textContent='Over weekly limit';}else if(u2>=_wkLim*0.5){bdg.className='badge ba';bdg.textContent='Nearing limit';}else{bdg.className='badge bg';bdg.textContent='Within limit';}}
 }
 function showDrinkGrid(){
