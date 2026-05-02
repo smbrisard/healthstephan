@@ -599,8 +599,6 @@ body { height: 100dvh; }
           <div class="g2" id="dr-grid" style="margin-bottom:10px"></div>
         </div>
         <div class="slbl" id="dr-log-hdr">Today's Log</div><div id="dr-log"></div>
-        <div class="slbl" style="margin-top:10px">7-Day Calories</div>
-        
       </div>
     </div>
 
@@ -2604,7 +2602,16 @@ var DRINKS=[
 
 ];
 
-function drCat(cat,btn){dCat=cat; document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');}); btn.classList.add('on'); rDrGrid();}
+function drCat(cat,btn){
+  dCat=cat;
+  document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');});
+  btn.classList.add('on');
+  // Auto-expand grid when category selected
+  var db=g('dr-db-section'),dbtn=g('dr-browse-btn');
+  if(db) db.style.display='block';
+  if(dbtn){dbtn.style.display='block';dbtn.textContent='\uD83C\uDF77 Browse drinks \u25B2';}
+  rDrGrid();
+}
 function rDrinks(){rDrBanner();rDrGrid();rDrLog();rDrChart();}
 function rDrBanner(){
   var td=tDrinks(),c2=td.reduce(function(a,d){return a+d.c;},0);
