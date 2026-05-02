@@ -1119,9 +1119,11 @@ function calcWaterL() {
   var ml=0;
   tDrinks().forEach(function(d){
     if(d.cat==='water') ml+=(d.vol||0);
-    else if(d.cat==='coffee') ml+=(d.vol||0)*0.8;
+    else if(d.cat==='coffee') ml+=(d.vol||0)*0.5; // coffee counts 50% toward hydration
+    else if(d.cat==='tea') ml+=(d.vol||d.c*3||0)*0.8; // tea counts 80%
+    else if(d.cat==='soft'&&!d.u) ml+=(d.vol||0)*0.5; // soft drinks 50%
   });
-  return Math.round(ml/100)/10; // litres
+  return Math.round(ml/10)/100; // accurate litres with 2dp
 }
 function calcWaterOz() {
   var ml=0;
