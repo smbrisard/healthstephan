@@ -3237,20 +3237,27 @@ function fetchSync(){
   .then(function(r){return r.json();})
   .then(function(d){
     if(!d||d.error)return;
-    // Update all metrics - Val Town already filters to today's data
-    // Use date for display only, don't gate updates on timezone-sensitive comparison
+    // Smart date gating - accept daily data only if within 1 day of today
+    // This handles Pacific timezone (UTC-7/8) where HAE date can be 'yesterday'
     P.lastSyncDate=d.date||today();
+    var _syncDate=d.date||today();
+    var _syncIsRecent=(_syncDate===today()||_syncDate===yesterday());
     var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
       'standHours','exerciseMins','totalBurned','restingEnergy'];
     var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
-    // Always update daily fields if they have valid positive data
-    _allDailyFields.forEach(function(k){
-      if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
-        P[k]=parseFloat(d[k]); updated=true;
-      }
-    });
-    // Force updated=true if we got steps or burned (key metrics)
+    if(_syncIsRecent){
+      // Fresh data - update daily fields
+      _allDailyFields.forEach(function(k){
+        if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
+          P[k]=parseFloat(d[k]); updated=true;
+        }
+      });
+    } else {
+      // Stale data (2+ days old) - zero out daily metrics
+      _allDailyFields.forEach(function(k){P[k]=0;});
+      updated=true;
+    }
     if(d.stepsToday||d.totalBurned||d.rhr) updated=true;
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
