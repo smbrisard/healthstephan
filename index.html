@@ -1924,7 +1924,7 @@ function renderRecentFoods(){
     D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
       recent.map(function(m,i){
         return D('style="display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:16px;border:.5px solid rgba(255,255,255,.1);cursor:pointer;touch-action:manipulation" onclick="addRecentFood('+i+')"',
-          D('style="font-size:15px"',getFoodEmoji(m.name)||(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+
+          D('style="font-size:15px"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+
           D('style="font-size:12px;font-weight:600;color:var(--txt)"',(m.name.length>14?m.name.slice(0,14)+'...':m.name))+
           D('style="font-size:11px;color:var(--dim)"',fN(m.cals)+'k'));
       }).join('')
