@@ -3152,6 +3152,12 @@ function launch(){
   }
   setTimeout(function(){ if(loader) loader.style.display='none'; }, 500);
 }
+// Aggressively clear old caches
+if('caches' in window){
+  caches.keys().then(function(names){
+    names.forEach(function(name){caches.delete(name);});
+  });
+}
 if('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(sw){sw.unregister();});}); }
 if('caches' in window){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}); }
 
