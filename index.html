@@ -572,7 +572,7 @@ body { height: 100dvh; }
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px">THIS WEEK'S UNITS</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="badge bg" id="dr-bdg">Within limit</div><div style="font-size:10px;color:var(--dim)">14 std drinks/week</div></div></div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div style="font-family:var(--mn);font-size:46px;font-weight:800;color:var(--pnk);line-height:1" id="dr-units">0.0</div>
-            <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div></div>
+            <div><div style="font-size:14px;color:var(--dim)">std drinks</div><div style="font-size:13px;color:var(--pnk);font-family:var(--mn);font-weight:700" id="dr-cals">0 kcal</div><div id="dr-units-breakdown" style="font-size:10px;color:var(--dim);margin-top:2px"></div></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;margin-bottom:4px"><div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px">WATER TODAY</div><div style="font-size:13px;font-weight:700;color:#38bdf8" id="dr-water">0.0 / 101.4 fl oz</div></div><div style="height:5px;background:rgba(56,189,248,.15);border-radius:3px;overflow:hidden;margin-bottom:10px"><div id="dr-water-bar" style="height:100%;width:0%;background:#38bdf8;border-radius:3px;transition:width .4s"></div></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dr-bar" style="height:100%;background:linear-gradient(90deg,var(--pnk),var(--pur));width:0%;transition:width .5s;border-radius:3px"></div></div>
           <div style="font-size:11px;color:var(--dim2);margin-top:4px;text-align:right;font-family:var(--mn)">14 units / week max</div>
@@ -2620,8 +2620,22 @@ function rDrBanner(){
   // Weekly units - sum all alcohol from past 7 days
   var _wkStart=new Date(); _wkStart.setDate(_wkStart.getDate()-6);
   var _wkStr=_wkStart.getFullYear()+'-'+String(_wkStart.getMonth()+1).padStart(2,'0')+'-'+String(_wkStart.getDate()).padStart(2,'0');
-  var u2=DL.filter(function(d){return d.date>=_wkStr;}).reduce(function(a,d){return a+(d.u||0);},0);
+  // Weekly units - only count alcoholic drinks (u>0) within past 7 days
+  var _wkDrinks=DL.filter(function(d){return d.date>=_wkStr&&d.date<=today()&&(d.u||0)>0;});
+  var u2=_wkDrinks.reduce(function(a,d){return a+(d.u||0);},0);
+  // Store breakdown for debugging
+  window._wkDrinkBreakdown=_wkDrinks.map(function(d){return d.date+': '+d.n+' ('+d.u+'u)';});
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
+  var _wkBrkEl=g('dr-units-breakdown');
+  if(_wkBrkEl){
+    var _byDate={};
+    _wkDrinks.forEach(function(d){_byDate[d.date]=(_byDate[d.date]||0)+(d.u||0);});
+    var _brkStr=Object.keys(_byDate).sort().map(function(dt){
+      var dd=new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'});
+      return dd+': '+fD(_byDate[dt],1)+'u';
+    }).join(' · ');
+    _wkBrkEl.textContent=_brkStr||'No alcohol this week';
+  }
   var _wl=calcWaterL(),_we=g('dr-water'),_wb=g('dr-water-bar');
   if(_we) _we.textContent=fD(_wl,1)+'L / '+fD(P.water||3,1)+'L';
   if(_wb) _wb.style.width=Math.min(_wl/(P.water||3)*100,100)+'%'; if(_wb) _wb.style.transition='width 0.3s';
