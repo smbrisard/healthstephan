@@ -756,7 +756,7 @@ body { height: 100dvh; }
     <input type="hidden" id="me-id-store">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <input class="fld" type="text" id="me-emoji" placeholder="&#127869;" style="width:54px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
-      <div style="font-size:11px;color:var(--dim);flex:1">Change emoji: type any emoji or an HTML code like <span style="color:var(--grn);font-family:monospace">&#38;#127822;</span></div>
+      <div style="font-size:11px;color:var(--dim);flex:1">Paste an emoji 🍎 or type a code like <span style="color:var(--grn);font-family:monospace">&#38;#127822;</span> then Save</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:var(--s2);border-radius:12px;padding:10px">
       <div style="font-size:13px;color:var(--dim);flex:1">Servings</div>
@@ -1070,6 +1070,19 @@ var FL = (_data && Array.isArray(_data.fl)) ? _data.fl : [];
 var ML = migrateArr('ml', ['hsml','hs_ml','hs_ml2']);
 var SL = migrateArr('sl', ['hssl','hs_sl','hs_sl2']);
 var DL = migrateArr('dl', ['hsdl','hs_dl','hs_dl2']);
+
+// Convert HTML entity like &#127822; or &#x1F34E; to actual emoji character
+function decodeEmoji(str){
+  if(!str) return '';
+  str=str.trim();
+  // Already an emoji character (not an entity)
+  if(!str.includes('&')) return str;
+  // Decimal entity: &#127822;
+  str=str.replace(/&#(\d+);/g,function(_,n){return String.fromCodePoint(parseInt(n));});
+  // Hex entity: &#x1F34E;
+  str=str.replace(/&#x([0-9a-fA-F]+);/g,function(_,h){return String.fromCodePoint(parseInt(h,16));});
+  return str;
+}
 
 function dedupML(){
   var seen={};
@@ -2160,8 +2173,11 @@ function saveMealEdit() {
       if(mf&&mf.value!=='') ML[i].fat=parseFloat(mf.value)||0;
       // Type - keep original case pattern used elsewhere (lowercase)
       if(mt&&mt.value) ML[i].type=mt.value.toLowerCase();
-      // Save custom emoji if user changed it
-      var _meEm=g('me-emoji'); if(_meEm&&_meEm.value.trim()) ML[i].emoji=_meEm.value.trim();
+      // Save custom emoji - decode HTML entities (e.g. &#127822; → 🍎)
+      var _meEm=g('me-emoji');
+      if(_meEm&&_meEm.value.trim()){
+        ML[i].emoji=decodeEmoji(_meEm.value.trim());
+      }
       // Date - ONLY update if user changed it AND it's a valid date matching YYYY-MM-DD
       if(md&&md.value&&/^\d{4}-\d{2}-\d{2}$/.test(md.value)){
         ML[i].date=md.value;
@@ -3727,7 +3743,7 @@ function saveMyFoods(arr){try{localStorage.setItem('hs_myfoods',JSON.stringify(a
 function saveToMyFoods(){
   var name=(g('cf-name')||{value:''}).value.trim();
   if(!name){toast('Enter a food name first');return;}
-  var emoji=(g('cf-emoji')||{value:''}).value||'\uD83C\uDF7D';
+  var emoji=decodeEmoji((g('cf-emoji')||{value:''}).value)||'\uD83C\uDF7D';
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
   var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
   var carbs=parseFloat((g('cf-carbs')||{value:0}).value)||0;
