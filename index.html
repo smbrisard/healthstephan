@@ -3057,9 +3057,47 @@ function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localS
 
 
 // ═══ LAUNCH ═══
+function migrateMLMicronutrients(){
+  // One-time migration: backfill micronutrients from FOODS DB for existing ML entries
+  var migrated=0;
+  ML.forEach(function(m){
+    // Find matching food in DB by name (strip serving suffix like " x1.5")
+    var baseName=m.name.replace(/\s+x\d+\.?\d*$/,'').trim();
+    var food=FOODS.find(function(f){
+      return f.n===baseName||f.n===m.name||
+             f.n.toLowerCase()===baseName.toLowerCase();
+    });
+    if(!food) return;
+    // Only backfill fields that are zero or missing (don't overwrite user edits)
+    var fields=[
+      ['potassium','po'],['calcium','ca'],['iron','ir'],
+      ['cholest','ch'],['vitC','vc'],['vitD','vd'],
+      ['sugar','su'],['satFat','sf'],['sodium','na'],['fiber','fi']
+    ];
+    var changed=false;
+    fields.forEach(function(pair){
+      var mlKey=pair[0], fKey=pair[1];
+      var dbVal=parseFloat(food[fKey])||0;
+      var mlVal=parseFloat(m[mlKey])||0;
+      if(mlVal===0&&dbVal>0){
+        // Scale by servings if entry has a multiplier
+        var srv=1;
+        var srvMatch=m.name.match(/x(\d+\.?\d*)$/);
+        if(srvMatch) srv=parseFloat(srvMatch[1])||1;
+        m[mlKey]=Math.round(dbVal*srv*10)/10;
+        changed=true;
+      }
+    });
+    if(changed) migrated++;
+  });
+  if(migrated>0){save();console.log('Migrated micronutrients for '+migrated+' ML entries');}
+}
+
 function launchApp(){
   // Clean up any duplicate entries from previous bugs
   dedupML(); dedupDL();
+  // Backfill micronutrients from FOODS DB for existing entries
+  migrateMLMicronutrients();
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
