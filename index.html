@@ -498,6 +498,9 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('starbucks',this)">Starbucks</div>
         </div>
         <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127869; Browse foods &#9660;</button>
+        <div id="food-restore-bar" style="display:none;text-align:center;margin-bottom:6px">
+          <span onclick="restoreAllFoods()" style="font-size:11px;color:var(--dim);text-decoration:underline;cursor:pointer">Restore deleted foods</span>
+        </div>
         <div id="food-db-section" style="display:none">
           <div class="g2" id="food-grid" style="margin-bottom:10px"></div>
         </div>
@@ -2100,13 +2103,20 @@ function setFCat(cat, btn) {
 
 function rFoodGrid() {
   var ge=g('food-grid'); if(!ge) return;
-  var list=FOODS.filter(function(f){
+  var _deletedFoods=loadDeletedFoods();
+  var myFoods=loadMyFoods();
+  var allFoods=myFoods.map(function(f){return Object.assign({},f,{_custom:true});}).concat(FOODS);
+  var list=allFoods.filter(function(f){
+    if(_deletedFoods.indexOf(f.n)>=0) return false;
     return fCat==='all' || f.cat===fCat;
   });
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
     var idx=FOODS.indexOf(f); var over=f.c>rem&&rem>0;
-    return D('class="ftile" onclick="openFood('+idx+')"',D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    var _isCustomFood=f._custom||f.custom||false;
+    var _fidx=_isCustomFood?-1:FOODS.indexOf(f);
+    var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB(\''+f.n+'\','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--red);font-size:13px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u00d7');
+    return D('class="ftile" style="position:relative" onclick="openFood('+_fidx+')"',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -3780,6 +3790,33 @@ function cfSelect(idx) {
 }
 
 // Custom user food database stored separately
+// Track deleted foods (hides them from built-in DB)
+function loadDeletedFoods(){
+  try{return JSON.parse(localStorage.getItem('hs_deleted_foods')||'[]');}catch(e){return[];}
+}
+function saveDeletedFoods(arr){
+  try{localStorage.setItem('hs_deleted_foods',JSON.stringify(arr));}catch(e){}
+}
+function deleteFoodFromDB(name,isCustom){
+  if(!confirm('Remove "'+name+'" from the database?')) return;
+  if(isCustom){
+    // Remove from My Foods
+    var mf=loadMyFoods().filter(function(f){return f.n!==name;});
+    saveMyFoods(mf);
+  } else {
+    // Mark built-in food as deleted
+    var del=loadDeletedFoods();
+    if(del.indexOf(name)<0){del.push(name);saveDeletedFoods(del);}
+  }
+  toast('\u2713 Removed from database');
+  rFoodGrid();
+}
+function restoreAllFoods(){
+  localStorage.removeItem('hs_deleted_foods');
+  toast('All built-in foods restored');
+  rFoodGrid();
+}
+
 function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
 function deleteMyFood(name){
   var myFoods=loadMyFoods();
