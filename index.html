@@ -754,6 +754,10 @@ body { height: 100dvh; }
   <div class="msheet"><div class="mhandle"></div><div class="mtitle">Edit Meal Entry</div>
     <div id="meal-edit-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
     <input type="hidden" id="me-id-store">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <input class="fld" type="text" id="me-emoji" placeholder="&#127869;" style="width:54px;text-align:center;font-size:22px;margin-bottom:0;flex-shrink:0">
+      <div style="font-size:11px;color:var(--dim);flex:1">Change emoji: type any emoji or an HTML code like <span style="color:var(--grn);font-family:monospace">&#38;#127822;</span></div>
+    </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:var(--s2);border-radius:12px;padding:10px">
       <div style="font-size:13px;color:var(--dim);flex:1">Servings</div>
       <button onclick="var si=g('me-srv');if(si&&parseFloat(si.value)>0.5){si.value=Math.round((parseFloat(si.value)-0.5)*10)/10;updateMeServing();}" style="width:32px;height:32px;background:var(--s3,var(--bg2));border-radius:50%;border:.5px solid var(--b1);color:var(--txt);font-size:18px;touch-action:manipulation">−</button>
@@ -2798,7 +2802,7 @@ function rFitness(){
   P.waterToday=calcWaterL();
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
-  var _fiToday=!P.lastSyncDate||P.lastSyncDate===today()||P.lastSyncDate===yesterday();
+  var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
