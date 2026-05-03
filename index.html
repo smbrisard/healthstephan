@@ -941,6 +941,23 @@ body { height: 100dvh; }
           <input class="fld" type="number" id="cf-cholest" placeholder="0" style="margin-bottom:0"></div>
       </div>
 
+      <!-- Food category -->
+      <div class="flbl">Food Category (for Browse)</div>
+      <select class="fld" id="cf-cat" style="margin-bottom:10px;color:var(--txt);background:var(--s2)">
+        <option value="custom">⭐ Custom (My Foods only)</option>
+        <option value="eggs">🥚 Eggs</option>
+        <option value="meat">🍗 Meat &amp; Fish</option>
+        <option value="dairy">🧀 Dairy</option>
+        <option value="grains">🍞 Grains</option>
+        <option value="veg">🥦 Vegetables</option>
+        <option value="fruit">🍎 Fruit</option>
+        <option value="breakfast">🥣 Breakfast</option>
+        <option value="snacks">🌰 Snacks</option>
+        <option value="supplements">💊 Supplements</option>
+        <option value="meals">🍽 Meals</option>
+        <option value="fastfood">🍔 Fast Food</option>
+        <option value="sauces">🫙 Sauces</option>
+      </select>
       <!-- Meal type -->
       <div class="flbl">Meal Type</div>
       <select class="fld" id="cf-type" style="margin-bottom:14px">
@@ -989,7 +1006,22 @@ body { height: 100dvh; }
     </div>
     <div class="callout ci" style="margin-bottom:10px"><span>&#128161;</span>
       <span>1 standard drink = 0.6 fl oz (14g) of pure alcohol. A 5oz glass of 12% wine = 1.0 standard drink. Formula: fl oz x ABV% x 0.059 = standard drinks.</span></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-radius:13px;border:.5px solid var(--b2);margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--dim)">Quantity</div><div style="display:flex;align-items:center;gap:13px"><div onclick="cdAdjQty(-1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">-</div><div style="font-family:var(--mn);font-size:20px;font-weight:800;min-width:36px;text-align:center" id="cd-qty-disp">1</div><div onclick="cdAdjQty(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">+</div></div></div><div class="fw"><div class="flbl">Date</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s3);border-radius:13px;border:.5px solid var(--b2);margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--dim)">Quantity</div><div style="display:flex;align-items:center;gap:13px"><div onclick="cdAdjQty(-1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">-</div><div style="font-family:var(--mn);font-size:20px;font-weight:800;min-width:36px;text-align:center" id="cd-qty-disp">1</div><div onclick="cdAdjQty(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;touch-action:manipulation">+</div></div></div>
+    <div class="fw"><div class="flbl">Drink Category</div>
+      <select class="fld" id="cd-cat" style="margin-bottom:0;color:var(--txt);background:var(--s2)">
+        <option value="custom">⭐ Custom</option>
+        <option value="beer">🍺 Beer</option>
+        <option value="wine">🍷 Wine</option>
+        <option value="spirits">🥃 Spirits</option>
+        <option value="cocktail">🍸 Cocktails</option>
+        <option value="soft">🥤 Soft Drinks</option>
+        <option value="coffee">☕ Coffee</option>
+        <option value="tea">🍵 Tea</option>
+        <option value="water">💧 Water</option>
+        <option value="choc">🍫 Chocolate</option>
+      </select>
+    </div>
+    <div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
     <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
@@ -3241,7 +3273,10 @@ function addCustomDrink(){
   var sugar=parseFloat((g('cd-sugar')||{value:0}).value)||0;
   var date=(g('cd-date')||{value:''}).value||todayLocal();
   if(!name){toast('Please enter a drink name',true);return;}
-  DL.push({id:Date.now(),date:date,n:name,e:'\u0026#127867;',c:Math.round(cals),u:units,cat:'custom',sugar:sugar,carbs:carbs});
+  var drCatVal=(g('cd-cat')||{value:'custom'}).value||'custom';
+  var _isNonAlcDr=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
+  DL.push({id:Date.now(),date:date,n:name,e:'&#127867;',c:Math.round(cals),
+    u:_isNonAlcDr?0:units,cat:drCatVal,sugar:sugar,carbs:carbs,vol:0});
   save();closeM('custom-drink-m');rDrinks();toast(name+' added');
 }
 
@@ -3676,6 +3711,7 @@ function openCustomFood() {
    'cf-sodium','cf-satfat','cf-potassium','cf-calcium','cf-iron','cf-cholest'].forEach(function(id){
     var el=g(id); if(el) el.value='';
   });
+  var _cfCatEl=g('cf-cat'); if(_cfCatEl) _cfCatEl.value='custom';
   var _cemoji=g('cf-emoji'); if(_cemoji) _cemoji.value='';
   var ct=g('cf-type'); if(ct) ct.value=mealTab||'snack';
   openM('custom-food-m');
@@ -3880,6 +3916,7 @@ function saveToMyFoods(){
   var name=(g('cf-name')||{value:''}).value.trim();
   if(!name){toast('Enter a food name first');return;}
   var emoji=decodeEmoji((g('cf-emoji')||{value:''}).value)||'\uD83C\uDF7D';
+  var foodCat=(g('cf-cat')||{value:'custom'}).value||'custom';
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
   var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
   var carbs=parseFloat((g('cf-carbs')||{value:0}).value)||0;
@@ -3892,7 +3929,10 @@ function saveToMyFoods(){
   var _mpo=parseFloat((g('cf-potassium')||{value:0}).value)||0;
   var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
   var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
-  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,fi:_mfi,su:0,as:0,sf:0,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,vc:0,vd:0,va:0,custom:true});
+  var _mfCat=(g('cf-cat')||{value:'custom'}).value||'custom';
+  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,
+    fi:_mfi,su:0,as:0,sf:0,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,
+    vc:0,vd:0,va:0,cat:_mfCat,custom:true});
   saveMyFoods(myFoods);
   toast('\u2713 '+name+' saved!');
   // Close modal if called standalone
@@ -3932,6 +3972,7 @@ function cfAdd() {
   var sugar2=parseFloat((g('cf-sugar')||{value:0}).value)||0;
   var satFat2=parseFloat((g('cf-satfat')||{value:0}).value)||0;
   var cholest2=parseFloat((g('cf-cholest')||{value:0}).value)||0;
+  // Use category for food DB if saving to MyFoods
   ML.push({id:Date.now(),date:date,name:name+(_srv!==1?' x'+fD(_srv,1):''),emoji:emoji,type:type,
     cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
     fiber:Math.round(fiber*_srv*10)/10,sugar:Math.round(sugar2*_srv*10)/10,satFat:Math.round(satFat2*_srv*10)/10,
