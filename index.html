@@ -948,9 +948,9 @@ body { height: 100dvh; }
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <button onclick="saveCustomFood()" class="btn btn-r">Add to Log</button>
-        <button onclick="saveToMyFoods();closeM('cf-m')" style="padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;touch-action:manipulation">Save Only</button>
+        <button onclick="saveToMyFoods();closeM('cf-m');closeM('custom-food-m')" style="padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;touch-action:manipulation">Save Only</button>
       </div>
-      <button onclick="saveToMyFoods()" style="width:100%;padding:12px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Foods</button>
+      
       <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
     </div>
   </div>
@@ -3809,7 +3809,9 @@ function saveToMyFoods(){
   var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
   myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,fi:_mfi,su:0,as:0,sf:0,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,vc:0,vd:0,va:0,custom:true});
   saveMyFoods(myFoods);
-  toast('\u2713 '+name+' saved to My Foods!');
+  toast('\u2713 '+name+' saved!');
+  // Close modal if called standalone
+  closeM('cf-m'); closeM('custom-food-m');
 }
 function saveCustomFood(){cfAdd();}
 function cfAdd() {
