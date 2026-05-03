@@ -2751,8 +2751,18 @@ function showDrinkGrid(){
 
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
-  var list=dCat==='all'?DRINKS:DRINKS.filter(function(d){return d.cat===dCat;});
-  ge.innerHTML=list.map(function(d,i){var idx=DRINKS.indexOf(d); return D('class="dtile" onclick="openDrink('+idx+')"',D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic')));}).join('');
+  var _myDrs=loadMyDrinks();
+  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
+  var _builtInDr=dCat==='all'?DRINKS:DRINKS.filter(function(d){return d.cat===dCat;});
+  var list=_myDrInCat.concat(_builtInDr);
+  ge.innerHTML=list.map(function(d,i){
+    var _isDrC=d._custom||false;
+    var _drIdx=_isDrC?-1:DRINKS.indexOf(d);
+    var _mdi=_isDrC?_myDrs.findIndex(function(x){return x.n===d.n;}): -1;
+    var _dcFn=_isDrC?'addMyDrinkToLog('+_mdi+')':'openDrink('+_drIdx+')';
+    var _ddb=_isDrC?'<button onclick="event.stopPropagation();deleteMyDrink('+_mdi+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.25);border:none;border-radius:50%;width:26px;height:26px;color:#FF3B5C;font-size:14px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation">\u00d7</button>':'';
+    return '<div style="position:relative" class="dtile" onclick="'+_dcFn+'">'+_ddb+D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic'))+'</div>';
+  }).join('');
 }
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
@@ -2839,6 +2849,8 @@ function rDrChart(){
   }).join('');
 }
 function openDrink(idx){
+  // idx < 0 means custom drink - handled separately
+  if(idx<0) return;
   selDr=DRINKS[idx]; dQty=1;
   g('dm-em').innerHTML=selDr.e; set('dm-name',selDr.n); set('dm-portion',selDr.p); set('dm-qty',1); set('dm-total',fN(selDr.c)+' kcal');
   sH('dm-info',[['kcal',fN(selDr.c),'var(--pnk)'],['units',selDr.u,'var(--pur)'],['carbs',selDr.cb+'g','var(--amb)']].map(function(p){return D('style="flex:1;background:var(--s3);border-radius:9px;padding:9px;text-align:center"',D('style="font-family:var(--mn);font-size:15px;font-weight:700;color:'+p[2]+'"',p[1])+D('style="font-size:10px;color:var(--dim);margin-top:2px"',p[0]));}).join(''));
@@ -3280,9 +3292,18 @@ function addCustomDrink(){
   if(!name){toast('Please enter a drink name',true);return;}
   var drCatVal=(g('cd-cat')||{value:'custom'}).value||'custom';
   var _isNonAlcDr=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
+  var _uVal=_isNonAlcDr?0:(parseFloat(units)||0);
+  // Save to My Drinks database so it appears in Browse grid
+  var myDrinks=loadMyDrinks();
+  if(!myDrinks.find(function(d){return d.n===name;})){
+    myDrinks.push({n:name,e:'&#127867;',p:'custom',c:Math.round(cals),
+      u:_uVal,cat:drCatVal,sg:sugar,cb:carbs,vol:0,custom:true});
+    saveMyDrinks(myDrinks);
+  }
+  // Also add to today's log
   DL.push({id:Date.now(),date:date,n:name,e:'&#127867;',c:Math.round(cals),
-    u:_isNonAlcDr?0:units,cat:drCatVal,sugar:sugar,carbs:carbs,vol:0});
-  save();closeM('custom-drink-m');rDrinks();toast(name+' added');
+    u:_uVal,cat:drCatVal,sugar:sugar,carbs:carbs,vol:0});
+  save();closeM('custom-drink-m');rDrinks();toast(name+' added to log!');
 }
 
 
@@ -3617,6 +3638,7 @@ function exportData() {
     profile:P, weightLog:WL, mealLog:ML, sleepLog:SL,
     drinkLog:DL, fitnessLog:FL,
     myFoods:myFoods, bloodPressureLog:bpl,
+    myDrinks:(function(){try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}})(),
     syncUrl:syncUrl
   };
   // Note: avatar not included (too large for JSON)
@@ -3645,6 +3667,9 @@ function importData() {
         // Restore myFoods if backup has them, otherwise preserve existing
         if(data.myFoods&&data.myFoods.length>0){
           try{localStorage.setItem('hs_myfoods',JSON.stringify(data.myFoods));}catch(e){}
+        }
+        if(data.myDrinks&&data.myDrinks.length>0){
+          try{localStorage.setItem('hs_mydrinks',JSON.stringify(data.myDrinks));}catch(e){}
         }
         // Restore BP log if backup has entries
         if(data.bloodPressureLog&&data.bloodPressureLog.length>0){
@@ -3906,6 +3931,32 @@ function restoreAllFoods(){
   rFoodGrid();
 }
 
+// ── My Drinks Database ──────────────────────────────────────
+function loadMyDrinks(){
+  try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}
+}
+function saveMyDrinks(arr){
+  try{localStorage.setItem('hs_mydrinks',JSON.stringify(arr));}catch(e){}
+}
+function addMyDrinkToLog(idx){
+  var myDrinks=loadMyDrinks();
+  var d=myDrinks[idx];
+  if(!d){toast('Drink not found',true);return;}
+  var _isNA=['water','tea','coffee','soft','choc'].indexOf(d.cat)>=0;
+  DL.push({id:Date.now(),date:today(),n:d.n,e:d.e||'&#127867;',
+    c:d.c||0,u:_isNA?0:(d.u||0),cat:d.cat,sugar:d.sg||0,carbs:d.cb||0,vol:d.vol||0});
+  save(); rDrinks();
+  toast(d.n+' added!');
+}
+function deleteMyDrink(idx){
+  var myDrinks=loadMyDrinks();
+  var name=myDrinks[idx]?myDrinks[idx].n:'this drink';
+  if(!confirm('Remove "'+name+'" from your drinks database?')) return;
+  myDrinks.splice(idx,1);
+  saveMyDrinks(myDrinks);
+  toast('Removed from drinks database');
+  rDrGrid();
+}
 function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
 function deleteMyFood(name){
   var myFoods=loadMyFoods();
