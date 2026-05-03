@@ -3569,9 +3569,21 @@ function importData() {
         P=data.profile; WL=data.weightLog||[]; ML=data.mealLog||[];
         SL=data.sleepLog||[]; DL=data.drinkLog||[]; FL=data.fitnessLog||[];
         // Restore additional stores
-        if(data.myFoods) try{localStorage.setItem('hs_myfoods',JSON.stringify(data.myFoods));}catch(e){}
-        if(data.bloodPressureLog) try{localStorage.setItem('hs_bpl',JSON.stringify(data.bloodPressureLog));}catch(e){}
-        if(data.syncUrl) try{localStorage.setItem('hs_sync_url',data.syncUrl);SYNC_URL=data.syncUrl;}catch(e){}
+        // Restore myFoods if backup has them, otherwise preserve existing
+        if(data.myFoods&&data.myFoods.length>0){
+          try{localStorage.setItem('hs_myfoods',JSON.stringify(data.myFoods));}catch(e){}
+        }
+        // Restore BP log if backup has entries
+        if(data.bloodPressureLog&&data.bloodPressureLog.length>0){
+          try{localStorage.setItem('hs_bpl',JSON.stringify(data.bloodPressureLog));}catch(e){}
+        }
+        // Only restore syncUrl if backup has one - don't clear existing
+        if(data.syncUrl){
+          try{localStorage.setItem('hs_sync_url',data.syncUrl);SYNC_URL=data.syncUrl;}catch(e){}
+        } else {
+          // Preserve existing sync URL
+          try{var _existingUrl=localStorage.getItem('hs_sync_url');if(_existingUrl)SYNC_URL=_existingUrl;}catch(e){}
+        }
         save(); launch(); toast('Data imported ✓');
       } catch(e){toast('Import failed: '+e.message,true);}
     };
