@@ -3530,14 +3530,30 @@ function getWeeklySummary(anchorDate) {
 
 // === DATA EXPORT / IMPORT ===
 function exportData() {
-  var data = {exportDate:new Date().toISOString(), profile:P, weightLog:WL, mealLog:ML, sleepLog:SL, drinkLog:DL, fitnessLog:FL};
+  // Include ALL data stores
+  var myFoods=[];
+  try{myFoods=JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){}
+  var bpl=[];
+  try{bpl=JSON.parse(localStorage.getItem('hs_bpl')||'[]');}catch(e){}
+  var avatar='';
+  try{avatar=localStorage.getItem('hs_avatar')||'';}catch(e){}
+  var syncUrl='';
+  try{syncUrl=localStorage.getItem('hs_sync_url')||'';}catch(e){}
+  var data = {
+    exportDate:new Date().toISOString(),
+    profile:P, weightLog:WL, mealLog:ML, sleepLog:SL,
+    drinkLog:DL, fitnessLog:FL,
+    myFoods:myFoods, bloodPressureLog:bpl,
+    syncUrl:syncUrl
+  };
+  // Note: avatar not included (too large for JSON)
   var json = JSON.stringify(data, null, 2);
   var b = new Blob([json], {type:'application/json'});
   var url = URL.createObjectURL(b);
   var a = document.createElement('a');
   a.href=url; a.download='HealthStephan-'+today()+'.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url); toast('Data exported');
+  URL.revokeObjectURL(url); toast('Data exported ✓');
 }
 function importData() {
   var inp = document.createElement('input');
@@ -3552,7 +3568,11 @@ function importData() {
         if(!confirm('Replace all data with this backup?'))return;
         P=data.profile; WL=data.weightLog||[]; ML=data.mealLog||[];
         SL=data.sleepLog||[]; DL=data.drinkLog||[]; FL=data.fitnessLog||[];
-        save(); launch(); toast('Data imported');
+        // Restore additional stores
+        if(data.myFoods) try{localStorage.setItem('hs_myfoods',JSON.stringify(data.myFoods));}catch(e){}
+        if(data.bloodPressureLog) try{localStorage.setItem('hs_bpl',JSON.stringify(data.bloodPressureLog));}catch(e){}
+        if(data.syncUrl) try{localStorage.setItem('hs_sync_url',data.syncUrl);SYNC_URL=data.syncUrl;}catch(e){}
+        save(); launch(); toast('Data imported ✓');
       } catch(e){toast('Import failed: '+e.message,true);}
     };
     reader.readAsText(file);
