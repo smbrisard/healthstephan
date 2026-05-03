@@ -903,22 +903,34 @@ body { height: 100dvh; }
 
       <!-- Macros grid -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <div class="flbl">Calories</div>
-          <input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0" oninput="_cfBaseCals=parseFloat(this.value)||0">
-        </div>
-        <div>
-          <div class="flbl">Protein (g)</div>
-          <input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseProt=parseFloat(this.value)||0">
-        </div>
-        <div>
-          <div class="flbl">Carbs (g)</div>
-          <input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseCarbs=parseFloat(this.value)||0">
-        </div>
-        <div>
-          <div class="flbl">Fat (g)</div>
-          <input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseFat=parseFloat(this.value)||0">
-        </div>
+        <div><div class="flbl">Calories</div>
+          <input class="fld" type="number" id="cf-cals" placeholder="0" style="margin-bottom:0" oninput="_cfBaseCals=parseFloat(this.value)||0"></div>
+        <div><div class="flbl">Protein (g)</div>
+          <input class="fld" type="number" id="cf-prot" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseProt=parseFloat(this.value)||0"></div>
+        <div><div class="flbl">Carbs (g)</div>
+          <input class="fld" type="number" id="cf-carbs" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseCarbs=parseFloat(this.value)||0"></div>
+        <div><div class="flbl">Fat (g)</div>
+          <input class="fld" type="number" id="cf-fat" placeholder="0" step="0.1" style="margin-bottom:0" oninput="_cfBaseFat=parseFloat(this.value)||0"></div>
+      </div>
+      <!-- Micronutrients -->
+      <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:6px">MICRONUTRIENTS (OPTIONAL)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div><div class="flbl">Fiber (g)</div>
+          <input class="fld" type="number" id="cf-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Sugar (g)</div>
+          <input class="fld" type="number" id="cf-sugar" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Sodium (mg)</div>
+          <input class="fld" type="number" id="cf-sodium" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Sat. Fat (g)</div>
+          <input class="fld" type="number" id="cf-satfat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Potassium (mg)</div>
+          <input class="fld" type="number" id="cf-potassium" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Calcium (mg)</div>
+          <input class="fld" type="number" id="cf-calcium" placeholder="0" style="margin-bottom:0"></div>
+        <div><div class="flbl">Iron (mg)</div>
+          <input class="fld" type="number" id="cf-iron" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+        <div><div class="flbl">Cholesterol (mg)</div>
+          <input class="fld" type="number" id="cf-cholest" placeholder="0" style="margin-bottom:0"></div>
       </div>
 
       <!-- Meal type -->
@@ -1291,14 +1303,6 @@ function rHome() {
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
-  // Streak
-  var _sk=calcStreak();
-  var _ske=g('hm-streak');
-  if(_ske) _ske.textContent=_sk>0?'⚡ '+_sk+' day streak':'';
-  // Calorie bar
-  var _eaten=tTotal(),_rem=P.calTarget-_eaten,_pct=Math.min(_eaten/(P.calTarget||2200),1);
-  var _cb=g('hm-cal-bar'); if(_cb){_cb.style.width=Math.min(_pct*100,100)+'%';_cb.style.background=_eaten>P.calTarget?'var(--red)':'var(--grn)';}
-  var _cl=g('hm-cal-lbl'); if(_cl) _cl.textContent=fN(_eaten)+' / '+fN(P.calTarget)+' kcal • '+(_rem>=0?fN(_rem)+' left':fN(Math.abs(_rem))+' over');
   // Suggestions
   try { var _sugg=getMealSuggestions(), _se=g('hm-suggestions');
   if(_se&&_sugg.length){
@@ -1358,8 +1362,6 @@ function rHome() {
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist||0,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr||0,true,' bpm');
-    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
-    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
     _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
     _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
   } else {
@@ -3495,12 +3497,11 @@ function openCustomFood() {
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
   var cs=g('cf-search'); if(cs) cs.value='';
   var srv=g('cf-srv'); if(srv) srv.value='1';
-  ['cf-name','cf-cals','cf-prot','cf-carbs','cf-fat'].forEach(function(id){
+  ['cf-name','cf-cals','cf-prot','cf-carbs','cf-fat','cf-fiber','cf-sugar',
+   'cf-sodium','cf-satfat','cf-potassium','cf-calcium','cf-iron','cf-cholest'].forEach(function(id){
     var el=g(id); if(el) el.value='';
   });
   var _cemoji=g('cf-emoji'); if(_cemoji) _cemoji.value='';
-  if(g('cf-cals')) g('cf-cals').value=''; if(g('cf-prot')) g('cf-prot').value='';
-  if(g('cf-carbs')) g('cf-carbs').value=''; if(g('cf-fat')) g('cf-fat').value='';
   var ct=g('cf-type'); if(ct) ct.value=mealTab||'snack';
   openM('custom-food-m');
 }
@@ -3649,7 +3650,13 @@ function saveToMyFoods(){
   var fat=parseFloat((g('cf-fat')||{value:0}).value)||0;
   var myFoods=loadMyFoods();
   if(myFoods.find(function(f){return f.n.toLowerCase()===name.toLowerCase();})){toast('Already saved!');return;}
-  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,fi:0,su:0,as:0,sf:0,na:0,ch:0,po:0,ca:0,ir:0,vc:0,vd:0,va:0,custom:true});
+  var _mfi=parseFloat((g('cf-fiber')||{value:0}).value)||0;
+  var _mna=parseFloat((g('cf-sodium')||{value:0}).value)||0;
+  var _mir=parseFloat((g('cf-iron')||{value:0}).value)||0;
+  var _mpo=parseFloat((g('cf-potassium')||{value:0}).value)||0;
+  var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
+  var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
+  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,fi:_mfi,su:0,as:0,sf:0,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,vc:0,vd:0,va:0,custom:true});
   saveMyFoods(myFoods);
   toast('\u2713 '+name+' saved to My Foods!');
 }
@@ -3681,10 +3688,18 @@ function cfAdd() {
   }
 
   var _srv=parseFloat((g('cf-srv')||{value:1}).value)||1;
+  var iron2=parseFloat((g('cf-iron')||{value:0}).value)||0;
+  var potassium2=parseFloat((g('cf-potassium')||{value:0}).value)||0;
+  var calcium2=parseFloat((g('cf-calcium')||{value:0}).value)||0;
+  var sugar2=parseFloat((g('cf-sugar')||{value:0}).value)||0;
+  var satFat2=parseFloat((g('cf-satfat')||{value:0}).value)||0;
+  var cholest2=parseFloat((g('cf-cholest')||{value:0}).value)||0;
   ML.push({id:Date.now(),date:date,name:name+(_srv!==1?' x'+fD(_srv,1):''),emoji:emoji,type:type,
     cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
-    fiber:Math.round(fiber*_srv*10)/10,sugar:0,satFat:0,sodium:Math.round(sodium*_srv),
-    cholest:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0});
+    fiber:Math.round(fiber*_srv*10)/10,sugar:Math.round(sugar2*_srv*10)/10,satFat:Math.round(satFat2*_srv*10)/10,
+    sodium:Math.round(sodium*_srv),cholest:Math.round(cholest2*_srv),
+    potassium:Math.round(potassium2*_srv),calcium:Math.round(calcium2*_srv),
+    iron:Math.round(iron2*_srv*10)/10,vitC:0,vitD:0});
   P.mealsLogged=(P.mealsLogged||0)+1;
   save(); closeM('custom-food-m'); rFood(); rHome();
   toast(name+' added');
