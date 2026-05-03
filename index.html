@@ -2698,7 +2698,8 @@ function saveDrinkEdit(){
     if(DL[i].id===_editDrinkId){
       var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
       if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
-      if(du) DL[i].u=parseFloat(du.value)||0;
+      var _editNonAlc=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
+      if(du) DL[i].u=_editNonAlc?0:(parseFloat(du.value)||0);
       if(dd&&dd.value) DL[i].date=dd.value;
       break;
     }
@@ -2751,7 +2752,10 @@ function adjDQ(d){dQty=Math.max(1,dQty+d); set('dm-qty',dQty); if(selDr) set('dm
 function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
-  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,e:selDr.e,c:selDr.c,u:selDr.u,cat:selDr.cat,sugar:selDr.sg||0,carbs:selDr.cb||0,vol:selDr.vol||0});
+  var _isNonAlc=['water','tea','coffee','soft','choc'].indexOf(selDr.cat)>=0;
+  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i,date:ld,n:selDr.n,
+    e:selDr.e,c:selDr.c,u:_isNonAlc?0:(selDr.u||0),cat:selDr.cat,
+    sugar:selDr.sg||0,carbs:selDr.cb||0,vol:selDr.vol||0});
   save(); closeM('dr-m'); rDrinks(); toast('Drink logged!');
 }
 
@@ -3112,6 +3116,15 @@ function launchApp(){
   dedupML(); dedupDL();
   // Backfill micronutrients from FOODS DB for existing entries
   migrateMLMicronutrients();
+  // Fix any non-alcoholic drinks that incorrectly have u>0
+  var _nonAlcCats=['water','tea','coffee','soft','choc'];
+  var _fixedUnits=false;
+  DL.forEach(function(d){
+    if(_nonAlcCats.indexOf(d.cat)>=0&&(d.u||0)>0){
+      d.u=0; _fixedUnits=true;
+    }
+  });
+  if(_fixedUnits){save();console.log('Fixed non-alcoholic drink units');}
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
