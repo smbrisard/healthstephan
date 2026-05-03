@@ -2143,34 +2143,39 @@ function rFoodGrid() {
   var ge=g('food-grid'); if(!ge) return;
   var _deletedFoods=loadDeletedFoods();
   var myFoods=loadMyFoods();
-  // Custom category shows ONLY My Foods
+  // Custom category: ONLY My Foods
   if(fCat==='custom'){
     if(!myFoods.length){
       g('food-grid').innerHTML=D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:13px"',
         'No custom foods yet. Use + Custom to add your own foods.');
       return;
     }
-    var list=myFoods.map(function(f){return Object.assign({},f,{_custom:true,cat:'custom'});});
+    // ONLY show myFoods - never built-in database items
+    var list=myFoods.map(function(f){return Object.assign({},f,{_custom:true});});
   } else {
-  var allFoods=myFoods.map(function(f){return Object.assign({},f,{_custom:true});}).concat(FOODS);
-  var list=allFoods.filter(function(f){
-    if(_deletedFoods.indexOf(f.n)>=0) return false;
-    return fCat==='all' || f.cat===fCat;
-  });
+    // Other categories: built-in FOODS + myFoods that match category
+    var myFoodsInCat=myFoods
+      .filter(function(f){return fCat==='all'||(f.cat&&f.cat===fCat);})
+      .map(function(f){return Object.assign({},f,{_custom:true});});
+    var builtInInCat=FOODS.filter(function(f){
+      if(_deletedFoods.indexOf(f.n)>=0) return false;
+      return fCat==='all' || f.cat===fCat;
+    });
+    var list=myFoodsInCat.concat(builtInInCat);
   }
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
     var idx=FOODS.indexOf(f); var over=f.c>rem&&rem>0;
     var _isCustomFood=f._custom||f.custom||false;
     var _fidx=_isCustomFood?-1:FOODS.indexOf(f);
-    // Make delete button more prominent for custom foods
-    var _delSize=_isCustomFood?'26px':'22px';
-    var _delBg=_isCustomFood?'rgba(255,59,92,.25)':'rgba(255,59,92,.15)';
-    var _delArg=_isCustomFood?''+_myIdx:'\''+f.n+'\'';
-    var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB('+_delArg+','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
-    // Use index for custom foods to avoid name escaping issues
+    // Compute index FIRST so _delArg can use it
     var _myIdx=_isCustomFood?loadMyFoods().findIndex(function(x){return x.n===f.n;}): -1;
     var _clickFn=_isCustomFood?'addMyFoodToLog('+_myIdx+')':'openFood('+_fidx+')';
+    // Delete button - use index for custom, name for built-in
+    var _delSize=_isCustomFood?'26px':'22px';
+    var _delBg=_isCustomFood?'rgba(255,59,92,.25)':'rgba(255,59,92,.15)';
+    var _delArg=_isCustomFood?_myIdx:'\''+f.n+'\'';
+    var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB('+_delArg+','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
     return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
