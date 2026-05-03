@@ -946,7 +946,10 @@ body { height: 100dvh; }
         <option value="snack">Snack</option>
       </select>
 
-      <button onclick="saveCustomFood()" class="btn btn-r" style="width:100%;margin-bottom:8px">Add Food</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <button onclick="saveCustomFood()" class="btn btn-r">Add to Log</button>
+        <button onclick="saveToMyFoods();closeM('cf-m')" style="padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;touch-action:manipulation">Save Only</button>
+      </div>
       <button onclick="saveToMyFoods()" style="width:100%;padding:12px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:600;margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Foods</button>
       <button onclick="closeM('custom-food-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
     </div>
@@ -3106,6 +3109,13 @@ function migrateMLMicronutrients(){
   ML.forEach(function(m){
     // Find matching food in DB by name (strip serving suffix like " x1.5")
     var baseName=m.name.replace(/\s+x\d+\.?\d*$/,'').trim();
+    // Also clear obviously wrong stored emojis (pizza=127829 on non-pizza items)
+    var _wrongEmojis=['&#127829;','\uD83C\uDF55'];
+    if(m.emoji&&_wrongEmojis.indexOf(m.emoji)>=0&&
+       baseName.toLowerCase().indexOf('pizza')<0&&
+       baseName.toLowerCase().indexOf('wrap')<0){
+      m.emoji=''; migrated++;
+    }
     var food=FOODS.find(function(f){
       return f.n===baseName||f.n===m.name||
              f.n.toLowerCase()===baseName.toLowerCase();
@@ -3739,6 +3749,15 @@ function cfSelect(idx) {
 
 // Custom user food database stored separately
 function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
+function deleteMyFood(name){
+  var myFoods=loadMyFoods();
+  myFoods=myFoods.filter(function(f){return f.n!==name;});
+  saveMyFoods(myFoods);
+  toast('Removed from My Foods');
+  // Refresh search results
+  var sr=g('cf-results');
+  if(sr) sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Deleted. Search again to refresh.</div>';
+}
 function saveMyFoods(arr){try{localStorage.setItem('hs_myfoods',JSON.stringify(arr));}catch(e){}}
 function saveToMyFoods(){
   var name=(g('cf-name')||{value:''}).value.trim();
@@ -3801,8 +3820,8 @@ function cfAdd() {
     potassium:Math.round(potassium2*_srv),calcium:Math.round(calcium2*_srv),
     iron:Math.round(iron2*_srv*10)/10,vitC:0,vitD:0});
   P.mealsLogged=(P.mealsLogged||0)+1;
-  save(); closeM('custom-food-m'); rFood(); rHome();
-  toast(name+' added');
+  save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome();
+  toast(name+' \u2713 added to log!');
 }
 
 // Barcode scanning via camera
