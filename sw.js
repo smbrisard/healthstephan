@@ -1,5 +1,5 @@
-/* v21aj-FINAL 1777838498 */
-var CACHE='hs-v21aj';
+/* v21ak 1777840309 */
+var CACHE='hs-v21ak';
 self.addEventListener('install',function(e){self.skipWaiting();});
 self.addEventListener('activate',function(e){
   e.waitUntil(caches.keys().then(function(keys){

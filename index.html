@@ -2135,7 +2135,8 @@ function rFoodGrid() {
     var _delSize=_isCustomFood?'26px':'22px';
     var _delBg=_isCustomFood?'rgba(255,59,92,.25)':'rgba(255,59,92,.15)';
     var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB(\''+f.n+'\','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
-    return D('class="ftile" style="position:relative" onclick="openFood('+_fidx+')"',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    var _clickFn=_isCustomFood?'addMyFoodToLog("'+f.n+'")':'openFood('+_fidx+')';
+    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"'',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -3816,6 +3817,26 @@ function loadDeletedFoods(){
 function saveDeletedFoods(arr){
   try{localStorage.setItem('hs_deleted_foods',JSON.stringify(arr));}catch(e){}
 }
+function addMyFoodToLog(name){
+  var myFoods=loadMyFoods();
+  var f=myFoods.find(function(x){return x.n===name;});
+  if(!f){toast('Food not found',true);return;}
+  var ld=foodChartDate||today();
+  ML.push({id:Date.now(),date:ld,
+    name:f.n,emoji:f.e||'&#127869;',type:mealTab.toLowerCase(),
+    cals:f.c||0,protein:f.pr||0,carbs:f.cb||0,fat:f.f||0,
+    fiber:f.fi||0,sugar:f.su||0,satFat:f.sf||0,sodium:f.na||0,
+    cholest:f.ch||0,potassium:f.po||0,calcium:f.ca||0,
+    iron:f.ir||0,vitC:f.vc||0,vitD:f.vd||0});
+  save();
+  // Collapse grid after adding
+  var db=g('food-db-section'),fbtn=g('food-browse-btn');
+  if(db) db.style.display='none';
+  if(fbtn){fbtn.style.display='block';fbtn.textContent='\uD83C\uDF7D Browse foods \u25BC';}
+  rFood(); rHome(); rNutrition();
+  toast(f.n+' added to '+mealTab+'!');
+}
+
 function deleteFoodFromDB(name,isCustom){
   if(!confirm('Remove "'+name+'" from the database?')) return;
   if(isCustom){
