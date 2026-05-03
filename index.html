@@ -1290,7 +1290,9 @@ function rHome() {
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
   // Consider sync as today if date matches OR if synced recently (within 4hrs)
-  var _isToday=!P.lastSyncDate||P.lastSyncDate===today()||P.lastSyncDate===yesterday();
+  // Show daily metrics if synced within 20 hours
+  var _syncAgeHrs=P.lastSyncAt?(Date.now()-P.lastSyncAt)/3600000:999;
+  var _isToday=!P.lastSyncDate||_syncAgeHrs<20;
   set('hm-steps',_isToday?fN(Math.round(P.stepsToday||0)):'--');
   // Show totalBurned if synced today, restingEnergy as baseline if not
   var _burnedVal=_isToday?(P.totalBurned||P.burned||0):(P.restingEnergy||0);
@@ -2123,6 +2125,7 @@ function openMealEdit(id) {
   _editMealId=id;
   var idStore=g('me-id-store'); if(idStore) idStore.value=id;
   var info=g('meal-edit-info'); if(info) info.innerHTML=((getFoodEmoji(m.name)||m.emoji||'&#127869;'))+' <strong>'+m.name+'</strong>';
+  var _meEmojiEl=g('me-emoji'); if(_meEmojiEl) _meEmojiEl.value=m.emoji||'';
   _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
   var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
@@ -2153,6 +2156,8 @@ function saveMealEdit() {
       if(mf&&mf.value!=='') ML[i].fat=parseFloat(mf.value)||0;
       // Type - keep original case pattern used elsewhere (lowercase)
       if(mt&&mt.value) ML[i].type=mt.value.toLowerCase();
+      // Save custom emoji if user changed it
+      var _meEm=g('me-emoji'); if(_meEm&&_meEm.value.trim()) ML[i].emoji=_meEm.value.trim();
       // Date - ONLY update if user changed it AND it's a valid date matching YYYY-MM-DD
       if(md&&md.value&&/^\d{4}-\d{2}-\d{2}$/.test(md.value)){
         ML[i].date=md.value;
@@ -3307,8 +3312,12 @@ function fetchSync(){
     // Smart date gating - accept daily data only if within 1 day of today
     // This handles Pacific timezone (UTC-7/8) where HAE date can be 'yesterday'
     P.lastSyncDate=d.date||today();
+    P.lastSyncAt=d.syncedAt?new Date(d.syncedAt).getTime():Date.now();
     var _syncDate=d.date||today();
-    var _syncIsRecent=(_syncDate===today()||_syncDate===yesterday());
+    // Use syncedAt timestamp for freshness - reliable regardless of timezone
+    // syncedAt is UTC 'now' when HAE fires, so within 20hrs = today's data
+    var _syncAge=d.syncedAt?(Date.now()-new Date(d.syncedAt).getTime())/3600000:999;
+    var _syncIsRecent=_syncAge<20;  // synced within 20 hours = fresh
     var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
       'standHours','exerciseMins','totalBurned','restingEnergy'];
     var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','bpSystolic','bpDiastolic'];
