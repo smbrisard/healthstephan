@@ -496,6 +496,7 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('snacks',this)">Snacks</div>
           <div class="pill" onclick="setFCat('supplements',this)">Supplements</div>
           <div class="pill" onclick="setFCat('starbucks',this)">Starbucks</div>
+          <div class="pill" onclick="setFCat('custom',this)">⭐ Custom</div>
         </div>
         <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127869; Browse foods &#9660;</button>
         <div id="food-restore-bar" style="display:none;text-align:center;margin-bottom:6px">
@@ -2093,11 +2094,16 @@ function openFoodBrowser() {
 function setFCat(cat, btn) {
   fCat=cat;
   document.querySelectorAll('#food-cats .pill').forEach(function(p){p.classList.remove('on');p.style.cssText='';});
-  btn.classList.add('on'); btn.style.background='var(--grn)'; btn.style.color='#000'; btn.style.borderColor='transparent';
+  btn.classList.add('on');
+  // Custom pill uses green, others use standard green
+  btn.style.background='var(--grn)'; btn.style.color='#000'; btn.style.borderColor='transparent';
   // Show grid, update browse button text but keep it visible
   var db=g('food-db-section'),fbtn=g('food-browse-btn');
   if(db) db.style.display='block';
-  if(fbtn){fbtn.style.display='block';fbtn.textContent='\uD83C\uDF7D Browse foods \u25B2';}
+  if(fbtn){
+    fbtn.style.display='block';
+    fbtn.textContent=cat==='custom'?'\u2B50 My Custom Foods \u25B2':'\uD83C\uDF7D Browse foods \u25B2';
+  }
   rFoodGrid();
 }
 
@@ -2105,17 +2111,30 @@ function rFoodGrid() {
   var ge=g('food-grid'); if(!ge) return;
   var _deletedFoods=loadDeletedFoods();
   var myFoods=loadMyFoods();
+  // Custom category shows ONLY My Foods
+  if(fCat==='custom'){
+    if(!myFoods.length){
+      g('food-grid').innerHTML=D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:13px"',
+        'No custom foods yet. Use + Custom to add your own foods.');
+      return;
+    }
+    var list=myFoods.map(function(f){return Object.assign({},f,{_custom:true,cat:'custom'});});
+  } else {
   var allFoods=myFoods.map(function(f){return Object.assign({},f,{_custom:true});}).concat(FOODS);
   var list=allFoods.filter(function(f){
     if(_deletedFoods.indexOf(f.n)>=0) return false;
     return fCat==='all' || f.cat===fCat;
   });
+  }
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
     var idx=FOODS.indexOf(f); var over=f.c>rem&&rem>0;
     var _isCustomFood=f._custom||f.custom||false;
     var _fidx=_isCustomFood?-1:FOODS.indexOf(f);
-    var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB(\''+f.n+'\','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--red);font-size:13px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u00d7');
+    // Make delete button more prominent for custom foods
+    var _delSize=_isCustomFood?'26px':'22px';
+    var _delBg=_isCustomFood?'rgba(255,59,92,.25)':'rgba(255,59,92,.15)';
+    var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB(\''+f.n+'\','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
     return D('class="ftile" style="position:relative" onclick="openFood('+_fidx+')"',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
