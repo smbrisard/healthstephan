@@ -4003,7 +4003,7 @@ function cfAdd() {
   var fat=parseFloat((g('cf-fat')||{value:0}).value)||0;
   var fiber=parseFloat((g('cf-fiber')||{value:0}).value)||0;
   var sodium=parseFloat((g('cf-sodium')||{value:0}).value)||0;
-  var emoji=(g('cf-emoji')||{value:''}).value||'&#127829;';
+  var emoji=decodeEmoji((g('cf-emoji')||{value:''}).value)||getFoodEmoji((g('cf-name')||{value:''}).value)||'&#127869;';
   var type=(g('cf-type')||{value:mealTab}).value||mealTab;
   var date=(g('cf-date')||{value:''}).value||todayLocal();
   if(!name){toast('Please enter a food name',true);return;}
