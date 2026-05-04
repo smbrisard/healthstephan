@@ -1255,7 +1255,6 @@ function toast(msg, warn) {
 
 // ═══ NAVIGATION ═══
 function showTab(name) {
-  loadAvatar();
   document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
   var sc = g('sc-'+name); if(sc) sc.classList.add('on');
@@ -1332,7 +1331,6 @@ function obNext() {
 // ═══ HOME ═══
 function rHome() {
   try {
-  loadAvatar();
   // Auto-zero daily metrics if last sync date is not today or yesterday
   if(P.lastSyncDate&&P.lastSyncDate!==today()&&P.lastSyncDate!==yesterday()){
     ['stepsToday','burned','distMiles','walkMiles','cycleMiles',
@@ -2565,15 +2563,23 @@ function rSleep() {
 function slAdv(h){if(h>=7&&h<=9)return'Perfect. Keep it up!'; if(h>=6)return'Slightly under. Try 30 min earlier.'; if(h>9)return'Oversleeping may indicate fatigue.'; return'Under 6hrs impairs recovery. Aim for 7-9hrs.';}
 function slCalc() { var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440; var pe=g('sl-prev'); if(pe)pe.textContent=Math.floor(ms/60)+'h '+(ms%60)+'m'; }
 function syncSleepToProfile(){
-  // Keep P.sleepLast in sync with most recent SL entry
-  // This ensures Home, Fitness and History all show correct sleep value
-  if(!SL.length){P.sleepLast=null;return;}
-  var sorted=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  // Sync P.sleepLast from most recent SL entry (manual entries take priority)
+  if(!SL.length) return;
+  // Sort by date desc, prefer manual entries (autoSynced===false) when dates tie
+  var sorted=SL.slice().sort(function(a,b){
+    if(b.date!==a.date) return b.date.localeCompare(a.date);
+    // Same date: prefer manual over auto-synced
+    var aManual=a.autoSynced===false||a.autoSynced===undefined;
+    var bManual=b.autoSynced===false||b.autoSynced===undefined;
+    if(aManual&&!bManual) return -1;
+    if(!aManual&&bManual) return 1;
+    return 0;
+  });
   var latest=sorted[0];
   P.sleepLast=latest.hours;
   P.sleepBedtime=latest.bedtime||'';
   P.sleepWake=latest.wake||'';
-  P.lastSyncDate=latest.date; // keep date in sync for display
+  // NOTE: do NOT touch P.lastSyncDate - that's controlled by fetchSync only
 }
 
 function deleteSleep(idx){
