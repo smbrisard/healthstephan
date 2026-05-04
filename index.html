@@ -2587,6 +2587,15 @@ function deleteSleep(idx){
   var entry=sorted[idx];
   if(!entry) return;
   if(!confirm('Delete '+hHM(entry.hours)+' sleep on '+entry.date+'?')) return;
+  // Block auto-sync from re-adding for this date
+  var blockedDates=[];
+  try{blockedDates=JSON.parse(localStorage.getItem('hs_sleep_blocked')||'[]');}catch(e){}
+  if(blockedDates.indexOf(entry.date)<0){
+    blockedDates.push(entry.date);
+    // Only keep last 30 days of blocks
+    blockedDates=blockedDates.slice(-30);
+    try{localStorage.setItem('hs_sleep_blocked',JSON.stringify(blockedDates));}catch(e){}
+  }
   SL=SL.filter(function(s){return s.id!==entry.id;});
   syncSleepToProfile();
   save(); rSleep(); rHome(); rFitness();
@@ -3577,8 +3586,12 @@ function fetchSync(){
       // OR if the only existing entry is explicitly auto-synced
       var _allAutoSynced=_existingForDate.length>0&&_existingForDate.every(function(s){return s.autoSynced===true;});
       var _noEntry=_existingForDate.length===0;
-      if(_noEntry||_allAutoSynced){
-        // Safe to update - remove old auto entry and add fresh one
+      // Check if user has blocked auto-sync for this date (by deleting)
+      var _blockedDates=[];
+      try{_blockedDates=JSON.parse(localStorage.getItem('hs_sleep_blocked')||'[]');}catch(e){}
+      var _isBlocked=_blockedDates.indexOf(slDt)>=0;
+      if((_noEntry||_allAutoSynced)&&slHrs>=3&&!_isBlocked){
+        // Safe to update - only if sleep is at least 3hrs (avoids watch artifacts)
         SL=SL.filter(function(s){return s.date!==slDt||s.autoSynced!==true;});
         SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs,autoSynced:true});
         updated=true;
