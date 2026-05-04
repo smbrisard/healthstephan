@@ -3496,7 +3496,8 @@ function fetchSync(){
     var _syncIsRecent=_syncAge<20&&_dataIsToday;
     var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
       'standHours','exerciseMins','totalBurned','restingEnergy'];
-    var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','bpSystolic','bpDiastolic'];
+    // sleepLast is intentionally excluded - it's always derived from SL log via syncSleepToProfile()
+    var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
     if(_syncIsRecent){
       // Fresh data - update daily fields
@@ -3603,6 +3604,7 @@ function fetchSync(){
           if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
         }
       }
+      syncSleepToProfile(); // Always derive P.sleepLast from SL log after sync
       save();rHome();rFitness();rHealth();
       var sb=g('sync-badge');
       if(sb){var t=new Date(d.syncedAt||Date.now());
