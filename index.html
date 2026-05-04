@@ -2564,19 +2564,33 @@ function rSleep() {
 }
 function slAdv(h){if(h>=7&&h<=9)return'Perfect. Keep it up!'; if(h>=6)return'Slightly under. Try 30 min earlier.'; if(h>9)return'Oversleeping may indicate fatigue.'; return'Under 6hrs impairs recovery. Aim for 7-9hrs.';}
 function slCalc() { var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440; var pe=g('sl-prev'); if(pe)pe.textContent=Math.floor(ms/60)+'h '+(ms%60)+'m'; }
+function syncSleepToProfile(){
+  // Keep P.sleepLast in sync with most recent SL entry
+  // This ensures Home, Fitness and History all show correct sleep value
+  if(!SL.length){P.sleepLast=null;return;}
+  var sorted=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var latest=sorted[0];
+  P.sleepLast=latest.hours;
+  P.sleepBedtime=latest.bedtime||'';
+  P.sleepWake=latest.wake||'';
+  P.lastSyncDate=latest.date; // keep date in sync for display
+}
+
 function deleteSleep(idx){
   var sorted=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   var entry=sorted[idx];
   if(!entry) return;
   if(!confirm('Delete '+hHM(entry.hours)+' sleep on '+entry.date+'?')) return;
   SL=SL.filter(function(s){return s.id!==entry.id;});
-  save(); rSleep(); toast('Sleep entry deleted');
+  syncSleepToProfile();
+  save(); rSleep(); rHome(); rFitness();
+  toast('Sleep entry deleted');
 }
 
 function saveSleep() {
   var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', dt=(g('sl-date')||{value:''}).value||today();
   var bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440;
-  SL.push({id:Date.now(),date:dt,bedtime:bd,wake:wk,hours:ms/60,autoSynced:false}); save(); closeM('sl-m'); rSleep(); rHome();
+  SL.push({id:Date.now(),date:dt,bedtime:bd,wake:wk,hours:ms/60,autoSynced:false}); syncSleepToProfile(); save(); closeM('sl-m'); rSleep(); rHome(); rFitness();
   toast('Sleep logged - '+hHM(ms/60));
 }
 
@@ -3265,6 +3279,9 @@ function launchApp(){
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
+  syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
+  loadAvatar();
+  if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
   rHome();
 }
 function launch(){
