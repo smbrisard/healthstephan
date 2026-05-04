@@ -1332,7 +1332,12 @@ function obNext() {
 // ═══ HOME ═══
 function rHome() {
   try {
-  loadAvatar(); // Always restore photo first before anything resets the avatar
+  loadAvatar();
+  // Auto-zero daily metrics if last sync date is not today or yesterday
+  if(P.lastSyncDate&&P.lastSyncDate!==today()&&P.lastSyncDate!==yesterday()){
+    ['stepsToday','burned','distMiles','walkMiles','cycleMiles',
+     'standHours','exerciseMins','totalBurned'].forEach(function(k){P[k]=0;});
+  }
   var _hd=g('hm-date');
   if(_hd) _hd.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   var _nm=String(P.name||'Stephan'); var init=_nm.split(' ').filter(function(w){return w.length>0;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)||'ST';
@@ -1351,7 +1356,8 @@ function rHome() {
   // Consider sync as today if date matches OR if synced recently (within 4hrs)
   // Show daily metrics if synced within 20 hours
   var _syncAgeHrs=P.lastSyncAt?(Date.now()-P.lastSyncAt)/3600000:999;
-  var _isToday=!P.lastSyncDate||_syncAgeHrs<20;
+  var _dataDateOk=!P.lastSyncDate||(P.lastSyncDate===today()||P.lastSyncDate===yesterday());
+  var _isToday=_dataDateOk&&(!P.lastSyncAt||_syncAgeHrs<20);
   set('hm-steps',_isToday?fN(Math.round(P.stepsToday||0)):'--');
   // Show totalBurned if synced today, restingEnergy as baseline if not
   var _burnedVal=_isToday?(P.totalBurned||P.burned||0):(P.restingEnergy||0);
@@ -2552,14 +2558,14 @@ function rSleep() {
   set('sl-best',hrs.length?hHM(Math.max.apply(null,hrs)):'--');
   set('sl-worst',hrs.length?hHM(Math.min.apply(null,hrs)):'--');
   var le2=g('sl-log'); if(!le2) return;
-  le2.innerHTML=sorted.length?sorted.map(function(e){var ss=slSt(e.hours); return D('class="ritem"',D('class="ric" style="background:rgba(77,166,255,.1)"','&#128564;')+D('class="rmain"',D('class="rname"',hHM(e.hours))+D('class="rsub"',e.bedtime+' - '+e.wake+' - '+new Date(e.date+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'short'})))+D('style="flex-shrink:0"',D('class="badge '+ss.c+'" style="font-size:11px"',ss.l)));}).join(''):D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No entries yet.');
+  le2.innerHTML=sorted.length?sorted.map(function(e,si){var ss=slSt(e.hours); return D('class="ritem"',D('class="ric" style="background:rgba(77,166,255,.1)"','&#128564;')+D('class="rmain"',D('class="rname"',hHM(e.hours)+(e.autoSynced===false?' &#9998;':''))+D('class="rsub"',e.bedtime+' - '+e.wake+' - '+new Date(e.date+'T12:00').toLocaleDateString('en-US',{day:'numeric',month:'short'})))+D('style="flex-shrink:0"',D('class="badge '+ss.c+'" style="font-size:11px"',ss.l)));}).join(''):D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No entries yet.');
 }
 function slAdv(h){if(h>=7&&h<=9)return'Perfect. Keep it up!'; if(h>=6)return'Slightly under. Try 30 min earlier.'; if(h>9)return'Oversleeping may indicate fatigue.'; return'Under 6hrs impairs recovery. Aim for 7-9hrs.';}
 function slCalc() { var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440; var pe=g('sl-prev'); if(pe)pe.textContent=Math.floor(ms/60)+'h '+(ms%60)+'m'; }
 function saveSleep() {
   var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', dt=(g('sl-date')||{value:''}).value||today();
   var bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440;
-  SL.push({id:Date.now(),date:dt,bedtime:bd,wake:wk,hours:ms/60}); save(); closeM('sl-m'); rSleep(); rHome();
+  SL.push({id:Date.now(),date:dt,bedtime:bd,wake:wk,hours:ms/60,autoSynced:false}); save(); closeM('sl-m'); rSleep(); rHome();
   toast('Sleep logged - '+hHM(ms/60));
 }
 
@@ -3450,7 +3456,10 @@ function fetchSync(){
     // Use syncedAt timestamp for freshness - reliable regardless of timezone
     // syncedAt is UTC 'now' when HAE fires, so within 20hrs = today's data
     var _syncAge=d.syncedAt?(Date.now()-new Date(d.syncedAt).getTime())/3600000:999;
-    var _syncIsRecent=_syncAge<20;  // synced within 20 hours = fresh
+    // Data is fresh only if BOTH: synced recently AND data date is today or yesterday
+    var _dataDate=d.date||today();
+    var _dataIsToday=(_dataDate===today()||_dataDate===yesterday());
+    var _syncIsRecent=_syncAge<20&&_dataIsToday;
     var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
       'standHours','exerciseMins','totalBurned','restingEnergy'];
     var fields=['rhr','hrv','spo2','rr','sleepLast','waterToday','bpSystolic','bpDiastolic'];
@@ -3463,7 +3472,7 @@ function fetchSync(){
         }
       });
     } else {
-      // Stale data (2+ days old) - zero out daily metrics
+      // Stale data OR data not from today/yesterday - zero out daily metrics
       _allDailyFields.forEach(function(k){P[k]=0;});
       updated=true;
     }
@@ -3499,10 +3508,17 @@ function fetchSync(){
       var slBed=d.sleepBedtime||'23:00';
       var slWake=d.sleepWake||'07:00';
       var slHrs=parseFloat(d.sleepLast);
-      // Always overwrite sleep entry for this date with latest sync data
-      SL=SL.filter(function(s){return s.date!==slDt;});
-      SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs});
-      updated=true;
+      // Only auto-sync if no manual entry exists for this date
+      // Manual entries have no 'autoSynced' flag
+      var _existingSleep=SL.find(function(s){return s.date===slDt;});
+      // Treat entries without autoSynced flag as manual (entered before this feature)
+      var _hasManual=_existingSleep&&(_existingSleep.autoSynced===false||_existingSleep.autoSynced===undefined);
+      if(!_hasManual){
+        // Remove previous auto-synced entry and add new one
+        SL=SL.filter(function(s){return s.date!==slDt||!s.autoSynced;});
+        SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs,autoSynced:true});
+        updated=true;
+      }
     }
     // Save BP from sync
     try{
