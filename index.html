@@ -3225,6 +3225,32 @@ function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localS
 
 
 // ═══ LAUNCH ═══
+function migrateSleepEntries(){
+  // For dates with multiple entries, keep only the one with lowest hours
+  // (manual entries tend to be more conservative/accurate)
+  // Also mark all remaining entries as manual to protect from future auto-sync
+  var byDate={};
+  SL.forEach(function(s){
+    if(!byDate[s.date]) byDate[s.date]=[];
+    byDate[s.date].push(s);
+  });
+  var changed=false;
+  Object.keys(byDate).forEach(function(dt){
+    if(byDate[dt].length>1){
+      // Multiple entries for same date - keep only manual or lowest
+      var manuals=byDate[dt].filter(function(s){return s.autoSynced!==true;});
+      var keep=manuals.length>0?manuals[0]:byDate[dt][0];
+      SL=SL.filter(function(s){return s.date!==dt||s.id===keep.id;});
+      changed=true;
+    }
+  });
+  // Mark all remaining entries without flag as manual
+  SL.forEach(function(s){
+    if(s.autoSynced===undefined){s.autoSynced=false; changed=true;}
+  });
+  if(changed){save(); console.log('Sleep entries migrated');}
+}
+
 function migrateMLMicronutrients(){
   // One-time migration: backfill micronutrients from FOODS DB for existing ML entries
   var migrated=0;
@@ -3285,6 +3311,7 @@ function launchApp(){
   var ob=g('ob'); if(ob) ob.style.display='none';
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
+  migrateSleepEntries(); // Fix duplicate sleep entries and mark all as manual
   syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
   loadAvatar();
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
@@ -3545,12 +3572,14 @@ function fetchSync(){
       var slHrs=parseFloat(d.sleepLast);
       // Only auto-sync if no manual entry exists for this date
       // Manual entries have no 'autoSynced' flag
-      var _existingSleep=SL.find(function(s){return s.date===slDt;});
-      // Treat entries without autoSynced flag as manual (entered before this feature)
-      var _hasManual=_existingSleep&&(_existingSleep.autoSynced===false||_existingSleep.autoSynced===undefined);
-      if(!_hasManual){
-        // Remove previous auto-synced entry and add new one
-        SL=SL.filter(function(s){return s.date!==slDt||!s.autoSynced;});
+      var _existingForDate=SL.filter(function(s){return s.date===slDt;});
+      // Only auto-add if NO entry exists for this date at all
+      // OR if the only existing entry is explicitly auto-synced
+      var _allAutoSynced=_existingForDate.length>0&&_existingForDate.every(function(s){return s.autoSynced===true;});
+      var _noEntry=_existingForDate.length===0;
+      if(_noEntry||_allAutoSynced){
+        // Safe to update - remove old auto entry and add fresh one
+        SL=SL.filter(function(s){return s.date!==slDt||s.autoSynced!==true;});
         SL.push({id:Date.now(),date:slDt,bedtime:slBed,wake:slWake,hours:slHrs,autoSynced:true});
         updated=true;
       }
