@@ -1,4 +1,4 @@
-/* v21ap 1777856742 */
+/* v21ap 1777857266 */
 var CACHE='hs-v21ap';
 self.addEventListener('install',function(e){self.skipWaiting();});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
