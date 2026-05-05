@@ -2246,7 +2246,8 @@ function rFoodGrid() {
     var _delBg=_isCustomFood?'rgba(255,59,92,.25)':'rgba(255,59,92,.15)';
     var _delArg=_isCustomFood?_myIdx:'\''+f.n+'\'';
     var _delBtn=D('onclick="event.stopPropagation();deleteFoodFromDB('+_delArg+','+_isCustomFood+')" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
-    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    var _editBtn=_isCustomFood?D('onclick="event.stopPropagation();editMyFood('+_myIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):'';
+    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_editBtn+_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+f.pr+'g C:'+f.cb+'g F:'+f.f+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -4097,6 +4098,32 @@ function addMyFoodToLog(idx){
   toast(f.n+' added to '+mealTab+'!');
 }
 
+function editMyFood(idx){
+  var myFoods=loadMyFoods();
+  var f=myFoods[idx];
+  if(!f) return;
+  // Open custom food form pre-filled with existing data
+  openCustomFood();
+  setTimeout(function(){
+    var fields={
+      'cf-name':f.n,'cf-emoji':f.e||'',
+      'cf-cals':f.c||0,'cf-prot':f.pr||0,'cf-carbs':f.cb||0,'cf-fat':f.f||0,
+      'cf-fiber':f.fi||0,'cf-sugar':f.su||0,'cf-sodium':f.na||0,
+      'cf-satfat':f.sf||0,'cf-potassium':f.po||0,'cf-calcium':f.ca||0,
+      'cf-iron':f.ir||0,'cf-cholest':f.ch||0
+    };
+    Object.keys(fields).forEach(function(id){
+      var el=g(id); if(el) el.value=fields[id];
+    });
+    _cfBaseCals=f.c||0; _cfBaseProt=f.pr||0;
+    _cfBaseCarbs=f.cb||0; _cfBaseFat=f.f||0;
+    var catEl=g('cf-cat'); if(catEl) catEl.value=f.cat||'custom';
+    // Remove old entry so re-saving replaces it
+    myFoods.splice(idx,1); saveMyFoods(myFoods);
+    toast('Edit and re-save to update');
+  },100);
+}
+
 function deleteFoodFromDB(nameOrIdx,isCustom){
   var mf=loadMyFoods();
   var displayName=isCustom?(mf[nameOrIdx]?mf[nameOrIdx].n:nameOrIdx):nameOrIdx;
@@ -4229,7 +4256,7 @@ function cfAdd() {
     potassium:Math.round(potassium2*_srv),calcium:Math.round(calcium2*_srv),
     iron:Math.round(iron2*_srv*10)/10,vitC:0,vitD:0});
   P.mealsLogged=(P.mealsLogged||0)+1;
-  save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome();
+  save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome(); rNutrition();
   toast(name+' \u2713 added to log!');
 }
 
