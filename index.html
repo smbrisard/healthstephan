@@ -4082,7 +4082,6 @@ function addMyFoodToLog(idx){
   var myFoods=loadMyFoods();
   var f=myFoods[idx];
   if(!f){toast('Food not found',true);return;}
-  toast('DB: su='+f.su+' po='+f.po,false);
   var ld=foodChartDate||today();
   ML.push({id:Date.now(),date:ld,
     name:f.n,emoji:f.e||'&#127869;',type:mealTab.toLowerCase(),
@@ -4199,7 +4198,9 @@ function saveToMyFoods(){
   var _msu=parseFloat((g('cf-sugar')||{value:0}).value)||0;
   var _msf=parseFloat((g('cf-satfat')||{value:0}).value)||0;
   var _mna=parseFloat((g('cf-sodium')||{value:0}).value)||0;
-  var _mpo=parseFloat((g('cf-potassium')||{value:0}).value)||0;
+  var _cfPotEl=g('cf-potassium');
+  var _mpo=_cfPotEl?parseFloat(_cfPotEl.value)||0:0;
+  console.log('cf-potassium el:',_cfPotEl,'value:',_cfPotEl&&_cfPotEl.value,'_mpo:',_mpo);
   var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
   var _mir=parseFloat((g('cf-iron')||{value:0}).value)||0;
   var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
@@ -4212,7 +4213,7 @@ function saveToMyFoods(){
   if(_ei>=0){
     myFoods[_ei]=_entry;
     saveMyFoods(myFoods);
-    toast('\u2713 '+name+' updated!');
+    toast('\u2713 Updated! su='+_msu+' po='+_mpo);
   } else {
     myFoods.push(_entry);
     saveMyFoods(myFoods);
