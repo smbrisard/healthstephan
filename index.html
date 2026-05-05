@@ -2246,7 +2246,7 @@ function rFoodLog() {
   var _flHdr=g('food-log-hdr');
   if(_flHdr){
     var _capTab=mealTab.charAt(0).toUpperCase()+mealTab.slice(1);
-    _flHdr.textContent=logDate===today()?_capTab+"'s Log - Today":_capTab+' Log - '+new Date(logDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    _flHdr.textContent=logDate===today()?_capTab+"'s Log - Today":_capTab+' Log - '+fmtChartDate(logDate);
   }
   var items=ML.filter(function(m){return m.date===logDate&&m.type.toLowerCase()===mealTab.toLowerCase();});
   if(!items.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No '+mealTab+' logged today.');return;}
@@ -2516,7 +2516,7 @@ function drawWtChart(entries) {
   var step=Math.max(1,Math.ceil(entries.length/5));
   entries.forEach(function(e,i){
     if(i===0||i===entries.length-1||i%step===0){
-      var d=new Date(e.date+'T12:00');
+      var d=fmtChartDate(e.date);
       var lbl=d.toLocaleDateString('en',{month:'short',day:'numeric'});
       var x=toX(i); if(x<20)x=20; if(x>W-20)x=W-20;
       ctx.fillText(lbl,x,H-1);
@@ -2880,10 +2880,10 @@ function rDrLog(){
   var td=DL.filter(function(d){return d.date===_drDate;}).sort(function(a,b){return b.id-a.id;});
   if(!td.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No drinks logged yet.'); return;}
   le.innerHTML=td.map(function(d){
-    var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',new Date(d.date+'T12:00').toLocaleDateString('en',{month:'short',day:'numeric'})):'';
+    var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',fmtChartDate(d.date)):'';
     return D('class="ritem"',
       D('class="ric" style="background:rgba(255,77,184,.1)"',d.e||'&#127866;')+
-      D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.date&&d.date!==today()?' - '+new Date(d.date+'T12:00').toLocaleDateString('en',{month:'short',day:'numeric'}):'' )))+
+      D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.date&&d.date!==today()?' - '+fmtChartDate(d.date):'')))+
       D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',
         D('class="rval" style="color:var(--pnk)"',fN(d.c))+
         D('style="width:28px;height:28px;border-radius:50%;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--pnk);touch-action:manipulation" onclick="openDrinkEdit('+d.id+')"','&#9998;')+
