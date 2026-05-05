@@ -4082,6 +4082,7 @@ function addMyFoodToLog(idx){
   var myFoods=loadMyFoods();
   var f=myFoods[idx];
   if(!f){toast('Food not found',true);return;}
+  toast('DB: su='+f.su+' po='+f.po,false);
   var ld=foodChartDate||today();
   ML.push({id:Date.now(),date:ld,
     name:f.n,emoji:f.e||'&#127869;',type:mealTab.toLowerCase(),
