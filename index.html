@@ -4216,6 +4216,10 @@ function saveToMyFoods(){
 }
 function saveCustomFood(){cfAdd();}
 function cfAdd() {
+  // Debug: show what fields contain
+  var _dbgSugar=g('cf-sugar'); var _dbgPot=g('cf-potassium');
+  var _dbgMsg='Sugar field: '+(_dbgSugar?_dbgSugar.value:'NULL')+' | Pot: '+(_dbgPot?_dbgPot.value:'NULL');
+  toast(_dbgMsg,false);
   var name=(g('cf-name')||{value:''}).value.trim();
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
   var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
