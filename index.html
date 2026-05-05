@@ -4190,36 +4190,37 @@ function saveToMyFoods(){
   var name=(g('cf-name')||{value:''}).value.trim();
   if(!name){toast('Enter a food name first');return;}
   var emoji=decodeEmoji((g('cf-emoji')||{value:''}).value)||'\uD83C\uDF7D';
-  var foodCat=(g('cf-cat')||{value:'custom'}).value||'custom';
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
   var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
   var carbs=parseFloat((g('cf-carbs')||{value:0}).value)||0;
   var fat=parseFloat((g('cf-fat')||{value:0}).value)||0;
-  var myFoods=loadMyFoods();
-  if(myFoods.find(function(f){return f.n.toLowerCase()===name.toLowerCase();})){toast('Already saved!');return;}
   var _mfi=parseFloat((g('cf-fiber')||{value:0}).value)||0;
-  var _mna=parseFloat((g('cf-sodium')||{value:0}).value)||0;
-  var _mir=parseFloat((g('cf-iron')||{value:0}).value)||0;
-  var _mpo=parseFloat((g('cf-potassium')||{value:0}).value)||0;
-  var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
-  var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
-  var _mfCat=(g('cf-cat')||{value:'custom'}).value||'custom';
   var _msu=parseFloat((g('cf-sugar')||{value:0}).value)||0;
   var _msf=parseFloat((g('cf-satfat')||{value:0}).value)||0;
-  myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,
+  var _mna=parseFloat((g('cf-sodium')||{value:0}).value)||0;
+  var _mpo=parseFloat((g('cf-potassium')||{value:0}).value)||0;
+  var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
+  var _mir=parseFloat((g('cf-iron')||{value:0}).value)||0;
+  var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
+  var _mfCat=(g('cf-cat')||{value:'custom'}).value||'custom';
+  var _entry={n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,
     fi:_mfi,su:_msu,as:0,sf:_msf,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,
-    vc:0,vd:0,va:0,cat:_mfCat,custom:true});
-  saveMyFoods(myFoods);
-  toast('\u2713 '+name+' saved!');
-  // Close modal if called standalone
+    vc:0,vd:0,va:0,cat:_mfCat,custom:true};
+  var myFoods=loadMyFoods();
+  var _ei=myFoods.findIndex(function(f){return f.n.toLowerCase()===name.toLowerCase();});
+  if(_ei>=0){
+    myFoods[_ei]=_entry;
+    saveMyFoods(myFoods);
+    toast('\u2713 '+name+' updated!');
+  } else {
+    myFoods.push(_entry);
+    saveMyFoods(myFoods);
+    toast('\u2713 '+name+' saved!');
+  }
   closeM('cf-m'); closeM('custom-food-m');
 }
 function saveCustomFood(){cfAdd();}
 function cfAdd() {
-  // Debug: show what fields contain
-  var _dbgSugar=g('cf-sugar'); var _dbgPot=g('cf-potassium');
-  var _dbgMsg='Sugar field: '+(_dbgSugar?_dbgSugar.value:'NULL')+' | Pot: '+(_dbgPot?_dbgPot.value:'NULL');
-  toast(_dbgMsg,false);
   var name=(g('cf-name')||{value:''}).value.trim();
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
   var prot=parseFloat((g('cf-prot')||{value:0}).value)||0;
