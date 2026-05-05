@@ -778,6 +778,17 @@ body { height: 100dvh; }
     <div class="fw"><div class="flbl">Protein (g)</div><input class="fld" type="number" id="me-prot" step="0.1"></div>
     <div class="fw"><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="me-carbs" step="0.1"></div>
     <div class="fw"><div class="flbl">Fat (g)</div><input class="fld" type="number" id="me-fat" step="0.1"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:6px;margin-top:4px">MICRONUTRIENTS (OPTIONAL)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="me-fiber" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sugar (g)</div><input class="fld" type="number" id="me-sugar" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sodium (mg)</div><input class="fld" type="number" id="me-sodium" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sat. Fat (g)</div><input class="fld" type="number" id="me-satfat" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Potassium (mg)</div><input class="fld" type="number" id="me-potassium" style="margin-bottom:0"></div>
+      <div><div class="flbl">Calcium (mg)</div><input class="fld" type="number" id="me-calcium" style="margin-bottom:0"></div>
+      <div><div class="flbl">Iron (mg)</div><input class="fld" type="number" id="me-iron" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Cholesterol (mg)</div><input class="fld" type="number" id="me-cholest" style="margin-bottom:0"></div>
+    </div>
     <div class="fw"><div class="flbl">Meal Type</div>
       <select class="fld" id="me-type">
         <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
@@ -2281,6 +2292,13 @@ function openMealEdit(id) {
   var idStore=g('me-id-store'); if(idStore) idStore.value=id;
   var info=g('meal-edit-info'); if(info) info.innerHTML=((m.emoji||getFoodEmoji(m.name)||'&#127869;'))+' <strong>'+m.name+'</strong>';
   var _meEmojiEl=g('me-emoji'); if(_meEmojiEl) _meEmojiEl.value=m.emoji||'';
+  // Populate micronutrients
+  var _meFlds=[['me-fiber','fiber'],['me-sugar','sugar'],['me-sodium','sodium'],
+    ['me-satfat','satFat'],['me-potassium','potassium'],['me-calcium','calcium'],
+    ['me-iron','iron'],['me-cholest','cholest']];
+  _meFlds.forEach(function(pair){
+    var el=g(pair[0]); if(el) el.value=m[pair[1]]||0;
+  });
   _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
   var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
@@ -2321,6 +2339,14 @@ function saveMealEdit() {
         ML[i].date=md.value;
       }
       // Reset serving counter
+      // Save micronutrients
+      var _meSaveFlds=[['me-fiber','fiber'],['me-sugar','sugar'],['me-sodium','sodium'],
+        ['me-satfat','satFat'],['me-potassium','potassium'],['me-calcium','calcium'],
+        ['me-iron','iron'],['me-cholest','cholest']];
+      _meSaveFlds.forEach(function(pair){
+        var el=g(pair[0]);
+        if(el) ML[i][pair[1]]=parseFloat(el.value)||ML[i][pair[1]]||0;
+      });
       _editMealId=null;
       var _idS=g('me-id-store'); if(_idS) _idS.value='';
       break;
