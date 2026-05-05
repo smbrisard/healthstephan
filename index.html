@@ -481,8 +481,6 @@ body { height: 100dvh; }
         </div>
 
         <!-- Recent foods -->
-        <div id="recent-foods-section" style="margin-bottom:10px"></div>
-
         <!-- Food database - category pills + browse -->
         <div class="pills" id="food-cats" style="margin-bottom:10px">
           <div class="pill on" onclick="setFCat('all',this)">All</div>
@@ -2109,15 +2107,48 @@ function showFoodGrid(){
 }
 
 function rFood() {
-  renderRecentFoods();
   rFoodChart();
   var eaten=tTotal(), rem=P.calTarget-eaten, pct=Math.min(eaten/P.calTarget,1);
   set('food-sub',fN(eaten)+' / '+fN(P.calTarget)+' kcal');
   var ro=182-(182*pct);
-  sH('food-summary',D('style="display:flex;align-items:center;gap:14px"',
-    D('style="position:relative;flex-shrink:0"','<svg width="72" height="72" viewBox="0 0 72 72" style="transform:rotate(-90deg)"><circle cx="36" cy="36" r="29" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/><circle cx="36" cy="36" r="29" fill="none" stroke="url(#fg2)" stroke-width="8" stroke-dasharray="182" stroke-dashoffset="'+ro+'" stroke-linecap="round"/><defs><linearGradient id="fg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs></svg>'+D('style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center"',S('style="font-family:var(--mn);font-size:13px;font-weight:800;color:var(--grn)"',Math.round(pct*100)+'%')))+
-    D('',D('style="font-size:12px;color:var(--dim);margin-bottom:2px"','Today')+D('style="font-family:var(--mn);font-size:22px;font-weight:800;letter-spacing:-.5px"',fN(eaten)+S('style="font-size:13px;color:var(--dim);font-weight:500"',' / '+fN(P.calTarget)))+D('style="font-size:13px;font-weight:600;margin-top:3px;color:'+(rem>=0?'var(--grn)':'var(--red)')+';"',rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal'))+
-    D('style="margin-left:auto;display:flex;flex-direction:column;gap:5px;font-size:12px;font-family:var(--mn)"',S('style="color:var(--grn)"','P '+Math.round(tN('protein'))+'g/'+Math.round(P.protein||150)+'g')+S('style="color:var(--blu)"','C '+Math.round(tN('carbs'))+'g/'+Math.round(P.carbs||200)+'g')+S('style="color:var(--amb)"','F '+Math.round(tN('fat'))+'g/'+Math.round(P.fat||65)+'g'))));
+  // Drinks-style banner with halo + progress bars
+  var _pr=Math.round(tN('protein')),_prT=Math.round(P.protein||150);
+  var _cb=Math.round(tN('carbs')),_cbT=Math.round(P.carbs||131);
+  var _ft=Math.round(tN('fat')),_ftT=Math.round(P.fat||42);
+  var _prPct=Math.min(_pr/_prT,1)*100,_cbPct=Math.min(_cb/_cbT,1)*100,_ftPct=Math.min(_ft/_ftT,1)*100;
+  var _ftOver=_ft>_ftT;
+  sH('food-summary',
+    '<div class="card" style="margin-bottom:13px;border-color:rgba(0,212,170,.2)">'+
+    '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">'+
+    // Halo ring
+    '<div style="position:relative;flex-shrink:0">'+
+    '<svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'+
+    '<circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/>'+
+    '<circle cx="40" cy="40" r="32" fill="none" stroke="url(#fgFood)" stroke-width="8" stroke-dasharray="201" stroke-dashoffset="'+(201-(201*pct))+'" stroke-linecap="round"/>'+
+    '<defs><linearGradient id="fgFood" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs></svg>'+
+    '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">'+
+    '<div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--grn)">'+Math.round(pct*100)+'%</div>'+
+    '</div></div>'+
+    // Calorie info
+    '<div style="flex:1">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:4px">TODAY\'S CALORIES</div>'+
+    '<div style="font-family:var(--mn);font-size:36px;font-weight:800;line-height:1;color:var(--txt)">'+fN(eaten)+'</div>'+
+    '<div style="font-size:13px;color:var(--dim);margin-top:2px">of '+fN(P.calTarget)+' kcal</div>'+
+    '<div style="font-size:13px;font-weight:700;margin-top:4px;color:'+(rem>=0?'var(--grn)':'var(--red)">')+
+      (rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal')+'</div>'+
+    '</div></div>'+
+    // Macro progress bars
+    '<div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">MACROS</div>'+
+    // Protein
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Protein</span><span style="font-family:var(--mn);font-weight:700;color:var(--grn)">'+_pr+'g / '+_prT+'g</span></div>'+
+    '<div style="height:5px;background:rgba(0,212,170,.12);border-radius:3px;margin-bottom:8px;overflow:hidden"><div style="height:100%;width:'+_prPct+'%;background:var(--grn);border-radius:3px;transition:width .4s"></div></div>'+
+    // Carbs
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Carbs</span><span style="font-family:var(--mn);font-weight:700;color:var(--blu)">'+_cb+'g / '+_cbT+'g</span></div>'+
+    '<div style="height:5px;background:rgba(77,166,255,.12);border-radius:3px;margin-bottom:8px;overflow:hidden"><div style="height:100%;width:'+_cbPct+'%;background:var(--blu);border-radius:3px;transition:width .4s"></div></div>'+
+    // Fat
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Fat</span><span style="font-family:var(--mn);font-weight:700;color:'+(_ftOver?'var(--red)':'var(--amb)')+'">'+_ft+'g / '+_ftT+'g'+(_ftOver?' ▲':'')+'</span></div>'+
+    '<div style="height:5px;background:rgba(255,184,48,.12);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+_ftPct+'%;background:'+(_ftOver?'var(--red)':'var(--amb)')+';border-radius:3px;transition:width .4s"></div></div>'+
+    '</div>');
   rFoodGrid();
   rFoodLog();
 }
