@@ -3379,6 +3379,16 @@ function launchApp(){
   var app=g('app'); if(app) app.style.display='flex';
   var td=today(); var wd=g('wt-date'); if(wd) wd.value=td; var sd=g('sl-date'); if(sd) sd.value=td; var hd=g('hist-date'); if(hd) hd.value=td;
   migrateSleepEntries(); // Fix duplicate sleep entries and mark all as manual
+  // Fix any My Foods entries with zero sugar/satFat (old save bug)
+  var _mfCheck=loadMyFoods();
+  var _mfFixed=false;
+  _mfCheck.forEach(function(f){
+    // Find matching ML entry with better data
+    var match=ML.filter(function(m){return m.name===f.n||m.name.indexOf(f.n)===0;});
+    if(match.length&&f.su===0&&match[0].sugar>0){f.su=match[0].sugar;_mfFixed=true;}
+    if(match.length&&f.sf===0&&match[0].satFat>0){f.sf=match[0].satFat;_mfFixed=true;}
+  });
+  if(_mfFixed){saveMyFoods(_mfCheck);}
   syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
   loadAvatar();
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
@@ -4141,8 +4151,10 @@ function saveToMyFoods(){
   var _mca=parseFloat((g('cf-calcium')||{value:0}).value)||0;
   var _mch=parseFloat((g('cf-cholest')||{value:0}).value)||0;
   var _mfCat=(g('cf-cat')||{value:'custom'}).value||'custom';
+  var _msu=parseFloat((g('cf-sugar')||{value:0}).value)||0;
+  var _msf=parseFloat((g('cf-satfat')||{value:0}).value)||0;
   myFoods.push({n:name,e:emoji,p:'custom',c:cals,pr:prot,cb:carbs,f:fat,
-    fi:_mfi,su:0,as:0,sf:0,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,
+    fi:_mfi,su:_msu,as:0,sf:_msf,na:_mna,ch:_mch,po:_mpo,ca:_mca,ir:_mir,
     vc:0,vd:0,va:0,cat:_mfCat,custom:true});
   saveMyFoods(myFoods);
   toast('\u2713 '+name+' saved!');
