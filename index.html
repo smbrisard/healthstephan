@@ -457,10 +457,7 @@ body { height: 100dvh; }
     <div class="scr" id="sc-food">
       <div class="phdr">
         <div><div class="ptitle">Food</div><div class="psub" id="food-sub">0 / 2,200 kcal</div></div>
-        <div style="display:flex;gap:8px">
-          <button onclick="openCustomFood()" style="padding:8px 14px;background:rgba(0,212,170,.1);border-radius:20px;border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">+ Custom</button>
-          <button onclick="openRecipeBuilder()" style="padding:8px 14px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.3);color:var(--amb);font-size:12px;font-weight:700;touch-action:manipulation">&#127859; Recipe</button>
-        </div>
+
       </div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
 
@@ -499,6 +496,14 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('fastfood',this)">🍔 Fast Food</div>
           <div class="pill" onclick="setFCat('custom',this)">⭐ Custom</div>
         </div>
+        <!-- Quick Add row - matches drinks layout -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="slbl" style="margin-bottom:0">Quick Add</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="openCustomFood()" style="padding:6px 14px;border-radius:20px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">+ Custom</button>
+            <button onclick="openRecipeBuilder()" style="padding:6px 14px;border-radius:20px;background:rgba(255,184,48,.1);border:.5px solid rgba(255,184,48,.3);color:var(--amb);font-size:12px;font-weight:700;touch-action:manipulation">&#127859; Recipe</button>
+          </div>
+        </div>
         <button onclick="showFoodGrid()" id="food-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127869; Browse foods &#9660;</button>
         <div id="food-restore-bar" style="display:none;text-align:center;margin-bottom:6px">
           <span onclick="restoreAllFoods()" style="font-size:11px;color:var(--dim);text-decoration:underline;cursor:pointer">Restore deleted foods</span>
@@ -506,8 +511,8 @@ body { height: 100dvh; }
         <div id="food-db-section" style="display:none">
           <div class="g2" id="food-grid" style="margin-bottom:10px"></div>
         </div>
-
-        <!-- Today's log for selected meal -->
+        <!-- Log header with dynamic date - matches drinks layout -->
+        <div class="slbl" id="food-log-hdr">Today's Log</div>
         <div id="food-log" style="margin-bottom:10px"></div>
 
       </div>
@@ -2117,37 +2122,53 @@ function rFood() {
   var _ft=Math.round(tN('fat')),_ftT=Math.round(P.fat||42);
   var _prPct=Math.min(_pr/_prT,1)*100,_cbPct=Math.min(_cb/_cbT,1)*100,_ftPct=Math.min(_ft/_ftT,1)*100;
   var _ftOver=_ft>_ftT;
+  var _remColor=rem>=0?'var(--grn)':'var(--red)';
+  var _remText=rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal';
   sH('food-summary',
     '<div class="card" style="margin-bottom:13px;border-color:rgba(0,212,170,.2)">'+
-    '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">'+
-    // Halo ring
-    '<div style="position:relative;flex-shrink:0">'+
-    '<svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg)">'+
-    '<circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/>'+
-    '<circle cx="40" cy="40" r="32" fill="none" stroke="url(#fgFood)" stroke-width="8" stroke-dasharray="201" stroke-dashoffset="'+(201-(201*pct))+'" stroke-linecap="round"/>'+
-    '<defs><linearGradient id="fgFood" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs></svg>'+
-    '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">'+
-    '<div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--grn)">'+Math.round(pct*100)+'%</div>'+
-    '</div></div>'+
-    // Calorie info
-    '<div style="flex:1">'+
-    '<div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:4px">TODAY\'S CALORIES</div>'+
-    '<div style="font-family:var(--mn);font-size:36px;font-weight:800;line-height:1;color:var(--txt)">'+fN(eaten)+'</div>'+
-    '<div style="font-size:13px;color:var(--dim);margin-top:2px">of '+fN(P.calTarget)+' kcal</div>'+
-    '<div style="font-size:13px;font-weight:700;margin-top:4px;color:'+(rem>=0?'var(--grn)':'var(--red)">')+
-      (rem>=0?fN(rem)+' remaining':'Over by '+fN(Math.abs(rem))+' kcal')+'</div>'+
-    '</div></div>'+
-    // Macro progress bars
-    '<div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">MACROS</div>'+
-    // Protein
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Protein</span><span style="font-family:var(--mn);font-weight:700;color:var(--grn)">'+_pr+'g / '+_prT+'g</span></div>'+
-    '<div style="height:5px;background:rgba(0,212,170,.12);border-radius:3px;margin-bottom:8px;overflow:hidden"><div style="height:100%;width:'+_prPct+'%;background:var(--grn);border-radius:3px;transition:width .4s"></div></div>'+
-    // Carbs
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Carbs</span><span style="font-family:var(--mn);font-weight:700;color:var(--blu)">'+_cb+'g / '+_cbT+'g</span></div>'+
-    '<div style="height:5px;background:rgba(77,166,255,.12);border-radius:3px;margin-bottom:8px;overflow:hidden"><div style="height:100%;width:'+_cbPct+'%;background:var(--blu);border-radius:3px;transition:width .4s"></div></div>'+
-    // Fat
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:var(--dim)">Fat</span><span style="font-family:var(--mn);font-weight:700;color:'+(_ftOver?'var(--red)':'var(--amb)')+'">'+_ft+'g / '+_ftT+'g'+(_ftOver?' ▲':'')+'</span></div>'+
-    '<div style="height:5px;background:rgba(255,184,48,.12);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+_ftPct+'%;background:'+(_ftOver?'var(--red)':'var(--amb)')+';border-radius:3px;transition:width .4s"></div></div>'+
+    // Top row: halo + calories side by side, perfectly centred
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'+
+      // Left: label + big number + remaining
+      '<div>'+
+        '<div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:6px">TODAY\'S CALORIES</div>'+
+        '<div style="font-family:var(--mn);font-size:42px;font-weight:800;line-height:1;color:var(--txt)">'+fN(eaten)+'</div>'+
+        '<div style="font-size:12px;color:var(--dim);margin-top:3px">of '+fN(P.calTarget)+' kcal</div>'+
+        '<div style="font-size:13px;font-weight:700;margin-top:5px;color:'+_remColor+'">'+_remText+'</div>'+
+      '</div>'+
+      // Right: halo ring centred
+      '<div style="position:relative;width:88px;height:88px;flex-shrink:0">'+
+        '<svg width="88" height="88" viewBox="0 0 88 88" style="transform:rotate(-90deg)">'+
+          '<circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>'+
+          '<circle cx="44" cy="44" r="36" fill="none" stroke="url(#fgFood)" stroke-width="9" stroke-dasharray="226" stroke-dashoffset="'+(226-(226*pct))+'" stroke-linecap="round"/>'+
+          '<defs><linearGradient id="fgFood" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs>'+
+        '</svg>'+
+        '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">'+
+          '<div style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)">'+Math.round(pct*100)+'%</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    // Divider
+    '<div style="height:.5px;background:rgba(255,255,255,.07);margin-bottom:12px"></div>'+
+    // Macro label - dimmer, smaller, like drinks page
+    '<div style="font-size:10px;font-weight:700;color:var(--dim2,var(--dim));letter-spacing:1px;margin-bottom:10px">MACROS</div>'+
+    // Protein bar
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+      '<span style="font-size:12px;color:var(--dim)">Protein</span>'+
+      '<span style="font-family:var(--mn);font-size:12px;font-weight:700;color:var(--grn)">'+_pr+'g / '+_prT+'g</span>'+
+    '</div>'+
+    '<div style="height:5px;background:rgba(0,212,170,.12);border-radius:3px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:'+_prPct+'%;background:var(--grn);border-radius:3px;transition:width .5s"></div></div>'+
+    // Carbs bar
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+      '<span style="font-size:12px;color:var(--dim)">Carbs</span>'+
+      '<span style="font-family:var(--mn);font-size:12px;font-weight:700;color:var(--blu)">'+_cb+'g / '+_cbT+'g</span>'+
+    '</div>'+
+    '<div style="height:5px;background:rgba(77,166,255,.12);border-radius:3px;margin-bottom:10px;overflow:hidden"><div style="height:100%;width:'+_cbPct+'%;background:var(--blu);border-radius:3px;transition:width .5s"></div></div>'+
+    // Fat bar
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+      '<span style="font-size:12px;color:var(--dim)">Fat</span>'+
+      '<span style="font-family:var(--mn);font-size:12px;font-weight:700;color:'+(_ftOver?'var(--red)':'var(--amb)')+'">'+_ft+'g / '+_ftT+'g'+(_ftOver?' ▲':'')+'</span>'+
+    '</div>'+
+    '<div style="height:5px;background:rgba(255,184,48,.12);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+_ftPct+'%;background:'+(_ftOver?'var(--red)':'var(--amb)')+';border-radius:3px;transition:width .5s"></div></div>'+
     '</div>');
   rFoodGrid();
   rFoodLog();
@@ -2221,6 +2242,12 @@ function rFoodGrid() {
 function rFoodLog() {
   var le=g('food-log'); if(!le) return;
   var logDate=foodChartDate||today();
+  // Update log header with meal + date - matches drinks behaviour
+  var _flHdr=g('food-log-hdr');
+  if(_flHdr){
+    var _capTab=mealTab.charAt(0).toUpperCase()+mealTab.slice(1);
+    _flHdr.textContent=logDate===today()?_capTab+"'s Log - Today":_capTab+' Log - '+new Date(logDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
   var items=ML.filter(function(m){return m.date===logDate&&m.type.toLowerCase()===mealTab.toLowerCase();});
   if(!items.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No '+mealTab+' logged today.');return;}
   var secCals=items.reduce(function(a,m){return a+(m.cals||0);},0);
