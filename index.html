@@ -2517,7 +2517,7 @@ function drawWtChart(entries) {
   entries.forEach(function(e,i){
     if(i===0||i===entries.length-1||i%step===0){
       var d=fmtChartDate(e.date);
-      var lbl=d.toLocaleDateString('en',{month:'short',day:'numeric'});
+      var lbl=fmtChartDate(e.date);
       var x=toX(i); if(x<20)x=20; if(x>W-20)x=W-20;
       ctx.fillText(lbl,x,H-1);
     }
@@ -4315,7 +4315,7 @@ function rHistory() {
       var flSnap=fls.length?fls[fls.length-1]:null;
       days30.push({
         dt:dt,
-        lbl:dd.toLocaleDateString('en',{month:'short',day:'numeric'}),
+        lbl:fmtChartDate(dt),
         wkd:dd.toLocaleDateString('en',{weekday:'short'}).slice(0,1),
         cals:cals,
         deficit:cals>0?P.calTarget-cals:null,
@@ -4329,7 +4329,7 @@ function rHistory() {
     var selDay=days30.filter(function(d){return d.dt===histDate;})[0]||null;
     if(sub){
       var sd=new Date(histDate+'T12:00');
-      sub.textContent=histDate===today()?'Today - '+sd.toLocaleDateString('en-US',{month:'short',day:'numeric'}):sd.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
+      sub.textContent=histDate===today()?'Today - '+fmtChartDate(histDate):fmtChartDate(histDate);
     }
 
     var html='';
