@@ -3706,6 +3706,7 @@ function launchApp(){
   if(_mfFixed){saveMyFoods(_mfCheck);}
   syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
   loadAvatar();
+  initSync(); // Re-run to ensure SYNC_URL loaded from localStorage
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
   rHome();
 }
@@ -4051,6 +4052,7 @@ function fetchSync(){
   }).catch(function(e){console.log('Sync failed:',e.message);});
 }
 function openSyncSettings(){
+  initSync(); // Ensure URL is loaded
   var inp=g('sync-url-input');if(inp)inp.value=SYNC_URL||'';
   openM('sync-m');
 }
