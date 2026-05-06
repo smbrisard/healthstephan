@@ -2138,7 +2138,7 @@ function _renderRecipeIngs(){
           : '<input class="fld" placeholder="Ingredient name" value="'+(ing.name||'')+'" oninput="_recipeIngs['+i+'].name=this.value" style="flex:1;margin-bottom:0;font-size:13px">'
         )+
         '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
-          '<span style="font-size:11px;color:var(--dim)">Qty</span>'+
+          '<span style="font-size:11px;color:var(--dim)">'+(isDB?'× servings':'amount')+'</span>'+
           '<input class="fld" type="number" min="0.25" step="0.25" value="'+(ing.qty||1)+'" oninput="_recipeIngs['+i+'].qty=parseFloat(this.value)||1;_updateRecipeTotals()" style="width:52px;margin-bottom:0;text-align:center;font-size:13px">'+
         '</div>'+
         '<button onclick="removeRecipeIng('+i+')" style="background:rgba(255,59,92,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--red);font-size:15px;cursor:pointer;flex-shrink:0;line-height:26px;text-align:center">&#215;</button>'+
@@ -5036,7 +5036,7 @@ function saveRecipe(){
       <input id="recipe-name" class="fld" placeholder="e.g. Chicken Stir Fry" style="margin-bottom:8px">
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <div class="flbl" style="margin-bottom:0;flex:1">Servings this recipe makes</div>
+      <div style="flex:1"><div class="flbl" style="margin-bottom:0">Total Servings</div><div style="font-size:10px;color:var(--dim)">Portions this whole recipe yields</div></div>
       <input id="recipe-servings" class="fld" type="number" min="1" value="1" style="width:70px;margin-bottom:0" oninput="_updateRecipeTotals()">
     </div>
     <!-- Ingredient search -->
