@@ -1345,7 +1345,11 @@ function obNext() {
 // ═══ HOME ═══
 function rHome() {
   try {
-  // Auto-zero daily metrics if last sync date is not today or yesterday
+  // Always zero exercise/stand if last sync date is not strictly today
+  if(P.lastSyncDate&&P.lastSyncDate!==today()){
+    P.exerciseMins=0; P.standHours=0;
+  }
+  // Zero all daily metrics if sync date is older than yesterday
   if(P.lastSyncDate&&P.lastSyncDate!==today()&&P.lastSyncDate!==yesterday()){
     ['stepsToday','burned','distMiles','walkMiles','cycleMiles',
      'standHours','exerciseMins','totalBurned'].forEach(function(k){P[k]=0;});
@@ -1378,9 +1382,11 @@ function rHome() {
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
-  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
-  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
-  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_isToday&&P.standHours)?Math.round(P.standHours):'--';
+  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
+  // Exercise/stand only show if sync date is strictly today
+  var _exToday=!P.lastSyncDate||P.lastSyncDate===today();
+  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_exToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
+  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   // Suggestions
   try { var _sugg=getMealSuggestions(), _se=g('hm-suggestions');
@@ -3632,15 +3638,26 @@ function fetchSync(){
     var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
     if(_syncIsRecent){
-      // Fresh data - update daily fields
+      // Update general daily fields (today or yesterday ok)
       _allDailyFields.forEach(function(k){
         if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
           P[k]=parseFloat(d[k]); updated=true;
         }
       });
+      // Exercise/stand: ONLY from strictly today's data
+      if(_dataIsStrictlyToday){
+        _strictFields.forEach(function(k){
+          if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
+            P[k]=parseFloat(d[k]); updated=true;
+          }
+        });
+      } else {
+        // Yesterday's data - zero exercise and stand (they reset daily)
+        P.exerciseMins=0; P.standHours=0;
+      }
     } else {
-      // Stale data OR data not from today/yesterday - zero out daily metrics
-      _allDailyFields.forEach(function(k){P[k]=0;});
+      // Stale data - zero everything
+      _allDailyFields.concat(_strictFields).forEach(function(k){P[k]=0;});
       updated=true;
     }
     if(d.stepsToday||d.totalBurned||d.rhr) updated=true;
