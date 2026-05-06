@@ -2038,11 +2038,12 @@ var _recipeIngs=[];
 var _editingRecipeIdx=-1; // -1 = new recipe
 
 function openRecipeBuilder(editIdx){
-  _editingRecipeIdx=(editIdx!==undefined)?editIdx:-1;
-  // Always reset form first
+  _editingRecipeIdx=(editIdx!==undefined&&editIdx>=0)?editIdx:-1;
+  // Reset form
   _recipeIngs=[];
   var ni=g('recipe-name'); if(ni) ni.value='';
   var si=g('recipe-servings'); if(si) si.value='1';
+  var rcCat=g('recipe-category'); if(rcCat) rcCat.value='custom';
   var sr=g('recipe-ing-search'); if(sr) sr.value='';
   var res=g('recipe-ing-results'); if(res){res.innerHTML='';res.style.display='none';}
   // Load existing recipe if editing
@@ -2052,7 +2053,8 @@ function openRecipeBuilder(editIdx){
     if(r){
       if(ni) ni.value=r.name||'';
       if(si) si.value=r.servings||1;
-      _recipeIngs=r.ingredients?r.ingredients.map(function(i){return Object.assign({},i);}):[];
+      if(rcCat) rcCat.value=r.cat||'custom';
+      _recipeIngs=(r.ingredients||[]).map(function(i){return Object.assign({},i);});
     }
   }
   openM('recipe-modal');
@@ -2063,8 +2065,8 @@ function openRecipeBuilder(editIdx){
 
 function closeRecipeModal(){
   closeM('recipe-modal');
-  var el=g('recipe-modal'); if(el) el.style.display='none';
   _editingRecipeIdx=-1;
+  _recipeIngs=[];
 }
 
 // Search food DB + myFoods for ingredient
@@ -2295,8 +2297,9 @@ function saveRecipeToDatabase(){
   var per=_updateRecipeTotals();
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
   var recipes=loadRecipes();
+  var _rcCat=(g('recipe-category')||{value:'custom'}).value||'custom';
   var entry={
-    name:name,emoji:'&#128216;',servings:srv,
+    name:name,emoji:'&#128216;',cat:_rcCat,servings:srv,
     ingredients:_recipeIngs.map(function(i){return Object.assign({},i);}),
     cals:Math.round(per.cals),protein:per.protein,carbs:per.carbs,fat:per.fat,
     fiber:per.fiber||0,sugar:per.sugar||0,satFat:per.satFat||0,sodium:per.sodium||0,
@@ -2506,7 +2509,9 @@ function rFoodGrid() {
     var list=myFoods.map(function(f){return Object.assign({},f,{_custom:true});});
   } else {
     // Other categories: built-in FOODS + myFoods that match category
-    var myFoodsInCat=myFoods
+    // Also show recipes in their assigned category
+  var recipesInCat=fCat==='all'?savedRecipes:savedRecipes.filter(function(r){return r.cat===fCat||(!r.cat&&fCat==='meals');});
+  var myFoodsInCat=myFoods
       .filter(function(f){return fCat==='all'||(f.cat&&f.cat===fCat);})
       .map(function(f){return Object.assign({},f,{_custom:true});});
     var builtInInCat=FOODS.filter(function(f){
@@ -4999,9 +5004,24 @@ function getWeekStats(startDateStr) {
       <div class="mtitle" style="margin-bottom:0">📖 Recipe Builder</div>
       <button onclick="closeRecipeModal()" style="background:none;border:none;color:var(--dim);font-size:22px;padding:0">×</button>
     </div>
-    <!-- Recipe name + servings -->
+    <!-- Recipe name + category + servings -->
     <div class="fw"><div class="flbl">Recipe Name</div>
       <input id="recipe-name" class="fld" placeholder="e.g. Chicken Stir Fry" style="margin-bottom:8px">
+    </div>
+    <div class="fw"><div class="flbl">Save to Category Pill</div>
+      <select id="recipe-category" class="fld" style="margin-bottom:8px;color:var(--txt);background:var(--s2)">
+        <option value="custom">⭐ Custom (My Foods)</option>
+        <option value="meals">🍽 Meals</option>
+        <option value="breakfast">🥣 Breakfast</option>
+        <option value="snacks">🌰 Snacks</option>
+        <option value="fastfood">🍔 Fast Food</option>
+        <option value="supplements">💊 Supplements</option>
+        <option value="meat">🍗 Meat &amp; Fish</option>
+        <option value="dairy">🧀 Dairy</option>
+        <option value="grains">🍞 Grains</option>
+        <option value="veg">🥦 Vegetables</option>
+        <option value="sauces">🫙 Sauces</option>
+      </select>
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <div style="flex:1"><div class="flbl" style="margin-bottom:0">Total Servings</div><div style="font-size:10px;color:var(--dim)">Portions this whole recipe yields</div></div>
