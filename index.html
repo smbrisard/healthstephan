@@ -3913,10 +3913,11 @@ function fetchSync(){
     // Data is fresh only if BOTH: synced recently AND data date is today or yesterday
     var _dataDate=d.date||today();
     var _dataIsToday=(_dataDate===today()||_dataDate===yesterday());
+    var _dataIsStrictlyToday=(_dataDate===today()); // exercise/stand NEVER carry from yesterday
     var _syncIsRecent=_syncAge<20&&_dataIsToday;
-    var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles',
-      'standHours','exerciseMins','totalBurned','restingEnergy'];
-    // sleepLast is intentionally excluded - it's always derived from SL log via syncSleepToProfile()
+    var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles','totalBurned','restingEnergy'];
+    var _strictFields=['standHours','exerciseMins']; // reset at midnight, today only
+    // sleepLast is intentionally excluded - always derived from SL log
     var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
     if(_syncIsRecent){
