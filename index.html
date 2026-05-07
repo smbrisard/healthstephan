@@ -2134,10 +2134,18 @@ function _renderRecipeIngs(){
     return '<div style="background:var(--s2);border-radius:12px;padding:10px;margin-bottom:8px;position:relative">'+
       // Header row: emoji + name + qty + remove
       '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">'+
-        '<span style="font-size:18px">'+(ing.e||'&#127869;')+'</span>'+
+        '<span style="font-size:18px;'+(isDB?'':'display:none')+'">'+
+        (isDB?(ing.e||'&#127869;'):'')+
+        '</span>'+
         (isDB
           ? '<div style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">'+ing.name+'<div style="font-size:10px;color:var(--dim)">'+ing.serving+'</div></div>'
-          : '<input class="fld" placeholder="Ingredient name" value="'+(ing.name||'')+'" oninput="_recipeIngs['+i+'].name=this.value" style="flex:1;margin-bottom:0;font-size:13px">'
+          : '<div style="display:flex;gap:6px;flex:1;align-items:center">'+
+              '<input class="fld" placeholder="🍽" value="'+(ing.e&&ing.e!=='&#127869;'?ing.e:'')+
+              '" oninput="_recipeIngs['+i+'].e=this.value.trim()||\u0027&#127869;\u0027" '+
+              'style="width:44px;margin-bottom:0;text-align:center;font-size:18px;flex-shrink:0;padding:6px 4px">'+
+              '<input class="fld" placeholder="Ingredient name" value="'+(ing.name||'')+
+              '" oninput="_recipeIngs['+i+'].name=this.value" style="flex:1;margin-bottom:0;font-size:13px">'+
+            '</div>'
         )+
         '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
           '<span style="font-size:11px;color:var(--dim)">× qty</span>'+

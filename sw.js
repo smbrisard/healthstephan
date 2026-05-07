@@ -1,5 +1,5 @@
-/* v21bm 1778100320 */
-var CACHE='hs-v21bm';
+/* v21bn 1778117706 */
+var CACHE='hs-v21bn';
 self.addEventListener('install',function(e){self.skipWaiting();});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
 self.addEventListener('fetch',function(e){if(e.request.method!=='GET') return;e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});
