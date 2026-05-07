@@ -4668,6 +4668,14 @@ function cfLookupBarcode(code) {
 setTimeout(launch, 900);
 setTimeout(fetchSync, 2500);
 setTimeout(function(){ var l=g('loading'); if(l&&l.style.display!=='none') launch(); }, 1700);
+// Auto-sync every 5 minutes
+setInterval(function(){ if(SYNC_URL) fetchSync(); }, 5*60*1000);
+// Also sync when app becomes visible again (user returns to app)
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && SYNC_URL){
+    setTimeout(function(){ fetchSync(); }, 1000);
+  }
+});
 
 // ═══ HISTORY ═══
 var histDate = today();
