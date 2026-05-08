@@ -3948,6 +3948,71 @@ function rHistory(){
           S('style="font-size:12px;color:'+(wtChg<0?'var(--grn)':'var(--red)')+';font-weight:700"',(wtChg<0?'&#9660;':'&#9650;')+' '+fD(Math.abs(wtChg),1)+' lbs')+
           S('style="font-size:12px;color:var(--dim);font-weight:600"',fD(wtPts[wtPts.length-1].wt,1)+' lbs')));
     }
+    //    Body Measurements Chart                                                                  
+    var measAll=loadMeasurements();
+    if(measAll.length>=2){
+      var measFields=[
+        {key:'waist',label:'Waist',col:'var(--red)'},
+        {key:'hips',label:'Hips',col:'var(--pnk)'},
+        {key:'chest',label:'Chest',col:'var(--blu)'},
+        {key:'neck',label:'Neck',col:'var(--cyn)'},
+        {key:'arm_l',label:'L Arm',col:'var(--grn)'},
+        {key:'arm_r',label:'R Arm',col:'var(--amb)'},
+        {key:'thigh_l',label:'L Thigh',col:'var(--pur)'},
+        {key:'thigh_r',label:'R Thigh',col:'#38bdf8'}
+      ];
+      // Only show fields that have at least 2 data points
+      var activeMeasFields=measFields.filter(function(mf){
+        return measAll.filter(function(e){return e[mf.key]>0;}).length>=2;
+      });
+      if(activeMeasFields.length>0){
+        // Use sessionStorage to remember selected meas field (resets per session)
+        var _curMeasKey=window._histMeasKey||activeMeasFields[0].key;
+        // Make sure selected key is still active
+        if(!activeMeasFields.some(function(mf){return mf.key===_curMeasKey;})) _curMeasKey=activeMeasFields[0].key;
+        window._histMeasKey=_curMeasKey;
+        var curMF=activeMeasFields.filter(function(mf){return mf.key===_curMeasKey;})[0];
+        // Get data points for selected field - last 30 days or all entries
+        var measPts=measAll.filter(function(e){return e[curMF.key]>0;}).slice(-30);
+        var mnM=Math.min.apply(null,measPts.map(function(e){return e[curMF.key];}));
+        var mxM=Math.max.apply(null,measPts.map(function(e){return e[curMF.key];}));
+        var rngM=mxM-mnM||0.5;
+        var WM=300,HM=70,pdM=10;
+        var svgPtsM=measPts.map(function(e,i5){
+          var x=pdM+(i5/(measPts.length-1||1))*(WM-pdM*2);
+          var y=HM-pdM-(e[curMF.key]-mnM)/rngM*(HM-pdM*2);
+          return x.toFixed(1)+','+y.toFixed(1);
+        }).join(' ');
+        var measChg=measPts[measPts.length-1][curMF.key]-measPts[0][curMF.key];
+        // For waist/hips/chest: smaller is better; for arms/thighs: bigger is better
+        var smallerBetter=['waist','hips','chest','neck'].indexOf(curMF.key)>=0;
+        var measChgGood=smallerBetter?(measChg<0):(measChg>0);
+        var measChgCol=measChg===0?'var(--dim)':measChgGood?'var(--grn)':'var(--red)';
+        html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','Body Measurements');
+        // Pill selector
+        html+=D('style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;-webkit-overflow-scrolling:touch"',
+          activeMeasFields.map(function(mf){
+            var isSel=mf.key===_curMeasKey;
+            return D('onclick="window._histMeasKey=\''+mf.key+'\';rHistory()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap;background:'+(isSel?mf.col:'var(--s2)')+';color:'+(isSel?'#fff':'var(--dim)')+';border:.5px solid '+(isSel?mf.col:'var(--b1)')+'"',mf.label);
+          }).join(''));
+        // Chart card
+        html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:90px"',
+          '<svg viewBox="0 0 '+WM+' '+HM+'" style="width:100%;height:70px;display:block"><polyline points="'+svgPtsM+'" fill="none" stroke="'+curMF.col+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
+          measPts.map(function(e,i5){
+            var x=pdM+(i5/(measPts.length-1||1))*(WM-pdM*2);
+            var y=HM-pdM-(e[curMF.key]-mnM)/rngM*(HM-pdM*2);
+            var isSel=e.date===histDate;
+            return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(isSel?5:3)+'" fill="'+(isSel?'var(--cyn)':curMF.col)+'" '+(isSel?'stroke="var(--txt)" stroke-width="1.5"':'')+'/>';
+          }).join('')+'</svg>'+
+          D('style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"',
+            S('style="font-size:12px;color:var(--dim);font-weight:600"',fD(measPts[0][curMF.key],1)+'"')+
+            D('style="text-align:center"',
+              D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:'+curMF.col+'"',fD(measPts[measPts.length-1][curMF.key],1)+'"')+
+              D('style="font-size:11px;color:var(--dim);margin-top:1px"','latest '+curMF.label.toLowerCase())+
+              (measChg!==0?D('style="font-size:12px;color:'+measChgCol+';font-weight:700;margin-top:2px"',(measChg<0?'&#9660;':'&#9650;')+' '+fD(Math.abs(measChg),1)+'" since start'):D('style="font-size:12px;color:var(--dim)"','no change')))+
+            S('style="font-size:12px;color:var(--dim);font-weight:600"',fD(measPts[measPts.length-1][curMF.key],1)+'"')));
+      }
+    }
     hb.innerHTML=html;
   }catch(e2){console.error('rHistory error',e2);}
 }
