@@ -4021,6 +4021,7 @@ function applyTheme(){
   var t=localStorage.getItem('hs_theme')||'dark';
   document.documentElement.setAttribute('data-theme',t);
 }
+applyTheme(); // Apply immediately when defined
 function toggleTheme(){
   var t=localStorage.getItem('hs_theme')||'dark';
   var n=t==='light'?'dark':'light';
