@@ -1443,7 +1443,6 @@ function rHome() {
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
   var _rhrel=g('hm-rhr'); if(_rhrel) _rhrel.textContent=P.rhr?Math.round(P.rhr):'--';
-  var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
   // Exercise/stand only show if sync date is strictly today
   var _exToday=!P.lastSyncDate||P.lastSyncDate===today();
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
@@ -3836,11 +3835,10 @@ function launchApp(){
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
   rHome();
 }
-function launchApp(){
-  document.body.style.background='red';
+function launch(){
   var loader=g('loading');
-  // Always hide loader first, unconditionally, before anything else
-  if(loader){ loader.style.opacity='0'; loader.style.pointerEvents='none'; loader.classList.add('gone'); }
+  if(loader){ loader.style.opacity='0'; loader.style.pointerEvents='none'; }
+  setTimeout(function(){ if(loader) loader.style.display='none'; }, 500);
   try {
     if(P.isOnboarded){ launchApp(); }
     else { var ob=g('ob'); if(ob) ob.style.display='flex'; }
@@ -3848,8 +3846,7 @@ function launchApp(){
     console.error('launch error',e);
     try { launchApp(); } catch(e2) { console.error('launchApp error',e2); }
   }
-  setTimeout(function(){ if(loader) loader.style.display='none'; }, 500);
-}}
+}
 // Aggressively clear old caches
 if('caches' in window){
   caches.keys().then(function(names){
@@ -4883,11 +4880,10 @@ function _lookupBarcode(barcode){
   }).catch(function(e){
     toast('Lookup failed - check connection',true);
   });
-window.addEventListener('load', function(){
-  document.body.style.background='green';
-  setTimeout(launch, 100);
+}
 
-}</script>
+window.addEventListener('load', launch);
+</script>
 
   <div id="recipe-modal" class="modal"><div class="mbg" onclick="closeRecipeModal()"></div>
   <div class="msheet" style="max-height:92vh;overflow-y:auto">
