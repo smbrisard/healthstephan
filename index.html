@@ -223,6 +223,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;heigh
 /* iOS keyboard fix */
 body { height: 100dvh; }
 #app { height: 100dvh; }
+
+[data-theme="light"]{
+  --bg:#f0f2f5;--s1:#ffffff;--s2:#e8eaf0;--s3:#dde0eb;
+  --txt:#0d0d1a;--dim:#5a5a7a;--dim2:#aaaacc;
+  --b1:rgba(0,0,0,0.08);--b2:rgba(0,0,0,0.14);
+}
+[data-theme="light"] .card{background:var(--s1);}
+[data-theme="light"] .fld{background:var(--s2);color:var(--txt);}
+[data-theme="light"] .msheet{background:var(--s1);}
 </style>
 </head>
 <body>
@@ -417,12 +426,19 @@ body { height: 100dvh; }
           <button onclick="showTab('food')" style="flex:1;padding:13px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button>
           <button onclick="showTab('drinks')" style="flex:1;padding:13px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button>
         </div>
+        <!-- Quick shortcut widgets -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">
+          <button onclick="openWtModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pur);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">⚖️</span>Weight</button>
+          <button onclick="openM('sl-m')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--blu);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">😴</span>Sleep</button>
+          <button onclick="openMeasModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pnk);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">📏</span>Measure</button>
+          <button onclick="showTab('nutrition')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--grn);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">🥗</span>Nutrition</button>
+        </div>
       </div>
     </div>
 
     <!-- PROFILE -->
     <div class="scr" id="sc-profile">
-      <div class="phdr"><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v21ba</div></div>
+      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v21bp</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
         <div class="card" style="text-align:center;margin-bottom:14px">
           <div class="avatar" id="pr-av" onclick="openAvatarUpload()" style="cursor:pointer;overflow:hidden;position:relative">ST<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);font-size:9px;color:#fff;text-align:center;padding:3px;font-weight:600">EDIT</div></div>
@@ -551,8 +567,47 @@ body { height: 100dvh; }
         <div class="wchart" style="margin-bottom:13px"><canvas id="wt-canvas" style="width:100%;height:100%"></canvas></div>
         <div class="card" style="margin-bottom:13px" id="wt-analysis"></div>
         <div class="slbl">Log</div><div id="wt-log"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+          <div class="slbl" style="margin-bottom:0">📏 Body Measurements</div>
+          <button onclick="openMeasModal()" style="padding:6px 14px;border-radius:20px;background:rgba(180,77,255,.1);border:.5px solid rgba(180,77,255,.3);color:var(--pur);font-size:12px;font-weight:700;touch-action:manipulation">+ Log</button>
+        </div>
+        <div id="meas-log" style="margin-bottom:10px"></div>
       </div>
     </div>
+
+  <div class="modal" id="barcode-m"><div class="mbg" onclick="closeBarcodeModal()"></div>
+  <div class="msheet" style="background:#000;border-radius:20px 20px 0 0">
+    <div class="mhandle" style="background:rgba(255,255,255,.2)"></div>
+    <div style="position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:12px;margin-bottom:12px">
+      <video id="bc-video" style="width:100%;height:100%;object-fit:cover" playsinline muted></video>
+      <!-- Scan frame overlay -->
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <div style="width:200px;height:120px;border:2px solid var(--grn);border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,.5)"></div>
+      </div>
+    </div>
+    <div id="bc-status" style="color:rgba(255,255,255,.7);font-size:13px;text-align:center;margin-bottom:8px">Point camera at barcode</div>
+    <button onclick="closeBarcodeModal()" style="width:100%;padding:14px;border-radius:13px;background:rgba(255,255,255,.1);border:none;color:white;font-size:14px;font-weight:600;touch-action:manipulation">Cancel</button>
+  </div></div>
+
+    <!-- MEASUREMENTS MODAL -->
+  <div class="modal" id="meas-m"><div class="mbg" onclick="closeM('meas-m')"></div>
+  <div class="msheet"><div class="mhandle"></div>
+    <div class="mtitle">📏 Body Measurements</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div><div class="flbl">Waist (in)</div><input class="fld" type="number" id="meas-waist" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Hips (in)</div><input class="fld" type="number" id="meas-hips" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Chest (in)</div><input class="fld" type="number" id="meas-chest" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Neck (in)</div><input class="fld" type="number" id="meas-neck" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">L. Arm (in)</div><input class="fld" type="number" id="meas-arm-l" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">R. Arm (in)</div><input class="fld" type="number" id="meas-arm-r" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">L. Thigh (in)</div><input class="fld" type="number" id="meas-thigh-l" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">R. Thigh (in)</div><input class="fld" type="number" id="meas-thigh-r" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+    </div>
+    <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="meas-date" style="margin-bottom:10px"></div>
+    <div class="fw"><div class="flbl">Notes (optional)</div><input class="fld" id="meas-notes" placeholder="e.g. morning, post-workout" style="margin-bottom:12px"></div>
+    <button onclick="saveMeasurement()" class="btn btn-r" style="width:100%;margin-bottom:8px">Save Measurements</button>
+    <button onclick="closeM('meas-m')" style="width:100%;padding:13px;border-radius:13px;background:var(--s2);border:.5px solid var(--b1);color:var(--dim);font-size:14px;font-weight:600;touch-action:manipulation">Cancel</button>
+  </div></div>
 
     <!-- SLEEP -->
     <div class="scr" id="sc-sleep">
@@ -2807,6 +2862,7 @@ function getWtR(){
   return sorted.filter(function(e){return e.date>=cutStr;});
 }
 function rWeight() {
+  setTimeout(rMeasLog,50);
   var lw=latWt();
   set('wt-cur',lw?fW(lw.weight):'--'); set('wt-goal',fW(P.goalKg));
   if(lw){ wtLbs=parseFloat(fD(k2l(lw.weight),1)); set('wt-disp',wtLbs.toFixed(1)); }
@@ -3724,6 +3780,7 @@ function launchApp(){
   });
   if(_mfFixed){saveMyFoods(_mfCheck);}
   syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
+  applyTheme();
   loadAvatar();
   initSync(); // Re-run to ensure SYNC_URL loaded from localStorage
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
@@ -3913,6 +3970,65 @@ function loadCustomDrinks(){
     });
   }catch(e){}
 }
+
+// ── BODY MEASUREMENTS ────────────────────────────────
+function loadMeasurements(){try{return JSON.parse(localStorage.getItem('hs_measurements')||'[]');}catch(e){return[];}}
+function saveMeasurements(a){try{localStorage.setItem('hs_measurements',JSON.stringify(a));}catch(e){}}
+function openMeasModal(){
+  var ml=loadMeasurements(),last=ml.length?ml[ml.length-1]:null;
+  ['waist','hips','chest','neck'].forEach(function(f){var el=g('meas-'+f);if(el)el.value=last&&last[f]||'';});
+  ['arm-l','arm-r','thigh-l','thigh-r'].forEach(function(f){var k=f.replace('-','_');var el=g('meas-'+f);if(el)el.value=last&&last[k]||'';});
+  var dt=g('meas-date');if(dt)dt.value=today();
+  var nt=g('meas-notes');if(nt)nt.value='';
+  openM('meas-m');
+}
+function saveMeasurement(){
+  var entry={id:Date.now(),date:(g('meas-date')||{value:today()}).value||today()};
+  ['waist','hips','chest','neck'].forEach(function(f){entry[f]=parseFloat((g('meas-'+f)||{value:0}).value)||0;});
+  ['arm-l','arm-r','thigh-l','thigh-r'].forEach(function(f){entry[f.replace('-','_')]=parseFloat((g('meas-'+f)||{value:0}).value)||0;});
+  entry.notes=(g('meas-notes')||{value:''}).value.trim();
+  var ml=loadMeasurements();ml.push(entry);saveMeasurements(ml);
+  closeM('meas-m');rMeasLog();toast('\u2713 Measurements saved');
+}
+function deleteMeasurement(id){
+  if(!confirm('Delete this measurement?'))return;
+  saveMeasurements(loadMeasurements().filter(function(m){return m.id!==id;}));
+  rMeasLog();toast('Deleted');
+}
+function _mBadge(l,v){
+  return v?'<div style="background:var(--s2);border-radius:8px;padding:6px;text-align:center"><div style="font-size:12px;font-weight:700;color:var(--pur)">'+v+'"</div><div style="font-size:9px;color:var(--dim)">'+l+'</div></div>':'<div style="background:var(--s2);border-radius:8px;padding:6px;text-align:center"><div style="font-size:10px;color:var(--dim2)">--</div><div style="font-size:9px;color:var(--dim2)">'+l+'</div></div>';
+}
+function rMeasLog(){
+  var el=g('meas-log');if(!el)return;
+  var ml=loadMeasurements().slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(!ml.length){el.innerHTML='<div style="padding:14px;text-align:center;color:var(--dim);font-size:13px;background:var(--s2);border-radius:13px">No measurements yet. Tap + Log to start.</div>';return;}
+  el.innerHTML=ml.map(function(m){
+    return '<div class="card" style="margin-bottom:8px;padding:12px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<div style="font-size:12px;font-weight:700;color:var(--dim)">'+fmtChartDate(m.date)+'</div>'+
+        '<button onclick="deleteMeasurement('+m.id+')" style="background:rgba(255,59,92,.15);border:none;border-radius:50%;width:24px;height:24px;color:var(--red);font-size:13px;cursor:pointer;line-height:24px;text-align:center">\u00d7</button>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">'+
+        _mBadge('Waist',m.waist)+_mBadge('Hips',m.hips)+_mBadge('Chest',m.chest)+_mBadge('Neck',m.neck)+
+        _mBadge('L.Arm',m.arm_l)+_mBadge('R.Arm',m.arm_r)+_mBadge('L.Thigh',m.thigh_l)+_mBadge('R.Thigh',m.thigh_r)+
+      '</div>'+(m.notes?'<div style="font-size:11px;color:var(--dim);margin-top:6px;font-style:italic">'+m.notes+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+
+// ── THEME ─────────────────────────────────────────────
+function applyTheme(){
+  var t=localStorage.getItem('hs_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+}
+function toggleTheme(){
+  var t=localStorage.getItem('hs_theme')||'dark';
+  var n=t==='light'?'dark':'light';
+  localStorage.setItem('hs_theme',n);
+  applyTheme();
+  toast(n==='light'?'\u2600\uFE0F Light mode':'\uD83C\uDF19 Dark mode');
+}
+
 function initSync(){try{var s=localStorage.getItem('hs_sync_url');if(s)SYNC_URL=s;}catch(e){}}
 function setSyncURL(url){SYNC_URL=url.trim();try{localStorage.setItem('hs_sync_url',SYNC_URL);}catch(e){}}
 function fetchSync(){
@@ -4152,6 +4268,7 @@ function exportData() {
     drinkLog:DL, fitnessLog:FL,
     myFoods:myFoods, bloodPressureLog:bpl,
     myDrinks:(function(){try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}})(),
+    measurements:(function(){try{return JSON.parse(localStorage.getItem('hs_measurements')||'[]');}catch(e){return[];}})(),
     recipes:(function(){try{return JSON.parse(localStorage.getItem('hs_recipes')||'[]');}catch(e){return[];}})(),
     syncUrl:syncUrl
   };
@@ -4184,6 +4301,9 @@ function importData() {
         }
         if(data.myDrinks&&data.myDrinks.length>0){
           try{localStorage.setItem('hs_mydrinks',JSON.stringify(data.myDrinks));}catch(e){}
+        }
+        if(data.measurements&&data.measurements.length>0){
+          try{localStorage.setItem('hs_measurements',JSON.stringify(data.measurements));}catch(e){}
         }
         if(data.recipes&&data.recipes.length>0){
           try{localStorage.setItem('hs_recipes',JSON.stringify(data.recipes));}catch(e){}
@@ -4601,431 +4721,117 @@ function cfAdd() {
 var _bcStream=null;
 var _bcInterval=null;
 
-function cfBarcode() {
+// ── BARCODE SCANNER (iOS 17+ / iPhone 12 Pro+) ────────
+// Uses BarcodeDetector API (supported in iOS 17+ Safari)
+// Falls back to ZXing-js for older devices
+function cfBarcode(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    toast('Camera not supported on this device',true); return;
+    toast('Camera not available',true); return;
+  }
+  // Check BarcodeDetector support (iOS 17+, all iPhone camera types including LiDAR)
+  if(!('BarcodeDetector' in window)){
+    toast('Barcode scanning requires iOS 17 or later',true); return;
   }
   openM('barcode-m');
-  var status=g('bc-status');
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
-    .then(function(stream){
-      _bcStream=stream;
-      var video=g('bc-video');
-      if(video){video.srcObject=stream; video.play();}
-      if(status) status.textContent='Point camera at barcode';
-      // Use BarcodeDetector if available (iOS 17+)
-      if('BarcodeDetector' in window){
-        var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39']});
-        _bcInterval=setInterval(function(){
-          var video=g('bc-video');
-          if(!video||!video.videoWidth) return;
-          detector.detect(video).then(function(barcodes){
-            if(barcodes.length>0){
-              clearInterval(_bcInterval);
-              var code=barcodes[0].rawValue;
-              if(status) status.textContent='Found: '+code+' — looking up...';
-              cfLookupBarcode(code);
-            }
-          }).catch(function(){});
-        },500);
-      } else {
-        if(status) status.textContent='BarcodeDetector not supported. Try searching by name instead.';
-      }
-    })
-    .catch(function(e){
-      cfStopScan();
-      toast('Camera access denied. Allow camera in Settings.',true);
-    });
+  _startBarcodeCamera();
 }
 
-function cfStopScan() {
-  if(_bcInterval){clearInterval(_bcInterval);_bcInterval=null;}
+function _startBarcodeCamera(){
+  var video=document.getElementById('bc-video');
+  var overlay=document.getElementById('bc-overlay');
+  if(!video) return;
+  navigator.mediaDevices.getUserMedia({
+    video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}
+  }).then(function(stream){
+    _bcStream=stream;
+    video.srcObject=stream;
+    video.play();
+    _bcScan();
+  }).catch(function(e){
+    toast('Camera error: '+e.message,true);
+    closeM('barcode-m');
+  });
+}
+
+function _bcScan(){
+  var video=document.getElementById('bc-video');
+  if(!video||!_bcStream) return;
+  var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+  _bcInterval=setInterval(function(){
+    if(!_bcStream){clearInterval(_bcInterval);return;}
+    if(video.readyState!==4) return;
+    detector.detect(video).then(function(codes){
+      if(codes.length>0){
+        clearInterval(_bcInterval);
+        var barcode=codes[0].rawValue;
+        _stopBarcodeCamera();
+        _lookupBarcode(barcode);
+      }
+    }).catch(function(){});
+  },300);
+}
+
+function _stopBarcodeCamera(){
+  clearInterval(_bcInterval);
   if(_bcStream){_bcStream.getTracks().forEach(function(t){t.stop();});_bcStream=null;}
-  var video=g('bc-video'); if(video) video.srcObject=null;
+  var video=document.getElementById('bc-video');
+  if(video){video.srcObject=null;}
   closeM('barcode-m');
 }
 
-function cfLookupBarcode(code) {
-  var status=g('bc-status');
-  if(!SYNC_URL){cfStopScan();toast('Set up sync URL first',true);return;}
-  var base=SYNC_URL.replace(/\/$/,'');
-  fetch(base+'/food/barcode?code='+encodeURIComponent(code))
-    .then(function(r){return r.json();})
-    .then(function(p){
-      cfStopScan();
-      if(p.error){toast('Product not found in database',true);return;}
-      window._cfProducts=[p];
-      cfSelect(0);
-      openM('custom-food-m');
-      var si=g('cf-search'); if(si) si.value=p.name||'';
-    })
-    .catch(function(){
-      cfStopScan();
-      toast('Lookup failed. Try searching by name.',true);
-    });
+function closeBarcodeModal(){
+  _stopBarcodeCamera();
 }
 
-setTimeout(launch, 900);
-setTimeout(fetchSync, 2500);
-setTimeout(function(){ var l=g('loading'); if(l&&l.style.display!=='none') launch(); }, 1700);
-// Auto-sync every 5 minutes
-setInterval(function(){ if(SYNC_URL) fetchSync(); }, 5*60*1000);
-// Also sync when app becomes visible again (user returns to app)
-document.addEventListener('visibilitychange', function(){
-  if(!document.hidden && SYNC_URL){
-    setTimeout(function(){ fetchSync(); }, 1000);
-  }
-});
-
-// ═══ HISTORY ═══
-var histDate = today();
-
-function histNav(dir) {
-  try {
-    var d = new Date(histDate + 'T12:00');
-    d.setDate(d.getDate() + dir);
-    histDate = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    var de = g('hist-date');
-    if (de) de.value = histDate;
-    rHistory();
-  } catch(e) { console.error('histNav',e); }
-}
-
-function rHistory() {
-  var ws=getWeeklySummary(histDate), wse=g('weekly-summary');
-  if(wse){
-    var wtTxt=ws.wtChange!==null?(ws.wtChange>0?'+':'')+fD(ws.wtChange,1)+' lbs':'No data';
-    var wtCol=ws.wtChange!==null?(ws.wtChange<=0?'var(--grn)':'var(--red)'):'var(--dim)';
-    wse.innerHTML=D('class="slbl" style="margin-top:4px;margin-bottom:10px"','Last 7 Days')+
-      D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center"',
-        [['&#128293;',fN(ws.avgCals),'avg kcal','var(--amb)'],['&#127939;',fN(ws.avgSteps),'avg steps','var(--grn)'],
-         ['&#128164;',hHM(ws.avgSleep),'avg sleep','var(--blu)'],['&#9881;',wtTxt,'wt change',wtCol]]
-        .map(function(r){return D('',D('style="font-size:18px"',r[0])+D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:'+r[3]+';margin:4px 0"',r[1])+D('style="font-size:10px;color:var(--dim)"',r[2]));}).join(''));
-  }
-  try {
-    var de = g('hist-date');
-    if(de && de.value) histDate = de.value;
-    else if(de) de.value = histDate;
-
-    var sub = g('hist-sub');
-    var hb = g('hist-body');
-    if(!hb) return;
-
-    // Build last 30 days data
-    var days30=[], i;
-    for(i=29;i>=0;i--){
-      var dd=new Date(); dd.setDate(dd.getDate()-i);
-      var dt=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
-      var dm=ML.filter(function(m){return m.date===dt;});
-      var dr=DL.filter(function(d){return d.date===dt;});
-      var cals=dm.reduce(function(a,m){return a+(m.cals||0);},0)+dr.reduce(function(a,d){return a+(d.c||0);},0);
-      var wts=WL.filter(function(w){return w.date===dt;});
-      var sls=SL.filter(function(s){return s.date===dt;});
-      var fls=FL.filter(function(f){return f.date===dt;});
-      var flSnap=fls.length?fls[fls.length-1]:null;
-      days30.push({
-        dt:dt,
-        lbl:fmtChartDate(dt),
-        wkd:dd.toLocaleDateString('en',{weekday:'short'}).slice(0,1),
-        cals:cals,
-        deficit:cals>0?P.calTarget-cals:null,
-        wt:wts.length?k2l(wts[wts.length-1].weight):null,
-        sl:sls.length?sls[sls.length-1].hours:null,
-        logged:dm.length+dr.length>0
+function _lookupBarcode(barcode){
+  document.getElementById('bc-status').textContent='Looking up '+barcode+'...';
+  // Use Open Food Facts API - free, no key needed, comprehensive database
+  var url='https://world.openfoodfacts.org/api/v2/product/'+barcode+'.json?fields=product_name,nutriments,serving_size,brands,image_url';
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    if(data.status!==1||!data.product){
+      toast('Product not found in database',true);
+      return;
+    }
+    var p=data.product;
+    var n=p.nutriments||{};
+    // Parse nutrients per 100g then calculate per serving
+    var servingG=parseFloat(p.serving_size)||100;
+    var factor=servingG/100;
+    var name=(p.product_name||'Unknown Product').trim();
+    var brand=(p.brands||'').split(',')[0].trim();
+    if(brand) name=name+' ('+brand+')';
+    // Fill custom food form with scanned data
+    openCustomFood();
+    setTimeout(function(){
+      var fields={
+        'cf-name':name,
+        'cf-cals':Math.round((n['energy-kcal_100g']||n['energy_100g']||0)*factor),
+        'cf-prot':Math.round(((n['proteins_100g']||0)*factor)*10)/10,
+        'cf-carbs':Math.round(((n['carbohydrates_100g']||0)*factor)*10)/10,
+        'cf-fat':Math.round(((n['fat_100g']||0)*factor)*10)/10,
+        'cf-fiber':Math.round(((n['fiber_100g']||0)*factor)*10)/10,
+        'cf-sugar':Math.round(((n['sugars_100g']||0)*factor)*10)/10,
+        'cf-sodium':Math.round((n['sodium_100g']||0)*factor*1000),
+        'cf-satfat':Math.round(((n['saturated-fat_100g']||0)*factor)*10)/10,
+        'cf-potassium':Math.round((n['potassium_100g']||0)*factor*1000),
+        'cf-calcium':Math.round((n['calcium_100g']||0)*factor*1000),
+        'cf-iron':Math.round(((n['iron_100g']||0)*factor*1000)*10)/10,
+        'cf-cholest':Math.round((n['cholesterol_100g']||0)*factor*1000)
+      };
+      Object.keys(fields).forEach(function(id){
+        var el=document.getElementById(id);
+        if(el) el.value=fields[id];
       });
-    }
-
-    // Selected day detail
-    var selDay=days30.filter(function(d){return d.dt===histDate;})[0]||null;
-    if(sub){
-      var sd=new Date(histDate+'T12:00');
-      sub.textContent=histDate===today()?'Today - '+fmtChartDate(histDate):fmtChartDate(histDate);
-    }
-
-    var html='';
-
-    // ── Selected day card ────────────────────────────────────────
-    if(selDay){
-      var selDm=ML.filter(function(m){return m.date===histDate;});
-      var selDr=DL.filter(function(d){return d.date===histDate;});
-      var selWt=WL.filter(function(w){return w.date===histDate;});
-      var selSl=SL.filter(function(s){return s.date===histDate;});
-      var selCals=selDm.reduce(function(a,m){return a+(m.cals||0);},0)+selDr.reduce(function(a,d){return a+(d.c||0);},0);
-      var selDef=P.calTarget-selCals;
-      var selFl=FL.filter(function(f){return f.date===histDate;});
-      var selFlSnap=selFl.length?selFl[selFl.length-1]:null;
-      var hasData=selDm.length||selDr.length||selWt.length||selSl.length||selFlSnap;
-
-      if(hasData){
-        var defCol2=selDef>=0?'var(--grn)':'var(--red)';
-        // Only show deficit if food was logged that day
-        var showDeficit=selDm.length>0||selDr.length>0;
-        var _hd=new Date(histDate+'T12:00');
-        var _hdStr=_hd.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();
-        html+=D('class="slbl" style="margin-top:32px;margin-bottom:8px"',_hdStr);
-        html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px"',
-          D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"',
-            D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:var(--txt);line-height:1"',fN(selCals))+
-            D('style="font-size:12px;color:var(--dim)"','kcal')+
-            ((selDm.length||selDr.some(function(d){return (d.c||d.cals||0)>0;}))?D('style="text-align:right"',
-              D('style="font-size:11px;color:var(--dim)"',selDef>=0?'deficit':'surplus')+
-              D('style="font-family:var(--mn);font-size:22px;font-weight:800;color:'+defCol2+';display:block"',(selDef>=0?'-':'+')+fN(Math.abs(selDef)))):''))+
-          D('style="display:flex;gap:10px;margin-bottom:'+(selFlSnap?'10px':'0')+'"',
-            (selWt.length?D('style="flex:1;background:rgba(180,77,255,.1);border-radius:10px;padding:9px;text-align:center"',
-              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+
-              D('style="font-size:10px;color:var(--dim);margin-top:2px"','weight')):'')+
-            ((selSl.length||(selFlSnap&&selFlSnap.sleep>0))?D('style="flex:1;background:rgba(77,166,255,.1);border-radius:10px;padding:9px;text-align:center"',
-              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap&&selFlSnap.sleep>0?selFlSnap.sleep:0)))+
-              D('style="font-size:10px;color:var(--dim);margin-top:2px"','sleep')):'')+
-            (selDm.length?D('style="flex:1;background:rgba(0,212,170,.1);border-radius:10px;padding:9px;text-align:center"',
-              D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+
-              D('style="font-size:10px;color:var(--dim);margin-top:2px"','protein')):''))+
-          (selFlSnap?D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
-            [['&#128205;',fD(histDate===today()?(P.distMiles||0):(selFlSnap?selFlSnap.dist||0:0),1)+' mi','dist','#38bdf8'],
-             ['&#127939;',fN(Math.round(histDate===today()?(P.stepsToday||selFlSnap&&selFlSnap.steps||0):(selFlSnap&&selFlSnap.steps||0))),'steps','var(--amb)'],
-             ['&#9889;',selFlSnap.hrv?fD(selFlSnap.hrv,1)+' ms':'--','HRV','var(--grn)'],
-             ['&#10084;&#65039;',selFlSnap.rhr?Math.round(selFlSnap.rhr)+' bpm':'--','RHR','var(--red)'],
-             ['&#128167;',(function(){
-               var wOz=histDate===today()?calcWaterOz():(selFlSnap?(selFlSnap.water||0)*33.814:0);
-               return fD(wOz,0)+' oz';
-             })(),'water','var(--cyn)']]
-            .map(function(r){return D('style="background:rgba(255,255,255,.04);border-radius:9px;padding:7px;text-align:center"',
-              D('style="font-size:13px"',r[0])+
-              D('style="font-family:var(--mn);font-size:13px;font-weight:800;color:'+r[3]+';margin:2px 0;display:block"',r[1])+
-              D('style="font-size:9px;color:var(--dim)"',r[2]));}).join('')
-          ):''));
-      } else {
-        html+=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px;margin-bottom:13px"','No data for this day. Use arrows to navigate.');
-      }
-    }
-
-    // ── 7-day macro chart ────────────────────────────────────────
-    var last7days=days30.slice(-7);
-    var anyMacro=last7days.some(function(d){return ML.some(function(m){return m.date===d.dt;});});
-    if(anyMacro){
-      html+=D('class="slbl"','7-Day Macros');
-      var macroRows=[
-        {key:'protein',label:'Protein',target:P.protein||150,col:'var(--grn)'},
-        {key:'carbs',label:'Carbs',target:P.carbs||200,col:'var(--blu)'},
-        {key:'fat',label:'Fat',target:P.fat||65,col:'var(--amb)'}
-      ];
-      var macroCardHtml='<div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px">';
-      // Day header row
-      macroCardHtml+='<div style="display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;margin-bottom:8px">';
-      macroCardHtml+='<div style="font-size:10px;color:var(--dim)"></div>';
-      last7days.forEach(function(d){
-        var isSel=d.dt===histDate;
-        var wkd=new Date(d.dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,1);
-        var day=d.dt.slice(8);
-        macroCardHtml+='<div onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()" style="text-align:center;font-size:10px;font-weight:'+(isSel?700:400)+';color:'+(isSel?'var(--txt)':'var(--dim)')+';cursor:pointer">'+wkd+'<span style="display:block;font-size:9px;color:var(--dim2)">'+day+'</span></div>';
-      });
-      macroCardHtml+='</div>';
-      // Macro rows
-      macroRows.forEach(function(mr){
-        var dayVals=last7days.map(function(d){
-          return ML.filter(function(m){return m.date===d.dt;}).reduce(function(a,m){return a+(m[mr.key]||0);},0);
-        });
-        var maxVal=Math.max.apply(null,dayVals.concat([mr.target]));
-        macroCardHtml+='<div style="display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;margin-bottom:6px;align-items:center">';
-        macroCardHtml+='<div style="font-size:10px;color:var(--dim)">'+mr.label+'</div>';
-        dayVals.forEach(function(v,i2){
-          var d2=last7days[i2];
-          var pct=maxVal>0?v/maxVal:0;
-          var over=v>mr.target;
-          var isSel=d2.dt===histDate;
-          var barCol=over?'var(--red)':mr.col;
-          var targetPct=Math.min(mr.target/maxVal*100,100);
-          var valCol=v>0?(over?'var(--red)':mr.col):'var(--dim2)';
-          macroCardHtml+='<div onclick="histDate=\''+d2.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d2.dt+'\';rHistory()" style="cursor:pointer">'
-            +'<div style="background:rgba(255,255,255,.06);border-radius:4px;height:28px;position:relative;overflow:hidden;outline:'+(isSel?'1.5px solid '+mr.col:'none')+'">'
-            +'<div style="position:absolute;bottom:0;left:0;right:0;height:'+Math.max(pct*100,v>0?8:0)+'%;background:'+barCol+';border-radius:3px;opacity:'+(isSel?1:.7)+'"></div>'
-            +'<div style="position:absolute;left:0;right:0;top:'+(100-targetPct)+'%;height:1px;background:rgba(255,255,255,.3)"></div>'
-            +'</div>'
-            +'<div style="text-align:center;font-size:9px;font-family:var(--mn);color:'+valCol+';margin-top:2px">'+(v>0?Math.round(v)+'g':'')+'</div>'
-            +'</div>';
-        });
-        macroCardHtml+='</div>';
-      });
-      // Legend
-      macroCardHtml+='<div style="display:flex;gap:10px;margin-top:6px;padding-top:8px;border-top:.5px solid var(--b1);flex-wrap:wrap">';
-      macroRows.forEach(function(mr){
-        macroCardHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:'+mr.col+'"></div><span style="font-size:10px;color:var(--dim)">'+mr.label+' ('+mr.target+'g)</span></div>';
-      });
-      macroCardHtml+='<div style="display:flex;align-items:center;gap:4px;margin-left:auto"><div style="width:12px;height:1px;background:rgba(255,255,255,.3)"></div><span style="font-size:10px;color:var(--dim)">Target</span></div>';
-      macroCardHtml+='</div></div>';
-      html+=macroCardHtml;
-    }
-
-    // ── Sleep trend ──────────────────────────────────────────────
-    var sleepDays=last7days.map(function(d){
-      var sl=SL.find(function(s){return s.date===d.dt;});
-      var flSnap=FL.find(function(f){return f.date===d.dt;});
-      return {dt:d.dt,hrs:sl?sl.hours:(flSnap&&flSnap.sleep?flSnap.sleep:0)};
-    });
-    var anySleep=sleepDays.some(function(d){return d.hrs>0;});
-    if(anySleep){
-      html+=D('class="slbl"','7-Day Sleep');
-      var sleepTarget=P.sleepTarget||8;
-      var maxSleep=Math.max.apply(null,sleepDays.map(function(d){return d.hrs;}).concat([sleepTarget]));
-      var sleepCardHtml='<div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:13px">';
-      sleepCardHtml+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:flex-end;height:70px;margin-bottom:4px">';
-      sleepDays.forEach(function(d){
-        var isSel=d.dt===histDate;
-        var pct=maxSleep>0?d.hrs/maxSleep:0;
-        var col=d.hrs>=7&&d.hrs<=9?'var(--blu)':d.hrs>=6?'var(--amb)':'var(--red)';
-        var targetPct=Math.min(sleepTarget/maxSleep*100,100);
-        sleepCardHtml+='<div onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">';
-        sleepCardHtml+='<div style="font-size:9px;font-family:var(--mn);color:'+(d.hrs>0?col:'var(--dim2)')+';margin-bottom:2px">'+(d.hrs>0?hHM(d.hrs):'')+'</div>';
-        sleepCardHtml+='<div style="width:100%;position:relative;background:rgba(255,255,255,.06);border-radius:4px 4px 0 0;height:'+Math.max(pct*56,d.hrs>0?4:1)+'px;outline:'+(isSel?'1.5px solid var(--blu)':'none')+'">';
-        sleepCardHtml+='<div style="position:absolute;bottom:0;left:0;right:0;height:100%;background:'+col+';border-radius:4px 4px 0 0;opacity:'+(isSel?1:.65)+'"></div>';
-        sleepCardHtml+='<div style="position:absolute;bottom:'+(targetPct)+'%;left:0;right:0;height:1px;background:rgba(255,255,255,.35)"></div>';
-        sleepCardHtml+='</div></div>';
-      });
-      sleepCardHtml+='</div>';
-      sleepCardHtml+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px">';
-      sleepDays.forEach(function(d){
-        var isSel=d.dt===histDate;
-        sleepCardHtml+='<div style="text-align:center;font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?700:400)+'">'+new Date(d.dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,1)+'</div>';
-      });
-      sleepCardHtml+='</div>';
-      // Avg + best/worst callout
-      var validSleep=sleepDays.filter(function(d){return d.hrs>0;});
-      if(validSleep.length){
-        var avgSl=validSleep.reduce(function(a,d){return a+d.hrs;},0)/validSleep.length;
-        var bestSl=validSleep.reduce(function(a,d){return d.hrs>a.hrs?d:a;},validSleep[0]);
-        var worstSl=validSleep.reduce(function(a,d){return d.hrs<a.hrs?d:a;},validSleep[0]);
-        sleepCardHtml+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
-        sleepCardHtml+='<div style="text-align:center;background:rgba(77,166,255,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--blu)">'+hHM(avgSl)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">avg</div></div>';
-        sleepCardHtml+='<div style="text-align:center;background:rgba(0,212,170,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--grn)">'+hHM(bestSl.hrs)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">best</div></div>';
-        sleepCardHtml+='<div style="text-align:center;background:rgba(255,59,92,.08);border-radius:9px;padding:8px"><div style="font-family:var(--mn);font-size:15px;font-weight:800;color:var(--red)">'+hHM(worstSl.hrs)+'</div><div style="font-size:10px;color:var(--dim);margin-top:2px">worst</div></div>';
-        sleepCardHtml+='</div>';
-      }
-      sleepCardHtml+='</div>';
-      html+=sleepCardHtml;
-    }
-
-    // ── Best / worst calorie day ──────────────────────────────────
-    var loggedLast7=last7days.filter(function(d){return d.logged;});
-    if(loggedLast7.length>=2){
-      var bestDay=loggedLast7.reduce(function(a,d){return Math.abs(d.cals-P.calTarget)<Math.abs(a.cals-P.calTarget)?d:a;},loggedLast7[0]);
-      var worstDay=loggedLast7.reduce(function(a,d){return d.cals>a.cals?d:a;},loggedLast7[0]);
-      html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px">';
-      html+='<div onclick="histDate=\''+bestDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+bestDay.dt+'\';rHistory()" style="background:rgba(0,212,170,.12);border-radius:13px;border:.5px solid rgba(0,212,170,.35);padding:12px;cursor:pointer;text-align:center">';
-      html+='<div style="font-size:10px;color:var(--grn);font-weight:600;margin-bottom:4px">&#127942; Best day</div>';
-      html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--grn)">'+fN(bestDay.cals)+' kcal</div>';
-      html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(bestDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
-      html+='</div>';
-      html+='<div onclick="histDate=\''+worstDay.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+worstDay.dt+'\';rHistory()" style="background:rgba(255,59,92,.08);border-radius:13px;border:.5px solid rgba(255,59,92,.2);padding:12px;cursor:pointer;text-align:center">';
-      html+='<div style="font-size:10px;color:var(--red);font-weight:600;margin-bottom:4px">&#128293; Most indulgent</div>';
-      html+='<div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--red)">'+fN(worstDay.cals)+' kcal</div>';
-      html+='<div style="font-size:11px;color:var(--dim);margin-top:2px">'+new Date(worstDay.dt+'T12:00').toLocaleDateString('en',{weekday:'long'})+'</div>';
-      html+='</div></div>';
-    }
-
-    // ── 30-day calorie chart ─────────────────────────────────────
-    var loggedDays=days30.filter(function(d){return d.logged;});
-    if(loggedDays.length>0){
-      html+=D('class="slbl"','30-Day Calories vs Goal');
-      var maxCals=Math.max.apply(null,days30.map(function(d){return d.cals||0;}).concat([P.calTarget]));
-      var goalPct=Math.min(P.calTarget/maxCals,1)*100;
-      var barsHtml=days30.map(function(d){
-        var h2=d.cals>0?Math.max(d.cals/maxCals*70,2):1;
-        var col=d.dt===histDate?'var(--cyn)':d.cals>P.calTarget?'var(--red)':d.logged?'var(--grn)':'rgba(255,255,255,.06)';
-        return D('style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;cursor:pointer" onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()"',
-          D('style="width:100%;background:'+col+';border-radius:2px 2px 0 0;height:'+h2+'px;transition:height .2s"',''));
-      }).join('');
-      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:13px;margin-bottom:13px"',
-        D('style="position:relative;height:84px;display:flex;align-items:flex-end;gap:2px;margin-bottom:4px"',
-          D('style="position:absolute;bottom:'+Math.round(goalPct*70/100)+'px;left:0;right:0;border-top:1px dashed rgba(255,255,255,.2);pointer-events:none"',
-            D('style="font-size:9px;color:var(--dim);position:absolute;top:-12px;right:0"','goal'))+
-          barsHtml)+
-        D('style="display:flex;justify-content:space-between;margin-top:2px"',
-          D('style="font-size:10px;color:var(--dim)"',days30[0].lbl)+
-          D('style="font-size:10px;color:var(--cyn)"','Tap bar to see day')+
-          D('style="font-size:10px;color:var(--dim)"',days30[29].lbl)));
-    }
-
-    // ── 30-day weight trend ──────────────────────────────────────
-    var wtPoints=days30.filter(function(d){return d.wt!==null;});
-    if(wtPoints.length>=2){
-      html+=D('class="slbl"','Weight Trend (lbs)');
-      var minWt=Math.min.apply(null,wtPoints.map(function(d){return d.wt;}))-1;
-      var maxWt=Math.max.apply(null,wtPoints.map(function(d){return d.wt;}))+1;
-      var W=320, H=70;
-      var svgPts=wtPoints.map(function(d){
-        var xi=days30.indexOf(days30.filter(function(dd){return dd.dt===d.dt;})[0]);
-        var x=Math.round(xi/(days30.length-1)*(W-20))+10;
-        var y=Math.round(H-8-((d.wt-minWt)/(maxWt-minWt))*(H-16));
-        return x+','+y;
-      }).join(' ');
-      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:13px;margin-bottom:13px"',
-        '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px">'+
-        '<polyline points="'+svgPts+'" fill="none" stroke="var(--pur)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
-        wtPoints.map(function(d){
-          var xi=days30.indexOf(days30.filter(function(dd){return dd.dt===d.dt;})[0]);
-          var x=Math.round(xi/(days30.length-1)*(W-20))+10;
-          var y=Math.round(H-8-((d.wt-minWt)/(maxWt-minWt))*(H-16));
-          var isSel=d.dt===histDate;
-          return '<circle cx="'+x+'" cy="'+y+'" r="'+(isSel?5:3)+'" fill="'+(isSel?'var(--cyn)':'var(--pur)')+'"/>';
-        }).join('')+
-        '</svg>'+
-        D('style="display:flex;justify-content:space-between;margin-top:4px"',
-          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[0].wt,1)+' lbs - '+wtPoints[0].lbl)+
-          D('style="font-size:10px;color:var(--pur)"',fD(wtPoints[wtPoints.length-1].wt-wtPoints[0].wt,1)+' lbs')+
-          D('style="font-size:10px;color:var(--dim)"',fD(wtPoints[wtPoints.length-1].wt,1)+' lbs - '+wtPoints[wtPoints.length-1].lbl)));
-    }
-
-    // ── 7-day calorie vs goal comparison ────────────────────────
-    var last7=days30.slice(-7);
-    var anyLogged7=last7.some(function(d){return d.logged;});
-    if(anyLogged7){
-      html+=D('class="slbl"','This Week at a Glance');
-      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:13px;margin-bottom:13px"',
-        D('style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"',
-          last7.map(function(d){
-            var isSel=d.dt===histDate;
-            var over=d.cals>P.calTarget;
-            var col=isSel?'var(--cyn)':d.logged?(over?'var(--red)':'var(--grn)'):'var(--dim2)';
-            var bg=isSel?'rgba(0,229,255,.15)':d.logged?(over?'rgba(255,59,92,.1)':'rgba(0,212,170,.1)'):'rgba(255,255,255,.04)';
-            return D('style="text-align:center;padding:8px 2px;border-radius:9px;background:'+bg+';border:.5px solid '+(isSel?'var(--cyn)':'transparent')+';cursor:pointer" onclick="histDate=\''+d.dt+'\';var de=g(\'hist-date\');if(de)de.value=\''+d.dt+'\';rHistory()"',
-              D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',d.wkd)+
-              D('style="font-family:var(--mn);font-size:12px;font-weight:800;color:'+col+'"',d.logged?fN(d.cals):'-')+
-              D('style="font-size:9px;color:var(--dim);margin-top:1px"',d.logged?(over?'over':'ok'):''));
-          }).join('')));
-    }
-
-    hb.innerHTML = html;
-  } catch(e) { console.error('rHistory',e); var hb=g('hist-body'); if(hb) hb.innerHTML='<div style="padding:20px;color:var(--red)">Error: '+e.message+'</div>'; }
-}
-
-// ── Weekly Trends (called from History tab week view) ────────────────────────
-function getWeekStats(startDateStr) {
-  var out = [];
-  for (var i = 0; i < 7; i++) {
-    var d = new Date(startDateStr + 'T12:00');
-    d.setDate(d.getDate() + i);
-    var dt = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    var meals = ML.filter(function(m){ return m.date===dt; });
-    var drinks = DL.filter(function(dr){ return dr.date===dt; });
-    var cals = meals.reduce(function(a,m){ return a+(m.cals||0); },0) + drinks.reduce(function(a,dr){ return a+(dr.c||0); },0);
-    var wt = WL.filter(function(w){ return w.date===dt; });
-    var sl = SL.filter(function(s){ return s.date===dt; });
-    out.push({
-      date: dt,
-      label: d.toLocaleDateString('en',{weekday:'short'}),
-      cals: cals,
-      deficit: cals > 0 ? P.calTarget - cals : null,
-      weight: wt.length ? fD(k2l(wt[wt.length-1].weight),1) : null,
-      sleep: sl.length ? fD(sl[sl.length-1].hours,1) : null,
-      logged: meals.length + drinks.length > 0
-    });
-  }
-  return out;
-}
-
-
-
-// ═══ RECIPE BUILDER ═══</script>
+      _cfBaseCals=fields['cf-cals'];
+      _cfBaseProt=fields['cf-prot'];
+      _cfBaseCarbs=fields['cf-carbs'];
+      _cfBaseFat=fields['cf-fat'];
+      toast('\u2713 '+name+' loaded! Review and save.');
+    },200);
+  }).catch(function(e){
+    toast('Lookup failed - check connection',true);
+  });
+}</script>
 
   <div id="recipe-modal" class="modal"><div class="mbg" onclick="closeRecipeModal()"></div>
   <div class="msheet" style="max-height:92vh;overflow-y:auto">
