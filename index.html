@@ -3840,12 +3840,12 @@ function rHistory(){
     mealOrder.forEach(function(mk){
       if(!mealGroups[mk]||!mealGroups[mk].length) return;
       var groupCals=mealGroups[mk].reduce(function(a,m){return a+(m.cals||0);},0);
-      mealHtml+=D('style="font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.5px;margin:8px 0 5px"',mealLabels[mk]+' \xb7 '+fN(groupCals)+' kcal');
+      mealHtml+=D('style="font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.5px;margin:8px 0 5px"',mealLabels[mk]+' · '+fN(groupCals)+' kcal');
       mealGroups[mk].forEach(function(m){
         mealHtml+=D('class="ritem" style="margin-bottom:6px"',
           D('class="ric" style="background:var(--s3)"',m.emoji||'&#127869;')+
-          D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals||0)+' kcal'+(m.protein?' \xb7 '+Math.round(m.protein)+'g protein':'')))+
-          D('style="font-size:13px;color:var(--dim);flex-shrink:0"',m.servings&&m.servings!==1?'\xd7'+m.servings:''));
+          D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals||0)+' kcal'+(m.protein?' · '+Math.round(m.protein)+'g protein':'')))+
+          D('style="font-size:13px;color:var(--dim);flex-shrink:0"',m.servings&&m.servings!==1?'×'+m.servings:''));
       });
     });
     html+=D('style="margin-bottom:12px"',
@@ -3855,13 +3855,13 @@ function rHistory(){
     var drinkCals=dayDrinks.reduce(function(a,d){return a+(d.c||0);},0);
     html+=D('style="margin-bottom:12px"',
       D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px"',
-        'Drinks \xb7 '+fN(drinkCals)+' kcal'+(dayUnits>0?' \xb7 '+fD(dayUnits,1)+' std units':''))+
+        'Drinks · '+fN(drinkCals)+' kcal'+(dayUnits>0?' · '+fD(dayUnits,1)+' std units':''))+
       dayDrinks.map(function(d){
         var sz=d.sz||d.size||'';var ml=d.ml||0;
         var sub=sz?(sz+(ml>0?' ('+ml+'ml)':'')):(ml>0?ml+'ml':'');
         return D('class="ritem" style="margin-bottom:6px"',
           D('class="ric" style="background:var(--s3)"',d.e||d.emoji||'&#127870;')+
-          D('class="rmain"',D('class="rname"',d.n||d.name||'Drink')+D('class="rsub"',sub+(d.u>0?' \xb7 '+fD(d.u,1)+' units':'')))+
+          D('class="rmain"',D('class="rname"',d.n||d.name||'Drink')+D('class="rsub"',sub+(d.u>0?' · '+fD(d.u,1)+' units':'')))+
           D('class="rval"',fN(d.c||0)+' kcal'));
       }).join(''));
   }
@@ -3869,15 +3869,15 @@ function rHistory(){
     var lw2=dayWts[dayWts.length-1];
     html+=D('class="card" style="margin-bottom:12px"',
       D('style="display:flex;justify-content:space-between;align-items:center"',
-        D('style="font-size:13px;color:var(--dim)"','\u2696\ufe0f Weight')+
+        D('style="font-size:13px;color:var(--dim)"','– Weight')+
         D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--pur)"',fW(lw2.weight))));
   }
   if(daySleep.length){
     var sl2=daySleep[daySleep.length-1];
     html+=D('class="card" style="margin-bottom:12px"',
       D('style="display:flex;justify-content:space-between;align-items:center"',
-        D('',D('style="font-size:13px;color:var(--dim)"','\ud83d\ude34 Sleep')+
-           D('style="font-size:11px;color:var(--dim2);margin-top:2px"',(sl2.bedtime&&sl2.wake)?sl2.bedtime+' \u2192 '+sl2.wake:''))+
+        D('',D('style="font-size:13px;color:var(--dim)"','=4 Sleep')+
+           D('style="font-size:11px;color:var(--dim2);margin-top:2px"',(sl2.bedtime&&sl2.wake)?sl2.bedtime+' ’ '+sl2.wake:''))+
         D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--blu)"',hHM(sl2.hours||0))));
   }
   if(!dayCals&&!daySnap&&!dayWts.length&&!daySleep.length){
