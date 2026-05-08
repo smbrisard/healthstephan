@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
-<title>Health Stephan v22</title>
+<title>Health Stephan v23</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -595,7 +595,7 @@ body { height: 100dvh; }
     <!-- MEASUREMENTS MODAL -->
   <div class="modal" id="meas-m"><div class="mbg" onclick="closeM('meas-m')"></div>
   <div class="msheet"><div class="mhandle"></div>
-    <div class="mtitle">📏 Body Measurements</div>
+    <div class="mtitle" id="meas-modal-title">📏 Body Measurements</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div><div class="flbl">Waist (in)</div><input class="fld" type="number" id="meas-waist" placeholder="0" step="0.1" style="margin-bottom:0"></div>
       <div><div class="flbl">Hips (in)</div><input class="fld" type="number" id="meas-hips" placeholder="0" step="0.1" style="margin-bottom:0"></div>
@@ -3934,7 +3934,7 @@ function rHistory(){
       }).join(' ');
       var wtChg=wtPts[wtPts.length-1].wt-wtPts[0].wt;
       html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','Weight Trend');
-      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:90px"',
+      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:14px"',
         '<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:70px;display:block"><polyline points="'+svgPts+'" fill="none" stroke="var(--pur)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
         wtPts.map(function(d){
           var ix=days30.findIndex(function(d2){return d2.dt===d.dt;});
@@ -4249,19 +4249,39 @@ function loadCustomDrinks(){
 function loadMeasurements(){try{return JSON.parse(localStorage.getItem('hs_measurements')||'[]');}catch(e){return[];}}
 function saveMeasurements(a){try{localStorage.setItem('hs_measurements',JSON.stringify(a));}catch(e){}}
 function openMeasModal(){
+  _editMeasId=null;
   var ml=loadMeasurements(),last=ml.length?ml[ml.length-1]:null;
   ['waist','hips','chest','neck'].forEach(function(f){var el=g('meas-'+f);if(el)el.value=last&&last[f]||'';});
   ['arm-l','arm-r','thigh-l','thigh-r'].forEach(function(f){var k=f.replace('-','_');var el=g('meas-'+f);if(el)el.value=last&&last[k]||'';});
   var dt=g('meas-date');if(dt)dt.value=today();
   var nt=g('meas-notes');if(nt)nt.value='';
+  var title=g('meas-modal-title');if(title)title.textContent='Log Measurements';
+  openM('meas-m');
+}
+var _editMeasId=null;
+function editMeasurement(id){
+  var ml=loadMeasurements();
+  var entry=ml.filter(function(m){return m.id===id;})[0];
+  if(!entry) return;
+  _editMeasId=id;
+  ['waist','hips','chest','neck'].forEach(function(f){var el=g('meas-'+f);if(el)el.value=entry[f]||'';});
+  ['arm-l','arm-r','thigh-l','thigh-r'].forEach(function(f){var k=f.replace('-','_');var el=g('meas-'+f);if(el)el.value=entry[k]||'';});
+  var dt=g('meas-date');if(dt)dt.value=entry.date||today();
+  var nt=g('meas-notes');if(nt)nt.value=entry.notes||'';
+  var title=g('meas-modal-title');if(title)title.textContent='Edit Measurements';
   openM('meas-m');
 }
 function saveMeasurement(){
-  var entry={id:Date.now(),date:(g('meas-date')||{value:today()}).value||today()};
+  var ml=loadMeasurements();
+  var entry=_editMeasId?ml.filter(function(m){return m.id===_editMeasId;})[0]:null;
+  if(!entry){entry={id:Date.now()};ml.push(entry);}
+  entry.date=(g('meas-date')||{value:today()}).value||today();
   ['waist','hips','chest','neck'].forEach(function(f){entry[f]=parseFloat((g('meas-'+f)||{value:0}).value)||0;});
   ['arm-l','arm-r','thigh-l','thigh-r'].forEach(function(f){entry[f.replace('-','_')]=parseFloat((g('meas-'+f)||{value:0}).value)||0;});
   entry.notes=(g('meas-notes')||{value:''}).value.trim();
-  var ml=loadMeasurements();ml.push(entry);saveMeasurements(ml);
+  saveMeasurements(ml);
+  _editMeasId=null;
+  var title=g('meas-modal-title');if(title)title.textContent='Log Measurements';
   closeM('meas-m');rMeasLog();toast('\u2713 Measurements saved');
 }
 function deleteMeasurement(id){
@@ -4280,7 +4300,10 @@ function rMeasLog(){
     return '<div class="card" style="margin-bottom:8px;padding:12px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
         '<div style="font-size:12px;font-weight:700;color:var(--dim)">'+fmtChartDate(m.date)+'</div>'+
-        '<button onclick="deleteMeasurement('+m.id+')" style="background:rgba(255,59,92,.15);border:none;border-radius:50%;width:24px;height:24px;color:var(--red);font-size:13px;cursor:pointer;line-height:24px;text-align:center">\u00d7</button>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button onclick="editMeasurement('+m.id+')" style="background:rgba(77,166,255,.15);border:none;border-radius:50%;width:28px;height:28px;color:var(--blu);font-size:13px;cursor:pointer;line-height:28px;text-align:center;touch-action:manipulation">&#9998;</button>'+
+          '<button onclick="deleteMeasurement('+m.id+')" style="background:rgba(255,59,92,.15);border:none;border-radius:50%;width:28px;height:28px;color:var(--red);font-size:13px;cursor:pointer;line-height:28px;text-align:center;touch-action:manipulation">\u00d7</button>'+
+        '</div>'+
       '</div>'+
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">'+
         _mBadge('Waist',m.waist)+_mBadge('Hips',m.hips)+_mBadge('Chest',m.chest)+_mBadge('Neck',m.neck)+
