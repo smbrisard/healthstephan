@@ -1446,7 +1446,6 @@ function rHome() {
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
   // Exercise/stand only show if sync date is strictly today
   var _exToday=!P.lastSyncDate||P.lastSyncDate===today();
-  var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_exToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   var _stel=g('hm-stand'); if(_stel) _stel.textContent=(_exToday&&P.standHours)?Math.round(P.standHours):'--';
   var _emel=g('hm-exmin'); if(_emel) _emel.textContent=(_isToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--';
   // Suggestions
@@ -3755,6 +3754,52 @@ function migrateMLMicronutrients(){
   });
   if(migrated>0){save();console.log('Migrated micronutrients for '+migrated+' ML entries');}
 }
+
+var histDate=today();
+function rHistory(){
+  var hd=g('hist-date'); if(hd) hd.value=histDate;
+  var sub=g('hist-sub'); if(sub) sub.textContent=fmtChartDate(histDate);
+  var wb=g('weekly-summary'); if(wb) wb.innerHTML='';
+  var hb=g('hist-body'); if(!hb) return;
+  var dayMeals=ML.filter(function(m){return m.date===histDate;});
+  var dayDrinks=DL.filter(function(d){return d.date===histDate;});
+  var dayCals=dayMeals.reduce(function(a,m){return a+(m.cals||0);},0)+dayDrinks.reduce(function(a,d){return a+(d.c||0);},0);
+  var dayProt=dayMeals.reduce(function(a,m){return a+(m.protein||0);},0);
+  var daySnap=null;
+  for(var i=FL.length-1;i>=0;i--){if(FL[i].date===histDate){daySnap=FL[i];break;}}
+  var html='';
+  if(dayCals>0){
+    html+=D('class="card" style="margin-bottom:12px"',
+      D('style="display:flex;justify-content:space-between;margin-bottom:6px"',
+        D('style="font-size:13px;color:var(--dim)"','Calories')+
+        D('style="font-family:var(--mn);font-size:15px;font-weight:700"',fN(dayCals)+' kcal'))+
+      D('style="display:flex;justify-content:space-between"',
+        D('style="font-size:13px;color:var(--dim)"','Protein')+
+        D('style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--grn)"',Math.round(dayProt)+'g')));
+  }
+  if(daySnap){
+    html+=D('class="card" style="margin-bottom:12px"',
+      D('style="display:flex;justify-content:space-between;margin-bottom:6px"',
+        D('style="font-size:13px;color:var(--dim)"','Steps')+
+        D('style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--amb)"',fN(daySnap.steps||0)))+
+      D('style="display:flex;justify-content:space-between"',
+        D('style="font-size:13px;color:var(--dim)"','Sleep')+
+        D('style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--blu)"',daySnap.sleep?hHM(daySnap.sleep):'--')));
+  }
+  if(!dayCals&&!daySnap){
+    html=D('style="padding:20px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No data for this day.');
+  }
+  hb.innerHTML=html;
+}
+function histNav(dir){
+  var d=new Date(histDate+'T12:00');
+  d.setDate(d.getDate()+dir);
+  var nd=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(nd>today()) return;
+  histDate=nd;
+  rHistory();
+}
+
 
 function launchApp(){
   // Clean up any duplicate entries from previous bugs
