@@ -3836,17 +3836,20 @@ function launchApp(){
   if(SYNC_URL) setTimeout(function(){fetchSync();},1500);
   rHome();
 }
-function launch(){
+function launchApp(){
+  document.body.style.background='red';
   var loader=g('loading');
-  if(loader){loader.style.opacity='0';loader.style.pointerEvents='none';loader.style.display='none';}
-  try{
-    if(P&&P.isOnboarded){launchApp();}
-    else{var ob=g('ob');if(ob)ob.style.display='flex';}
-  }catch(err){
-    console.error('[fix] launch:',err);
-    try{var app=g('app');if(app)app.style.display='flex';}catch(e2){}
+  // Always hide loader first, unconditionally, before anything else
+  if(loader){ loader.style.opacity='0'; loader.style.pointerEvents='none'; loader.classList.add('gone'); }
+  try {
+    if(P.isOnboarded){ launchApp(); }
+    else { var ob=g('ob'); if(ob) ob.style.display='flex'; }
+  } catch(e) {
+    console.error('launch error',e);
+    try { launchApp(); } catch(e2) { console.error('launchApp error',e2); }
   }
-}
+  setTimeout(function(){ if(loader) loader.style.display='none'; }, 500);
+}}
 // Aggressively clear old caches
 if('caches' in window){
   caches.keys().then(function(names){
@@ -4880,6 +4883,10 @@ function _lookupBarcode(barcode){
   }).catch(function(e){
     toast('Lookup failed - check connection',true);
   });
+window.addEventListener('load', function(){
+  document.body.style.background='green';
+  setTimeout(launch, 100);
+
 }</script>
 
   <div id="recipe-modal" class="modal"><div class="mbg" onclick="closeRecipeModal()"></div>
