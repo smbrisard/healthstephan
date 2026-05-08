@@ -962,7 +962,7 @@ body { height: 100dvh; }
     <!-- Search results -->
     <div id="cf-results" style="max-height:180px;overflow-y:auto;margin-bottom:4px"></div>
 
-    <!-- Barcode scan -->
+    <!-- Barcode scan button -->
     <button onclick="cfBarcode()" style="width:100%;padding:12px;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.3);border-radius:12px;color:var(--blu);font-size:14px;font-weight:700;margin-bottom:10px;touch-action:manipulation">📷 Scan Barcode</button>
 
     <!-- Divider -->
@@ -1503,14 +1503,14 @@ function rHome() {
     el2.innerHTML=S('style="color:'+col+'"',(diff>0?'&#9650;':'&#9660;')+' '+Math.abs(diff)+(unit||''))+S('style="color:var(--dim2)"',' yd');
   }
   if(_ydSnap){
-    _hmD('hm-steps-yd',Math.round(P.stepsToday||0),_ydSnap.steps!=null?Math.round(_ydSnap.steps):null,false,'');
-    _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv!=null?_ydSnap.hrv:null,false,'ms');
-    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep!=null?_ydSnap.sleep:null,false,'h');
-    _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned!=null?_ydSnap.burned:null,false,' kcal');
-    _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist!=null&&_ydSnap.dist>0?_ydSnap.dist:null,false,' mi');
-    _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr!=null&&_ydSnap.rhr>0?_ydSnap.rhr:null,true,' bpm');
-    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours!=null?_ydSnap.standHours:null,false,' hrs');
-    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins!=null?_ydSnap.exerciseMins:null,false,' min');
+    _hmD('hm-steps-yd',Math.round(P.stepsToday||0),_ydSnap.steps>0?Math.round(_ydSnap.steps):null,false,'');
+    _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv>0?_ydSnap.hrv:null,false,'ms');
+    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep>0?_ydSnap.sleep:null,false,'h');
+    _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned>0?_ydSnap.burned:null,false,' kcal');
+    _hmD('hm-dist-yd',P.distMiles||0,(_ydSnap.dist>0&&_ydSnap.dist<20)?_ydSnap.dist:null,false,' mi');
+    _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr>0?_ydSnap.rhr:null,true,' bpm');
+    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours>0?_ydSnap.standHours:null,false,' hrs');
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins>0?_ydSnap.exerciseMins:null,false,' min');
   } else {
     ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
       var e=g(id); if(e) e.innerHTML='';
@@ -3764,7 +3764,6 @@ function rHistory(){
   var wb=g('weekly-summary'); if(wb) wb.innerHTML='';
   var hb=g('hist-body'); if(!hb) return;
 
-  // Gather data for selected day
   var dayMeals=ML.filter(function(m){return m.date===histDate;});
   var dayDrinks=DL.filter(function(d){return d.date===histDate;});
   var dayWts=WL.filter(function(w){return w.date===histDate;});
@@ -3776,11 +3775,14 @@ function rHistory(){
   var dayCarbs=dayMeals.reduce(function(a,m){return a+(m.carbs||0);},0);
   var dayFat=dayMeals.reduce(function(a,m){return a+(m.fat||0);},0);
   var dayUnits=dayDrinks.reduce(function(a,d){return a+(d.u||0);},0);
-  var html='';
 
-  // ── Weekly summary bar ─────────────────────────────────────────────────────
+  // ── Week at a Glance bar chart ────────────────────────────────────────────
   if(wb){
-    var wDays=[]; for(var wi=6;wi>=0;wi--){var wd2=new Date(histDate+'T12:00');wd2.setDate(wd2.getDate()-wi);wDays.push(wd2.getFullYear()+'-'+String(wd2.getMonth()+1).padStart(2,'0')+'-'+String(wd2.getDate()).padStart(2,'0'));}
+    var wDays=[];
+    for(var wi=6;wi>=0;wi--){
+      var wd2=new Date(histDate+'T12:00'); wd2.setDate(wd2.getDate()-wi);
+      wDays.push(wd2.getFullYear()+'-'+String(wd2.getMonth()+1).padStart(2,'0')+'-'+String(wd2.getDate()).padStart(2,'0'));
+    }
     var wkCals=wDays.map(function(dt){
       var wm=ML.filter(function(m){return m.date===dt;});
       var wdr=DL.filter(function(d){return d.date===dt;});
@@ -3791,7 +3793,7 @@ function rHistory(){
     wb.innerHTML=D('style="margin-bottom:14px"',
       D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px"','Week at a Glance')+
       D('style="display:flex;gap:5px;align-items:flex-end;height:60px"',wDays.map(function(dt,idx2){
-        var pct=wkCals[idx2]?Math.max(6,Math.round(wkCals[idx2]/maxCal*100)):4;
+        var pct=wkCals[idx2]?Math.max(8,Math.round(wkCals[idx2]/maxCal*100)):4;
         var isHist=dt===histDate;
         var dayD=new Date(dt+'T12:00');
         return D('style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;touch-action:manipulation" onclick="histDate=\''+dt+'\';rHistory()"',
@@ -3800,54 +3802,86 @@ function rHistory(){
       }).join('')));
   }
 
-  // ── Fitness snapshot card ──────────────────────────────────────────────────
+  var html='';
+
+  // ── Fitness snapshot ──────────────────────────────────────────────────────
   if(daySnap){
     html+=D('class="card" style="margin-bottom:12px"',
       D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px"','Fitness')+
       D('class="g2"',
-        [['&#127939; Steps',fN(daySnap.steps||0),'var(--amb)'],
-         ['&#128564; Sleep',daySnap.sleep?hHM(daySnap.sleep):'--','var(--blu)'],
-         ['&#9889; HRV',(daySnap.hrv?fD(daySnap.hrv,1):'--')+' ms','var(--grn)'],
-         ['&#10084; RHR',(daySnap.rhr?Math.round(daySnap.rhr):'--')+' bpm','var(--red)'],
-         ['&#128293; Burned',(daySnap.burned?fN(daySnap.burned):'--')+' kcal','var(--pnk)'],
-         ['&#128205; Distance',(daySnap.dist?fD(daySnap.dist,1):'--')+' mi','#38bdf8']
-        ].map(function(r){return D('style="background:var(--s3);border-radius:10px;padding:10px"',
-          D('style="font-size:11px;color:var(--dim);margin-bottom:3px"',r[0])+
-          D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+r[2]+'"',r[1]));}).join('')));
+        [['&#127939; Steps', fN(daySnap.steps||0), 'var(--amb)'],
+         ['&#128564; Sleep', daySnap.sleep?hHM(daySnap.sleep):'--', 'var(--blu)'],
+         ['&#9889; HRV', (daySnap.hrv?fD(daySnap.hrv,1):'--')+' ms', 'var(--grn)'],
+         ['&#10084; RHR', (daySnap.rhr?Math.round(daySnap.rhr):'--')+' bpm', 'var(--red)'],
+         ['&#128293; Burned', (daySnap.burned?fN(Math.round(daySnap.burned)):'--')+' kcal', 'var(--pnk)'],
+         ['&#128205; Distance', (daySnap.dist&&daySnap.dist>0?fD(daySnap.dist,1):'--')+' mi', '#38bdf8']
+        ].map(function(r){
+          return D('style="background:var(--s3);border-radius:10px;padding:10px"',
+            D('style="font-size:11px;color:var(--dim);margin-bottom:3px"',r[0])+
+            D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:'+r[2]+'"',r[1]));
+        }).join('')));
   }
 
-  // ── Calorie & macro summary ────────────────────────────────────────────────
+  // ── Nutrition summary ─────────────────────────────────────────────────────
   if(dayCals>0){
     html+=D('class="card" style="margin-bottom:12px"',
       D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px"','Nutrition')+
-      D('style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"',
-        D('style="font-size:13px;color:var(--dim)"','Calories')+
+      D('style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"',
+        D('style="font-size:13px;color:var(--dim)"','Total Calories')+
         D('style="font-family:var(--mn);font-size:18px;font-weight:800"',fN(dayCals)+' kcal'))+
-      D('class="g3" style="margin-top:8px"',
-        [['Protein',Math.round(dayProt)+'g','var(--grn)'],['Carbs',Math.round(dayCarbs)+'g','var(--amb)'],['Fat',Math.round(dayFat)+'g','var(--red)']].map(function(r){
+      D('class="g3"',
+        [['Protein',Math.round(dayProt)+'g','var(--grn)'],
+         ['Carbs',Math.round(dayCarbs)+'g','var(--amb)'],
+         ['Fat',Math.round(dayFat)+'g','var(--red)']
+        ].map(function(r){
           return D('style="text-align:center;background:var(--s3);border-radius:10px;padding:8px 4px"',
             D('style="font-family:var(--mn);font-size:15px;font-weight:800;color:'+r[2]+'"',r[1])+
-            D('style="font-size:10px;color:var(--dim);margin-top:1px"',r[0]));}).join('')));
+            D('style="font-size:10px;color:var(--dim);margin-top:1px"',r[0]));
+        }).join('')));
   }
 
   // ── Meals log ─────────────────────────────────────────────────────────────
   if(dayMeals.length){
+    var mealGroups={breakfast:[],lunch:[],dinner:[],snack:[]};
+    dayMeals.forEach(function(m){
+      var k=(m.meal||'snack').toLowerCase();
+      if(!mealGroups[k]) mealGroups[k]=[];
+      mealGroups[k].push(m);
+    });
+    var mealOrder=['breakfast','lunch','dinner','snack'];
+    var mealLabels={breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snacks'};
+    var mealHtml='';
+    mealOrder.forEach(function(mk){
+      if(!mealGroups[mk]||!mealGroups[mk].length) return;
+      var groupCals=mealGroups[mk].reduce(function(a,m){return a+(m.cals||0);},0);
+      mealHtml+=D('style="font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.5px;margin:8px 0 5px"',mealLabels[mk]+' · '+fN(groupCals)+' kcal');
+      mealGroups[mk].forEach(function(m){
+        mealHtml+=D('class="ritem" style="margin-bottom:6px"',
+          D('class="ric" style="background:var(--s3)"',m.emoji||'🍽')+
+          D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals||0)+' kcal'+(m.protein?' · '+Math.round(m.protein)+'g protein':'')))+
+          D('style="font-size:13px;color:var(--dim);flex-shrink:0"',m.servings&&m.servings!==1?'×'+m.servings:''));
+      });
+    });
     html+=D('style="margin-bottom:12px"',
-      D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px"','Meals')+
-      dayMeals.map(function(m){return D('class="ritem" style="margin-bottom:7px"',
-        D('class="ric" style="background:var(--s3)"',m.emoji||'🍽')+
-        D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',m.meal||''))+
-        D('class="rval"',fN(m.cals||0)+' kcal'));}).join(''));
+      D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px"','Meals')+
+      mealHtml);
   }
 
   // ── Drinks log ────────────────────────────────────────────────────────────
   if(dayDrinks.length){
+    var drinkCals=dayDrinks.reduce(function(a,d){return a+(d.c||0);},0);
     html+=D('style="margin-bottom:12px"',
-      D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px"','Drinks'+(dayUnits>0?' · '+fD(dayUnits,1)+' std units':''))+
-      dayDrinks.map(function(d){return D('class="ritem" style="margin-bottom:7px"',
-        D('class="ric" style="background:var(--s3)"',d.e||'🥤')+
-        D('class="rmain"',D('class="rname"',d.n||d.name)+D('class="rsub"',(d.ml||0)+' ml · '+(d.u||0)+' units'))+
-        D('class="rval"',fN(d.c||0)+' kcal'));}).join(''));
+      D('style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px"',
+        'Drinks · '+fN(drinkCals)+' kcal'+(dayUnits>0?' · '+fD(dayUnits,1)+' std units':''))+
+      dayDrinks.map(function(d){
+        var sz=d.sz||d.size||'';
+        var ml=d.ml||0;
+        var sub=sz?(sz+(ml>0?' ('+ml+'ml)':'')):(ml>0?ml+'ml':'');
+        return D('class="ritem" style="margin-bottom:6px"',
+          D('class="ric" style="background:var(--s3)"',d.e||d.emoji||'🥤')+
+          D('class="rmain"',D('class="rname"',d.n||d.name||'Drink')+D('class="rsub"',sub+(d.u>0?' · '+fD(d.u,1)+' units':'')))+
+          D('class="rval"',fN(d.c||0)+' kcal'));
+      }).join(''));
   }
 
   // ── Weight ────────────────────────────────────────────────────────────────
@@ -3862,14 +3896,17 @@ function rHistory(){
   // ── Sleep ─────────────────────────────────────────────────────────────────
   if(daySleep.length){
     var sl2=daySleep[daySleep.length-1];
+    var bedStr=sl2.bedtime||'';
+    var wakeStr=sl2.wake||'';
     html+=D('class="card" style="margin-bottom:12px"',
       D('style="display:flex;justify-content:space-between;align-items:center"',
-        D('style="font-size:13px;color:var(--dim)"','😴 Sleep')+
+        D('',D('style="font-size:13px;color:var(--dim)"','😴 Sleep')+
+           D('style="font-size:11px;color:var(--dim2);margin-top:2px"',bedStr&&wakeStr?bedStr+' → '+wakeStr:''))+
         D('style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--blu)"',hHM(sl2.hours||0))));
   }
 
   if(!dayCals&&!daySnap&&!dayWts.length&&!daySleep.length){
-    html=D('style="padding:20px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No data for this day.');
+    html=D('style="padding:24px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No data for this day.');
   }
   hb.innerHTML=html;
 }
@@ -4300,12 +4337,20 @@ function fetchSync(){
       var _ydStr2=_yd2.getFullYear()+'-'+String(_yd2.getMonth()+1).padStart(2,'0')+'-'+String(_yd2.getDate()).padStart(2,'0');
       var _hasYd=FL.some(function(f){return f.date===_ydStr2;});
       if(!_hasYd&&FL.length>1){
-        // Use second most recent FL entry as yesterday proxy
+        // Use second most recent FL entry as yesterday proxy — only if it's within 3 days
         var _sorted=FL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
         var _prev=_sorted[_sorted.length-2];
-        if(_prev&&_prev.date<snap.date){
-          var _ydProxy=JSON.parse(JSON.stringify(_prev));
-          _ydProxy.date=_ydStr2;
+        var _prevDate=_prev?new Date(_prev.date+'T12:00'):null;
+        var _ydDate=new Date(_ydStr2+'T12:00');
+        var _daysDiff=_prevDate?((_ydDate-_prevDate)/(1000*60*60*24)):999;
+        if(_prev&&_prev.date<snap.date&&_daysDiff<=3){
+          var _ydProxy={date:_ydStr2,
+            steps:_prev.steps||0,burned:_prev.burned||0,activeBurned:_prev.activeBurned||0,
+            rhr:_prev.rhr||0,hrv:_prev.hrv||0,spo2:_prev.spo2||0,rr:_prev.rr||0,
+            sleep:_prev.sleep||0,water:_prev.water||0,
+            dist:(_prev.dist&&_prev.dist<20)?_prev.dist:0,
+            standHours:_prev.standHours||0,exerciseMins:_prev.exerciseMins||0,
+            wt:_prev.wt||null};
           if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
         }
       }
@@ -4858,11 +4903,10 @@ var _bcInterval=null;
 // Falls back to ZXing-js for older devices
 function cfBarcode(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    toast('Camera not available',true); return;
-  }
-  // Check BarcodeDetector support (iOS 17+, all iPhone camera types including LiDAR)
-  if(!('BarcodeDetector' in window)){
-    toast('Barcode scanning requires iOS 17 or later',true); return;
+    // No camera API - offer manual entry
+    var code=prompt('Enter barcode number:');
+    if(code&&code.trim()) _lookupBarcode(code.trim());
+    return;
   }
   openM('barcode-m');
   _startBarcodeCamera();
@@ -4870,37 +4914,49 @@ function cfBarcode(){
 
 function _startBarcodeCamera(){
   var video=document.getElementById('bc-video');
-  var overlay=document.getElementById('bc-overlay');
   if(!video) return;
+  var statusEl=document.getElementById('bc-status');
+  if(statusEl) statusEl.textContent='Starting camera...';
   navigator.mediaDevices.getUserMedia({
-    video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}
+    video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
   }).then(function(stream){
     _bcStream=stream;
     video.srcObject=stream;
     video.play();
+    if(statusEl) statusEl.textContent='Point camera at barcode';
     _bcScan();
   }).catch(function(e){
-    toast('Camera error: '+e.message,true);
     closeM('barcode-m');
+    // Camera permission denied - fall back to manual entry
+    var code=prompt('Camera unavailable. Enter barcode number:');
+    if(code&&code.trim()) _lookupBarcode(code.trim());
   });
 }
 
 function _bcScan(){
   var video=document.getElementById('bc-video');
   if(!video||!_bcStream) return;
-  var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
-  _bcInterval=setInterval(function(){
-    if(!_bcStream){clearInterval(_bcInterval);return;}
-    if(video.readyState!==4) return;
-    detector.detect(video).then(function(codes){
-      if(codes.length>0){
-        clearInterval(_bcInterval);
-        var barcode=codes[0].rawValue;
-        _stopBarcodeCamera();
-        _lookupBarcode(barcode);
-      }
-    }).catch(function(){});
-  },300);
+  if('BarcodeDetector' in window){
+    // Native API - iOS 17+, Chrome, Edge
+    var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+    _bcInterval=setInterval(function(){
+      if(!_bcStream){clearInterval(_bcInterval);return;}
+      if(video.readyState!==4) return;
+      detector.detect(video).then(function(codes){
+        if(codes.length>0){
+          clearInterval(_bcInterval);
+          _stopBarcodeCamera();
+          _lookupBarcode(codes[0].rawValue);
+        }
+      }).catch(function(){});
+    },300);
+  } else {
+    // No BarcodeDetector - stop camera and offer manual entry
+    _stopBarcodeCamera();
+    closeM('barcode-m');
+    var code=prompt('Enter barcode number manually:');
+    if(code&&code.trim()) _lookupBarcode(code.trim());
+  }
 }
 
 function _stopBarcodeCamera(){
