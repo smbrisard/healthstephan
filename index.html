@@ -3795,25 +3795,30 @@ function rHistory(){
     if(hasData){
       var defCol=selDef>=0?'var(--grn)':'var(--red)';
       html+=D('style="background:var(--s2);border-radius:16px;border:.5px solid var(--b1);padding:16px;margin-bottom:14px"',
-        D('style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px"',
-          D('',D('style="font-family:var(--mn);font-size:38px;font-weight:800;line-height:1"',fN(selCals))+D('style="font-size:13px;color:var(--dim);margin-top:3px"','kcal'))+
-          D('style="text-align:right"',D('style="font-size:12px;color:var(--dim)"',(selDef>=0?'deficit':'surplus'))+D('style="font-family:var(--mn);font-size:26px;font-weight:800;color:'+defCol+'"',(selDef>=0?'-':'+')+fN(Math.abs(selDef)))))+
-        (selWt.length||selSl.length||(selDm.length&&selDm.reduce(function(a,m){return a+(m.protein||0);},0))?
-          D('style="display:flex;gap:8px;margin-bottom:11px"',
-            (selWt.length?D('style="flex:1;background:rgba(180,77,255,.15);border-radius:11px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+D('style="font-size:11px;color:var(--dim);margin-top:3px"','weight')):'')+
-            ((selSl.length||(selFlSnap&&selFlSnap.sleep))?D('style="flex:1;background:rgba(77,166,255,.15);border-radius:11px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--blu)"',hHM(selSl.length?selSl[0].hours:(selFlSnap&&selFlSnap.sleep?selFlSnap.sleep:0)))+D('style="font-size:11px;color:var(--dim);margin-top:3px"','sleep')):'')+
-            (selDm.reduce(function(a,m){return a+(m.protein||0);},0)?D('style="flex:1;background:rgba(0,212,170,.15);border-radius:11px;padding:10px;text-align:center"',D('style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--grn)"',Math.round(selDm.reduce(function(a,m){return a+(m.protein||0);},0))+'g')+D('style="font-size:11px;color:var(--dim);margin-top:3px"','protein')):'')):'')+(selFlSnap?
-          D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px"',
+        D('style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px"',
+          D('style="display:flex;align-items:baseline;gap:10px"',
+            D('style="font-family:var(--mn);font-size:42px;font-weight:800;line-height:1;color:var(--txt)"',fN(selCals))+
+            D('style="font-size:14px;color:var(--dim)"','kcal'))+
+          D('style="text-align:right"',
+            D('style="font-size:12px;color:var(--dim);margin-bottom:2px"',(selDef>=0?'deficit':'surplus'))+
+            D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:'+defCol+';display:block"',(selDef>=0?'-':'+')+fN(Math.abs(selDef)))))+
+        D('style="display:flex;gap:10px;margin-bottom:12px"',
+          (selWt.length?D('style="flex:1;background:rgba(180,77,255,.2);border-radius:13px;padding:13px;text-align:center;border:.5px solid rgba(180,77,255,.3)"',D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--pur)"',fD(k2l(selWt[selWt.length-1].weight),1)+' lbs')+D('style="font-size:12px;color:var(--dim);margin-top:4px"','weight')):
+           D('',''))+
+          ((function(){var slH=selSl.length?selSl[0].hours:(selFlSnap&&selFlSnap.sleep?selFlSnap.sleep:0);return slH?D('style="flex:1;background:rgba(77,166,255,.2);border-radius:13px;padding:13px;text-align:center;border:.5px solid rgba(77,166,255,.3)"',D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--blu)"',hHM(slH))+D('style="font-size:12px;color:var(--dim);margin-top:4px"','sleep')):'';})())+
+          ((function(){var p=selDm.reduce(function(a,m){return a+(m.protein||0);},0);return p?D('style="flex:1;background:rgba(0,212,170,.2);border-radius:13px;padding:13px;text-align:center;border:.5px solid rgba(0,212,170,.3)"',D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--grn)"',Math.round(p)+'g')+D('style="font-size:12px;color:var(--dim);margin-top:4px"','protein')):'';})()))+
+        (selFlSnap?
+          D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
             [['&#128205;',(selFlSnap.dist>0?fD(selFlSnap.dist,1)+' mi':'--'),'dist','#38bdf8'],
              ['&#127939;',(selFlSnap.steps>0?fN(Math.round(selFlSnap.steps)):'--'),'steps','var(--amb)'],
              ['&#9889;',(selFlSnap.hrv>0?fD(selFlSnap.hrv,1)+' ms':'--'),'HRV','var(--grn)'],
              ['&#10084;',(selFlSnap.rhr>0?Math.round(selFlSnap.rhr)+' bpm':'--'),'RHR','var(--red)'],
              ['&#128167;',(selFlSnap.water>0?fD(selFlSnap.water*33.814,0)+' oz':'--'),'water','var(--cyn)']
             ].map(function(t){
-              return D('style="background:var(--s3);border-radius:9px;padding:8px 3px;text-align:center"',
-                D('style="font-size:14px"',t[0])+
-                D('style="font-family:var(--mn);font-size:11px;font-weight:800;color:'+t[3]+';margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"',t[1])+
-                D('style="font-size:10px;color:var(--dim);margin-top:2px"',t[2]));
+              return D('style="background:var(--s3);border-radius:11px;padding:10px 4px;text-align:center;border:.5px solid var(--b2)"',
+                D('style="font-size:18px;line-height:1;margin-bottom:5px"',t[0])+
+                D('style="font-family:var(--mn);font-size:12px;font-weight:800;color:'+t[3]+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis"',t[1])+
+                D('style="font-size:10px;color:var(--dim);margin-top:3px"',t[2]));
             }).join('')):'')); 
     } else {
       html+=D('style="padding:18px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px;margin-bottom:14px"','No data for this day. Use arrows to navigate.');
