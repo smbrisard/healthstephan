@@ -4088,6 +4088,16 @@ function launchApp(){
     if(match.length&&f.sf===0&&match[0].satFat>0){f.sf=match[0].satFat;_mfFixed=true;}
   });
   if(_mfFixed){saveMyFoods(_mfCheck);}
+  // One-time data fix: clear today's FL snap if dist>=10 (stale carry-over from old sync bug)
+  (function(){
+    var _td=today();
+    var _badSnaps=FL.filter(function(f){return f.date===_td&&(f.dist||0)>=10;});
+    if(_badSnaps.length>0){
+      FL=FL.filter(function(f){return f.date!==_td;});
+      save();
+      console.log('Cleared stale today FL snap with dist:',_badSnaps[0].dist);
+    }
+  })();
   syncSleepToProfile(); // Ensure P.sleepLast matches SL log on every launch
   applyTheme();
   loadAvatar();
