@@ -3961,8 +3961,10 @@ function rHistory(){
           // Only consider days with meaningful food logged (>500 kcal) for best/worst
           var meaningfulDays=loggedDays.filter(function(d){return d.cals>=500;});
           var srtDays=meaningfulDays.length>=2?meaningfulDays:loggedDays;
-          var srt=srtDays.slice().sort(function(a,b){return (P.calTarget-b.cals)-(P.calTarget-a.cals);});
-          var bst=srt[0]; var wst=srt[srt.length-1];
+          // Sort by cals ascending: lowest cals = biggest deficit = best day
+          var srt=srtDays.slice().sort(function(a,b){return a.cals-b.cals;});
+          var bst=srt[0];           // fewest cals = biggest deficit
+          var wst=srt[srt.length-1]; // most cals = most over goal
           return D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px"',
             D('onclick="histDate=\''+bst.dt+'\';rHistory()" style="background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation;text-align:center"',
               D('style="font-size:10px;color:var(--grn);font-weight:700;margin-bottom:3px"','&#127942; Best deficit day')+
