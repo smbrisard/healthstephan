@@ -3802,8 +3802,20 @@ function rHistory(){
     }
     var wb=g('weekly-summary'); if(wb) wb.innerHTML='';
     var hb=g('hist-body'); if(!hb) return;
+    // Find earliest logged day (meals or drinks), cap window at 30 days
+    var _allLoggedDts=[].concat(
+      ML.map(function(m){return m.date;}),
+      DL.map(function(d){return d.date;})
+    ).filter(Boolean).sort();
+    var _firstLogDt=_allLoggedDts.length?_allLoggedDts[0]:null;
+    var _todayDt=today();
+    var _windowDays=30;
+    if(_firstLogDt){
+      var _daysSinceFirst=Math.round((new Date(_todayDt+'T12:00')-new Date(_firstLogDt+'T12:00'))/(86400000));
+      _windowDays=Math.min(30,Math.max(1,_daysSinceFirst+1));
+    }
     var days30=[],i2;
-    for(i2=29;i2>=0;i2--){
+    for(i2=_windowDays-1;i2>=0;i2--){
       var dd2=new Date(); dd2.setDate(dd2.getDate()-i2);
       var dt2=dd2.getFullYear()+'-'+String(dd2.getMonth()+1).padStart(2,'0')+'-'+String(dd2.getDate()).padStart(2,'0');
       var dm2=ML.filter(function(m){return m.date===dt2;});
@@ -3940,7 +3952,7 @@ function rHistory(){
         D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"',
           S('style="font-size:11px;color:var(--dim)"',days30[0].dt.slice(5))+
           S('style="font-size:11px;color:var(--amb);font-weight:600"','Goal: '+fN(P.calTarget)+' kcal')+
-          S('style="font-size:11px;color:var(--dim)"',days30[29].dt.slice(5)))+
+          S('style="font-size:11px;color:var(--dim)"',days30[days30.length-1].dt.slice(5)))+
         D('style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;align-items:center"',
           D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--grn)"','')+S('style="font-size:11px;color:var(--dim)"','Under goal'))+
           D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--red)"','')+S('style="font-size:11px;color:var(--dim)"','Over goal'))+
