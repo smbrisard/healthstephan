@@ -3958,12 +3958,14 @@ function rHistory(){
           D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--red)"','')+S('style="font-size:11px;color:var(--dim)"','Over goal'))+
           D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--cyn)"','')+S('style="font-size:11px;color:var(--dim)"','Selected day')))+
         (loggedDays.length>=3?(function(){
-          // Only consider days with meaningful food logged (>500 kcal) for best/worst
-          var meaningfulDays=loggedDays.filter(function(d){return d.cals>=500;});
-          var srtDays=meaningfulDays.length>=2?meaningfulDays:loggedDays;
+          // Exclude today (incomplete) and require >=500 kcal for meaningful comparison
+          var _td2=today();
+          var completeDays=loggedDays.filter(function(d){return d.dt!==_td2&&d.cals>=500;});
+          var srtDays=completeDays.length>=2?completeDays:(loggedDays.filter(function(d){return d.dt!==_td2;}));
+          if(!srtDays.length) srtDays=loggedDays;
           // Sort by cals ascending: lowest cals = biggest deficit = best day
           var srt=srtDays.slice().sort(function(a,b){return a.cals-b.cals;});
-          var bst=srt[0];           // fewest cals = biggest deficit
+          var bst=srt[0];            // fewest cals = biggest deficit
           var wst=srt[srt.length-1]; // most cals = most over goal
           return D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px"',
             D('onclick="histDate=\''+bst.dt+'\';rHistory()" style="background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation;text-align:center"',
