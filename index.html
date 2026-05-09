@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
-<title>Health Stephan v24</title>
+<title>Health Stephan v24b</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -3030,9 +3030,19 @@ function syncSleepToProfile(){
     return 0;
   });
   var latest=sorted[0];
-  P.sleepLast=latest.hours;
-  P.sleepBedtime=latest.bedtime||'';
-  P.sleepWake=latest.wake||'';
+  var td=today();
+  var yd=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  // Only show sleep if it's from today or last night (yesterday)
+  if(latest.date===td||latest.date===yd){
+    P.sleepLast=latest.hours;
+    P.sleepBedtime=latest.bedtime||'';
+    P.sleepWake=latest.wake||'';
+  } else {
+    // Sleep is older than yesterday  clear it so -- shows
+    P.sleepLast=0;
+    P.sleepBedtime='';
+    P.sleepWake='';
+  }
   // NOTE: do NOT touch P.lastSyncDate - that's controlled by fetchSync only
 }
 
@@ -3434,6 +3444,17 @@ function rFitness(){
   })();
   var ydSnap=null;
   for(var fi=FL.length-1;fi>=0;fi--){if(FL[fi].date===ydStr){ydSnap=FL[fi];break;}}
+  // Fallback: if no strict-yesterday snap, use most recent past snap within 3 days
+  if(!ydSnap&&FL.length>0){
+    var _sortedFL=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var _todayStr=today();
+    for(var fi2=0;fi2<_sortedFL.length;fi2++){
+      if(_sortedFL[fi2].date<_todayStr){
+        var _daysDiff=(new Date(_todayStr+'T12:00')-new Date(_sortedFL[fi2].date+'T12:00'))/(86400000);
+        if(_daysDiff<=3){ydSnap=_sortedFL[fi2];break;}
+      }
+    }
+  }
   function fiDelta(cur,prev,lowerBetter){
     if(prev===null||prev===undefined||isNaN(prev)||isNaN(cur)||cur===null||cur===undefined) return '';
     var diff=cur-prev;
@@ -3495,6 +3516,17 @@ function rHealth(){
   })();
   var _ydSnapH=null;
   for(var _fih=FL.length-1;_fih>=0;_fih--){if(FL[_fih].date===_ydH){_ydSnapH=FL[_fih];break;}}
+  // Fallback: most recent past snap within 3 days
+  if(!_ydSnapH&&FL.length>0){
+    var _sFL2=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var _tdStr2=today();
+    for(var _fih2=0;_fih2<_sFL2.length;_fih2++){
+      if(_sFL2[_fih2].date<_tdStr2){
+        var _dDiff2=(new Date(_tdStr2+'T12:00')-new Date(_sFL2[_fih2].date+'T12:00'))/(86400000);
+        if(_dDiff2<=3){_ydSnapH=_sFL2[_fih2];break;}
+      }
+    }
+  }
   function hlDelta(cur,prev,lowerBetter){
     if(prev===null||prev===undefined||isNaN(prev)||isNaN(cur)) return '';
     var diff=Math.round((cur-prev)*10)/10;
