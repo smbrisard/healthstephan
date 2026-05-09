@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
-<title>Health Stephan v23</title>
+<title>Health Stephan v24</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -4348,8 +4348,8 @@ function fetchSync(){
     var _dataIsToday=(_dataDate===today()||_dataDate===yesterday());
     var _dataIsStrictlyToday=(_dataDate===today()); // exercise/stand NEVER carry from yesterday
     var _syncIsRecent=_syncAge<20&&_dataIsToday;
-    var _allDailyFields=['stepsToday','burned','distMiles','walkMiles','cycleMiles','totalBurned','restingEnergy'];
-    var _strictFields=['standHours','exerciseMins']; // reset at midnight, today only
+    var _allDailyFields=['restingEnergy','walkMiles','cycleMiles']; // only fields that carry from yesterday
+    var _strictFields=['stepsToday','burned','distMiles','totalBurned','standHours','exerciseMins']; // ALL reset at midnight - today only
     // sleepLast is intentionally excluded - always derived from SL log
     var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
@@ -4368,8 +4368,10 @@ function fetchSync(){
           }
         });
       } else {
-        // Yesterday's data - zero exercise and stand (they reset daily)
+        // Yesterday's data - zero ALL fields that reset at midnight
         P.exerciseMins=0; P.standHours=0;
+        P.stepsToday=0; P.distMiles=0; P.walkMiles=0;
+        P.burned=0; P.totalBurned=P.restingEnergy||0; // keep resting energy only
       }
     } else {
       // Stale data - zero everything
@@ -4469,9 +4471,16 @@ function fetchSync(){
         // Use second most recent FL entry as yesterday proxy
         var _sorted=FL.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
         var _prev=_sorted[_sorted.length-2];
-        if(_prev&&_prev.date<snap.date){
-          var _ydProxy=JSON.parse(JSON.stringify(_prev));
-          _ydProxy.date=_ydStr2;
+        var _prevD2=_prev?new Date(_prev.date+'T12:00'):null;
+        var _ydD2=new Date(_ydStr2+'T12:00');
+        var _dd2=_prevD2?((_ydD2-_prevD2)/(86400000)):999;
+        if(_prev&&_prev.date<snap.date&&_dd2<=3){
+          var _ydProxy={date:_ydStr2,steps:_prev.steps||0,burned:_prev.burned||0,activeBurned:_prev.activeBurned||0,
+            rhr:_prev.rhr||0,hrv:_prev.hrv||0,spo2:_prev.spo2||0,rr:_prev.rr||0,
+            sleep:_prev.sleep||0,water:_prev.water||0,
+            dist:(_prev.dist&&_prev.dist<20)?_prev.dist:0,
+            standHours:_prev.standHours||0,exerciseMins:_prev.exerciseMins||0,
+            wt:_prev.wt||null};
           if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
         }
       }
