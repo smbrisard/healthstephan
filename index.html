@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
-<title>Health Stephan v24b</title>
+<title>Health Stephan v24</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -1505,7 +1505,7 @@ function rHome() {
   if(_ydSnap){
     _hmD('hm-steps-yd',Math.round(P.stepsToday||0),Math.round(_ydSnap.steps||0),false,'');
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
-    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSnap.sleep||0,false,'h');
+    _hmD('hm-sleep-yd',P.sleepLast||0,(_ydSnap.sleep>0?_ydSnap.sleep:null),false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,(_ydSnap.dist>0&&_ydSnap.dist<20)?_ydSnap.dist:null,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr>0?_ydSnap.rhr:null,true,' bpm');
@@ -1536,7 +1536,9 @@ function rHome() {
   // Sleep
   var lsl=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   // Use P.sleepLast (from sync) as primary, SL entry as fallback
-  var _sleepVal=P.sleepLast>0?P.sleepLast:(lsl?lsl.hours:0);
+  var _ydStrS=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  var _lslRecent=lsl&&(lsl.date===today()||lsl.date===_ydStrS);
+  var _sleepVal=P.sleepLast>0?P.sleepLast:(_lslRecent?lsl.hours:0);
   set('hm-sleep',_sleepVal>0?hHM(_sleepVal):'--');
 
   // Meals
@@ -3841,8 +3843,8 @@ function rHistory(){
           ((function(){var p=selDm.reduce(function(a,m){return a+(m.protein||0);},0);return p?D('style="flex:1;background:rgba(0,212,170,.2);border-radius:13px;padding:13px;text-align:center;border:.5px solid rgba(0,212,170,.3)"',D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--grn)"',Math.round(p)+'g')+D('style="font-size:12px;color:var(--dim);margin-top:4px"','protein')):'';})()))+
         (selFlSnap?
           D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
-            [['&#128205;',(selFlSnap.dist>0?fD(selFlSnap.dist,1)+' mi':'--'),'dist','#38bdf8'],
-             ['&#127939;',(selFlSnap.steps>0?fN(Math.round(selFlSnap.steps)):'--'),'steps','var(--amb)'],
+            [['&#128205;',(selFlSnap.dist>0&&selFlSnap.dist<20?fD(selFlSnap.dist,1)+' mi':'--'),'dist','#38bdf8'],
+             ['&#127939;',(selFlSnap.steps!==null&&selFlSnap.steps!==undefined?fN(Math.round(selFlSnap.steps)):'--'),'steps','var(--amb)'],
              ['&#9889;',(selFlSnap.hrv>0?fD(selFlSnap.hrv,1)+' ms':'--'),'HRV','var(--grn)'],
              ['&#10084;',(selFlSnap.rhr>0?Math.round(selFlSnap.rhr)+' bpm':'--'),'RHR','var(--red)'],
              ['&#128167;',(selFlSnap.water>0?fD(selFlSnap.water*33.814,0)+' oz':'--'),'water','var(--cyn)']
@@ -3942,11 +3944,11 @@ function rHistory(){
           var srt=loggedDays.slice().sort(function(a,b){return (P.calTarget-b.cals)-(P.calTarget-a.cals);});
           var bst=srt[0]; var wst=srt[srt.length-1];
           return D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px"',
-            D('onclick="histDate=\''+bst.dt+'\';rHistory()" style="background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation"',
+            D('onclick="histDate=\''+bst.dt+'\';rHistory()" style="background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation;text-align:center"',
               D('style="font-size:10px;color:var(--grn);font-weight:700;margin-bottom:3px"','&#127942; Best deficit day')+
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--grn)"',fN(bst.cals)+' kcal')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"',new Date(bst.dt+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})))+
-            D('onclick="histDate=\''+wst.dt+'\';rHistory()" style="background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation"',
+            D('onclick="histDate=\''+wst.dt+'\';rHistory()" style="background:rgba(255,59,92,.1);border:.5px solid rgba(255,59,92,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation;text-align:center"',
               D('style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:3px"','&#128308; Most over goal')+
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--red)"',fN(wst.cals)+' kcal')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"',new Date(wst.dt+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}))));
@@ -4481,7 +4483,8 @@ function fetchSync(){
       var _existingSnap=FL.filter(function(f){return f.date===today();});
       var _existingDist=_existingSnap.length?(_existingSnap[_existingSnap.length-1].dist||0):0;
       var _syncDist=P.distMiles||0;
-      var _finalDist=_existingDist>_syncDist?_existingDist:_syncDist;
+      // Only preserve existing dist if today's sync already set a real value
+      var _finalDist=_syncDist>0?Math.max(_existingDist,_syncDist):_existingDist>0&&_dataIsStrictlyToday?_existingDist:0;
       // Also update yesterday's FL snap with sleep if sleepDate is yesterday
       if(d.sleepDate&&d.sleepDate!==today()&&d.sleepLast>0){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
