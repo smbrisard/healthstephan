@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Health Stephan">
-<title>Health Stephan v25</title>
+<title>Health Stephan v26</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -3937,11 +3937,19 @@ function rHistory(){
             var col=isSel?'var(--cyn)':d.cals>P.calTarget?'var(--red)':d.logged?'var(--grn)':'rgba(255,255,255,.08)';
             return D('onclick="histDate=\''+d.dt+'\';rHistory()" style="flex:1;height:'+barH+'%;background:'+col+';border-radius:2px 2px 0 0;cursor:pointer;touch-action:manipulation;outline:'+(isSel?'1.5px solid var(--txt)':'none')+'"','');
           }).join(''))+
-        D('style="display:flex;justify-content:space-between;margin-bottom:10px"',
+        D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"',
           S('style="font-size:11px;color:var(--dim)"',days30[0].dt.slice(5))+
+          S('style="font-size:11px;color:var(--amb);font-weight:600"','Goal: '+fN(P.calTarget)+' kcal')+
           S('style="font-size:11px;color:var(--dim)"',days30[29].dt.slice(5)))+
+        D('style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;align-items:center"',
+          D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--grn)"','')+S('style="font-size:11px;color:var(--dim)"','Under goal'))+
+          D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--red)"','')+S('style="font-size:11px;color:var(--dim)"','Over goal'))+
+          D('style="display:flex;align-items:center;gap:5px"',D('style="width:10px;height:10px;border-radius:2px;background:var(--cyn)"','')+S('style="font-size:11px;color:var(--dim)"','Selected day')))+
         (loggedDays.length>=3?(function(){
-          var srt=loggedDays.slice().sort(function(a,b){return (P.calTarget-b.cals)-(P.calTarget-a.cals);});
+          // Only consider days with meaningful food logged (>500 kcal) for best/worst
+          var meaningfulDays=loggedDays.filter(function(d){return d.cals>=500;});
+          var srtDays=meaningfulDays.length>=2?meaningfulDays:loggedDays;
+          var srt=srtDays.slice().sort(function(a,b){return (P.calTarget-b.cals)-(P.calTarget-a.cals);});
           var bst=srt[0]; var wst=srt[srt.length-1];
           return D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px"',
             D('onclick="histDate=\''+bst.dt+'\';rHistory()" style="background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);border-radius:11px;padding:10px;cursor:pointer;touch-action:manipulation;text-align:center"',
@@ -3968,7 +3976,7 @@ function rHistory(){
       }).join(' ');
       var wtChg=wtPts[wtPts.length-1].wt-wtPts[0].wt;
       html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','Weight Trend');
-      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:14px"',
+      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:20px"',
         '<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:70px;display:block"><polyline points="'+svgPts+'" fill="none" stroke="var(--pur)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
         wtPts.map(function(d){
           var ix=days30.findIndex(function(d2){return d2.dt===d.dt;});
@@ -4030,7 +4038,7 @@ function rHistory(){
             return D('onclick="window._histMeasKey=\''+mf.key+'\';rHistory()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap;background:'+(isSel?mf.col:'var(--s2)')+';color:'+(isSel?'#fff':'var(--dim)')+';border:.5px solid '+(isSel?mf.col:'var(--b1)')+'"',mf.label);
           }).join(''));
         // Chart card
-        html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:90px"',
+        html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:20px"',
           '<svg viewBox="0 0 '+WM+' '+HM+'" style="width:100%;height:70px;display:block"><polyline points="'+svgPtsM+'" fill="none" stroke="'+curMF.col+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
           measPts.map(function(e,i5){
             var x=pdM+(i5/(measPts.length-1||1))*(WM-pdM*2);
