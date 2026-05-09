@@ -1507,7 +1507,7 @@ function rHome() {
     _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
     _hmD('hm-sleep-yd',P.sleepLast||0,(_ydSnap.sleep>0?_ydSnap.sleep:null),false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
-    _hmD('hm-dist-yd',P.distMiles||0,(_ydSnap.dist>0&&_ydSnap.dist<20)?_ydSnap.dist:null,false,' mi');
+    _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist>0?_ydSnap.dist:null,false,' mi');
     _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr>0?_ydSnap.rhr:null,true,' bpm');
     _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
     _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
@@ -3843,7 +3843,7 @@ function rHistory(){
           ((function(){var p=selDm.reduce(function(a,m){return a+(m.protein||0);},0);return p?D('style="flex:1;background:rgba(0,212,170,.2);border-radius:13px;padding:13px;text-align:center;border:.5px solid rgba(0,212,170,.3)"',D('style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--grn)"',Math.round(p)+'g')+D('style="font-size:12px;color:var(--dim);margin-top:4px"','protein')):'';})()))+
         (selFlSnap?
           D('style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"',
-            [['&#128205;',(selFlSnap.dist>0&&selFlSnap.dist<20?fD(selFlSnap.dist,1)+' mi':'--'),'dist','#38bdf8'],
+            [['&#128205;',(selFlSnap.dist>0?fD(selFlSnap.dist,1)+' mi':'--'),'dist','#38bdf8'],
              ['&#127939;',(selFlSnap.steps!==null&&selFlSnap.steps!==undefined?fN(Math.round(selFlSnap.steps)):'--'),'steps','var(--amb)'],
              ['&#9889;',(selFlSnap.hrv>0?fD(selFlSnap.hrv,1)+' ms':'--'),'HRV','var(--grn)'],
              ['&#10084;',(selFlSnap.rhr>0?Math.round(selFlSnap.rhr)+' bpm':'--'),'RHR','var(--red)'],
@@ -4483,8 +4483,8 @@ function fetchSync(){
       var _existingSnap=FL.filter(function(f){return f.date===today();});
       var _existingDist=_existingSnap.length?(_existingSnap[_existingSnap.length-1].dist||0):0;
       var _syncDist=P.distMiles||0;
-      // Only preserve existing dist if today's sync already set a real value
-      var _finalDist=_syncDist>0?Math.max(_existingDist,_syncDist):_existingDist>0&&_dataIsStrictlyToday?_existingDist:0;
+      // Only preserve existing dist if today's sync provided real data (strictly today)
+      var _finalDist=_dataIsStrictlyToday?Math.max(_existingDist,_syncDist):0;
       // Also update yesterday's FL snap with sleep if sleepDate is yesterday
       if(d.sleepDate&&d.sleepDate!==today()&&d.sleepLast>0){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
@@ -4513,7 +4513,7 @@ function fetchSync(){
           var _ydProxy={date:_ydStr2,steps:_prev.steps||0,burned:_prev.burned||0,activeBurned:_prev.activeBurned||0,
             rhr:_prev.rhr||0,hrv:_prev.hrv||0,spo2:_prev.spo2||0,rr:_prev.rr||0,
             sleep:_prev.sleep||0,water:_prev.water||0,
-            dist:(_prev.dist&&_prev.dist<20)?_prev.dist:0,
+            dist:_prev.dist||0,
             standHours:_prev.standHours||0,exerciseMins:_prev.exerciseMins||0,
             wt:_prev.wt||null};
           if(!FL.some(function(f){return f.date===_ydStr2;})) FL.push(_ydProxy);
