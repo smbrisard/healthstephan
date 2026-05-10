@@ -653,6 +653,7 @@ body { height: 100dvh; }
         </div>
         <div class="pills" id="dr-cats">
           <div class="pill on" onclick="drCat('all',this)">All</div>
+          <div class="pill" onclick="drCat('my',this)">&#11088; My Drinks</div>
           <div class="pill" onclick="drCat('beer',this)">Beer</div>
           <div class="pill" onclick="drCat('wine',this)">Wine</div>
           <div class="pill" onclick="drCat('spirits',this)">Spirits</div>
@@ -1080,6 +1081,28 @@ body { height: 100dvh; }
     <div style="margin-bottom:13px">
       <input class="fld" type="text" id="cd-search" placeholder="Search drinks database..." style="margin-bottom:6px" oninput="cdSearchInput(this.value)">
       <div id="cd-results"></div>
+    </div>
+    <!-- Emoji picker -->
+    <div class="fw" style="margin-bottom:10px">
+      <div class="flbl">Emoji</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127866;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127867;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127863;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127864;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#129380;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#9749;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#128167;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#129379;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127850;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#129483;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#127849;</span>
+        <span onclick="g('cd-emoji').value=this.textContent;g('cd-emoji-preview').textContent=this.textContent" style="font-size:24px;cursor:pointer;touch-action:manipulation">&#129382;</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="cd-emoji-preview" style="font-size:32px;line-height:1;min-width:36px">&#127867;</div>
+        <input class="fld" type="text" id="cd-emoji" placeholder="or type any emoji" style="margin-bottom:0;flex:1" oninput="g('cd-emoji-preview').textContent=this.value||'&#127867;'">
+      </div>
     </div>
     <div class="fw"><div class="flbl">Drink Name</div>
       <input class="fld" type="text" id="cd-name" placeholder="e.g. Margarita, Craft Beer...">
@@ -3278,8 +3301,8 @@ function showDrinkGrid(){
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
   var _myDrs=loadMyDrinks();
-  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
-  var _builtInDr=dCat==='all'?DRINKS:DRINKS.filter(function(d){return d.cat===dCat;});
+  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
+  var _builtInDr=dCat==='all'?DRINKS:dCat==='my'?[]:DRINKS.filter(function(d){return d.cat===dCat;});
   var list=_myDrInCat.concat(_builtInDr);
   ge.innerHTML=list.map(function(d,i){
     var _isDrC=d._custom||false;
@@ -4179,6 +4202,8 @@ function openCustomDrink(){
   var inp=g('cd-name');if(inp)inp.value='';
   var dt=g('cd-date');if(dt)dt.value=todayLocal();
   ['cd-cals','cd-units','cd-carbs','cd-sugar','cd-prot','cd-fat','cd-fiber','cd-sodium'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  var cdEm=g('cd-emoji');if(cdEm)cdEm.value='';
+  var cdEp=g('cd-emoji-preview');if(cdEp)cdEp.textContent='&#127867;';
   var ttl=g('cd-modal-title');if(ttl)ttl.textContent='Add Custom Drink';
   var sb=g('cd-save-btn');if(sb)sb.textContent='Add to Log';
   openM('custom-drink-m');
@@ -4189,6 +4214,8 @@ function editMyDrink(idx){
   cdQty=1; var qd=g('cd-qty-disp'); if(qd) qd.textContent='1';
   var sF=function(id,v){var e=g(id);if(e)e.value=v||'';};
   sF('cd-name',d.n); sF('cd-cals',d.c||0); sF('cd-units',d.u||0);
+  var cdEm2=g('cd-emoji');if(cdEm2)cdEm2.value=d.e||'';
+  var cdEp2=g('cd-emoji-preview');if(cdEp2)cdEp2.textContent=d.e||'&#127867;';
   sF('cd-carbs',d.cb||0); sF('cd-sugar',d.sg||0);
   sF('cd-prot',d.pr||0); sF('cd-fat',d.ft||0);
   sF('cd-fiber',d.fi||0); sF('cd-sodium',d.na||0);
@@ -4208,7 +4235,8 @@ function addCustomDrink(){
   var drCatVal=(g('cd-cat')||{value:'custom'}).value||'custom';
   var _isNA=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
   var _uVal=_isNA?0:units;
-  var _ent={n:name,e:'&#127867;',p:'1 serving',c:Math.round(cals),
+  var _cdEmoji=(g('cd-emoji')||{value:''}).value.trim()||'&#127867;';
+  var _ent={n:name,e:_cdEmoji,p:'1 serving',c:Math.round(cals),
     u:_uVal,cat:drCatVal,sg:sugar,cb:carbs,pr:prot,ft:fat,fi:fiber,na:sodium,vol:0,custom:true};
   var md=loadMyDrinks();
   if(_editMyDrinkIdx>=0&&md[_editMyDrinkIdx]){
@@ -4218,7 +4246,7 @@ function addCustomDrink(){
   }
   if(!md.find(function(d){return d.n===name;})){md.push(_ent);saveMyDrinks(md);}
   for(var _ci=0;_ci<cdQty;_ci++){
-    DL.push({id:Date.now()+_ci,date:date,n:name,e:'&#127867;',c:Math.round(cals),
+    DL.push({id:Date.now()+_ci,date:date,n:name,e:_cdEmoji,c:Math.round(cals),
       u:_uVal,cat:drCatVal,sugar:sugar,carbs:carbs,prot:prot,fat:fat,fiber:fiber,sodium:sodium,vol:0});
   }
   save();closeM('custom-drink-m');rDrinks();toast(name+' added to log!');
