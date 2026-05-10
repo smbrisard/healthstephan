@@ -1134,8 +1134,8 @@ body { height: 100dvh; }
     </div>
     <div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
-    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" id="cd-save-btn" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log &amp; Save</button>
-    <button onclick="saveCustomDrinkToLibraryOnly()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:15px;font-weight:600;background:rgba(77,166,255,.06);margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Drinks Only</button>
+<button class="btn btn-r" id="cd-save-btn" onclick="addCustomDrink()" style="margin-bottom:9px">&#127866; Log it + Save to Library</button>
+    <button onclick="saveCustomDrinkToLibraryOnly()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:15px;font-weight:600;background:rgba(77,166,255,.06);margin-bottom:8px;touch-action:manipulation">&#128190; Save to Library Only</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
@@ -3275,13 +3275,15 @@ function drCat(cat,btn){
     dbtn.style.display='block';
     dbtn.textContent=cat==='my'?'\u2B50 My Drinks \u25B2':'\uD83C\uDF77 Browse drinks \u25B2';
   }
-  // Hide today's log when browsing custom library
+  // Hide today's log when My Drinks pill is active
   var logEl=g('dr-log'), logHdr=g('dr-log-hdr');
-  if(logEl) logEl.style.display=cat==='my'?'none':'block';
-  if(logHdr) logHdr.style.display=cat==='my'?'none':'block';
+  var showLog=cat!=='my';
+  if(logEl) logEl.style.display=showLog?'block':'none';
+  if(logHdr) logHdr.style.display=showLog?'block':'none';
   rDrGrid();
+  if(showLog) rDrLog();
 }
-function rDrinks(){rDrBanner();rDrGrid();rDrLog();rDrChart();}
+function rDrinks(){rDrBanner();rDrGrid();if(dCat!=='my'){rDrLog();}rDrChart();}
 function rDrBanner(){
   var td=tDrinks(),c2=td.reduce(function(a,d){return a+d.c;},0);
   // Weekly units - sum all alcohol from past 7 days
@@ -3327,8 +3329,8 @@ function showDrinkGrid(){
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
   var _myDrs=loadMyDrinks();
-  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
-  var _builtInDr=dCat==='all'?DRINKS:DRINKS.filter(function(d){return d.cat===dCat;});
+  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
+  var _builtInDr=(dCat==='all')?DRINKS:(dCat==='my'?[]:DRINKS.filter(function(d){return d.cat===dCat;}));
   var list=_myDrInCat.concat(_builtInDr);
   ge.innerHTML=list.map(function(d,i){
     var _isDrC=d._custom||false;
@@ -3342,6 +3344,7 @@ function rDrGrid(){
 }
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
+  if(dCat==='my'){le.style.display='none';var h=g('dr-log-hdr');if(h)h.style.display='none';return;}
   var _drDate=drChartDate||today();
   var _drHdr=g('dr-log-hdr');
   if(_drHdr) _drHdr.textContent=_drDate===today()?"Today's Log":fmtChartDate(_drDate)+' Log';
