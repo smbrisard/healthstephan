@@ -663,7 +663,8 @@ body { height: 100dvh; }
           <div class="pill" onclick="drCat('choc',this)">Chocolate</div>
           <div class="pill" onclick="drCat('tea',this)">Tea</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button></div><button onclick="showDrinkGrid()" id="dr-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127864; Browse drinks &#9660;</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="slbl" style="margin-bottom:0">Quick Add</div><button onclick="openCustomDrink()" style="padding:6px 14px;border-radius:20px;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.3);color:var(--pnk);font-size:12px;font-weight:700;touch-action:manipulation">&#43; Custom</button>
+          <button onclick="openCocktailBuilder()" style="padding:6px 14px;border-radius:20px;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:12px;font-weight:700;touch-action:manipulation">&#127864; Build</button></div><button onclick="showDrinkGrid()" id="dr-browse-btn" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;margin-bottom:10px;touch-action:manipulation">&#127864; Browse drinks &#9660;</button>
         <div id="dr-db-section" style="display:none">
           <div class="g2" id="dr-grid" style="margin-bottom:10px"></div>
         </div>
@@ -921,6 +922,12 @@ body { height: 100dvh; }
     <div id="de-info" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:13px;font-size:14px;color:var(--dim)"></div>
     <div class="fw"><div class="flbl">Calories</div><input class="fld" type="number" id="de-cals" step="1"></div>
     <div class="fw"><div id="de-units-label" class="flbl">Servings</div><input class="fld" type="number" id="de-units" step="0.5" min="0.5" oninput="updateDrinkEditCals()"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="de-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="de-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="de-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="de-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+    </div>
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="de-date"></div>
     <button class="btn btn-k" onclick="saveDrinkEdit()" style="margin-bottom:9px">Save Changes</button>
     <button onclick="deleteDrinkEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
@@ -1069,7 +1076,7 @@ body { height: 100dvh; }
 </div>
 
 <div class="modal" id="custom-drink-m"><div class="mbg" onclick="closeM('custom-drink-m')"></div>
-  <div class="msheet"><div class="mhandle"></div><div class="mtitle">Add Custom Drink</div>
+  <div class="msheet"><div class="mhandle"></div><div class="mtitle" id="cd-modal-title">Add Custom Drink</div>
     <div style="margin-bottom:13px">
       <input class="fld" type="text" id="cd-search" placeholder="Search drinks database..." style="margin-bottom:6px" oninput="cdSearchInput(this.value)">
       <div id="cd-results"></div>
@@ -1082,6 +1089,10 @@ body { height: 100dvh; }
       <div><div class="flbl">Std Drinks (alcohol)</div><input class="fld" type="number" id="cd-units" placeholder="0.0" step="0.1" style="margin-bottom:0"><div style="font-size:10px;color:var(--dim);margin-top:3px">0 if non-alcoholic</div></div>
       <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="cd-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
       <div><div class="flbl">Sugar (g)</div><input class="fld" type="number" id="cd-sugar" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="cd-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="cd-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="cd-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sodium (mg)</div><input class="fld" type="number" id="cd-sodium" placeholder="0" step="1" style="margin-bottom:0"></div>
     </div>
     <div class="callout ci" style="margin-bottom:10px"><span>&#128161;</span>
       <span>1 standard drink = 0.6 fl oz (14g) of pure alcohol. A 5oz glass of 12% wine = 1.0 standard drink. Formula: fl oz x ABV% x 0.059 = standard drinks.</span></div>
@@ -1102,7 +1113,7 @@ body { height: 100dvh; }
     </div>
     <div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
-    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
+    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" id="cd-save-btn" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
@@ -3276,7 +3287,8 @@ function rDrGrid(){
     var _mdi=_isDrC?_myDrs.findIndex(function(x){return x.n===d.n;}): -1;
     var _dcFn=_isDrC?'addMyDrinkToLog('+_mdi+')':'openDrink('+_drIdx+')';
     var _ddb=_isDrC?'<button onclick="event.stopPropagation();deleteMyDrink('+_mdi+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.25);border:none;border-radius:50%;width:26px;height:26px;color:#FF3B5C;font-size:14px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation">\u00d7</button>':'';
-    return '<div style="position:relative" class="dtile" onclick="'+_dcFn+'">'+_ddb+D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic'))+'</div>';
+    var _dpb=_isDrC?'<button onclick="event.stopPropagation();editMyDrink('+_mdi+')" style="position:absolute;top:4px;left:4px;background:rgba(77,166,255,.25);border:none;border-radius:50%;width:26px;height:26px;color:var(--blu);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation">&#9998;</button>':'';
+    return '<div style="position:relative" class="dtile" onclick="'+_dcFn+'">'+_ddb+_dpb+D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic'))+'</div>';
   }).join('');
 }
 function rDrLog(){
@@ -3313,6 +3325,11 @@ function openDrinkEdit(id){
   if(lbl) lbl.textContent=isAlc?'Units (alcohol)':'Servings';
   if(dq) dq.value=1;
   if(dd) dd.value=d.date||todayLocal();
+  var setDE=function(id,v){var e=g(id);if(e)e.value=v||'';};
+  setDE('de-prot',d.prot||d.protein||0);
+  setDE('de-fat',d.fat||0);
+  setDE('de-carbs',d.carbs||d.cb||0);
+  setDE('de-fiber',d.fiber||0);
   openM('drink-edit-m');
 }
 function saveDrinkEdit(){
@@ -3321,17 +3338,16 @@ function saveDrinkEdit(){
     if(DL[i].id===_editDrinkId){
       var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
       if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
-      var _editNonAlc=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
-      if(du) DL[i].u=_editNonAlc?0:(parseFloat(du.value)||0);
+      var _eNA=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
+      if(du) DL[i].u=_eNA?0:(parseFloat(du.value)||0);
       if(dd&&dd.value) DL[i].date=dd.value;
+      var gDE=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
+      DL[i].prot=gDE('de-prot'); DL[i].fat=gDE('de-fat');
+      DL[i].carbs=gDE('de-carbs'); DL[i].fiber=gDE('de-fiber');
       break;
     }
   }
-  save();
-  drChartDate=null; // Reset to today
-  closeM('drink-edit-m');
-  rDrinks();
-  toast('Drink updated ✓');
+  save(); drChartDate=null; closeM('drink-edit-m'); rDrinks(); toast('Drink updated ');
 }
 function deleteDrinkEdit(){
   if(!_editDrinkId) return;
@@ -4156,34 +4172,55 @@ function cdAdjQty(d){
   cdQty=Math.max(1,Math.min(10,cdQty+d));
   var e=g('cd-qty-disp'); if(e) e.textContent=cdQty;
 }
+var _editMyDrinkIdx=-1;
 function openCustomDrink(){
+  _editMyDrinkIdx=-1;
   cdQty=1; var qd=g('cd-qty-disp'); if(qd) qd.textContent='1';
   var inp=g('cd-name');if(inp)inp.value='';
   var dt=g('cd-date');if(dt)dt.value=todayLocal();
-  ['cd-cals','cd-units','cd-carbs','cd-sugar'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  ['cd-cals','cd-units','cd-carbs','cd-sugar','cd-prot','cd-fat','cd-fiber','cd-sodium'].forEach(function(id){var e=g(id);if(e)e.value='';});
+  var ttl=g('cd-modal-title');if(ttl)ttl.textContent='Add Custom Drink';
+  var sb=g('cd-save-btn');if(sb)sb.textContent='Add to Log';
+  openM('custom-drink-m');
+}
+function editMyDrink(idx){
+  var md=loadMyDrinks(); var d=md[idx]; if(!d) return;
+  _editMyDrinkIdx=idx;
+  cdQty=1; var qd=g('cd-qty-disp'); if(qd) qd.textContent='1';
+  var sF=function(id,v){var e=g(id);if(e)e.value=v||'';};
+  sF('cd-name',d.n); sF('cd-cals',d.c||0); sF('cd-units',d.u||0);
+  sF('cd-carbs',d.cb||0); sF('cd-sugar',d.sg||0);
+  sF('cd-prot',d.pr||0); sF('cd-fat',d.ft||0);
+  sF('cd-fiber',d.fi||0); sF('cd-sodium',d.na||0);
+  var cat=g('cd-cat');if(cat)cat.value=d.cat||'custom';
+  var dt=g('cd-date');if(dt)dt.value=todayLocal();
+  var ttl=g('cd-modal-title');if(ttl)ttl.textContent='Edit Custom Drink';
+  var sb=g('cd-save-btn');if(sb)sb.textContent='Save Changes';
   openM('custom-drink-m');
 }
 function addCustomDrink(){
   var name=(g('cd-name')||{value:''}).value.trim();
-  var cals=parseFloat((g('cd-cals')||{value:0}).value)||0;
-  var units=parseFloat((g('cd-units')||{value:0}).value)||0;
-  var carbs=parseFloat((g('cd-carbs')||{value:0}).value)||0;
-  var sugar=parseFloat((g('cd-sugar')||{value:0}).value)||0;
-  var date=(g('cd-date')||{value:''}).value||todayLocal();
   if(!name){toast('Please enter a drink name',true);return;}
+  var gN=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
+  var cals=gN('cd-cals'),units=gN('cd-units'),carbs=gN('cd-carbs'),sugar=gN('cd-sugar');
+  var prot=gN('cd-prot'),fat=gN('cd-fat'),fiber=gN('cd-fiber'),sodium=gN('cd-sodium');
+  var date=(g('cd-date')||{value:''}).value||todayLocal();
   var drCatVal=(g('cd-cat')||{value:'custom'}).value||'custom';
-  var _isNonAlcDr=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
-  var _uVal=_isNonAlcDr?0:(parseFloat(units)||0);
-  // Save to My Drinks database so it appears in Browse grid
-  var myDrinks=loadMyDrinks();
-  if(!myDrinks.find(function(d){return d.n===name;})){
-    myDrinks.push({n:name,e:'&#127867;',p:'custom',c:Math.round(cals),
-      u:_uVal,cat:drCatVal,sg:sugar,cb:carbs,vol:0,custom:true});
-    saveMyDrinks(myDrinks);
+  var _isNA=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
+  var _uVal=_isNA?0:units;
+  var _ent={n:name,e:'&#127867;',p:'1 serving',c:Math.round(cals),
+    u:_uVal,cat:drCatVal,sg:sugar,cb:carbs,pr:prot,ft:fat,fi:fiber,na:sodium,vol:0,custom:true};
+  var md=loadMyDrinks();
+  if(_editMyDrinkIdx>=0&&md[_editMyDrinkIdx]){
+    md[_editMyDrinkIdx]=Object.assign(md[_editMyDrinkIdx],_ent);
+    saveMyDrinks(md); _editMyDrinkIdx=-1;
+    closeM('custom-drink-m'); rDrGrid(); toast(name+' updated!'); return;
   }
-  // Also add to today's log
-  DL.push({id:Date.now(),date:date,n:name,e:'&#127867;',c:Math.round(cals),
-    u:_uVal,cat:drCatVal,sugar:sugar,carbs:carbs,vol:0});
+  if(!md.find(function(d){return d.n===name;})){md.push(_ent);saveMyDrinks(md);}
+  for(var _ci=0;_ci<cdQty;_ci++){
+    DL.push({id:Date.now()+_ci,date:date,n:name,e:'&#127867;',c:Math.round(cals),
+      u:_uVal,cat:drCatVal,sugar:sugar,carbs:carbs,prot:prot,fat:fat,fiber:fiber,sodium:sodium,vol:0});
+  }
   save();closeM('custom-drink-m');rDrinks();toast(name+' added to log!');
 }
 
@@ -4990,7 +5027,8 @@ function addMyDrinkToLog(idx){
   if(!d){toast('Drink not found',true);return;}
   var _isNA=['water','tea','coffee','soft','choc'].indexOf(d.cat)>=0;
   DL.push({id:Date.now(),date:today(),n:d.n,e:d.e||'&#127867;',
-    c:d.c||0,u:_isNA?0:(d.u||0),cat:d.cat,sugar:d.sg||0,carbs:d.cb||0,vol:d.vol||0});
+    c:d.c||0,u:_isNA?0:(d.u||0),cat:d.cat,sugar:d.sg||0,carbs:d.cb||0,
+    prot:d.pr||0,fat:d.ft||0,fiber:d.fi||0,sodium:d.na||0,vol:d.vol||0});
   save(); rDrinks();
   toast(d.n+' added!');
 }
@@ -5168,6 +5206,120 @@ function _lookupBarcode(barcode){
     toast('Lookup failed - check connection',true);
   });
 }
+// --- COCKTAIL BUILDER ---
+var _cktlIngs=[];
+function openCocktailBuilder(){
+  _cktlIngs=[];
+  var nm=g('cktl-name');if(nm)nm.value='';
+  var sv=g('cktl-servings');if(sv)sv.value='1';
+  var dt=g('cktl-date');if(dt)dt.value=todayLocal();
+  var cat=g('cktl-cat');if(cat)cat.value='cocktail';
+  _renderCktlIngs();
+  openM('cocktail-m');
+}
+function closeCocktailBuilder(){_cktlIngs=[];closeM('cocktail-m');}
+function _cktlIngSearch(val){
+  var res=g('cktl-ing-results');if(!res)return;
+  if(!val||val.length<1){res.style.display='none';res.innerHTML='';return;}
+  var q=val.toLowerCase();
+  var myDrs=loadMyDrinks();
+  var matches=[];
+  myDrs.forEach(function(d,i){if(d.n.toLowerCase().indexOf(q)>=0)matches.push({src:'my',idx:i,d:d});});
+  DRINKS.forEach(function(d,i){if(d.n.toLowerCase().indexOf(q)>=0&&matches.length<12)matches.push({src:'db',idx:i,d:d});});
+  if(!matches.length){res.style.display='block';res.innerHTML='<div style="padding:10px;font-size:12px;color:var(--dim)">No matches - add manually below</div>';return;}
+  res.style.display='block';
+  window._cktlSearchResults=matches;
+  res.innerHTML=matches.map(function(m,i){
+    return D('onclick="_addCktlIngFromSearch('+i+')" style="padding:10px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;touch-action:manipulation"',
+      D('style="font-size:13px;font-weight:600"',m.d.e+' '+m.d.n)+
+      D('style="font-size:12px;color:var(--pnk)"',fN(m.d.c)+' kcal'));
+  }).join('');
+}
+function _addCktlIngFromSearch(i){
+  var m=window._cktlSearchResults&&window._cktlSearchResults[i];if(!m)return;
+  var d=m.d;
+  _cktlIngs.push({name:d.n,e:d.e||'&#127866;',cals:d.c||0,
+    prot:d.pr||0,carbs:d.cb||0,fat:d.ft||0,sugar:d.sg||0,units:d.u||0,qty:1});
+  var sr=g('cktl-ing-search');if(sr)sr.value='';
+  var res=g('cktl-ing-results');if(res){res.innerHTML='';res.style.display='none';}
+  _renderCktlIngs();
+}
+function _addCktlIngManual(){
+  _cktlIngs.push({name:'New ingredient',e:'&#127864;',cals:0,prot:0,carbs:0,fat:0,sugar:0,units:0,qty:1,_manual:true});
+  _renderCktlIngs();
+}
+function _removeCktlIng(i){_cktlIngs.splice(i,1);_renderCktlIngs();}
+function _renderCktlIngs(){
+  var el=g('cktl-ings');if(!el)return;
+  if(!_cktlIngs.length){
+    el.innerHTML=D('style="padding:12px;text-align:center;color:var(--dim);font-size:13px;background:var(--s2);border-radius:10px"','Search or add ingredients above');
+    _updateCktlTotals();return;
+  }
+  el.innerHTML=_cktlIngs.map(function(ing,i){
+    var manualFields=ing._manual?(
+      D('style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px"',
+        '<input class="fld" placeholder="Name" value="'+ing.name+'" style="margin-bottom:0;font-size:12px" onchange="_cktlIngs['+i+'].name=this.value;_renderCktlIngs()">'+
+        '<input class="fld" type="number" placeholder="kcal" value="'+ing.cals+'" style="margin-bottom:0;font-size:12px" onchange="_cktlIngs['+i+'].cals=parseFloat(this.value)||0;_updateCktlTotals()">'+
+        '<input class="fld" type="number" placeholder="units" value="'+ing.units+'" style="margin-bottom:0;font-size:12px" onchange="_cktlIngs['+i+'].units=parseFloat(this.value)||0;_updateCktlTotals()">')
+    ):'';
+    return D('style="background:var(--s2);border-radius:10px;padding:10px;margin-bottom:6px"',
+      D('style="display:flex;justify-content:space-between;align-items:center"',
+        D('style="font-size:13px;font-weight:700"',ing.e+' '+ing.name)+
+        D('style="display:flex;align-items:center;gap:6px"',
+          D('onclick="_cktlIngs['+i+'].qty=Math.max(0.5,(_cktlIngs['+i+'].qty||1)-0.5);_renderCktlIngs()" style="width:24px;height:24px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;touch-action:manipulation"','-')+
+          S('style="font-family:var(--mn);font-size:14px;font-weight:700;min-width:28px;text-align:center"',(ing.qty||1)+'x')+
+          D('onclick="_cktlIngs['+i+'].qty=(_cktlIngs['+i+'].qty||1)+0.5;_renderCktlIngs()" style="width:24px;height:24px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;touch-action:manipulation"','+')+
+          D('onclick="_removeCktlIng('+i+')" style="width:24px;height:24px;border-radius:50%;background:rgba(255,59,92,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red);font-size:14px;touch-action:manipulation"','&#215;')))+
+      (ing._manual?manualFields:D('style="font-size:11px;color:var(--dim);margin-top:4px"',fN(Math.round(ing.cals*(ing.qty||1)))+' kcal'+(ing.units>0?' - '+fD(ing.units*(ing.qty||1),1)+' units':''))));
+  }).join('');
+  _updateCktlTotals();
+}
+function _updateCktlTotals(){
+  var srv=parseFloat((g('cktl-servings')||{value:1}).value)||1;
+  var t={cals:0,prot:0,carbs:0,fat:0,units:0};
+  _cktlIngs.forEach(function(ing){var q=ing.qty||1;t.cals+=ing.cals*q;t.prot+=(ing.prot||0)*q;t.carbs+=(ing.carbs||0)*q;t.fat+=(ing.fat||0)*q;t.units+=(ing.units||0)*q;});
+  var p={cals:t.cals/srv,prot:t.prot/srv,carbs:t.carbs/srv,fat:t.fat/srv,units:t.units/srv};
+  var el=g('cktl-totals');if(!el)return;
+  el.innerHTML=[
+    [fN(Math.round(p.cals)),'kcal','var(--pnk)'],
+    [fD(p.prot,1)+'g','protein','var(--grn)'],
+    [fD(p.carbs,1)+'g','carbs','var(--amb)'],
+    [fD(p.units,1),'units','var(--pur)']
+  ].map(function(r){return D('style="text-align:center;background:var(--s3);border-radius:8px;padding:8px 4px"',D('style="font-family:var(--mn);font-size:15px;font-weight:800;color:'+r[2]+'"',r[0])+D('style="font-size:10px;color:var(--dim);margin-top:2px"',r[1]));}).join('');
+}
+function saveCocktail(){
+  var name=(g('cktl-name')||{value:''}).value.trim()||'Cocktail';
+  var srv=parseFloat((g('cktl-servings')||{value:1}).value)||1;
+  var date=(g('cktl-date')||{value:''}).value||todayLocal();
+  var cat=(g('cktl-cat')||{value:'cocktail'}).value||'cocktail';
+  if(!_cktlIngs.length){toast('Add at least one ingredient',true);return;}
+  var t={cals:0,prot:0,carbs:0,fat:0,sugar:0,units:0};
+  _cktlIngs.forEach(function(ing){var q=ing.qty||1;t.cals+=ing.cals*q;t.prot+=(ing.prot||0)*q;t.carbs+=(ing.carbs||0)*q;t.fat+=(ing.fat||0)*q;t.sugar+=(ing.sugar||0)*q;t.units+=(ing.units||0)*q;});
+  var p={cals:t.cals/srv,prot:t.prot/srv,carbs:t.carbs/srv,fat:t.fat/srv,sugar:t.sugar/srv,units:t.units/srv};
+  var _naC=['soft','choc','tea','coffee','water'];
+  DL.push({id:Date.now(),date:date,n:name,e:'&#127864;',
+    c:Math.round(p.cals),u:_naC.indexOf(cat)>=0?0:Math.round(p.units*10)/10,
+    cat:cat,carbs:Math.round(p.carbs*10)/10,sugar:Math.round(p.sugar*10)/10,
+    prot:Math.round(p.prot*10)/10,fat:Math.round(p.fat*10)/10,vol:0,_isCktl:true});
+  save();closeCocktailBuilder();rDrinks();
+  toast(name+' logged ('+fN(Math.round(p.cals))+' kcal)!');
+}
+function saveCocktailToLibrary(){
+  var name=(g('cktl-name')||{value:''}).value.trim()||'Cocktail';
+  if(!_cktlIngs.length){toast('Add at least one ingredient first',true);return;}
+  var srv=parseFloat((g('cktl-servings')||{value:1}).value)||1;
+  var cat=(g('cktl-cat')||{value:'cocktail'}).value||'cocktail';
+  var t={cals:0,prot:0,carbs:0,fat:0,sugar:0,units:0};
+  _cktlIngs.forEach(function(ing){var q=ing.qty||1;t.cals+=ing.cals*q;t.prot+=(ing.prot||0)*q;t.carbs+=(ing.carbs||0)*q;t.fat+=(ing.fat||0)*q;t.sugar+=(ing.sugar||0)*q;t.units+=(ing.units||0)*q;});
+  var p={cals:t.cals/srv,prot:t.prot/srv,carbs:t.carbs/srv,fat:t.fat/srv,sugar:t.sugar/srv,units:t.units/srv};
+  var md=loadMyDrinks();
+  if(md.find(function(d){return d.n===name;})){toast(name+' already in library',true);return;}
+  md.push({n:name,e:'&#127864;',p:'1 serving',c:Math.round(p.cals),u:Math.round(p.units*10)/10,
+    cat:cat,sg:Math.round(p.sugar*10)/10,cb:Math.round(p.carbs*10)/10,
+    pr:Math.round(p.prot*10)/10,ft:Math.round(p.fat*10)/10,vol:0,custom:true,_isCktl:true});
+  saveMyDrinks(md);toast(name+' saved to My Drinks!');
+}
+// --- END COCKTAIL BUILDER ---
 window.addEventListener('load', launch);</script>
 
   <div id="recipe-modal" class="modal"><div class="mbg" onclick="closeRecipeModal()"></div>
@@ -5223,5 +5375,44 @@ window.addEventListener('load', launch);</script>
     </div>
     <button onclick="closeRecipeModal()" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;font-weight:700;touch-action:manipulation">Cancel</button>
   </div></div>
+<div class="modal" id="cocktail-m"><div class="mbg" onclick="closeCocktailBuilder()"></div>
+  <div class="msheet" style="max-height:92vh;overflow-y:auto">
+    <div class="mhandle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="mtitle" style="margin-bottom:0">&#127864; Cocktail Builder</div>
+      <button onclick="closeCocktailBuilder()" style="background:none;border:none;color:var(--dim);font-size:22px;padding:0;touch-action:manipulation">&#215;</button>
+    </div>
+    <div class="fw"><div class="flbl">Cocktail Name</div>
+      <input id="cktl-name" class="fld" placeholder="e.g. Margarita, Mojito...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div><div class="flbl">Category</div>
+        <select id="cktl-cat" class="fld" style="margin-bottom:0;color:var(--txt);background:var(--s2)">
+          <option value="cocktail">&#127864; Cocktail</option>
+          <option value="beer">&#127866; Beer Mix</option>
+          <option value="wine">&#127863; Wine Mix</option>
+          <option value="soft">&#129380; Mocktail</option>
+        </select>
+      </div>
+      <div><div class="flbl">Servings made</div>
+        <input id="cktl-servings" class="fld" type="number" min="1" value="1" style="margin-bottom:0" oninput="_updateCktlTotals()">
+      </div>
+    </div>
+    <div class="flbl">Add Ingredient (search drinks)</div>
+    <input id="cktl-ing-search" class="fld" placeholder="Search your drinks..." oninput="_cktlIngSearch(this.value)" style="margin-bottom:4px">
+    <div id="cktl-ing-results" style="background:var(--s2);border-radius:10px;margin-bottom:8px;max-height:160px;overflow-y:auto;display:none"></div>
+    <button onclick="_addCktlIngManual()" style="width:100%;padding:11px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;margin-bottom:12px;touch-action:manipulation">+ Add Manually</button>
+    <div class="flbl">Ingredients</div>
+    <div id="cktl-ings" style="margin-bottom:10px"></div>
+    <div style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1px;margin-bottom:8px">PER SERVING TOTALS</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="cktl-totals"></div>
+    </div>
+    <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="cktl-date"></div>
+    <button class="btn btn-k" onclick="saveCocktail()" style="margin-bottom:9px">&#127864; Log Cocktail</button>
+    <button onclick="saveCocktailToLibrary()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:15px;font-weight:600;background:rgba(77,166,255,.06);margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Drinks Library</button>
+    <button onclick="closeCocktailBuilder()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
+  </div>
+</div>
 </body>
 </html>
