@@ -1134,7 +1134,8 @@ body { height: 100dvh; }
     </div>
     <div class="fw"><div class="flbl">Date</div>
       <input class="fld" type="date" id="cd-date" style="margin-bottom:0"></div>
-    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" id="cd-save-btn" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log</button>
+    <div style="margin-top:10px;margin-bottom:10px"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);cursor:pointer"><input type="checkbox" id="cd-save" style="width:16px;height:16px"> Save to my drinks</label></div><button class="btn btn-r" id="cd-save-btn" onclick="addCustomDrink()" style="margin-bottom:9px">Add to Log &amp; Save</button>
+    <button onclick="saveCustomDrinkToLibraryOnly()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:15px;font-weight:600;background:rgba(77,166,255,.06);margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Drinks Only</button>
     <button onclick="closeM('custom-drink-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
@@ -4260,6 +4261,28 @@ function editMyDrink(idx){
   var sb=g('cd-save-btn');if(sb)sb.textContent='Save Changes';
   openM('custom-drink-m');
 }
+function saveCustomDrinkToLibraryOnly(){
+  var name=(g('cd-name')||{value:''}).value.trim();
+  if(!name){toast('Please enter a drink name',true);return;}
+  var gN=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
+  var cals=gN('cd-cals'),units=gN('cd-units'),carbs=gN('cd-carbs'),sugar=gN('cd-sugar');
+  var prot=gN('cd-prot'),fat=gN('cd-fat'),fiber=gN('cd-fiber'),sodium=gN('cd-sodium');
+  var drCatVal=(g('cd-cat')||{value:'custom'}).value||'custom';
+  var _isNA=['water','tea','coffee','soft','choc'].indexOf(drCatVal)>=0;
+  var _uVal=_isNA?0:units;
+  var _cdEmoji=(g('cd-emoji')||{value:''}).value.trim()||'&#127867;';
+  var _ent={n:name,e:_cdEmoji,p:'1 serving',c:Math.round(cals),
+    u:_uVal,cat:drCatVal,sg:sugar,cb:carbs,pr:prot,ft:fat,fi:fiber,na:sodium,vol:0,custom:true};
+  var md=loadMyDrinks();
+  if(_editMyDrinkIdx>=0&&md[_editMyDrinkIdx]){
+    md[_editMyDrinkIdx]=Object.assign(md[_editMyDrinkIdx],_ent);
+    saveMyDrinks(md); _editMyDrinkIdx=-1;
+    closeM('custom-drink-m'); rDrGrid(); toast(name+' updated!'); return;
+  }
+  if(md.find(function(d){return d.n===name;})){toast(name+' already in My Drinks',true);return;}
+  md.push(_ent); saveMyDrinks(md);
+  closeM('custom-drink-m'); rDrGrid(); toast(name+' saved to My Drinks!');
+}
 function addCustomDrink(){
   var name=(g('cd-name')||{value:''}).value.trim();
   if(!name){toast('Please enter a drink name',true);return;}
@@ -5082,15 +5105,7 @@ function loadMyDrinks(){
   try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}
 }
 function saveMyDrinks(arr){
-  try{
-    localStorage.setItem('hs_mydrinks',JSON.stringify(arr));
-    // Also update md in main store for backup resilience
-    try{
-      var _main=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
-      _main.md=arr;
-      localStorage.setItem(STORE_KEY,JSON.stringify(_main));
-    }catch(e2){}
-  }catch(e){}
+  try{localStorage.setItem('hs_mydrinks',JSON.stringify(arr));}catch(e){}
 }
 function addMyDrinkToLog(idx){
   var myDrinks=loadMyDrinks();
