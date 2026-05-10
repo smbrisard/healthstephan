@@ -3270,7 +3270,14 @@ function drCat(cat,btn){
   // Auto-expand grid when category selected
   var db=g('dr-db-section'),dbtn=g('dr-browse-btn');
   if(db) db.style.display='block';
-  if(dbtn){dbtn.style.display='block';dbtn.textContent='\uD83C\uDF77 Browse drinks \u25B2';}
+  if(dbtn){
+    dbtn.style.display='block';
+    dbtn.textContent=cat==='my'?'\u2B50 My Drinks \u25B2':'\uD83C\uDF77 Browse drinks \u25B2';
+  }
+  // Hide today's log when browsing custom library
+  var logEl=g('dr-log'), logHdr=g('dr-log-hdr');
+  if(logEl) logEl.style.display=cat==='my'?'none':'block';
+  if(logHdr) logHdr.style.display=cat==='my'?'none':'block';
   rDrGrid();
 }
 function rDrinks(){rDrBanner();rDrGrid();rDrLog();rDrChart();}
@@ -3307,6 +3314,16 @@ function showDrinkGrid(){
   var isOpen=db.style.display==='block';
   db.style.display=isOpen?'none':'block';
   btn.textContent=isOpen?'\uD83C\uDF77 Browse drinks \u25BC':'\uD83C\uDF77 Browse drinks \u25B2';
+  // Restore log visibility when collapsing grid
+  if(isOpen){
+    var logEl=g('dr-log'),logHdr=g('dr-log-hdr');
+    if(logEl) logEl.style.display='block';
+    if(logHdr) logHdr.style.display='block';
+    dCat='all';
+    document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');});
+    var allPill=document.querySelector("#dr-cats .pill");
+    if(allPill) allPill.classList.add('on');
+  }
   if(!isOpen) rDrGrid();
 }
 
