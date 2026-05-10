@@ -500,6 +500,8 @@ body { height: 100dvh; }
         <!-- Food database - category pills + browse -->
         <div class="pills" id="food-cats" style="margin-bottom:10px">
           <div class="pill on" onclick="setFCat('all',this)">All</div>
+          <div class="pill" onclick="setFCat('custom',this)">&#11088; Custom</div>
+          <div class="pill" onclick="setFCat('recipes',this)">&#127869; Recipes</div>
           <div class="pill" onclick="setFCat('eggs',this)">Eggs</div>
           <div class="pill" onclick="setFCat('meat',this)">Meat &amp; Fish</div>
           <div class="pill" onclick="setFCat('dairy',this)">Dairy</div>
@@ -513,8 +515,277 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('sauces',this)">🫙 Sauces</div>
           <div class="pill" onclick="setFCat('meals',this)">🍽 Meals</div>
           <div class="pill" onclick="setFCat('fastfood',this)">🍔 Fast Food</div>
-          <div class="pill" onclick="setFCat('custom',this)">⭐ Custom</div>
-          <div class="pill" onclick="setFCat('recipes',this)">📖 Recipes</div>
+  <div style="font-size:24px;font-weight:800;letter-spacing:-.3px">Health Stephan</div>
+  <div style="font-size:14px;color:var(--dim)">Your health companion</div>
+  <div class="ldbar"><div class="ldfill"></div></div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="ob">
+  <div class="ob-prog"><div class="ob-fill" id="ob-prog" style="width:0%"></div></div>
+  <div class="ob-body" id="obs0">
+    <div style="font-size:54px;margin:14px 0 16px">&#128075;</div>
+    <div style="font-size:28px;font-weight:800;margin-bottom:11px;letter-spacing:-.4px">Welcome to<br>Health Stephan</div>
+    <div style="font-size:15px;color:var(--dim);line-height:1.65;margin-bottom:22px">Your personal health companion. Track nutrition, weight, sleep, and fitness in one place.</div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:13px;padding:14px;background:var(--s2);border-radius:13px"><span style="font-size:24px">&#127828;</span><div><div style="font-size:14px;font-weight:600">Smart food logging</div><div style="font-size:12px;color:var(--dim);margin-top:2px">500+ foods, Starbucks, supplements, fast food</div></div></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px;background:var(--s2);border-radius:13px"><span style="font-size:24px">&#9878;&#65039;</span><div><div style="font-size:14px;font-weight:600">Personalised calorie targets</div><div style="font-size:12px;color:var(--dim);margin-top:2px">TDEE calculated from your body data</div></div></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px;background:var(--s2);border-radius:13px"><span style="font-size:24px">&#9889;</span><div><div style="font-size:14px;font-weight:600">Health metrics dashboard</div><div style="font-size:12px;color:var(--dim);margin-top:2px">Log Apple Watch readings manually</div></div></div>
+    </div>
+  </div>
+  <div class="ob-body" id="obs1" style="display:none">
+    <div style="font-size:24px;font-weight:800;margin-bottom:18px">About you</div>
+    <div class="fw"><div class="flbl">Your Name</div><input class="fld" id="ob-name" type="text" placeholder="e.g. Stephan" autocomplete="off"></div>
+    <div class="fw"><div class="flbl">Age</div><input class="fld" id="ob-age" type="number" placeholder="30" min="10" max="100"></div>
+    <div class="fw"><div class="flbl">Gender</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <div class="gb on" id="gb-m" onclick="obGend('Male',this)">Male</div>
+        <div class="gb" id="gb-f" onclick="obGend('Female',this)">Female</div>
+        <div class="gb" id="gb-o" onclick="obGend('Other',this)">Other</div>
+      </div>
+    </div>
+  </div>
+  <div class="ob-body" id="obs2" style="display:none">
+    <div style="font-size:24px;font-weight:800;margin-bottom:6px">Your measurements</div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:18px">Used only for BMI and calorie calculations.</div>
+    <div class="flbl">Height</div>
+    <div id="ob-htd" style="font-family:var(--mn);font-size:44px;font-weight:800;color:var(--blu);line-height:1;margin-bottom:4px">5'9"</div>
+    <div class="adj">
+      <div class="abtn" onclick="obAdjHt(-1)" style="min-width:48px">-1"</div>
+      <div style="flex:1;text-align:center;font-size:12px;color:var(--dim)">inches</div>
+      <div class="abtn abtn-b" onclick="obAdjHt(1)" style="min-width:48px">+1"</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dim2);margin-bottom:5px"><span>4'7"</span><span>7'3"</span></div>
+    <input type="range" id="ob-ht" min="140" max="220" value="175" oninput="obHtSlide(this.value)" style="margin-bottom:22px">
+    <div class="flbl">Weight</div>
+    <div id="ob-wtd" style="font-family:var(--mn);font-size:44px;font-weight:800;color:var(--pur);line-height:1;margin-bottom:4px">165.3 lbs</div>
+    <div class="adj">
+      <div class="abtn" onclick="obAdjWt(-5)" style="min-width:50px">-5</div>
+      <div class="abtn" onclick="obAdjWt(-1)" style="min-width:44px">-1</div>
+      <div class="abtn" onclick="obAdjWt(-0.1)" style="min-width:50px">-.1</div>
+      <div style="flex:1;text-align:center;font-size:12px;color:var(--dim)">lbs</div>
+      <div class="abtn abtn-pu" onclick="obAdjWt(0.1)" style="min-width:50px">+.1</div>
+      <div class="abtn abtn-pu" onclick="obAdjWt(1)" style="min-width:44px">+1</div>
+      <div class="abtn abtn-pu" onclick="obAdjWt(5)" style="min-width:50px">+5</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dim2);margin-bottom:5px"><span>88 lbs</span><span>440 lbs</span></div>
+    <input type="range" id="ob-wt" min="40" max="200" value="75" step="0.1" oninput="obWtSlide(this.value)">
+    <div id="ob-bmi" style="margin-top:13px;padding:12px;background:var(--s2);border-radius:12px;font-size:14px;color:var(--dim)">BMI will appear here</div>
+  </div>
+  <div class="ob-body" id="obs3" style="display:none">
+    <div style="font-size:24px;font-weight:800;margin-bottom:14px">Your main goal</div>
+    <div id="ob-goals">
+      <div class="gopt on" onclick="obGoal('lose',this)"><span style="font-size:26px">&#9878;&#65039;</span><div><div style="font-weight:700;font-size:15px">Lose weight</div><div style="font-size:12px;color:var(--dim);margin-top:2px">Calorie deficit</div></div><div class="gck">&#10003;</div></div>
+      <div class="gopt" onclick="obGoal('maintain',this)"><span style="font-size:26px">&#127919;</span><div><div style="font-weight:700;font-size:15px">Maintain weight</div><div style="font-size:12px;color:var(--dim);margin-top:2px">Eat at maintenance</div></div><div class="gck"></div></div>
+      <div class="gopt" onclick="obGoal('build',this)"><span style="font-size:26px">&#128170;</span><div><div style="font-weight:700;font-size:15px">Build muscle</div><div style="font-size:12px;color:var(--dim);margin-top:2px">Calorie surplus</div></div><div class="gck"></div></div>
+      <div class="gopt" onclick="obGoal('fitness',this)"><span style="font-size:26px">&#127939;</span><div><div style="font-weight:700;font-size:15px">Improve fitness</div><div style="font-size:12px;color:var(--dim);margin-top:2px">Cardio and endurance</div></div><div class="gck"></div></div>
+    </div>
+  </div>
+  <div class="ob-body" id="obs4" style="display:none">
+    <div style="font-size:54px;margin:12px 0 14px">&#127881;</div>
+    <div style="font-size:26px;font-weight:800;margin-bottom:8px">You're all set!</div>
+    <div style="font-size:14px;color:var(--dim);margin-bottom:18px">Your personalised health snapshot:</div>
+    <div id="ob-snap"></div>
+  </div>
+  <div class="ob-foot"><button class="btn btn-r" id="ob-btn" onclick="obNext()">Get Started</button></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="screens">
+
+    <!-- HOME -->
+    <div class="scr on" id="sc-home">
+      <div class="phdr">
+        <div style="flex:1">
+          <div id="hm-date" style="font-size:17px;font-weight:700;color:var(--txt);letter-spacing:-.3px"></div>
+          <div id="sync-badge" style="display:none;margin-top:3px;font-size:10px;color:var(--grn)">&#10003; Synced</div>
+          <div id="hm-streak" style="font-size:12px;color:var(--amb);margin-top:3px"></div>
+        </div>
+        <button onclick="openSyncSettings()" style="width:34px;height:34px;border-radius:50%;background:rgba(56,189,248,.15);border:.5px solid rgba(56,189,248,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;margin-right:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="#38bdf8"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></button>
+        <div onclick="openAvatarUpload()" id="hm-av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#880033);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;overflow:hidden;cursor:pointer;color:#fff">ST</div>
+      </div>
+      <div class="sec" style="padding-top:6px;padding-bottom:100px">
+        <!-- deficit -->
+        <div class="def-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1px">CALORIE DEFICIT</div>
+            <div class="badge bp" id="hm-dbdg">On track</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <div class="defnum" id="hm-defnum">0</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.4)">kcal net</div>
+          </div>
+          <div class="eqrow">
+            <div class="eqb"><div class="eqv" style="color:var(--grn)" id="eq-goal">2200</div><div class="eql">goal</div></div>
+            <div class="eqop">-</div>
+            <div class="eqb"><div class="eqv" style="color:var(--amb)" id="eq-eaten">0</div><div class="eql" style="font-size:9px">food+drinks</div></div>
+            <div class="eqop">+</div>
+            <div class="eqb"><div class="eqv" style="color:#ff7070" id="eq-burned">389</div><div class="eql">burned</div></div>
+            <div class="eqop">=</div>
+            <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-net">0</div><div class="eql">net</div></div>
+          </div>
+          <div style="margin-top:12px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden"><div id="hm-dbar" style="height:100%;background:linear-gradient(90deg,var(--pur),var(--pnk));width:0%;transition:width .5s;border-radius:3px"></div></div>
+        </div>
+        <!-- ring + stats -->
+        <div class="card" style="display:flex;align-items:center;gap:15px;margin-bottom:12px">
+          <div class="ringwrap" style="flex-shrink:0">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="37" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
+              <circle id="hm-ring" cx="45" cy="45" r="37" fill="none" stroke="url(#rg)" stroke-width="9" stroke-dasharray="232" stroke-dashoffset="232" stroke-linecap="round"/>
+              <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs>
+            </svg>
+            <div class="ringmid"><div style="font-family:var(--mn);font-size:14px;font-weight:800;color:var(--grn)" id="hm-ringv">0</div><div style="font-size:10px;color:var(--dim)">kcal</div></div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:12px;color:var(--dim)">Daily goal</div>
+            <div style="font-size:21px;font-weight:800;letter-spacing:-.4px" id="hm-goallbl">2,200 kcal</div>
+            <div style="font-size:13px;color:var(--grn);margin-top:4px;font-weight:600" id="hm-remain">0 remaining</div>
+          </div>
+        </div>
+        <!-- quick stats -->
+        <div class="slbl">Quick Stats</div>
+        <div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:12px 14px;margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-size:12px;color:var(--dim)">Food + Drinks today</div><div style="font-size:12px;font-weight:700;color:var(--txt)" id="hm-cal-lbl">-- kcal</div></div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="hm-cal-bar" style="height:100%;width:0%;background:var(--grn);border-radius:3px;transition:width .4s"></div></div></div>
+        <div class="g2" style="margin-bottom:14px">
+          <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
+            <div style="font-size:20px;margin-bottom:7px">&#128205;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#38bdf8" id="hm-dist">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">mi total</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-dist-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(255,184,48,.18)" id="hm-steps-tile">
+            <div style="font-size:20px;margin-bottom:7px">&#127939;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb)" id="hm-steps">8,432</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">steps today</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-steps-yd"></div>
+          </div>
+          <div class="mtile" style="background:linear-gradient(135deg,rgba(0,212,170,.14),rgba(0,212,170,.03));border-color:rgba(0,212,170,.18)">
+            <div style="font-size:20px;margin-bottom:7px">&#9889;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--grn)" id="hm-hrv">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">HRV (ms)</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-hrv-yd"></div>
+          </div>          <div class="mtile" style="background:linear-gradient(135deg,rgba(77,166,255,.14),rgba(77,166,255,.03));border-color:rgba(77,166,255,.18)">
+            <div style="font-size:20px;margin-bottom:7px">&#128564;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--blu)" id="hm-sleep">7.2</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">hrs sleep</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-sleep-yd"></div>
+          </div>
+          <div class="mtile" style="background:linear-gradient(135deg,rgba(255,107,107,.14),rgba(255,107,107,.03));border-color:rgba(255,107,107,.18)">
+            <div style="font-size:20px;margin-bottom:7px">&#128293;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#ff7070" id="hm-burned">389</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px">total burned</div>
+            <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(255,59,92,.12)">
+            <div style="font-size:20px;margin-bottom:7px">&#10084;&#65039;</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--red);line-height:1" id="hm-rhr">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">bpm RHR</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-rhr-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(0,212,170,.12)">
+            <div style="font-size:20px;margin-bottom:7px">🧍</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--grn);line-height:1" id="hm-stand">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">stand hrs</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-stand-yd"></div>
+          </div>
+          <div class="mtile" style="background:rgba(255,184,48,.12)">
+            <div style="font-size:20px;margin-bottom:7px">⏱</div>
+            <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--amb);line-height:1" id="hm-exmin">--</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:3px">exercise min</div>
+            <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-exmin-yd"></div>
+          </div>
+        </div>
+        <!-- log buttons -->
+        <div style="display:flex;gap:10px;margin-bottom:16px">
+          <button onclick="showTab('food')" style="flex:1;padding:13px 0;background:rgba(255,59,92,.12);border-radius:14px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:14px;font-weight:700;touch-action:manipulation">🍽 Log Food</button>
+          <button onclick="showTab('drinks')" style="flex:1;padding:13px 0;background:rgba(56,189,248,.12);border-radius:14px;border:.5px solid rgba(56,189,248,.3);color:#38bdf8;font-size:14px;font-weight:700;touch-action:manipulation">💧 Log Drink</button>
+        </div>
+        <!-- Quick shortcut widgets -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">
+          <button onclick="openWtModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pur);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">⚖️</span>Weight</button>
+          <button onclick="openM('sl-m')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--blu);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">😴</span>Sleep</button>
+          <button onclick="openMeasModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pnk);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">📏</span>Measure</button>
+          <button onclick="showTab('nutrition')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--grn);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">🥗</span>Nutrition</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="scr" id="sc-profile">
+      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v21bp</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
+      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+        <div class="card" style="text-align:center;margin-bottom:14px">
+          <div class="avatar" id="pr-av" onclick="openAvatarUpload()" style="cursor:pointer;overflow:hidden;position:relative">ST<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);font-size:9px;color:#fff;text-align:center;padding:3px;font-weight:600">EDIT</div></div>
+          <div style="font-size:21px;font-weight:800" id="pr-name">Stephan</div>
+          <div style="font-size:13px;color:var(--dim);margin-top:3px">Health Journey</div>
+          <div style="display:flex;justify-content:center;gap:28px;margin-top:14px;padding-top:14px;border-top:.5px solid var(--b1)">
+            <div><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--red)" id="pr-streak">0</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Streak</div></div>
+            <div><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--grn)" id="pr-meals">0</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Meals</div></div>
+            <div><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--pur)" id="pr-change">--</div><div style="font-size:11px;color:var(--dim);margin-top:2px">lbs change</div></div>
+          </div>
+        </div>
+        <div class="slbl">Body Stats</div><div class="card" style="margin-bottom:14px" id="pr-stats"></div>
+        <div class="slbl">Edit Profile</div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="fw"><div class="flbl">Name</div><input class="fld" id="ed-name" type="text"></div>
+          <div class="fw"><div class="flbl">Age</div><input class="fld" id="ed-age" type="number"></div>
+          <div class="fw"><div class="flbl">Height</div>
+            <div style="display:flex;gap:8px">
+              <div style="flex:1"><input class="fld" id="ed-ft" type="number" placeholder="ft" style="text-align:center"><div style="font-size:11px;color:var(--dim);text-align:center;margin-top:3px">feet</div></div>
+              <div style="flex:1"><input class="fld" id="ed-in" type="number" placeholder="in" style="text-align:center"><div style="font-size:11px;color:var(--dim);text-align:center;margin-top:3px">inches</div></div>
+            </div>
+          </div>
+          <div class="fw" style="margin-bottom:0"><div class="flbl">Goal Weight (lbs)</div><input class="fld" id="ed-gwt" type="number" step="0.1"></div>
+        </div>
+        <button class="btn btn-r" onclick="saveProfile()" style="margin-bottom:9px">Save Profile</button>
+        <div style="display:flex;gap:8px;margin-top:8px"><button onclick="exportData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.25);color:var(--grn);font-size:14px;font-weight:700;touch-action:manipulation">&#128190; Export Data</button><button onclick="importData()" style="flex:1;padding:13px;border-radius:13px;background:rgba(77,166,255,.08);border:.5px solid rgba(77,166,255,.25);color:var(--blu);font-size:14px;font-weight:700;touch-action:manipulation">&#128228; Import Data</button></div>
+        <button onclick="resetApp()" style="width:100%;padding:14px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Reset All Data</button>
+      </div>
+    </div>
+
+    <!-- FOOD -->
+    <div class="scr" id="sc-food">
+      <div class="phdr">
+        <div><div class="ptitle">Food</div><div class="psub" id="food-sub">0 / 2,200 kcal</div></div>
+
+      </div>
+      <div class="sec" style="padding-top:8px;padding-bottom:100px">
+
+        <!-- Calorie summary + 7-day chart -->
+        <div id="food-summary" style="margin-bottom:10px"></div>
+        <div class="card" style="margin-bottom:14px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.8px;margin-bottom:8px">7-DAY CALORIES</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:64px" id="food-chart"></div>
+          <div style="display:flex;gap:3px;margin-top:4px" id="food-chart-lbl"></div>
+        </div>
+
+        <!-- Meal type tabs -->
+        <div class="meal-tabs" id="meal-tabs" style="margin-bottom:10px">
+          <div class="mtab on" onclick="setMealTab('Breakfast',this)">&#127749; Breakfast</div>
+          <div class="mtab" onclick="setMealTab('Lunch',this)">&#127803; Lunch</div>
+          <div class="mtab" onclick="setMealTab('Dinner',this)">&#127762; Dinner</div>
+          <div class="mtab" onclick="setMealTab('Snack',this)">&#127822; Snack</div>
+        </div>
+
+        <!-- Recent foods -->
+        <!-- Food database - category pills + browse -->
+        <div class="pills" id="food-cats" style="margin-bottom:10px">
+          <div class="pill on" onclick="setFCat('all',this)">All</div>
+          <div class="pill" onclick="setFCat('custom',this)">&#11088; Custom</div>
+          <div class="pill" onclick="setFCat('recipes',this)">&#127869; Recipes</div>
+          <div class="pill" onclick="setFCat('eggs',this)">Eggs</div>
+          <div class="pill" onclick="setFCat('meat',this)">Meat &amp; Fish</div>
+          <div class="pill" onclick="setFCat('dairy',this)">Dairy</div>
+          <div class="pill" onclick="setFCat('grains',this)">Grains</div>
+          <div class="pill" onclick="setFCat('veg',this)">Vegetables</div>
+          <div class="pill" onclick="setFCat('fruit',this)">Fruit</div>
+          <div class="pill" onclick="setFCat('breakfast',this)">Breakfast</div>
+          <div class="pill" onclick="setFCat('snacks',this)">Snacks</div>
+          <div class="pill" onclick="setFCat('supplements',this)">Supplements</div>
+          <div class="pill" onclick="setFCat('starbucks',this)">Starbucks</div>
+          <div class="pill" onclick="setFCat('sauces',this)">🫙 Sauces</div>
+          <div class="pill" onclick="setFCat('meals',this)">🍽 Meals</div>
+          <div class="pill" onclick="setFCat('fastfood',this)">🍔 Fast Food</div>
         </div>
         <!-- Quick Add row - matches drinks layout -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -654,10 +925,10 @@ body { height: 100dvh; }
         <div class="pills" id="dr-cats">
           <div class="pill on" onclick="drCat('all',this)">All</div>
           <div class="pill" onclick="drCat('my',this)">&#11088; My Drinks</div>
+          <div class="pill" onclick="drCat('cocktail',this)">&#127864; Cocktails</div>
           <div class="pill" onclick="drCat('beer',this)">Beer</div>
           <div class="pill" onclick="drCat('wine',this)">Wine</div>
           <div class="pill" onclick="drCat('spirits',this)">Spirits</div>
-          <div class="pill" onclick="drCat('cocktail',this)">Cocktails</div>
           <div class="pill" onclick="drCat('soft',this)">Soft</div>
           <div class="pill" onclick="drCat('coffee',this)">Coffee</div>
           <div class="pill" onclick="drCat('water',this)">Water</div>
@@ -3161,7 +3432,7 @@ var DRINKS=[
   {n:'Chai Latte',e:'&#9749;',p:'12 fl oz with milk',c:196,u:0,cb:30,sg:25,cat:'tea',vol:355},
   {n:'Iced Tea',e:'&#127784;',p:'12 fl oz, unsweetened',c:3,u:0,cb:1,sg:0,cat:'tea',vol:355},
   {n:'Herbal Tea',e:'&#127807;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
-  {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'soft',w:''},
+  {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'coffee',w:''},
   {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
   {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
   {n:'Water 8oz',e:'&#128167;',p:'8 fl oz',c:0,u:0,cb:0,sg:0,vol:237,cat:'water',w:''},
@@ -3221,9 +3492,9 @@ var DRINKS=[
   {n:'Lemonade 12oz',e:'&#127819;',p:'12 fl oz',c:148,u:0,cb:40,sg:38,cat:'soft',w:''},
   {n:'Apple Juice 8oz',e:'&#127822;',p:'8 fl oz',c:114,u:0,cb:28,sg:24,cat:'soft',w:''},
   {n:'Cranberry Juice 8oz',e:'&#127827;',p:'8 fl oz',c:116,u:0,cb:30,sg:28,cat:'soft',w:''},
-  {n:'Kombucha 16oz',e:'&#129518;',p:'16 fl oz',c:60,u:0,cb:14,sg:8,cat:'soft',w:'Fermented'},
-  {n:'Iced Coffee 16oz',e:'&#9749;',p:'16 fl oz black',c:5,u:0,cb:0,sg:0,cat:'soft',w:''},
-  {n:'Protein Water',e:'&#128167;',p:'16 fl oz',c:70,u:0,cb:1,sg:0,cat:'soft',w:'25g protein'},
+  {n:'Kombucha 16oz',e:'&#129518;',p:'16 fl oz',c:60,u:0,cb:14,sg:8,cat:'tea',w:'Fermented'},
+  {n:'Iced Coffee 16oz',e:'&#9749;',p:'16 fl oz black',c:5,u:0,cb:0,sg:0,cat:'coffee',w:''},
+  {n:'Protein Water',e:'&#128167;',p:'16 fl oz',c:70,u:0,cb:1,sg:0,cat:'water',w:'25g protein'},
   // ── COFFEE ────────────────────────────────────────────────────
   {n:'Espresso Single',e:'&#9749;',p:'1 fl oz',c:3,u:0,cb:0,sg:0,cat:'coffee',w:''},
   {n:'Espresso Double',e:'&#9749;',p:'2 fl oz',c:6,u:0,cb:0,sg:0,cat:'coffee',w:''},
