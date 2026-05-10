@@ -878,9 +878,9 @@ body { height: 100dvh; }
     </div>
     <div style="font-size:13px;color:var(--dim);text-align:center;margin-bottom:10px">Total: <span style="color:var(--pnk);font-family:var(--mn);font-weight:700" id="dm-total">0 kcal</span></div>
     <div class="fw" style="margin-bottom:12px"><div class="flbl">Date</div><input class="fld" type="date" id="dm-date"></div>
-    <button class="btn btn-k" onclick="addDrink()">+ Add to Log</button>
-  
-    <button onclick="closeM('dr-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
+    <button class="btn btn-k" onclick="addDrink()" style="margin-bottom:9px">+ Add to Log</button>
+    <button onclick="saveDrinkToMyLibrary()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:15px;font-weight:600;background:rgba(77,166,255,.06);margin-bottom:8px;touch-action:manipulation">&#128190; Save to My Drinks</button>
+    <button onclick="closeM('dr-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
 
@@ -3319,10 +3319,6 @@ function showDrinkGrid(){
     var logEl=g('dr-log'),logHdr=g('dr-log-hdr');
     if(logEl) logEl.style.display='block';
     if(logHdr) logHdr.style.display='block';
-    dCat='all';
-    document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');});
-    var allPill=document.querySelector("#dr-cats .pill");
-    if(allPill) allPill.classList.add('on');
   }
   if(!isOpen) rDrGrid();
 }
@@ -3442,6 +3438,16 @@ function openDrink(idx){
   openM('dr-m');
 }
 function adjDQ(d){dQty=Math.max(1,dQty+d); set('dm-qty',dQty); if(selDr) set('dm-total',fN(selDr.c*dQty)+' kcal');}
+function saveDrinkToMyLibrary(){
+  if(!selDr){toast('No drink selected',true);return;}
+  var md=loadMyDrinks();
+  if(md.find(function(d){return d.n===selDr.n;})){toast(selDr.n+' already in My Drinks',true);return;}
+  md.push({n:selDr.n,e:selDr.e||'&#127866;',p:selDr.p||'1 serving',
+    c:selDr.c||0,u:selDr.u||0,cat:selDr.cat,sg:selDr.sg||0,cb:selDr.cb||0,
+    pr:0,ft:0,fi:0,na:0,vol:selDr.vol||0,custom:true});
+  saveMyDrinks(md);
+  toast(selDr.n+' saved to My Drinks!');
+}
 function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
