@@ -1476,7 +1476,7 @@ function rHome() {
   set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.totalBurned||P.burned)); set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
   if(db){
-    if(eaten<300){
+    if(tCals()<300){
       db.className='badge';db.style.cssText='background:rgba(255,255,255,0.1);color:var(--dim)';db.textContent='Log food first';
     } else if(deficit>=700){db.className='badge bg';db.style.cssText='';db.textContent='Great day';
     } else if(deficit>=400){db.className='badge bp';db.style.cssText='';db.textContent='On track';
@@ -1486,7 +1486,7 @@ function rHome() {
   var dbar=g('hm-dbar');
   if(dbar){
     var _hr=new Date().getHours();
-    var _enoughData=eaten>=300; // at least 300 kcal logged to trust the deficit
+    var _enoughData=tCals()>=300; // food calories only - drinks shouldn't trigger 'enough data'
     if(!_enoughData){
       // Not enough food logged yet - show intake progress in grey
       dbar.style.background='rgba(255,255,255,0.15)';
