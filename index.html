@@ -1475,8 +1475,39 @@ function rHome() {
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
   set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.totalBurned||P.burned)); set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
-  if(db){if(deficit>=700){db.className='badge bg';db.textContent='Great day';}else if(deficit>=400){db.className='badge bp';db.textContent='On track';}else if(deficit>=0){db.className='badge ba';db.textContent='Under target';}else{db.className='badge br';db.textContent='Over limit';}}
-  var dbar=g('hm-dbar'); if(dbar) dbar.style.width=Math.min(Math.max(deficit/1000*100,0),100)+'%';
+  if(db){
+    if(eaten<300){
+      db.className='badge';db.style.cssText='background:rgba(255,255,255,0.1);color:var(--dim)';db.textContent='Log food first';
+    } else if(deficit>=700){db.className='badge bg';db.style.cssText='';db.textContent='Great day';
+    } else if(deficit>=400){db.className='badge bp';db.style.cssText='';db.textContent='On track';
+    } else if(deficit>=0){db.className='badge ba';db.style.cssText='';db.textContent='Under target';
+    } else{db.className='badge br';db.style.cssText='';db.textContent='Over limit';}
+  }
+  var dbar=g('hm-dbar');
+  if(dbar){
+    var _hr=new Date().getHours();
+    var _enoughData=eaten>=300; // at least 300 kcal logged to trust the deficit
+    if(!_enoughData){
+      // Not enough food logged yet - show intake progress in grey
+      dbar.style.background='rgba(255,255,255,0.15)';
+      dbar.style.width=Math.min(eaten/P.calTarget*100,100)+'%';
+      // badge already set above
+    } else {
+      // Enough food logged - show real deficit progress
+      var _defPct=Math.min(Math.max(deficit/(P.calTarget||1600)*100,0),100);
+      dbar.style.width=_defPct+'%';
+      // Color reflects deficit quality
+      if(deficit>=700){
+        dbar.style.background='linear-gradient(90deg,var(--pur),var(--pnk))';
+      } else if(deficit>=300){
+        dbar.style.background='linear-gradient(90deg,#0ea5e9,var(--pur))';
+      } else if(deficit>=0){
+        dbar.style.background='linear-gradient(90deg,var(--amb),#f97316)';
+      } else {
+        dbar.style.background='linear-gradient(90deg,var(--red),#dc2626)';
+      }
+    }
+  }
   var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
