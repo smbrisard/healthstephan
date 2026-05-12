@@ -3531,19 +3531,19 @@ function rFitness(){
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
-    {e:'&#10084;&#65039;',key:'rhr',raw:_fiToday?P.rhr:null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
-    {e:'&#9889;',key:'hrv',raw:_fiToday?P.hrv:null,lb:false,v:P.hrv||'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
-    {e:'&#129441;',key:'spo2',raw:_fiToday?P.spo2:null,lb:false,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
-    {e:'&#127774;&#65039;',key:'rr',raw:_fiToday?P.rr:null,lb:true,md:1,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
+    {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
+    {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv||'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
+    {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
+    {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:1,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
-    {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
+    {e:'&#128167;',key:'water',raw:calcWaterOz()||null,lb:false,v:calcWaterOz()>0?fD(calcWaterOz(),1):'--',u:'fl oz',l:'Water',noLog:calcWaterOz()===0,c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:(_fiToday&&P.standHours)?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
   {e:'⏱',key:'exerciseMins',raw:P.exerciseMins||null,lb:false,v:(_fiToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
   (function(){
   var _ydWL=WL.filter(function(w){return w.date===ydStr;});
   var _tdWL=WL.filter(function(w){return w.date===today();});
   var _wtDelta=(_ydWL.length&&_tdWL.length)?Math.round((k2l(_tdWL[_tdWL.length-1].weight)-k2l(_ydWL[_ydWL.length-1].weight))*10)/10:null;
-  return {e:'&#9878;&#65039;',key:'wt',raw:_lw?k2l(_lw.weight):null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
+  return {e:'&#9878;&#65039;',key:'wt',raw:_lw?k2l(_lw.weight):null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',noLog:!_lw,c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
 })()
   ];
   var ge=g('fi-grid'); if(!ge) return;
@@ -3587,7 +3587,8 @@ function rFitness(){
         D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:'+m.c+';line-height:1"',m.v)+
         D('style="font-size:13px;color:var(--dim);margin-top:4px"',m.u)+
         D('style="font-size:13px;color:var(--dim);margin-top:3px"',m.l)+
-        delta)+
+        (m.noLog?D('style="font-size:10px;color:var(--dim);margin-top:4px;opacity:0.5"','No log yet'):
+          D('style="min-height:16px;margin-top:2px"',delta)))+
       D('style="height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:10px;overflow:hidden"',
         D('style="height:100%;background:'+m.c+';width:'+Math.min(Math.max(m.raw!==null&&m.raw!==undefined?m.pct:0,m.raw?0.05:0)*100,100)+'%;border-radius:2px;transition:width .3s"','')));
   }).join('');
