@@ -679,7 +679,8 @@ body { height: 100dvh; }
         <button onclick="openFiModal()" style="font-size:12px;font-weight:700;color:var(--amb);padding:6px 13px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.25)">Edit</button>
       </div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
-                <div class="slbl">Today's Metrics</div><div class="g2" id="fi-grid" style="margin-bottom:13px"></div>
+                <div class="slbl">Today's Metrics</div><div id="fi-debug-panel" style="margin-bottom:12px"></div>
+      <div class="g2" id="fi-grid" style="margin-bottom:13px"></div>
       </div>
     </div>
 
@@ -3601,7 +3602,6 @@ function rFitness(){
       if(_pm.hasOwnProperty(m.key)&&_pm[m.key]) ydVal=_pm[m.key];
     }
     var _ydN=parseFloat(ydVal),_rawN=parseFloat(m.raw);
-    if(m.key==='rhr'||m.key==='spo2') console.log('DELTA DEBUG',m.key,'raw=',m.raw,'ydVal=',ydVal,'ydSnap=',ydSnap?'exists':'null','prevRhr=',P.prevRhr,'FL.len=',FL.length);
     var delta=(!isNaN(_ydN)&&!isNaN(_rawN)&&m.raw!==null&&ydVal!=null)?fiDelta(_rawN,_ydN,m.lb,m.md||0.5):'';
     return D('class="mtile" style="background:linear-gradient(135deg,'+m.bg+',rgba(255,255,255,.02));border-color:'+m.bg+';display:flex;flex-direction:column;justify-content:space-between"',
       D('style="flex:1"',
@@ -3615,6 +3615,25 @@ function rFitness(){
         D('style="height:100%;background:'+m.c+';width:'+Math.min(Math.max(m.raw!==null&&m.raw!==undefined?m.pct:0,m.raw?0.05:0)*100,100)+'%;border-radius:2px;transition:width .3s"','')));
   }).join('');
   } catch(e){ console.error('fi-grid error',e); }
+  // TEMP DEBUG PANEL
+  var _dbgP=g('fi-debug-panel');
+  if(_dbgP){
+    var _ydS2=null;
+    var _ydStr2=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+    for(var _dfi=FL.length-1;_dfi>=0;_dfi--){if(FL[_dfi].date<=_ydStr2){_ydS2=FL[_dfi];break;}}
+    _dbgP.innerHTML='<div style="font-size:10px;font-family:monospace;color:#0f0;background:#000;padding:8px;border-radius:8px;line-height:1.6">'
+      +'<b>FL snaps:</b> '+FL.length+'<br>'
+      +'<b>ydSnap date:</b> '+(_ydS2?_ydS2.date:'NONE')+'<br>'
+      +'<b>ydSnap.rhr:</b> '+(_ydS2?_ydS2.rhr:'--')+'<br>'
+      +'<b>ydSnap.spo2:</b> '+(_ydS2?_ydS2.spo2:'--')+'<br>'
+      +'<b>P.rhr today:</b> '+P.rhr+'<br>'
+      +'<b>P.spo2 today:</b> '+P.spo2+'<br>'
+      +'<b>P.prevRhr:</b> '+P.prevRhr+'<br>'
+      +'<b>P.prevSpo2:</b> '+P.prevSpo2+'<br>'
+      +'<b>lastSyncAt:</b> '+(P.lastSyncAt?new Date(P.lastSyncAt).toLocaleTimeString():'never')+'<br>'
+      +'<b>_fiToday:</b> '+_fiToday
+      +'</div>';
+  }
   var fe=g('fi-edit'); if(!fe) return;
   fe.innerHTML=FI_FIELDS.map(function(f){return D('style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--b1)"',D('',D('style="font-size:14px;font-weight:500"',f.l)+D('style="font-size:11px;color:var(--dim);margin-top:1px"',f.sub))+D('style="display:flex;align-items:center;gap:7px"','<input type="number" id="fif-'+f.key+'" value="'+P[f.key]+'" min="'+f.mn+'" max="'+f.mx+'" style="width:82px;padding:8px 10px;background:var(--s3);border:1.5px solid var(--b2);border-radius:10px;color:var(--txt);font-size:15px;font-family:var(--mn);font-weight:700;text-align:center;-webkit-appearance:none;outline:none">'+D('style="font-size:11px;color:var(--dim);white-space:nowrap"',f.u)));}).join('');
 }
