@@ -3543,7 +3543,7 @@ function rFitness(){
   var _ydWL=WL.filter(function(w){return w.date===ydStr;});
   var _tdWL=WL.filter(function(w){return w.date===today();});
   var _wtDelta=(_ydWL.length&&_tdWL.length)?Math.round((k2l(_tdWL[_tdWL.length-1].weight)-k2l(_ydWL[_ydWL.length-1].weight))*10)/10:null;
-  return {e:'&#9878;&#65039;',key:'wt',raw:_lw?k2l(_lw.weight):null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',noLog:!_lw,c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
+  return {e:'&#9878;&#65039;',key:'wt',raw:_lw?k2l(_lw.weight):null,lb:false,v:_lw?fD(k2l(_lw.weight),1):'--',u:'lb',l:'Weight',noLog:!_tdWL.length,c:'var(--pur)',bg:'rgba(180,77,255,.12)',pct:1,_wtDelta:_wtDelta};
 })()
   ];
   var ge=g('fi-grid'); if(!ge) return;
@@ -4684,7 +4684,8 @@ function fetchSync(){
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
       var _lwSync=latWt();
-      var snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
+      P.prevRhr=P.rhr||P.prevRhr; P.prevHrv=P.hrv||P.prevHrv; P.prevSpo2=P.spo2||P.prevSpo2; P.prevRr=P.rr||P.prevRr; P.prevSleep=P.sleepLast||P.prevSleep;
+      snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
         standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:_lwSync?k2l(_lwSync.weight):null};
