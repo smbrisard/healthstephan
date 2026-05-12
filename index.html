@@ -3601,6 +3601,7 @@ function rFitness(){
       if(_pm.hasOwnProperty(m.key)&&_pm[m.key]) ydVal=_pm[m.key];
     }
     var _ydN=parseFloat(ydVal),_rawN=parseFloat(m.raw);
+    if(m.key==='rhr'||m.key==='spo2') console.log('DELTA DEBUG',m.key,'raw=',m.raw,'ydVal=',ydVal,'ydSnap=',ydSnap?'exists':'null','prevRhr=',P.prevRhr,'FL.len=',FL.length);
     var delta=(!isNaN(_ydN)&&!isNaN(_rawN)&&m.raw!==null&&ydVal!=null)?fiDelta(_rawN,_ydN,m.lb,m.md||0.5):'';
     return D('class="mtile" style="background:linear-gradient(135deg,'+m.bg+',rgba(255,255,255,.02));border-color:'+m.bg+';display:flex;flex-direction:column;justify-content:space-between"',
       D('style="flex:1"',
