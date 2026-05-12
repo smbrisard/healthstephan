@@ -340,6 +340,7 @@ body { height: 100dvh; }
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
             <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1px">CALORIE DEFICIT</div>
             <div class="badge bp" id="hm-dbdg">On track</div>
+          <div id="hm-debug" style="font-size:10px;color:rgba(255,255,0,0.7);font-family:monospace;margin-top:4px;padding:2px 6px"></div>
           </div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div class="defnum" id="hm-defnum">0</div>
@@ -1483,6 +1484,9 @@ function rHome() {
     } else if(deficit>=0){db.className='badge ba';db.style.cssText='';db.textContent='Under target';
     } else{db.className='badge br';db.style.cssText='';db.textContent='Over limit';}
   }
+  // DEBUG - remove after testing
+  var _dbgEl=g('hm-debug');
+  if(_dbgEl) _dbgEl.textContent='v38 | food:'+Math.round(tCals())+'kcal | total:'+Math.round(eaten)+'kcal | threshold:'+(tCals()<300?'PENDING':'ACTIVE');
   var dbar=g('hm-dbar');
   if(dbar){
     var _hr=new Date().getHours();
@@ -3531,10 +3535,10 @@ function rFitness(){
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
-    {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr,lb:true,v:P.rhr,u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:.6},
-    {e:'&#9889;',key:'hrv',raw:P.hrv,lb:false,v:P.hrv,u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.hrv||0)/100},
-    {e:'&#129441;',key:'spo2',raw:P.spo2,lb:false,v:fD(P.spo2,0)+'%',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.spo2||97)/100},
-    {e:'&#127774;&#65039;',key:'rr',raw:P.rr,lb:true,v:fD(P.rr,0),u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:(P.rr||14)/20},
+    {e:'&#10084;&#65039;',key:'rhr',raw:_fiToday?P.rhr:null,lb:true,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
+    {e:'&#9889;',key:'hrv',raw:_fiToday?P.hrv:null,lb:false,v:P.hrv||'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
+    {e:'&#129441;',key:'spo2',raw:_fiToday?P.spo2:null,lb:false,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
+    {e:'&#127774;&#65039;',key:'rr',raw:_fiToday?P.rr:null,lb:true,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
     {e:'&#128167;',key:'water',raw:calcWaterOz(),lb:false,v:fD(calcWaterOz(),1),u:'fl oz',l:'Water',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:(_fiToday&&P.standHours)?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
@@ -3587,8 +3591,8 @@ function rFitness(){
       D('style="font-size:13px;color:var(--dim);margin-top:4px"',m.u)+
       D('style="font-size:13px;color:var(--dim);margin-top:3px"',m.l)+
       delta+
-      D('style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:8px;overflow:hidden"',
-        D('style="height:100%;background:'+m.c+';width:'+Math.min(m.pct*100,100)+'%;border-radius:2px"','')));
+      D('style="height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden;min-width:100%"',
+        D('style="height:100%;background:'+m.c+';width:'+Math.min(Math.max(m.raw!==null&&m.raw!==undefined?m.pct:0,m.raw?0.05:0)*100,100)+'%;border-radius:2px;transition:width .3s"','')));
   }).join('');
   } catch(e){ console.error('fi-grid error',e); }
   var fe=g('fi-edit'); if(!fe) return;
