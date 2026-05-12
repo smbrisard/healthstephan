@@ -3528,6 +3528,22 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
+  // Populate prevRhr etc from FL if not yet set (catches cold-start)
+  if(!P.prevRhr||!P.prevHrv){
+    var _todayS=today();
+    var _sortedFLp=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    for(var _fpi=0;_fpi<_sortedFLp.length;_fpi++){
+      var _fps=_sortedFLp[_fpi];
+      if(_fps.date<_todayS){
+        if(!P.prevRhr&&_fps.rhr) P.prevRhr=_fps.rhr;
+        if(!P.prevHrv&&_fps.hrv) P.prevHrv=_fps.hrv;
+        if(!P.prevSpo2&&_fps.spo2) P.prevSpo2=_fps.spo2;
+        if(!P.prevRr&&_fps.rr) P.prevRr=_fps.rr;
+        if(!P.prevSleep&&_fps.sleep) P.prevSleep=_fps.sleep;
+        break;
+      }
+    }
+  }
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
@@ -3577,10 +3593,15 @@ function rFitness(){
   }
   var yd_k={dist:'dist',steps:'steps',activeBurned:'activeBurned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
-    var ydVal=ydSnap&&yd_k[m.key]!==undefined?ydSnap[yd_k[m.key]]:null;
-    // Fallback: activeBurned -> burned for old snaps
-    if(ydVal===null&&m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
-    var delta=ydSnap?fiDelta(parseFloat(m.raw),parseFloat(ydVal),m.lb,m.md||0.5):'';
+    var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
+    // null OR undefined - old snaps missing fields
+    if(ydVal===null||ydVal===undefined){
+      if(m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
+      var _pm={rhr:P.prevRhr,hrv:P.prevHrv,spo2:P.prevSpo2,rr:P.prevRr,sleep:P.prevSleep};
+      if(_pm.hasOwnProperty(m.key)&&_pm[m.key]) ydVal=_pm[m.key];
+    }
+    var _ydN=parseFloat(ydVal),_rawN=parseFloat(m.raw);
+    var delta=(!isNaN(_ydN)&&!isNaN(_rawN)&&m.raw!==null&&ydVal!=null)?fiDelta(_rawN,_ydN,m.lb,m.md||0.5):'';
     return D('class="mtile" style="background:linear-gradient(135deg,'+m.bg+',rgba(255,255,255,.02));border-color:'+m.bg+';display:flex;flex-direction:column;justify-content:space-between"',
       D('style="flex:1"',
         D('style="font-size:24px;margin-bottom:8px"',m.e)+
