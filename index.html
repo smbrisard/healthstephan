@@ -4604,6 +4604,18 @@ function fetchSync(){
     // sleepLast is intentionally excluded - always derived from SL log
     var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
     var updated=false;
+    // Capture yesterday's biometrics from FL BEFORE any sync overwrites P values
+    // This is the most reliable source since it reflects the actual finalized daily values
+    var _todayForSnap=today();
+    var _pastSnaps=FL.filter(function(f){return f.date<_todayForSnap;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+    if(_pastSnaps.length>0){
+      var _latestPast=_pastSnaps[0];
+      if(_latestPast.rhr) P.prevRhr=_latestPast.rhr;
+      if(_latestPast.hrv) P.prevHrv=_latestPast.hrv;
+      if(_latestPast.spo2) P.prevSpo2=_latestPast.spo2;
+      if(_latestPast.rr) P.prevRr=_latestPast.rr;
+      if(_latestPast.sleep) P.prevSleep=_latestPast.sleep;
+    }
     if(_syncIsRecent){
       // Update general daily fields (today or yesterday ok)
       _allDailyFields.forEach(function(k){
@@ -4711,7 +4723,6 @@ function fetchSync(){
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
       var _lwSync=latWt();
-      P.prevRhr=P.rhr||P.prevRhr; P.prevHrv=P.hrv||P.prevHrv; P.prevSpo2=P.spo2||P.prevSpo2; P.prevRr=P.rr||P.prevRr; P.prevSleep=P.sleepLast||P.prevSleep;
       snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
         rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
         standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
