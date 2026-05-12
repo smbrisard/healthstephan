@@ -3582,6 +3582,21 @@ function rFitness(){
       }
     }
   }
+  // For biometrics that are daily averages (rhr/hrv/spo2/rr), Apple Watch
+  // finalizes them late in the day. Morning snaps capture stale values.
+  // Find the most recent PAST snap where each biometric differs from today.
+  var _bioSnap={rhr:null,hrv:null,spo2:null,rr:null};
+  var _sortedFLb=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var _todayStrb=today();
+  for(var _fbi=0;_fbi<_sortedFLb.length;_fbi++){
+    var _fbs=_sortedFLb[_fbi];
+    if(_fbs.date>=_todayStrb) continue;
+    if(!_bioSnap.rhr&&_fbs.rhr&&_fbs.rhr!==P.rhr) _bioSnap.rhr=_fbs.rhr;
+    if(!_bioSnap.hrv&&_fbs.hrv&&_fbs.hrv!==P.hrv) _bioSnap.hrv=_fbs.hrv;
+    if(!_bioSnap.spo2&&_fbs.spo2&&Math.abs(_fbs.spo2-P.spo2)>0.05) _bioSnap.spo2=_fbs.spo2;
+    if(!_bioSnap.rr&&_fbs.rr&&_fbs.rr!==P.rr) _bioSnap.rr=_fbs.rr;
+    if(_bioSnap.rhr&&_bioSnap.hrv&&_bioSnap.spo2&&_bioSnap.rr) break;
+  }
   function fiDelta(cur,prev,lowerBetter,minDiff){
     if(prev===null||prev===undefined||isNaN(prev)||isNaN(cur)||cur===null||cur===undefined) return '';
     var diff=cur-prev;
@@ -3597,8 +3612,12 @@ function rFitness(){
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
       if(m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
-      var _pm={rhr:P.prevRhr,hrv:P.prevHrv,spo2:P.prevSpo2,rr:P.prevRr,sleep:P.prevSleep};
-      if(_pm.hasOwnProperty(m.key)&&_pm[m.key]) ydVal=_pm[m.key];
+      // Use biometric-specific snap (skips stale same-value morning snaps)
+      var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr};
+      if(_bsMap.hasOwnProperty(m.key)&&_bsMap[m.key]) ydVal=_bsMap[m.key];
+      // Further fallback to stored prev values
+      else{var _pm={rhr:P.prevRhr,hrv:P.prevHrv,spo2:P.prevSpo2,rr:P.prevRr,sleep:P.prevSleep};
+        if(_pm.hasOwnProperty(m.key)&&_pm[m.key]&&_pm[m.key]!==m.raw) ydVal=_pm[m.key];}
     }
     var _ydN=parseFloat(ydVal),_rawN=parseFloat(m.raw);
     var delta=(!isNaN(_ydN)&&!isNaN(_rawN)&&m.raw!==null&&ydVal!=null)?fiDelta(_rawN,_ydN,m.lb,m.md||0.1):'';
