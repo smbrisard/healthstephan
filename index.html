@@ -679,8 +679,7 @@ body { height: 100dvh; }
         <button onclick="openFiModal()" style="font-size:12px;font-weight:700;color:var(--amb);padding:6px 13px;background:rgba(255,184,48,.1);border-radius:20px;border:.5px solid rgba(255,184,48,.25)">Edit</button>
       </div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
-                <div class="slbl">Today's Metrics</div><div id="fi-rhr-debug"></div>
-      <div class="g2" id="fi-grid" style="margin-bottom:13px"></div>
+                <div class="slbl">Today's Metrics</div><div class="g2" id="fi-grid" style="margin-bottom:13px"></div>
       </div>
     </div>
 
@@ -3568,7 +3567,7 @@ function rFitness(){
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv||'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
-    {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:1,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
+    {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:0.5,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
     {e:'&#128167;',key:'water',raw:calcWaterOz()||null,lb:false,v:calcWaterOz()>0?fD(calcWaterOz(),1):'--',u:'fl oz',l:'Water',noLog:calcWaterOz()===0,c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:(_fiToday&&P.standHours)?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
@@ -3631,9 +3630,12 @@ function rFitness(){
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
       if(m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
-      // Use prevX values saved at sync time (reliable previous biometric)
-      var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:P.prevSleep};
-      if(_bsMap.hasOwnProperty(m.key)&&_bsMap[m.key]!==undefined&&_bsMap[m.key]!==null) ydVal=_bsMap[m.key];
+    }
+    // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
+    var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
+    if(_bsMap.hasOwnProperty(m.key)&&_bsMap[m.key]!==null&&_bsMap[m.key]!==undefined){
+      // Use bioSnap if: ydSnap is missing the field OR ydSnap has same value as today
+      if(ydVal===null||ydVal===undefined||parseFloat(ydVal)===parseFloat(m.raw)) ydVal=_bsMap[m.key];
     }
     var _ydN=parseFloat(ydVal),_rawN=parseFloat(m.raw);
     var delta=(!isNaN(_ydN)&&!isNaN(_rawN)&&m.raw!==null&&ydVal!=null)?fiDelta(_rawN,_ydN,m.lb,m.md||0.1):'';
@@ -3649,20 +3651,7 @@ function rFitness(){
         D('style="height:100%;background:'+m.c+';width:'+Math.min(Math.max(m.raw!==null&&m.raw!==undefined?m.pct:0,m.raw?0.05:0)*100,100)+'%;border-radius:2px;transition:width .3s"','')));
   }).join('');
   } catch(e){ console.error('fi-grid error',e); }
-  // TEMP: RHR/RR debug
-  var _dbgFi=g('fi-rhr-debug');
-  if(_dbgFi){
-    var _dbgYdStr2=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
-    var _dbgYd=null;for(var _dbi=FL.length-1;_dbi>=0;_dbi--){if(FL[_dbi].date<today()){_dbgYd=FL[_dbi];break;}}
-    _dbgFi.innerHTML='<div style="font-size:9px;font-family:monospace;color:#0f0;background:#000;padding:6px;border-radius:6px;margin:8px 16px;line-height:1.7">'
-      +'P.rhr='+P.rhr+' P.rr='+P.rr+'<br>'
-      +'prevRhr='+P.prevRhr+' prevRr='+P.prevRr+'<br>'
-      +'bioSnap.rhr='+_bioSnap.rhr+' bioSnap.rr='+_bioSnap.rr+'<br>'
-      +'ydSnap('+(_dbgYd?_dbgYd.date:'null')+').rhr='+(_dbgYd?_dbgYd.rhr:'--')+'<br>'
-      +'ydSnap.rr='+(_dbgYd?_dbgYd.rr:'--')+'<br>'
-      +'FL.len='+FL.length
-      +'</div>';
-  }
+
   var fe=g('fi-edit'); if(!fe) return;
   fe.innerHTML=FI_FIELDS.map(function(f){return D('style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--b1)"',D('',D('style="font-size:14px;font-weight:500"',f.l)+D('style="font-size:11px;color:var(--dim);margin-top:1px"',f.sub))+D('style="display:flex;align-items:center;gap:7px"','<input type="number" id="fif-'+f.key+'" value="'+P[f.key]+'" min="'+f.mn+'" max="'+f.mx+'" style="width:82px;padding:8px 10px;background:var(--s3);border:1.5px solid var(--b2);border-radius:10px;color:var(--txt);font-size:15px;font-family:var(--mn);font-weight:700;text-align:center;-webkit-appearance:none;outline:none">'+D('style="font-size:11px;color:var(--dim);white-space:nowrap"',f.u)));}).join('');
 }
