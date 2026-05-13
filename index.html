@@ -1571,6 +1571,16 @@ function rHome() {
   })();
   var _ydSnap=null;
   for(var _fi=FL.length-1;_fi>=0;_fi--){if(FL[_fi].date===_ydStr){_ydSnap=FL[_fi];break;}}
+  // Fallback: use most recent past snap within 3 days
+  if(!_ydSnap&&FL.length>0){
+    var _hmSorted=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    for(var _hfi=0;_hfi<_hmSorted.length;_hfi++){
+      if(_hmSorted[_hfi].date<today()){
+        var _hmDD=(new Date(today()+'T12:00')-new Date(_hmSorted[_hfi].date+'T12:00'))/86400000;
+        if(_hmDD<=3){_ydSnap=_hmSorted[_hfi];break;}
+      }
+    }
+  }
   function _hmD(id2,cur,prev,lb,unit){
     var el2=g(id2); if(!el2) return;
     if(prev===null||prev===undefined){el2.innerHTML='';return;}
@@ -1586,8 +1596,8 @@ function rHome() {
     _hmD('hm-hrv-yd',P.hrv||0,_hmHrvYd,false,'ms');
     var _hmSlYd=(_ydSnap.sleep>0&&_ydSnap.sleep!==P.sleepLast)?_ydSnap.sleep:(P.prevSleep&&P.prevSleep!==P.sleepLast?P.prevSleep:null);
     _hmD('hm-sleep-yd',P.sleepLast||0,_hmSlYd,false,'h');
-    var _hmBurnedToday=P.totalBurned||P.burned||0;
-    var _hmBurnedYd=_ydSnap.burned||((_ydSnap.activeBurned||0)+0)||null;
+    var _hmBurnedToday=P.burned||0;
+    var _hmBurnedYd=(_ydSnap.activeBurned||_ydSnap.burned)||null;
     _hmD('hm-burned-yd',_hmBurnedToday,_hmBurnedYd,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist>0?_ydSnap.dist:null,false,' mi');
     var _hmRhrYd=(_ydSnap.rhr>0&&_ydSnap.rhr!==P.rhr)?_ydSnap.rhr:(P.prevRhr&&P.prevRhr!==P.rhr?P.prevRhr:null);
