@@ -1582,11 +1582,14 @@ function rHome() {
   }
   if(_ydSnap){
     _hmD('hm-steps-yd',Math.round(P.stepsToday||0),Math.round(_ydSnap.steps||0),false,'');
-    _hmD('hm-hrv-yd',P.hrv||0,_ydSnap.hrv,false,'ms');
-    _hmD('hm-sleep-yd',P.sleepLast||0,(_ydSnap.sleep>0?_ydSnap.sleep:null),false,'h');
+    var _hmHrvYd=(_ydSnap.hrv&&_ydSnap.hrv!==P.hrv)?_ydSnap.hrv:(P.prevHrv&&P.prevHrv!==P.hrv?P.prevHrv:null);
+    _hmD('hm-hrv-yd',P.hrv||0,_hmHrvYd,false,'ms');
+    var _hmSlYd=(_ydSnap.sleep>0&&_ydSnap.sleep!==P.sleepLast)?_ydSnap.sleep:(P.prevSleep&&P.prevSleep!==P.sleepLast?P.prevSleep:null);
+    _hmD('hm-sleep-yd',P.sleepLast||0,_hmSlYd,false,'h');
     _hmD('hm-burned-yd',P.burned||0,_ydSnap.burned,false,' kcal');
     _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist>0?_ydSnap.dist:null,false,' mi');
-    _hmD('hm-rhr-yd',P.rhr||0,_ydSnap.rhr>0?_ydSnap.rhr:null,true,' bpm');
+    var _hmRhrYd=(_ydSnap.rhr>0&&_ydSnap.rhr!==P.rhr)?_ydSnap.rhr:(P.prevRhr&&P.prevRhr!==P.rhr?P.prevRhr:null);
+    _hmD('hm-rhr-yd',P.rhr||0,_hmRhrYd,true,' bpm');
     _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
     _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
   } else {
