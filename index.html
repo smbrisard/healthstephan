@@ -1604,15 +1604,21 @@ function rHome() {
     if(_ydSnap&&_ydSnap.hrv&&_ydSnap.hrv!==P.hrv) _hmHrvRef=_ydSnap.hrv;
     else{for(var _hmfih=0;_hmfih<_hmFLs.length;_hmfih++){if(_hmFLs[_hmfih].date<today()&&_hmFLs[_hmfih].hrv&&_hmFLs[_hmfih].hrv!==P.hrv){_hmHrvRef=_hmFLs[_hmfih].hrv;break;}}}
     _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRef,false,'ms');
-    // Only use ydSnap.sleep or prevSleep if they represent real sleep (>=3h)
-    var _ydSlVal=(_ydSnap.sleep>=3&&_ydSnap.sleep!==P.sleepLast)?_ydSnap.sleep:null;
-    if(!_ydSlVal){
-      // Search FL for most recent past snap with valid sleep != today's
-      var _hmFLsl=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-      for(var _sli=0;_sli<_hmFLsl.length;_sli++){
-        var _fs=_hmFLsl[_sli];
-        if(_fs.date<today()&&(_fs.sleep||0)>=3&&_fs.sleep!==P.sleepLast){_ydSlVal=_fs.sleep;break;}
-      }
+    // Use SL log for sleep comparison - find most recent valid entry != today's sleep
+    var _ydSlVal=null;
+    var _slSorted=SL.slice().sort(function(a,b){
+      if(b.date!==a.date) return b.date.localeCompare(a.date);
+      return (b.hours||0)-(a.hours||0);
+    });
+    // Skip today's winning entry (P.sleepLast), find the next valid one
+    var _skipHours=P.sleepLast;
+    var _skipDate=today();
+    for(var _sli=0;_sli<_slSorted.length;_sli++){
+      var _sle=_slSorted[_sli];
+      if((_sle.hours||0)<3) continue;
+      // Skip the entry that IS today's current sleep
+      if(Math.abs((_sle.hours||0)-_skipHours)<0.1&&_sle.date>=_skipDate) continue;
+      _ydSlVal=_sle.hours; break;
     }
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSlVal,false,'h');
     var _hmBurnedToday=P.burned||0;
