@@ -1604,22 +1604,16 @@ function rHome() {
     if(_ydSnap&&_ydSnap.hrv&&_ydSnap.hrv!==P.hrv) _hmHrvRef=_ydSnap.hrv;
     else{for(var _hmfih=0;_hmfih<_hmFLs.length;_hmfih++){if(_hmFLs[_hmfih].date<today()&&_hmFLs[_hmfih].hrv&&_hmFLs[_hmfih].hrv!==P.hrv){_hmHrvRef=_hmFLs[_hmfih].hrv;break;}}}
     _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRef,false,'ms');
-    // Use SL log for sleep comparison - find most recent valid entry != today's sleep
+    // Sleep comparison: find the most recent valid SL entry BEFORE today
     var _ydSlVal=null;
-    var _slSorted=SL.slice().sort(function(a,b){
-      if(b.date!==a.date) return b.date.localeCompare(a.date);
-      return (b.hours||0)-(a.hours||0);
-    });
-    // Skip today's winning entry (P.sleepLast), find the next valid one
-    var _skipHours=P.sleepLast;
-    var _skipDate=today();
-    for(var _sli=0;_sli<_slSorted.length;_sli++){
-      var _sle=_slSorted[_sli];
-      if((_sle.hours||0)<3) continue;
-      // Skip the entry that IS today's current sleep
-      if(Math.abs((_sle.hours||0)-_skipHours)<0.1&&_sle.date>=_skipDate) continue;
-      _ydSlVal=_sle.hours; break;
-    }
+    var _todaySl=today();
+    // Get all entries strictly before today, sorted by date desc then hours desc
+    var _prevSl=SL.filter(function(s){return s.date<_todaySl&&(s.hours||0)>=3;})
+      .sort(function(a,b){
+        if(b.date!==a.date) return b.date.localeCompare(a.date);
+        return (b.hours||0)-(a.hours||0);
+      });
+    if(_prevSl.length) _ydSlVal=_prevSl[0].hours;
     _hmD('hm-sleep-yd',P.sleepLast||0,_ydSlVal,false,'h');
     var _hmBurnedToday=P.burned||0;
     var _hmBurnedYd=(_ydSnap.activeBurned||_ydSnap.burned)||null;
