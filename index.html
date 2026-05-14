@@ -4275,6 +4275,13 @@ function histNav(dir){
 function launchApp(){
   // Clean up any duplicate entries from previous bugs
   dedupML(); dedupDL();
+  // Remove auto-synced sleep entries under 3h (naps from watch)
+  var _slBefore=SL.length;
+  SL=SL.filter(function(s){
+    if((s.autoSynced===true)&&(s.hours||0)<3) return false;
+    return true;
+  });
+  if(SL.length!==_slBefore){save();syncSleepToProfile();}
   // Backfill micronutrients from FOODS DB for existing entries
   migrateMLMicronutrients();
   // Fix any non-alcoholic drinks that incorrectly have u>0
