@@ -396,7 +396,7 @@ body { height: 100dvh; }
           </div>          <div class="mtile" style="background:linear-gradient(135deg,rgba(77,166,255,.14),rgba(77,166,255,.03));border-color:rgba(77,166,255,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128564;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--blu)" id="hm-sleep">7.2</div>
-            <div style="font-size:11px;color:var(--dim);margin-top:2px">hrs sleep</div>
+            <div id="hm-sleep-lbl" style="font-size:11px;color:var(--dim);margin-top:2px">hrs sleep</div>
             <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-sleep-yd"></div>
           </div>
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,107,107,.14),rgba(255,107,107,.03));border-color:rgba(255,107,107,.18)">
@@ -1648,9 +1648,15 @@ function rHome() {
   var lsl=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   // Use P.sleepLast (from sync) as primary, SL entry as fallback
   var _ydStrS=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
-  var _lslRecent=lsl&&(lsl.date===today()||lsl.date===_ydStrS);
-  var _sleepVal=P.sleepLast>0?P.sleepLast:(_lslRecent?lsl.hours:0);
-  set('hm-sleep',_sleepVal>0?hHM(_sleepVal):'--');
+  // P.sleepLast is set by syncSleepToProfile which validates date
+  // Do NOT fall back to lsl.hours directly - that bypasses date validation
+  var _sleepVal=P.sleepLast||0;
+  set('hm-sleep',_sleepVal>=3?hHM(_sleepVal):'--');
+  // Label: 'last night' if sleep is from yesterday, 'hrs sleep' if today
+  var _sleepLbl=g('hm-sleep-lbl');
+  if(_sleepLbl){
+    _sleepLbl.textContent=_sleepVal>=3?'hrs sleep':'';
+  }
 
   // Meals
   var meals=tMeals(), mEl=g('hm-meals');
@@ -3151,10 +3157,11 @@ function syncSleepToProfile(){
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
   } else {
-    // Sleep is older than yesterday  clear it so -- shows
+    // Sleep is older than yesterday - clear it so -- shows
     P.sleepLast=0;
     P.sleepBedtime='';
     P.sleepWake='';
+    save(); // Persist the cleared sleep so it doesn't restore on next load
   }
   // NOTE: do NOT touch P.lastSyncDate - that's controlled by fetchSync only
 }
@@ -4281,7 +4288,8 @@ function launchApp(){
     if((s.autoSynced===true)&&(s.hours||0)<3) return false;
     return true;
   });
-  if(SL.length!==_slBefore){save();syncSleepToProfile();}
+  if(SL.length!==_slBefore){save();}
+  syncSleepToProfile(); // Always re-evaluate sleep on launch
   // Backfill micronutrients from FOODS DB for existing entries
   migrateMLMicronutrients();
   // Fix any non-alcoholic drinks that incorrectly have u>0
