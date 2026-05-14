@@ -4786,7 +4786,7 @@ function fetchSync(){
       // Only preserve existing dist if today's sync provided real data (strictly today)
       var _finalDist=_dataIsStrictlyToday?Math.max(_existingDist,_syncDist):0;
       // Also update yesterday's FL snap with sleep if sleepDate is yesterday
-      if(d.sleepDate&&d.sleepDate!==today()&&d.sleepLast>0){
+      if(d.sleepDate&&d.sleepDate!==today()&&d.sleepLast>=3){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
