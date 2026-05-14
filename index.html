@@ -3139,25 +3139,30 @@ function syncSleepToProfile(){
   // Sync P.sleepLast from most recent SL entry (manual entries take priority)
   if(!SL.length) return;
   // Sort by date desc, prefer manual entries (autoSynced===false) when dates tie
-  var sorted=SL.slice().sort(function(a,b){
-    if(b.date!==a.date) return b.date.localeCompare(a.date);
-    // Same date: prefer manual over auto-synced
-    var aManual=a.autoSynced===false||a.autoSynced===undefined;
-    var bManual=b.autoSynced===false||b.autoSynced===undefined;
-    if(aManual&&!bManual) return -1;
-    if(!aManual&&bManual) return 1;
-    return 0;
+  // Get today and yesterday strings
+  var _td2=today();
+  var _yd2=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  // Filter to only valid recent entries (today or yesterday, >=3h)
+  var _validEntries=SL.filter(function(s){
+    return (s.date===_td2||s.date===_yd2)&&(s.hours||0)>=3;
   });
-  var latest=sorted[0];
-  var td=today();
-  var yd=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  // Among valid entries, pick the one with the most hours (true main sleep)
+  var latest=_validEntries.length
+    ? _validEntries.reduce(function(best,s){return (s.hours||0)>(best.hours||0)?s:best;}, _validEntries[0])
+    : null;
+  // Fallback: any entry sorted by date desc
+  if(!latest){
+    var sorted=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    latest=sorted[0]||null;
+  }
+  var td=_td2; var yd=_yd2;
   // Only show sleep if it's from today or last night (yesterday)
-  if((latest.date===td||latest.date===yd)&&(latest.hours||0)>=3){
+  if(latest&&(latest.date===td||latest.date===yd)&&(latest.hours||0)>=3){
     P.sleepLast=latest.hours;
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
   } else {
-    // Sleep is older than yesterday - clear it so -- shows
+    // No valid recent sleep - clear so -- shows
     P.sleepLast=0;
     P.sleepBedtime='';
     P.sleepWake='';
