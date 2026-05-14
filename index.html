@@ -1471,7 +1471,13 @@ function rHome() {
   var _savedAv=localStorage.getItem('hs_avatar');
   if(_savedAv){updateAvatar(_savedAv);}else{var _avEl=g('hm-av');if(_avEl){_avEl.textContent=init;_avEl.style.background='linear-gradient(135deg,var(--red),#880033)';}}
 
-  var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+(P.totalBurned||P.burned), pct=Math.min(eaten/P.calTarget,1);
+  // Only use totalBurned if it's a valid today value (not yesterday's cached)
+  var _todayBurned=P.burned||0;
+  // totalBurned is reliable only when restingEnergy exists (watch has computed it)
+  // Check if lastSyncAt is today before trusting totalBurned
+  var _syncIsToday=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
+  var _burnedForDeficit=(_syncIsToday&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned;
+  var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+_burnedForDeficit, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
   set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.totalBurned||P.burned)); set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
@@ -1518,7 +1524,9 @@ function rHome() {
   var _isToday=_dataDateOk&&(!P.lastSyncAt||_syncAgeHrs<20);
   set('hm-steps',_isToday?fN(Math.round(P.stepsToday||0)):'--');
   // Show totalBurned if synced today, restingEnergy as baseline if not
-  var _burnedVal=_isToday?(P.totalBurned||P.burned||0):(P.restingEnergy||0);
+  // Only use totalBurned if today's sync included restingEnergy (otherwise it's yesterday's cache)
+  var _syncIsToday2=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
+  var _burnedVal=(_isToday&&_syncIsToday2&&P.totalBurned&&P.restingEnergy)?(P.totalBurned):(P.burned||0);
   set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
@@ -3138,7 +3146,7 @@ function syncSleepToProfile(){
   var td=today();
   var yd=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   // Only show sleep if it's from today or last night (yesterday)
-  if(latest.date===td||latest.date===yd){
+  if((latest.date===td||latest.date===yd)&&(latest.hours||0)>=3){
     P.sleepLast=latest.hours;
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
@@ -4716,7 +4724,7 @@ function fetchSync(){
       }
     }
     // Auto-create sleep log entry from sync
-    if(d.sleepLast&&parseFloat(d.sleepLast)>0){
+    if(d.sleepLast&&parseFloat(d.sleepLast)>=3){
       var slDt=d.sleepDate||today();
       var slBed=d.sleepBedtime||'23:00';
       var slWake=d.sleepWake||'07:00';
