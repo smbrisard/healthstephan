@@ -3155,9 +3155,12 @@ function syncSleepToProfile(){
   var _validEntries=SL.filter(function(s){
     return (s.date===_td2||s.date===_yd2)&&(s.hours||0)>=3;
   });
-  // Among valid entries, pick the one with the most hours (true main sleep)
+  // Pick most recent date first; if same date, pick longest hours
   var latest=_validEntries.length
-    ? _validEntries.reduce(function(best,s){return (s.hours||0)>(best.hours||0)?s:best;}, _validEntries[0])
+    ? _validEntries.sort(function(a,b){
+        if(b.date!==a.date) return b.date.localeCompare(a.date);
+        return (b.hours||0)-(a.hours||0);
+      })[0]
     : null;
   // Fallback: any entry sorted by date desc
   if(!latest){
