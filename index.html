@@ -1635,9 +1635,25 @@ function rHome() {
     _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
     _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
   } else {
-    ['hm-steps-yd','hm-hrv-yd','hm-sleep-yd','hm-burned-yd'].forEach(function(id){
+    // _ydSnap null - only clear snap-dependent deltas, not ones with own sources
+    ['hm-steps-yd','hm-burned-yd'].forEach(function(id){
       var e=g(id); if(e) e.innerHTML='';
     });
+    // Still compute HRV, RHR, sleep deltas using FL scan
+    var _hmFLsYd=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var _hmHrvRefYd=null,_hmRhrRefYd=null;
+    for(var _hyi=0;_hyi<_hmFLsYd.length;_hyi++){
+      var _hys=_hmFLsYd[_hyi];
+      if(_hys.date>=today()) continue;
+      if(!_hmHrvRefYd&&_hys.hrv&&_hys.hrv!==P.hrv) _hmHrvRefYd=_hys.hrv;
+      if(!_hmRhrRefYd&&_hys.rhr&&_hys.rhr!==P.rhr) _hmRhrRefYd=_hys.rhr;
+      if(_hmHrvRefYd&&_hmRhrRefYd) break;
+    }
+    _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRefYd,false,'ms');
+    _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRefYd,true,' bpm');
+    var _prevSlYd=SL.filter(function(s){return s.date<today()&&(s.hours||0)>=3;})
+      .sort(function(a,b){if(b.date!==a.date)return b.date.localeCompare(a.date);return (b.hours||0)-(a.hours||0);})[0];
+    _hmD('hm-sleep-yd',P.sleepLast||0,_prevSlYd?_prevSlYd.hours:null,false,'h');
   }
   // Weight vs yesterday (from WL entries)
   var _ydWEl=g('hm-wt-yd');
@@ -3742,7 +3758,7 @@ function saveFiEdit(){
   });
   FL=FL.filter(function(fi){return fi.date!==fiDt;});
   FL.push(snap);
-  save(); closeM('fi-m'); rFitness(); rHome(); rHealth(); toast('Metrics updated!');
+  save(); closeM('fi-m'); syncSleepToProfile(); rFitness(); rHome(); rHealth(); toast('Metrics updated!');
 }
 
 // ═══ HEALTH ═══
