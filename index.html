@@ -1204,7 +1204,7 @@ var P = (_data && _data.profile) ? _data.profile : {
   protein:150, carbs:220, fat:70, fiber:30, sugar:50, sodium:2300, potassium:4700, calcium:1300,
   steps:10000, water:3.0,
   systolic:118, diastolic:76, hrv:86, spo2:97, rr:14, rhr:58,
-  burned:389, stepsToday:8432, waterToday:1.8, sleepLast:7.2,
+  burned:389, stepsToday:8432, waterToday:1.8, sleepLast:0,
   streak:0, mealsLogged:0, isOnboarded:false
 };
 
@@ -1476,7 +1476,8 @@ function rHome() {
   // totalBurned is reliable only when restingEnergy exists (watch has computed it)
   // Check if lastSyncAt is today before trusting totalBurned
   var _syncIsToday=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
-  var _burnedForDeficit=Math.round((_syncIsToday&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned);
+  var _lastSyncTodayDef=P.lastSyncDate&&P.lastSyncDate===todayLocal();
+  var _burnedForDeficit=Math.round((_syncIsToday&&_lastSyncTodayDef&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned);
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+_burnedForDeficit, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
   set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(Math.round(P.totalBurned||P.burned))); set('eq-net',fN(Math.abs(deficit)));
@@ -1526,7 +1527,9 @@ function rHome() {
   // Show totalBurned if synced today, restingEnergy as baseline if not
   // Only use totalBurned if today's sync included restingEnergy (otherwise it's yesterday's cache)
   var _syncIsToday2=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
-  var _burnedVal=(_isToday&&_syncIsToday2&&P.totalBurned&&P.restingEnergy)?(P.totalBurned):(P.burned||0);
+  // Only show totalBurned if today's sync included restingEnergy (not yesterday's cache)
+  var _lastSyncToday=P.lastSyncDate&&P.lastSyncDate===todayLocal();
+  var _burnedVal=(_isToday&&_syncIsToday2&&_lastSyncToday&&P.totalBurned&&P.restingEnergy)?(P.totalBurned):(P.burned||0);
   set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
@@ -3193,6 +3196,7 @@ function syncSleepToProfile(){
     P.sleepLast=latest.hours;
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
+    save();
   } else {
     // No valid recent sleep - clear so -- shows
     P.sleepLast=0;
@@ -4743,7 +4747,7 @@ function fetchSync(){
         // Yesterday's data - zero ALL fields that reset at midnight
         P.exerciseMins=0; P.standHours=0;
         P.stepsToday=0; P.distMiles=0; P.walkMiles=0;
-        P.burned=0; P.totalBurned=P.restingEnergy||0; // keep resting energy only
+        P.burned=0; P.totalBurned=0; P.restingEnergy=null; // clear all - fresh day
       }
     } else {
       // Stale data - zero everything
