@@ -519,7 +519,7 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('breakfast',this)">Breakfast</div>
           <div class="pill" onclick="setFCat('snacks',this)">Snacks</div>
           <div class="pill" onclick="setFCat('supplements',this)">Supplements</div>
-          <div class="pill" onclick="setFCat('starbucks',this)">Starbucks</div>
+          
           <div class="pill" onclick="setFCat('sauces',this)">🫙 Sauces</div>
           <div class="pill" onclick="setFCat('meals',this)">🍽 Meals</div>
           <div class="pill" onclick="setFCat('fastfood',this)">🍔 Fast Food</div>
@@ -663,6 +663,7 @@ body { height: 100dvh; }
           <div class="pill on" onclick="drCat('all',this)">All</div>
           <div class="pill" onclick="drCat('my',this)">&#11088; My Drinks</div>
           <div class="pill" onclick="drCat('cocktail',this)">&#127864; Cocktails</div>
+          <div class="pill" onclick="drCat('starbucks',this)">&#9749; Starbucks</div>
           <div class="pill" onclick="drCat('beer',this)">Beer</div>
           <div class="pill" onclick="drCat('wine',this)">Wine</div>
           <div class="pill" onclick="drCat('spirits',this)">Spirits</div>
@@ -1708,7 +1709,7 @@ function rHome() {
 }
 
 // ═══ FOOD DATABASE ═══
-var FCATS=[{id:'all',l:'All'},{id:'eggs',l:'Eggs'},{id:'meat',l:'Meat & Fish'},{id:'dairy',l:'Dairy'},{id:'grains',l:'Grains'},{id:'veg',l:'Vegetables'},{id:'fruit',l:'Fruit'},{id:'breakfast',l:'Breakfast'},{id:'snacks',l:'Snacks'},{id:'starbucks',l:'Starbucks'},{id:'supplements',l:'Supplements'},{id:'fastfood',l:'Fast Food'},{id:'sauces',l:'Sauces'}];
+var FCATS=[{id:'all',l:'All'},{id:'eggs',l:'Eggs'},{id:'meat',l:'Meat & Fish'},{id:'dairy',l:'Dairy'},{id:'grains',l:'Grains'},{id:'veg',l:'Vegetables'},{id:'fruit',l:'Fruit'},{id:'breakfast',l:'Breakfast'},{id:'snacks',l:'Snacks'},{id:'supplements',l:'Supplements'},{id:'fastfood',l:'Fast Food'},{id:'sauces',l:'Sauces'}];
 
 
 var FOOD_EMOJI_MAP = [
@@ -3464,7 +3465,9 @@ function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
   var _myDrs=loadMyDrinks();
   var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
-  var _builtInDr=(dCat==='all')?DRINKS:(dCat==='my'?[]:DRINKS.filter(function(d){return d.cat===dCat;}));
+  var _builtInDr=(dCat==='all')?DRINKS:(dCat==='my'?[]:(dCat==='starbucks'?
+    FOODS.filter(function(f){return f.cat==='starbucks';}).map(function(f){return {n:f.n,e:f.e,c:f.c,cat:'starbucks',_isFood:true};}):
+    DRINKS.filter(function(d){return d.cat===dCat;})));
   var list=_myDrInCat.concat(_builtInDr);
   ge.innerHTML=list.map(function(d,i){
     var _isDrC=d._custom||false;
