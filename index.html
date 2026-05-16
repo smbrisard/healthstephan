@@ -382,6 +382,7 @@ body { height: 100dvh; }
           </div>
           <div style="display:none"><div id="hm-cal-lbl"></div><div id="hm-cal-bar"></div></div>
         </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin:14px 0 10px">QUICK STATS</div>
         <div class="g2" style="margin-bottom:14px">
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128205;</div>
@@ -1599,7 +1600,7 @@ function rHome() {
     for(var _hfi=0;_hfi<_hmSorted.length;_hfi++){
       if(_hmSorted[_hfi].date<today()){
         var _hmDD=(new Date(today()+'T12:00')-new Date(_hmSorted[_hfi].date+'T12:00'))/86400000;
-        if(_hmDD<=3){_ydSnap=_hmSorted[_hfi];break;}
+        if(_hmDD<=7){_ydSnap=_hmSorted[_hfi];break;}
       }
     }
   }
@@ -4343,8 +4344,9 @@ function launchApp(){
   // Remove SL entries with exactly 7.2h that have no explicit manual flag (old default artifact)
   var _slPre=SL.length;
   SL=SL.filter(function(s){
-    // Keep if: manual (autoSynced===false) OR hours not equal to 7.2
-    return s.autoSynced===false||Math.abs((s.hours||0)-7.2)>0.05;
+    // Remove ANY entry with exactly 7.2h - this is always the old default artifact
+    // Real sleep is never exactly 7.2h to one decimal place
+    return Math.abs((s.hours||0)-7.2)>0.05;
   });
   if(SL.length!==_slPre) save();
   // Clean up any duplicate entries from previous bugs
