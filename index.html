@@ -1476,10 +1476,10 @@ function rHome() {
   // totalBurned is reliable only when restingEnergy exists (watch has computed it)
   // Check if lastSyncAt is today before trusting totalBurned
   var _syncIsToday=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
-  var _burnedForDeficit=(_syncIsToday&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned;
+  var _burnedForDeficit=Math.round((_syncIsToday&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned);
   var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+_burnedForDeficit, pct=Math.min(eaten/P.calTarget,1);
   set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
-  set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(P.totalBurned||P.burned)); set('eq-net',fN(Math.abs(deficit)));
+  set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(Math.round(P.totalBurned||P.burned))); set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
   if(db){
     if(tCals()<300){
@@ -1942,8 +1942,8 @@ var FOODS=[
   {cat:'grains',n:'White Bread 1 slice',e:'&#129366;',p:'1 slice 35g',c:82,pr:2.7,cb:15,f:1,fi:0.6,su:1.2,as:0.5,sf:0.2,na:142,ch:0,po:38,ca:32,ir:0.8,vc:0,vd:0,va:0},
   {cat:'grains',n:'Wholemeal Bread 1 slice',e:'&#129366;',p:'1 slice 38g',c:85,pr:4,cb:14,f:1.1,fi:2.5,su:0.9,as:0,sf:0.2,na:148,ch:0,po:82,ca:32,ir:1.0,vc:0,vd:0,va:0},
   {cat:'grains',n:'Sourdough 1 slice',e:'&#129366;',p:'1 thick slice 55g',c:135,pr:5,cb:26,f:0.9,fi:1.5,su:0.8,as:0,sf:0.2,na:220,ch:0,po:72,ca:16,ir:1.4,vc:0,vd:0,va:0},
-  {cat:'grains',n:'Potato medium 150g',e:'&#129365;',p:'1 medium boiled',c:116,pr:3,cb:26,f:0.1,fi:2.4,su:1.4,as:0,sf:0,na:8,ch:0,po:534,ca:14,ir:0.8,vc:20,vd:0,va:0},
-  {cat:'grains',n:'Sweet Potato 150g',e:'&#129365;',p:'150g baked',c:130,pr:2,cb:30,f:0.1,fi:3.8,su:6,as:0,sf:0,na:55,ch:0,po:438,ca:38,ir:0.8,vc:20,vd:0,va:960},
+  {cat:'grains',n:'Potato medium 150g',e:'&#129364;',p:'1 medium boiled',c:116,pr:3,cb:26,f:0.1,fi:2.4,su:1.4,as:0,sf:0,na:8,ch:0,po:534,ca:14,ir:0.8,vc:20,vd:0,va:0},
+  {cat:'grains',n:'Sweet Potato 150g',e:'&#129364;',p:'150g baked',c:130,pr:2,cb:30,f:0.1,fi:3.8,su:6,as:0,sf:0,na:55,ch:0,po:438,ca:38,ir:0.8,vc:20,vd:0,va:960},
   // VEG
   {cat:'veg',n:'Broccoli 100g',e:'&#129382;',p:'100g steamed',c:34,pr:2.8,cb:6.6,f:0.4,fi:2.6,su:1.7,as:0,sf:0.1,na:33,ch:0,po:316,ca:47,ir:0.7,vc:89,vd:0,va:62},
   {cat:'veg',n:'Spinach 100g',e:'&#129382;',p:'100g raw',c:23,pr:2.9,cb:3.6,f:0.4,fi:2.2,su:0.4,as:0,sf:0.1,na:79,ch:0,po:558,ca:99,ir:2.7,vc:28,vd:0,va:469},
@@ -2327,7 +2327,12 @@ function _renderRecipeIngs(){
         (isDB?(ing.e||'&#127869;'):'')+
         '</span>'+
         (isDB
-          ? '<div style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">'+ing.name+'<div style="font-size:10px;color:var(--dim)">'+ing.serving+'</div></div>'
+          ? '<div style="flex:1;font-size:13px;font-weight:600;color:var(--txt)">'+ing.name+'<div style="font-size:10px;color:var(--dim)">'+ing.serving+'</div></div>'+
+              '<div style="display:flex;align-items:center;gap:4px">'+
+              '<button onclick="_rcpAdjQty('+i+',-0.5)" style="width:22px;height:22px;border-radius:50%;background:var(--s3);border:none;color:var(--txt);font-size:14px;cursor:pointer;touch-action:manipulation">-</button>'+
+              '<span id="rcp-qty-'+i+'" style="font-size:12px;font-weight:700;min-width:24px;text-align:center;color:var(--txt)">'+(ing.qty||1)+'x</span>'+
+              '<button onclick="_rcpAdjQty('+i+',0.5)" style="width:22px;height:22px;border-radius:50%;background:var(--s3);border:none;color:var(--txt);font-size:14px;cursor:pointer;touch-action:manipulation">+</button>'+
+              '</div>'
           : '<div style="display:flex;gap:6px;flex:1;align-items:center">'+
               '<input class="fld" placeholder="🍽" value="'+(ing.e&&ing.e!=='&#127869;'?ing.e:'')+
               '" oninput="_recipeIngs['+i+'].e=this.value.trim()||\u0027&#127869;\u0027" '+
@@ -2420,6 +2425,13 @@ function _doSaveRecipeIng(i,cat){
   toast('✓ '+ing.name+' saved to My Foods!');
 }
 
+function _rcpAdjQty(i,delta){
+  if(!_recipeIngs[i]) return;
+  _recipeIngs[i].qty=Math.max(0.5,Math.round((((_recipeIngs[i].qty||1)+delta)*2))/2);
+  var el=g('rcp-qty-'+i);
+  if(el) el.textContent=_recipeIngs[i].qty+'x';
+  _updateRecipeTotals();
+}
 function _updateRecipeTotals(){
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
   var totals={cals:0,protein:0,carbs:0,fat:0,fiber:0,sugar:0,sodium:0,potassium:0,calcium:0,iron:0,satFat:0,cholest:0};
@@ -2477,7 +2489,7 @@ function saveRecipe(){
   var per=_updateRecipeTotals();
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
   ML.push({id:Date.now(),date:foodChartDate||today(),name:name,emoji:'&#128216;',
-    type:mealTab.toLowerCase(),
+    type:(typeof mealTab!=='undefined'&&mealTab?mealTab.toLowerCase():'lunch'),
     cals:Math.round(per.cals),protein:per.protein,carbs:per.carbs,fat:per.fat,
     fiber:per.fiber||0,sugar:per.sugar||0,satFat:per.satFat||0,sodium:per.sodium||0,
     cholest:per.cholest||0,potassium:per.potassium||0,calcium:per.calcium||0,iron:per.iron||0,
@@ -2507,6 +2519,18 @@ function saveRecipeToDatabase(){
   if(ei>=0){recipes[ei]=entry;toast('✓ Recipe updated!');}
   else{recipes.push(entry);toast('✓ Recipe saved to database!');}
   saveRecipes(recipes);
+  // Auto-save manual ingredients to custom foods
+  var _myF=loadMyFoods();
+  _recipeIngs.forEach(function(ing){
+    if(ing._manual&&ing.name&&(ing.cals||0)>0){
+      if(!_myF.find(function(f){return f.n.toLowerCase()===ing.name.toLowerCase();})){
+        _myF.push({n:ing.name,e:ing.e||'&#127869;',p:'1 serving',
+          c:Math.round(ing.cals),pr:ing.protein||0,cb:ing.carbs||0,f:ing.fat||0,
+          fi:ing.fiber||0,su:ing.sugar||0,na:ing.sodium||0,cat:'custom',custom:true});
+      }
+    }
+  });
+  saveMyFoods(_myF);
   closeRecipeModal(); rFoodGrid();
 }
 
@@ -3162,11 +3186,7 @@ function syncSleepToProfile(){
         return (b.hours||0)-(a.hours||0);
       })[0]
     : null;
-  // Fallback: any entry sorted by date desc
-  if(!latest){
-    var sorted=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-    latest=sorted[0]||null;
-  }
+  // No fallback - only show sleep from today or yesterday
   var td=_td2; var yd=_yd2;
   // Only show sleep if it's from today or last night (yesterday)
   if(latest&&(latest.date===td||latest.date===yd)&&(latest.hours||0)>=3){
@@ -3607,7 +3627,7 @@ function rFitness(){
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
     {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
-    {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv||'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
+    {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:0.5,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
