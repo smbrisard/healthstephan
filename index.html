@@ -367,6 +367,7 @@ body { height: 100dvh; }
             <div class="ringmid"><div style="font-family:var(--mn);font-size:14px;font-weight:800;color:var(--grn)" id="hm-ringv">0</div><div style="font-size:10px;color:var(--dim)">kcal</div></div>
           </div>
           <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:3px">FOOD + DRINKS</div>
             <div style="font-size:12px;color:var(--dim)">Daily goal</div>
             <div style="font-size:21px;font-weight:800;letter-spacing:-.4px" id="hm-goallbl">2,200 kcal</div>
             <div style="font-size:13px;color:var(--grn);margin-top:4px;font-weight:600" id="hm-remain">0 remaining</div>
@@ -374,7 +375,7 @@ body { height: 100dvh; }
         </div>
         <!-- quick stats -->
         <div class="slbl">Quick Stats</div>
-        <div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:12px 14px;margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><div style="font-size:12px;color:var(--dim)">Food + Drinks today</div><div style="font-size:12px;font-weight:700;color:var(--txt)" id="hm-cal-lbl">-- kcal</div></div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="hm-cal-bar" style="height:100%;width:0%;background:var(--grn);border-radius:3px;transition:width .4s"></div></div></div>
+        <div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:12px 14px;margin-bottom:13px"><div style="display:none"><div id="hm-cal-lbl"></div><div id="hm-cal-bar"></div></div></div>
         <div class="g2" style="margin-bottom:14px">
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128205;</div>
@@ -1515,7 +1516,11 @@ function rHome() {
       }
     }
   }
-  var ring=g('hm-ring'); if(ring) ring.style.strokeDashoffset=232-(232*pct);
+  var ring=g('hm-ring');
+  if(ring){
+    ring.style.strokeDashoffset=232-(232*Math.min(pct,1));
+    ring.style.stroke=pct>1?'var(--red)':'';
+  }
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
   set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
   // Consider sync as today if date matches OR if synced recently (within 4hrs)
@@ -4337,7 +4342,11 @@ function histNav(dir){
 
 
 function launchApp(){
-  // Always re-validate sleep on launch - clear stale cached values
+  // Remove SL entries that exactly match old default 7.2h (bug artifact)
+  var _slPre=SL.length;
+  SL=SL.filter(function(s){return Math.abs((s.hours||0)-7.2)>0.05||s.autoSynced===false;});
+  if(SL.length!==_slPre) save();
+  // Always re-validate sleep on launch
   syncSleepToProfile();
   // Clean up any duplicate entries from previous bugs
   dedupML(); dedupDL();
