@@ -3201,7 +3201,11 @@ function slAdv(h){if(h>=7&&h<=9)return'Perfect. Keep it up!'; if(h>=6)return'Sli
 function slCalc() { var bd=(g('sl-bed')||{value:'23:00'}).value||'23:00', wk=(g('sl-wake')||{value:'07:00'}).value||'07:00', bp=bd.split(':').map(Number), wp=wk.split(':').map(Number), ms=(wp[0]*60+wp[1])-(bp[0]*60+bp[1]); if(ms<0)ms+=1440; var pe=g('sl-prev'); if(pe)pe.textContent=Math.floor(ms/60)+'h '+(ms%60)+'m'; }
 function syncSleepToProfile(){
   // Sync P.sleepLast from most recent SL entry (manual entries take priority)
-  if(!SL.length) return;
+  if(!SL.length){
+    // No sleep entries at all - clear P.sleepLast so -- shows
+    if(P.sleepLast>0){P.sleepLast=0;P.sleepBedtime='';P.sleepWake='';save();}
+    return;
+  }
   // Sort by date desc, prefer manual entries (autoSynced===false) when dates tie
   // Get today and yesterday strings
   var _td2=today();
