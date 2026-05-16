@@ -357,25 +357,31 @@ body { height: 100dvh; }
           <div style="margin-top:12px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden"><div id="hm-dbar" style="height:100%;background:linear-gradient(90deg,var(--pur),var(--pnk));width:0%;transition:width .5s;border-radius:3px"></div></div>
         </div>
         <!-- ring + stats -->
-        <div class="card" style="display:flex;align-items:center;gap:15px;margin-bottom:12px">
-          <div class="ringwrap" style="flex-shrink:0">
-            <svg width="90" height="90" viewBox="0 0 90 90">
-              <circle cx="45" cy="45" r="37" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
-              <circle id="hm-ring" cx="45" cy="45" r="37" fill="none" stroke="url(#rg)" stroke-width="9" stroke-dasharray="232" stroke-dashoffset="232" stroke-linecap="round"/>
-              <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00d4aa"/><stop offset="100%" stop-color="#00e5ff"/></linearGradient></defs>
-            </svg>
-            <div class="ringmid"><div style="font-family:var(--mn);font-size:14px;font-weight:800;color:var(--grn)" id="hm-ringv">0</div><div style="font-size:10px;color:var(--dim)">kcal</div></div>
+        <div class="card" style="margin-bottom:14px;padding:18px 20px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:12px">FOOD + DRINKS</div>
+          <div style="display:flex;align-items:center;gap:20px">
+            <div style="position:relative;width:96px;height:96px;flex-shrink:0">
+              <svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)">
+                <defs><linearGradient id="fgFood" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#00d4aa"/>
+                  <stop offset="100%" stop-color="#00b4d8"/>
+                </linearGradient></defs>
+                <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/>
+                <circle id="hm-ring" cx="48" cy="48" r="40" fill="none" stroke="url(#fgFood)" stroke-width="10" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--grn)" id="hm-ringv">0</div>
+                <div style="font-size:9px;color:var(--dim)">kcal</div>
+              </div>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--dim);margin-bottom:2px">Daily goal</div>
+              <div style="font-family:var(--mn);font-size:26px;font-weight:800;color:var(--txt)" id="hm-goallbl">1,600 kcal</div>
+              <div style="font-size:14px;font-weight:600;color:var(--grn);margin-top:4px" id="hm-remain">1,600 remaining</div>
+            </div>
           </div>
-          <div style="flex:1">
-            <div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:3px">FOOD + DRINKS</div>
-            <div style="font-size:12px;color:var(--dim)">Daily goal</div>
-            <div style="font-size:21px;font-weight:800;letter-spacing:-.4px" id="hm-goallbl">2,200 kcal</div>
-            <div style="font-size:13px;color:var(--grn);margin-top:4px;font-weight:600" id="hm-remain">0 remaining</div>
-          </div>
+          <div style="display:none"><div id="hm-cal-lbl"></div><div id="hm-cal-bar"></div></div>
         </div>
-        <!-- quick stats -->
-        <div class="slbl">Quick Stats</div>
-        <div style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:12px 14px;margin-bottom:13px"><div style="display:none"><div id="hm-cal-lbl"></div><div id="hm-cal-bar"></div></div></div>
         <div class="g2" style="margin-bottom:14px">
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
             <div style="font-size:20px;margin-bottom:7px">&#128205;</div>
@@ -1518,7 +1524,7 @@ function rHome() {
   }
   var ring=g('hm-ring');
   if(ring){
-    ring.style.strokeDashoffset=232-(232*Math.min(pct,1));
+    ring.style.strokeDashoffset=251-(251*Math.min(pct,1));
     ring.style.stroke=pct>1?'var(--red)':'';
   }
   set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
@@ -3980,29 +3986,21 @@ function resetApp(){if(confirm('Reset all data? This cannot be undone.')){localS
 
 // ═══ LAUNCH ═══
 function migrateSleepEntries(){
-  // For dates with multiple entries, keep only the one with lowest hours
-  // (manual entries tend to be more conservative/accurate)
-  // Also mark all remaining entries as manual to protect from future auto-sync
+  // Dedupe only - keep manual entries over auto-synced for same date
+  // Do NOT change autoSynced flags - undefined means unknown, not manual
   var byDate={};
-  SL.forEach(function(s){
-    if(!byDate[s.date]) byDate[s.date]=[];
-    byDate[s.date].push(s);
-  });
+  SL.forEach(function(s){if(!byDate[s.date])byDate[s.date]=[];byDate[s.date].push(s);});
   var changed=false;
   Object.keys(byDate).forEach(function(dt){
     if(byDate[dt].length>1){
-      // Multiple entries for same date - keep only manual or lowest
-      var manuals=byDate[dt].filter(function(s){return s.autoSynced!==true;});
-      var keep=manuals.length>0?manuals[0]:byDate[dt][0];
+      // Keep manual entry if exists, else keep the one with most hours
+      var manuals=byDate[dt].filter(function(s){return s.autoSynced===false;});
+      var keep=manuals.length>0?manuals[0]:byDate[dt].sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
       SL=SL.filter(function(s){return s.date!==dt||s.id===keep.id;});
       changed=true;
     }
   });
-  // Mark all remaining entries without flag as manual
-  SL.forEach(function(s){
-    if(s.autoSynced===undefined){s.autoSynced=false; changed=true;}
-  });
-  if(changed){save(); console.log('Sleep entries migrated');}
+  if(changed) save();
 }
 
 function migrateMLMicronutrients(){
@@ -4342,12 +4340,13 @@ function histNav(dir){
 
 
 function launchApp(){
-  // Remove SL entries that exactly match old default 7.2h (bug artifact)
+  // Remove SL entries with exactly 7.2h that have no explicit manual flag (old default artifact)
   var _slPre=SL.length;
-  SL=SL.filter(function(s){return Math.abs((s.hours||0)-7.2)>0.05||s.autoSynced===false;});
+  SL=SL.filter(function(s){
+    // Keep if: manual (autoSynced===false) OR hours not equal to 7.2
+    return s.autoSynced===false||Math.abs((s.hours||0)-7.2)>0.05;
+  });
   if(SL.length!==_slPre) save();
-  // Always re-validate sleep on launch
-  syncSleepToProfile();
   // Clean up any duplicate entries from previous bugs
   dedupML(); dedupDL();
   // Remove auto-synced sleep entries under 3h (naps from watch)
@@ -4361,7 +4360,6 @@ function launchApp(){
   var _flFixed=false;
   FL.forEach(function(f){if(f.sleep&&f.sleep<3){f.sleep=null;_flFixed=true;}});
   if(_flFixed) save();
-  syncSleepToProfile(); // Always re-evaluate sleep on launch
   // Backfill micronutrients from FOODS DB for existing entries
   migrateMLMicronutrients();
   // Fix any non-alcoholic drinks that incorrectly have u>0
@@ -4821,7 +4819,8 @@ function fetchSync(){
       var _existingForDate=SL.filter(function(s){return s.date===slDt;});
       // Only auto-add if NO entry exists for this date at all
       // OR if the only existing entry is explicitly auto-synced
-      var _allAutoSynced=_existingForDate.length>0&&_existingForDate.every(function(s){return s.autoSynced===true;});
+      // Treat undefined autoSynced as auto-syncable (not explicitly marked manual)
+      var _allAutoSynced=_existingForDate.length>0&&_existingForDate.every(function(s){return s.autoSynced!==false;});
       var _noEntry=_existingForDate.length===0;
       // Check if user has blocked auto-sync for this date (by deleting)
       var _blockedDates=[];
