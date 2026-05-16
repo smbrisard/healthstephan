@@ -4321,6 +4321,8 @@ function histNav(dir){
 
 
 function launchApp(){
+  // Always re-validate sleep on launch - clear stale cached values
+  syncSleepToProfile();
   // Clean up any duplicate entries from previous bugs
   dedupML(); dedupDL();
   // Remove auto-synced sleep entries under 3h (naps from watch)
