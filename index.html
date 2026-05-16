@@ -1215,6 +1215,8 @@ var P = (_data && _data.profile) ? _data.profile : {
   burned:389, stepsToday:8432, waterToday:1.8, sleepLast:0,
   streak:0, mealsLogged:0, isOnboarded:false
 };
+// Clear stale default sleepLast=7.2 immediately on load
+if(P.sleepLast&&Math.abs(P.sleepLast-7.2)<0.05){P.sleepLast=0;}
 
 // Migrate old array keys
 function migrateArr(key, oldKeys) {
@@ -1613,60 +1615,48 @@ function rHome() {
     var col=better?'var(--grn)':'var(--red)';
     el2.innerHTML=S('style="color:'+col+'"',(diff>0?'&#9650;':'&#9660;')+' '+Math.abs(diff)+(unit||''))+S('style="color:var(--dim2)"',' yd');
   }
-  if(_ydSnap){
-    _hmD('hm-steps-yd',Math.round(P.stepsToday||0),Math.round(_ydSnap.steps||0),false,'');
-    var _hmHrvRef=null;
-    if(_ydSnap&&_ydSnap.hrv&&_ydSnap.hrv!==P.hrv) _hmHrvRef=_ydSnap.hrv;
-    else{for(var _hmfih=0;_hmfih<_hmFLs.length;_hmfih++){if(_hmFLs[_hmfih].date<today()&&_hmFLs[_hmfih].hrv&&_hmFLs[_hmfih].hrv!==P.hrv){_hmHrvRef=_hmFLs[_hmfih].hrv;break;}}}
-    _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRef,false,'ms');
-    // Sleep comparison: find the most recent valid SL entry BEFORE today
-    var _ydSlVal=null;
-    var _todaySl=today();
-    // Get all entries strictly before today, sorted by date desc then hours desc
-    var _prevSl=SL.filter(function(s){return s.date<_todaySl&&(s.hours||0)>=3;})
-      .sort(function(a,b){
-        if(b.date!==a.date) return b.date.localeCompare(a.date);
-        return (b.hours||0)-(a.hours||0);
-      });
-    if(_prevSl.length) _ydSlVal=_prevSl[0].hours;
-    _hmD('hm-sleep-yd',P.sleepLast||0,_ydSlVal,false,'h');
-    var _hmBurnedToday=P.burned||0;
-    var _hmBurnedYd=(_ydSnap.activeBurned||_ydSnap.burned)||null;
-    _hmD('hm-burned-yd',_hmBurnedToday,_hmBurnedYd,false,' kcal');
-    _hmD('hm-dist-yd',P.distMiles||0,_ydSnap.dist>0?_ydSnap.dist:null,false,' mi');
-    // Use bioSnap logic: find past FL snap where rhr differs from today
-    var _hmRhrRef=null;
-    if(_ydSnap&&_ydSnap.rhr>0&&_ydSnap.rhr!==P.rhr) _hmRhrRef=_ydSnap.rhr;
-    else{
-      var _hmFLs=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-      for(var _hmfi=0;_hmfi<_hmFLs.length;_hmfi++){
-        if(_hmFLs[_hmfi].date<today()&&_hmFLs[_hmfi].rhr&&_hmFLs[_hmfi].rhr!==P.rhr){_hmRhrRef=_hmFLs[_hmfi].rhr;break;}
-      }
-    }
-    _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
-    _hmD('hm-stand-yd',P.standHours||0,_ydSnap.standHours||0,false,' hrs');
-    _hmD('hm-exmin-yd',P.exerciseMins||0,_ydSnap.exerciseMins||0,false,' min');
-  } else {
-    // _ydSnap null - only clear snap-dependent deltas, not ones with own sources
-    ['hm-steps-yd','hm-burned-yd'].forEach(function(id){
-      var e=g(id); if(e) e.innerHTML='';
-    });
-    // Still compute HRV, RHR, sleep deltas using FL scan
-    var _hmFLsYd=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-    var _hmHrvRefYd=null,_hmRhrRefYd=null;
-    for(var _hyi=0;_hyi<_hmFLsYd.length;_hyi++){
-      var _hys=_hmFLsYd[_hyi];
-      if(_hys.date>=today()) continue;
-      if(!_hmHrvRefYd&&_hys.hrv&&_hys.hrv!==P.hrv) _hmHrvRefYd=_hys.hrv;
-      if(!_hmRhrRefYd&&_hys.rhr&&_hys.rhr!==P.rhr) _hmRhrRefYd=_hys.rhr;
-      if(_hmHrvRefYd&&_hmRhrRefYd) break;
-    }
-    _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRefYd,false,'ms');
-    _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRefYd,true,' bpm');
-    var _prevSlYd=SL.filter(function(s){return s.date<today()&&(s.hours||0)>=3;})
-      .sort(function(a,b){if(b.date!==a.date)return b.date.localeCompare(a.date);return (b.hours||0)-(a.hours||0);})[0];
-    _hmD('hm-sleep-yd',P.sleepLast||0,_prevSlYd?_prevSlYd.hours:null,false,'h');
+  // Always compute deltas - use _ydSnap where available, FL scan as fallback
+  var _hmFLall=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var _hmYdSnap=_ydSnap; // may be null
+
+  // Steps delta
+  var _stepsYd=_hmYdSnap?Math.round(_hmYdSnap.steps||0):null;
+  if(_stepsYd!==null) _hmD('hm-steps-yd',Math.round(P.stepsToday||0),_stepsYd,false,'');
+
+  // HRV delta - scan FL for different value
+  var _hmHrvRef=null;
+  if(_hmYdSnap&&_hmYdSnap.hrv&&_hmYdSnap.hrv!==P.hrv) _hmHrvRef=_hmYdSnap.hrv;
+  if(!_hmHrvRef){for(var _hhi=0;_hhi<_hmFLall.length;_hhi++){var _hhs=_hmFLall[_hhi];if(_hhs.date<today()&&_hhs.hrv&&_hhs.hrv!==P.hrv){_hmHrvRef=_hhs.hrv;break;}}}
+  _hmD('hm-hrv-yd',P.hrv||0,_hmHrvRef,false,'ms');
+
+  // Sleep delta - use SL log directly
+  var _todaySl2=today();
+  var _prevSl=SL.filter(function(s){return s.date<_todaySl2&&(s.hours||0)>=3;})
+    .sort(function(a,b){if(b.date!==a.date)return b.date.localeCompare(a.date);return (b.hours||0)-(a.hours||0);})[0];
+  _hmD('hm-sleep-yd',P.sleepLast||0,_prevSl?_prevSl.hours:null,false,'h');
+
+  // Burned delta
+  var _lastSyncTodayHm=P.lastSyncDate&&P.lastSyncDate===todayLocal();
+  var _hmBurnedToday=(_lastSyncTodayHm&&P.totalBurned&&P.restingEnergy)?P.totalBurned:(P.burned||0);
+  var _hmBurnedYd=_hmYdSnap?(_hmYdSnap.activeBurned||_hmYdSnap.burned)||null:null;
+  _hmD('hm-burned-yd',_hmBurnedToday,_hmBurnedYd,false,' kcal');
+
+  // Distance delta
+  var _distYd=_hmYdSnap&&_hmYdSnap.dist>0?_hmYdSnap.dist:null;
+  _hmD('hm-dist-yd',P.distMiles||0,_distYd,false,' mi');
+
+  // RHR delta - scan FL for different value
+  var _hmRhrRef=null;
+  if(_hmYdSnap&&_hmYdSnap.rhr>0&&_hmYdSnap.rhr!==P.rhr) _hmRhrRef=_hmYdSnap.rhr;
+  if(!_hmRhrRef){for(var _hri=0;_hri<_hmFLall.length;_hri++){var _hrs2=_hmFLall[_hri];if(_hrs2.date<today()&&_hrs2.rhr&&_hrs2.rhr!==P.rhr){_hmRhrRef=_hrs2.rhr;break;}}}
+  _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
+
+  // Stand/Exercise delta
+  if(_hmYdSnap){
+    _hmD('hm-stand-yd',P.standHours||0,_hmYdSnap.standHours||0,false,' hrs');
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_hmYdSnap.exerciseMins||0,false,' min');
   }
+
   // Weight vs yesterday (from WL entries)
   var _ydWEl=g('hm-wt-yd');
   if(_ydWEl){
