@@ -1347,10 +1347,20 @@ function tDrinks() { return DL.filter(function(d){return d.date===today();}); }
 function calcWaterForDate(dt) {
   var ml=0;
   DL.filter(function(d){return d.date===dt;}).forEach(function(d){
-    if(d.cat==='water') ml+=(d.vol||0);
-    else if(d.cat==='coffee') ml+=(d.vol||0)*0.5;
-    else if(d.cat==='tea') ml+=(d.vol||d.c*3||0)*0.8;
-    else if(d.cat==='soft'&&!d.u) ml+=(d.vol||0)*0.5;
+    // vol may be 0 for custom/Starbucks drinks - estimate from calories
+    // Coffee/tea: ~3ml per kcal is a good proxy (110kcal latte ~ 330ml)
+    var _vol=d.vol||0;
+    if(_vol===0&&d.c>0){
+      // Estimate serving size from calories if not stored
+      if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
+      else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
+      else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
+      else if(d.cat==='water') _vol=240; // default glass if no vol
+    }
+    if(d.cat==='water') ml+=_vol;
+    else if(d.cat==='coffee'||d.cat==='starbucks') ml+=_vol*0.5;
+    else if(d.cat==='tea'||d.cat==='kombucha') ml+=_vol*0.8;
+    else if(d.cat==='soft'&&!d.u) ml+=_vol*0.5;
   });
   return Math.round(ml/10)/100;
 }
