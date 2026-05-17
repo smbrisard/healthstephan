@@ -639,7 +639,7 @@ body { height: 100dvh; }
         <div class="slbl">Last Night</div><div class="card" style="margin-bottom:13px" id="sl-last"></div>
         <div class="slbl">7-Day Chart</div>
         <div class="card" style="margin-bottom:13px">
-          <div style="display:flex;gap:5px;align-items:flex-end;height:84px" id="sl-bars"></div>
+          <div style="display:flex;gap:5px;align-items:flex-end;height:124px" id="sl-bars"></div>
           <div style="display:flex;gap:5px;margin-top:5px" id="sl-lbls"></div>
         </div>
         <div class="g3" style="margin-bottom:13px">
@@ -1684,14 +1684,17 @@ function rHome() {
 
   // Streak
   var sk=calcStreak();
-  var _prev=P._lastStreakToast||0;
-  [7,14,21,30,60,90,180,365].forEach(function(ms){
-    if(sk>=ms&&_prev<ms){
-      var _em=ms>=365?'&#127881;':ms>=90?'&#129351;':ms>=30?'&#129352;':'&#9889;';
-      setTimeout(function(){toast(_em+' '+ms+' day streak! Amazing!',false,4000);},1200);
-      P._lastStreakToast=ms; save();
+  var _prevMT=P._lastStreakToast||0;
+  if(sk>0){
+    var _msList=[7,14,21,30,60,90,180,365];
+    for(var _mi=0;_mi<_msList.length;_mi++){
+      if(sk>=_msList[_mi]&&_prevMT<_msList[_mi]){
+        var _em=_msList[_mi]>=365?'&#127881;':_msList[_mi]>=90?'&#129351;':_msList[_mi]>=30?'&#129352;':'&#9889;';
+        (function(ms,em){setTimeout(function(){toast(em+' '+ms+' day streak! Keep it up!',false,5000);},1500);}(_msList[_mi],_em));
+        P._lastStreakToast=_msList[_mi]; save(); break;
+      }
     }
-  });
+  }
   var ske=g('hm-streak');
   if(ske) ske.textContent=sk>0?'⚡ '+sk+' day streak':'';
 
@@ -3325,21 +3328,23 @@ function rSleep() {
   var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<1)mxH=8;
   var be=g('sl-bars'), bl=g('sl-lbls');
   if(be){
-  var VW=280,VH=80,n=recent.length;
+  var VW=280,VH=120,n=recent.length;
   if(n>0){
     var colW=Math.floor(VW/n),bw=colW-3;
     var rects=recent.map(function(e,i){
-      var pc=e.hours/mxH,bh=Math.max(Math.round(pc*62),3);
+      var pc=e.hours/mxH,bh=Math.max(Math.round(pc*100),4);
       var x=i*colW+1,y=VH-bh-2;
       var slS=slSt(e.hours),col=slS.c==='bg'?'#4da6ff':slS.c==='ba'?'#ffb830':'#ff3b5c';
       return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+col+'" rx="2"/>'
-        +'<text x="'+(x+bw/2)+'" y="'+(y>12?y-2:y+bh+8)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+hHM(e.hours)+'</text>';
+        +'<text x="'+(x+bw/2)+'" y="'+(y>14?y-3:y+bh+9)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+hHM(e.hours)+'</text>';
     }).join('');
-    var _slGoalY=Math.round(VH-2-(7/mxH)*62);
-    var _slAvgV=recent.length?recent.reduce(function(a,e){return a+e.hours;},0)/recent.length:0;
-    var _slAvgY2=_slAvgV>0?Math.round(VH-2-(_slAvgV/mxH)*62):0;
-    var _gL=7<=mxH?('<line x1="0" y1="'+_slGoalY+'" x2="'+VW+'" y2="'+_slGoalY+'" stroke="rgba(0,212,170,.8)" stroke-width="1.5" stroke-dasharray="4,3"/>'+'<text x="'+(VW-2)+'" y="'+(_slGoalY-2)+'" text-anchor="end" font-size="8" fill="rgba(0,212,170,.95)" font-family="sans-serif">7h goal</text>'):'';
-    var _aL=_slAvgV>0&&Math.abs(_slAvgV-7)>0.2?('<line x1="0" y1="'+_slAvgY2+'" x2="'+VW+'" y2="'+_slAvgY2+'" stroke="rgba(255,184,48,.7)" stroke-width="1" stroke-dasharray="3,3"/>'+'<text x="2" y="'+(_slAvgY2-2)+'" text-anchor="start" font-size="8" fill="rgba(255,184,48,.95)" font-family="sans-serif">'+hHM(_slAvgV)+' avg</text>'):'';
+    var _gY=Math.round(VH-3-(7/mxH)*100);
+    var _avV=recent.length?recent.reduce(function(a,e){return a+e.hours;},0)/recent.length:0;
+    var _aY=_avV>0?Math.round(VH-3-(_avV/mxH)*100):0;
+    var _gL='<line x1="4" y1="'+_gY+'" x2="'+VW+'" y2="'+_gY+'" stroke="rgba(0,212,170,.9)" stroke-width="2" stroke-dasharray="6,4"/>'
+      +'<text x="6" y="'+(_gY-3)+'" font-size="9" font-weight="bold" fill="rgba(0,212,170,1)" font-family="sans-serif">7h goal</text>';
+    var _aL=_avV>0&&Math.abs(_avV-7)>0.2?'<line x1="4" y1="'+_aY+'" x2="'+VW+'" y2="'+_aY+'" stroke="rgba(255,184,48,.9)" stroke-width="1.5" stroke-dasharray="4,3"/>'
+      +'<text x="6" y="'+(_aY-3)+'" font-size="9" fill="rgba(255,184,48,1)" font-family="sans-serif">'+hHM(_avV)+' avg</text>':'';
     be.innerHTML='<svg width="100%" height="'+VH+'" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+rects+_gL+_aL+'</svg>';
   }
 }
@@ -3860,7 +3865,7 @@ function rFitness(){
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:0.5,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
-    {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9},
+    {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9,sub:P.sleepLast>=7?'Optimal':P.sleepLast>=6?'Good':P.sleepLast>=5?'Fair':P.sleepLast>0?'Poor':'',subCol:P.sleepLast>=7?'var(--grn)':P.sleepLast>=6?'var(--amb)':'var(--red)'},
     {e:'&#128167;',key:'water',raw:calcWaterOz()||null,lb:false,v:calcWaterOz()>0?fD(calcWaterOz(),1):'--',u:'fl oz',l:'Water',noLog:calcWaterOz()===0,c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:calcWaterL()/(P.water||3)},
   {e:'🧍',key:'standHours',raw:P.standHours||null,lb:false,v:(_fiToday&&P.standHours)?Math.round(P.standHours):'--',u:'hrs',l:'Stand',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:(P.standHours||0)/12},
   {e:'⏱',key:'exerciseMins',raw:P.exerciseMins||null,lb:false,v:(_fiToday&&P.exerciseMins)?Math.round(P.exerciseMins):'--',u:'min',l:'Exercise',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.exerciseMins||0)/30},
@@ -3937,6 +3942,7 @@ function rFitness(){
         D('style="font-family:var(--mn);font-size:28px;font-weight:800;color:'+m.c+';line-height:1"',m.v)+
         D('style="font-size:13px;color:var(--dim);margin-top:4px"',m.u)+
         D('style="font-size:13px;color:var(--dim);margin-top:3px"',m.l)+
+        (m.sub?D('style="font-size:11px;font-weight:700;color:'+(m.subCol||'var(--grn)')+';margin-top:3px"',m.sub):'')+
         (m.noLog?D('style="font-size:10px;color:var(--dim);margin-top:4px;opacity:0.5"','No log yet'):
           D('style="min-height:16px;margin-top:2px"',delta)))+
       D('style="height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:10px;overflow:hidden"',
@@ -4374,7 +4380,8 @@ function rHistory(){
       var bSlIdx=slVals.lastIndexOf(bSl); var wSlIdx=slVals.lastIndexOf(wSl);
       html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','7-Day Sleep');
       html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:14px"',
-        D('style="display:flex;gap:4px;align-items:flex-end;height:100px;margin-bottom:8px"',
+        D('style="position:relative;height:108px;margin-bottom:8px"',
+          D('style="display:flex;gap:4px;align-items:flex-end;height:100px;position:absolute;bottom:0;left:0;right:0"',
           last7.map(function(d,i4){
             var v=slVals[i4];
             var barH=v>0?Math.max(Math.round(v/mxSl*100),10):0;
@@ -4387,14 +4394,10 @@ function rHistory(){
               D('style="width:100%;height:'+barH+'px;min-height:'+(v>0?'8px':'0')+';background:'+col+';border-radius:4px 4px 0 0;outline:'+(isSel?'2px solid var(--txt)':'none')+';outline-offset:-1px"','')+
               D('style="font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?700:400)+';margin-top:4px"',wk2));
           }).join(''))+
-        // 7h goal line and avg line overlaid via negative margin trick
-        D('style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin:-6px 0 6px"',
-          D('style="display:flex;align-items:center;gap:4px"',
-            D('style="width:16px;height:0;border-top:1.5px dashed rgba(0,212,170,.8)"','')+
-            D('style="font-size:9px;color:var(--grn)"','7h goal'))+
-          (avSl>0?D('style="display:flex;align-items:center;gap:4px"',
-            D('style="width:16px;height:0;border-top:1px dashed rgba(255,184,48,.7)"','')+
-            D('style="font-size:9px;color:var(--amb)"',hHM(avSl)+' avg')):'')
+          D('style="position:absolute;left:0;right:0;bottom:'+Math.round(7/mxSl*100)+'px;pointer-events:none"',
+            '<div style="border-top:2px dashed rgba(0,212,170,.9)"><span style="float:right;font-size:9px;color:rgba(0,212,170,1);font-weight:700;line-height:0;margin-top:-9px;margin-right:2px;background:var(--s2);padding:1px 3px">7h</span></div>')+
+          D('style="position:absolute;left:0;right:0;bottom:'+Math.round(avSl/mxSl*100)+'px;pointer-events:none"',
+            '<div style="border-top:1.5px dashed rgba(255,184,48,.8)"><span style="float:left;font-size:9px;color:rgba(255,184,48,1);font-weight:700;line-height:0;margin-top:-9px;margin-left:2px;background:var(--s2);padding:1px 3px">'+hHM(avSl)+'</span></div>')
         )+
         D('style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"',
           D('style="text-align:center;background:var(--s3);border-radius:11px;padding:10px"',D('style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--blu)"',hHM(avSl))+D('style="font-size:11px;color:var(--dim);margin-top:3px"','avg'))+
