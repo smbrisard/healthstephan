@@ -1344,16 +1344,17 @@ function toImperial(p) {
 function todayLocal(){var d=new Date();var yr=d.getFullYear();var mo=String(d.getMonth()+1).padStart(2,'0');var dy=String(d.getDate()).padStart(2,'0');return yr+'-'+mo+'-'+dy;}
 
 function tDrinks() { return DL.filter(function(d){return d.date===today();}); }
-function calcWaterL() {
+function calcWaterForDate(dt) {
   var ml=0;
-  tDrinks().forEach(function(d){
+  DL.filter(function(d){return d.date===dt;}).forEach(function(d){
     if(d.cat==='water') ml+=(d.vol||0);
-    else if(d.cat==='coffee') ml+=(d.vol||0)*0.5; // coffee counts 50% toward hydration
-    else if(d.cat==='tea') ml+=(d.vol||d.c*3||0)*0.8; // tea counts 80%
-    else if(d.cat==='soft'&&!d.u) ml+=(d.vol||0)*0.5; // soft drinks 50%
+    else if(d.cat==='coffee') ml+=(d.vol||0)*0.5;
+    else if(d.cat==='tea') ml+=(d.vol||d.c*3||0)*0.8;
+    else if(d.cat==='soft'&&!d.u) ml+=(d.vol||0)*0.5;
   });
-  return Math.round(ml/10)/100; // accurate litres with 2dp
+  return Math.round(ml/10)/100;
 }
+function calcWaterL() { return calcWaterForDate(today()); }
 function calcWaterOz() {
   var ml=0;
   tDrinks().forEach(function(d){
@@ -4158,7 +4159,10 @@ function rHistory(){
              ['&#127939;',(selFlSnap.steps!==null&&selFlSnap.steps!==undefined?fN(Math.round(selFlSnap.steps)):'--'),'steps','var(--amb)'],
              ['&#9889;',(selFlSnap.hrv>0?fD(selFlSnap.hrv,1)+' ms':'--'),'HRV','var(--grn)'],
              ['&#10084;',(selFlSnap.rhr>0?Math.round(selFlSnap.rhr)+' bpm':'--'),'RHR','var(--red)'],
-             ['&#128167;',(selFlSnap.water>0?fD(selFlSnap.water*33.814,0)+' oz':'--'),'water','var(--cyn)']
+             ['&#128167;',(function(){
+              var _wl=calcWaterForDate(histDate);
+              return _wl>0?fD(_wl*33.814,0)+' oz':'--';
+            }()),'water','var(--cyn)']
             ].map(function(t){
               return D('style="background:var(--s3);border-radius:11px;padding:10px 4px;text-align:center;border:.5px solid var(--b2)"',
                 D('style="font-size:18px;line-height:1;margin-bottom:5px"',t[0])+
@@ -4895,7 +4899,7 @@ function fetchSync(){
         // Yesterday's data - zero ALL fields that reset at midnight
         P.exerciseMins=0; P.standHours=0;
         P.stepsToday=0; P.distMiles=0; P.walkMiles=0;
-        P.burned=0; P.totalBurned=0; P.restingEnergy=null; // clear all - fresh day
+        P.burned=0; P.totalBurned=0; P.restingEnergy=null; P.waterToday=0; // clear all - fresh day
       }
     } else {
       // Stale data - zero everything
