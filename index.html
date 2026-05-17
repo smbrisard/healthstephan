@@ -2982,9 +2982,9 @@ function openFood(idx) {
 function adjSrv(d) { fSrv=Math.max(0.5,parseFloat((fSrv+d).toFixed(1))); set('fm-srv',fSrv.toFixed(1)); if(selF){set('fm-total',fN(Math.round(selF.c*fSrv))+' kcal');} }
 
 function buildNF(f) {
-  function pc(v,dv){return Math.round(v/dv*100)+'%';}
+  function pc(v,dv){var _v=parseFloat(v)||0;return Math.round(_v/dv*100)+'%';}
   function hi(p){return parseFloat(p)>30?' style="color:var(--amb)"':'';}
-  return D('class="nf"',D('class="nft"','Nutrition Facts')+D('class="nfr" style="font-size:12px;color:var(--dim)"',S('','Serving size')+S('',toImperial(f.p)))+D('style="height:7px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('class="nfr nfb"',S('','Calories')+S('style="font-size:22px;font-family:var(--mn)"',Math.round(f.c)))+D('style="height:3px;background:var(--txt);margin:3px 0;border-radius:1px"','')+D('style="text-align:right;font-size:11px;color:var(--dim);margin-bottom:3px"','% Daily Value*')+D('class="nfr nfb"',S('','Total Fat')+S(hi(pc(f.f,78)),pc(f.f,78)+' '+Math.round(f.f)+'g'))+D('class="nfr nfi"',S('','Saturated Fat')+S(hi(pc(f.sf,20)),pc(f.sf,20)+' '+Math.round(f.sf)+'g'))+D('class="nfr nfb"',S('','Cholesterol')+S('',pc(f.ch,300)+' '+Math.round(f.ch)+'mg'))+D('class="nfr nfb"',S(hi(pc(f.na,2300)),'Sodium')+S(hi(pc(f.na,2300)),pc(f.na,2300)+' '+Math.round(f.na)+'mg'))+D('class="nfr nfb"',S('','Total Carbohydrate')+S('',pc(f.cb,275)+' '+Math.round(f.cb)+'g'))+D('class="nfr nfi"',S('','Dietary Fiber')+S('',pc(f.fi,28)+' '+Math.round(f.fi)+'g'))+D('class="nfr nfi"',S('','Total Sugars')+S('',Math.round(f.su)+'g'))+D('class="nfr nfi2"',S('','Incl. Added Sugars')+S('',pc(f.as,50)+' '+Math.round(f.as)+'g'))+D('class="nfr nfb"',S('','Protein')+S('',Math.round(f.pr)+'g'))+D('style="height:3px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('style="display:flex;gap:7px;flex-wrap:wrap;margin-top:3px"',S('style="font-size:11px;color:var(--dim)"','Vit D '+fD(f.vd)+'mcg')+S('style="font-size:11px;color:var(--dim)"','Calcium '+Math.round(f.ca)+'mg')+S('style="font-size:11px;color:var(--dim)"','Iron '+fD(f.ir)+'mg')+S('style="font-size:11px;color:var(--dim)"','Potassium '+Math.round(f.po)+'mg'))+D('style="font-size:10px;color:var(--dim2);margin-top:5px"','* Based on 2,000 kcal diet.'));
+  return D('class="nf"',D('class="nft"','Nutrition Facts')+D('class="nfr" style="font-size:12px;color:var(--dim)"',S('','Serving size')+S('',toImperial(f.p)))+D('style="height:7px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('class="nfr nfb"',S('','Calories')+S('style="font-size:22px;font-family:var(--mn)"',Math.round(f.c)))+D('style="height:3px;background:var(--txt);margin:3px 0;border-radius:1px"','')+D('style="text-align:right;font-size:11px;color:var(--dim);margin-bottom:3px"','% Daily Value*')+D('class="nfr nfb"',S('','Total Fat')+S(hi(pc(f.f,78)),pc(f.f,78)+' '+Math.round(f.f)+'g'))+D('class="nfr nfi"',S('','Saturated Fat')+S(hi(pc(f.sf,20)),pc(f.sf||0,20)+' '+Math.round(f.sf||0)+'g'))+D('class="nfr nfb"',S('','Cholesterol')+S('',pc(f.ch||0,300)+' '+Math.round(f.ch||0)+'mg'))+D('class="nfr nfb"',S(hi(pc(f.na,2300)),'Sodium')+S(hi(pc(f.na,2300)),pc(f.na,2300)+' '+Math.round(f.na)+'mg'))+D('class="nfr nfb"',S('','Total Carbohydrate')+S('',pc(f.cb,275)+' '+Math.round(f.cb)+'g'))+D('class="nfr nfi"',S('','Dietary Fiber')+S('',pc(f.fi,28)+' '+Math.round(f.fi)+'g'))+D('class="nfr nfi"',S('','Total Sugars')+S('',Math.round(f.su)+'g'))+D('class="nfr nfi2"',S('','Incl. Added Sugars')+S('',pc(f.as||0,50)+' '+Math.round(f.as||0)+'g'))+D('class="nfr nfb"',S('','Protein')+S('',Math.round(f.pr)+'g'))+D('style="height:3px;background:var(--txt);margin:4px 0;border-radius:1px"','')+D('style="display:flex;gap:7px;flex-wrap:wrap;margin-top:3px"',S('style="font-size:11px;color:var(--dim)"','Vit D '+(f.vd?fD(f.vd):'0')+'mcg')+S('style="font-size:11px;color:var(--dim)"','Calcium '+Math.round(f.ca||0)+'mg')+S('style="font-size:11px;color:var(--dim)"','Iron '+(f.ir?fD(f.ir):'0')+'mg')+S('style="font-size:11px;color:var(--dim)"','Potassium '+Math.round(f.po||0)+'mg'))+D('style="font-size:10px;color:var(--dim2);margin-top:5px"','* Based on 2,000 kcal diet.'));
 }
 
 function addFood() {
@@ -4458,7 +4458,17 @@ function launchApp(){
     {cat:'kebabshop',n:'Hummus Pita TKS',e:'&#129379;',p:'1 serving',c:320,pr:10,cb:44,f:12,fi:8,su:2,na:580},
     {cat:'kebabshop',n:'Baklava TKS',e:'&#127855;',p:'2 pieces',c:280,pr:4,cb:34,f:16,fi:2,su:20,na:80}
   ];
-  _rf.forEach(function(f){FOODS.push(f);});
+  // Add default micronutrients to restaurant items missing them
+  _rf.forEach(function(f){
+    if(f.sf===undefined) f.sf=Math.round((f.f||0)*0.3); // est. 30% of fat is saturated
+    if(f.ch===undefined) f.ch=Math.round((f.pr||0)*1.5); // est. from protein
+    if(f.as===undefined) f.as=0;
+    if(f.po===undefined) f.po=Math.round((f.na||0)*0.5);
+    if(f.ca===undefined) f.ca=0;
+    if(f.ir===undefined) f.ir=0;
+    if(f.vd===undefined) f.vd=0;
+    FOODS.push(f);
+  });
   var _rd=[
     {n:'Prosecco Glass',e:'&#127870;',p:'5 fl oz',c:98,u:1.4,cat:'prosecco'},
     {n:'Champagne Glass',e:'&#127870;',p:'5 fl oz',c:95,u:1.4,cat:'prosecco'},
@@ -4476,6 +4486,16 @@ function launchApp(){
     {n:'Humm Kombucha',e:'&#127861;',p:'14 fl oz',c:50,u:0.1,cat:'kombucha'}
   ];
   _rd.forEach(function(d){DRINKS.push(d);});
+  // Fix ML entries missing micronutrient fields (from restaurant items)
+  ML.forEach(function(m){
+    if(m.sf===undefined) m.sf=Math.round((m.f||0)*0.3);
+    if(m.ch===undefined) m.ch=Math.round((m.pr||0)*1.5);
+    if(m.as===undefined) m.as=0;
+    if(m.po===undefined) m.po=Math.round((m.na||0)*0.5);
+    if(m.ca===undefined) m.ca=0;
+    if(m.ir===undefined) m.ir=0;
+    if(m.vd===undefined) m.vd=0;
+  });
   // Remove SL entries with exactly 7.2h that have no explicit manual flag (old default artifact)
   var _slPre=SL.length;
   SL=SL.filter(function(s){
