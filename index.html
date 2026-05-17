@@ -383,6 +383,7 @@ body { height: 100dvh; }
           </div>
           <div style="display:none"><div id="hm-cal-lbl"></div><div id="hm-cal-bar"></div></div>
         </div>
+        <div id="hm-weekly"></div>
         <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin:14px 0 10px">QUICK STATS</div>
         <div class="g2" style="margin-bottom:14px">
           <div class="mtile" style="background:linear-gradient(135deg,rgba(255,184,48,.14),rgba(255,184,48,.03));border-color:rgba(56,189,248,.18)">
@@ -1500,6 +1501,66 @@ function obNext() {
 }
 
 // ═══ HOME ═══
+
+function rWeeklySummary(){
+  var el=g('hm-weekly'); if(!el) return;
+  var _td=today();
+  // Get last 7 days
+  var _days=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(); d.setDate(d.getDate()-i);
+    _days.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
+  }
+  // Calories per day from ML+DL
+  var _calDays=_days.map(function(dt){
+    var mc=ML.filter(function(m){return m.date===dt;}).reduce(function(a,m){return a+(m.cals||0);},0);
+    var dc=DL.filter(function(d){return d.date===dt;}).reduce(function(a,d){return a+(d.c||0);},0);
+    return mc+dc;
+  });
+  var _calLogged=_calDays.filter(function(c){return c>0;});
+  var _avgCal=_calLogged.length?Math.round(_calLogged.reduce(function(a,b){return a+b;},0)/_calLogged.length):0;
+  // Sleep avg from SL
+  var _slDays=_days.map(function(dt){
+    var entries=SL.filter(function(s){return s.date===dt&&(s.hours||0)>=3;});
+    return entries.length?Math.max.apply(null,entries.map(function(s){return s.hours;})):0;
+  }).filter(function(h){return h>0;});
+  var _avgSleep=_slDays.length?(_slDays.reduce(function(a,b){return a+b;},0)/_slDays.length):0;
+  // Steps avg from FL
+  var _stepDays=FL.filter(function(f){return _days.indexOf(f.date)>=0&&(f.steps||0)>0;});
+  var _avgSteps=_stepDays.length?Math.round(_stepDays.reduce(function(a,f){return a+(f.steps||0);},0)/_stepDays.length):0;
+  // Protein avg
+  var _prDays=_days.map(function(dt){
+    return ML.filter(function(m){return m.date===dt;}).reduce(function(a,m){return a+(m.protein||0);},0);
+  }).filter(function(p){return p>0;});
+  var _avgPr=_prDays.length?Math.round(_prDays.reduce(function(a,b){return a+b;},0)/_prDays.length):0;
+  if(!_avgCal&&!_avgSleep&&!_avgSteps) return; // nothing to show yet
+  el.innerHTML=
+    '<div class="card" style="margin-bottom:14px">'+
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:12px">7-DAY AVERAGES</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+      '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#128293; Calories</div>'+
+      '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--txt)">'+fN(_avgCal)+'</div>'+
+      '<div style="font-size:10px;color:var(--dim)">kcal / day</div>'+
+    '</div>'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+      '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#128564; Sleep</div>'+
+      '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:'+(_avgSleep>=7?'var(--grn)':_avgSleep>=6?'var(--amb)':'var(--red)')+'">'+(_avgSleep>0?hHM(_avgSleep):'--')+'</div>'+
+      '<div style="font-size:10px;color:var(--dim)">avg / night</div>'+
+    '</div>'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+      '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#127939; Steps</div>'+
+      '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--txt)">'+fN(_avgSteps)+'</div>'+
+      '<div style="font-size:10px;color:var(--dim)">avg / day</div>'+
+    '</div>'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+      '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#129385; Protein</div>'+
+      '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--grn)">'+(_avgPr>0?_avgPr+'g':'--')+'</div>'+
+      '<div style="font-size:10px;color:var(--dim)">avg / day</div>'+
+    '</div>'+
+    '</div>'+
+    '</div>';
+}
 function rHome() {
   try {
   // Always zero exercise/stand if last sync date is not strictly today
@@ -1732,6 +1793,8 @@ function rHome() {
   // Weight change on quick stats
 
 
+  // Weekly summary
+  rWeeklySummary();
   // Sleep
   var lsl=SL.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   // Use P.sleepLast (from sync) as primary, SL entry as fallback
@@ -1740,6 +1803,12 @@ function rHome() {
   // Do NOT fall back to lsl.hours directly - that bypasses date validation
   var _sleepVal=P.sleepLast||0;
   set('hm-sleep',_sleepVal>=3?hHM(_sleepVal):'--');
+  // Color code sleep tile by quality
+  var _sleepTile=g('hm-sleep');
+  if(_sleepTile){
+    var _sc=_sleepVal>=7?'var(--grn)':_sleepVal>=6?'var(--amb)':_sleepVal>=3?'var(--red)':'var(--blu)';
+    _sleepTile.style.color=_sc;
+  }
   // Label: 'last night' if sleep is from yesterday, 'hrs sleep' if today
   var _sleepLbl=g('hm-sleep-lbl');
   if(_sleepLbl){
@@ -3536,6 +3605,43 @@ function rDrGrid(){
     return '<div style="position:relative" class="dtile" onclick="'+_dcFn+'">'+_ddb+_dpb+D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic'))+'</div>';
   }).join('');
 }
+
+function drinkInfo(idx){
+  var _todayDr=DL.filter(function(x){return x.date===(drChartDate||today());});
+  var d=_todayDr[idx];
+  if(!d) return;
+  var _u=d.u||0,_na=d.sodium||d.na||0,_cb=d.carbs||d.cb||0,_su=d.sugar||d.sg||0;
+  var _pr=d.prot||d.pr||0,_ft=d.fat||d.f||0,_fi=d.fiber||d.fi||0;
+  var info='<div style="padding:4px 0">'+
+    '<div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:2px">'+(d.e||'&#127861;')+' '+d.n+'</div>'+
+    '<div style="font-size:12px;color:var(--dim);margin-bottom:12px">'+(d.p||'1 serving')+'</div>'+
+    '<div style="font-size:32px;font-weight:800;font-family:var(--mn);color:var(--grn);margin-bottom:4px">'+(d.c||0)+'<span style="font-size:14px;color:var(--dim)"> kcal</span></div>'+
+    (_u>0?'<div style="font-size:12px;color:var(--amb);margin-bottom:10px">'+fD(_u,1)+' std drinks</div>':'')+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--grn)">'+_pr+'g</div><div style="font-size:10px;color:var(--dim)">Protein</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--blu)">'+_cb+'g</div><div style="font-size:10px;color:var(--dim)">Carbs</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--amb)">'+_ft+'g</div><div style="font-size:10px;color:var(--dim)">Fat</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--pur)">'+_su+'g</div><div style="font-size:10px;color:var(--dim)">Sugar</div></div>'+
+    '</div>'+
+    (_na>0?'<div style="font-size:12px;color:var(--dim)">Sodium: '+_na+'mg</div>':'')+
+    (_fi>0?'<div style="font-size:12px;color:var(--dim)">Fiber: '+_fi+'g</div>':'')+
+  '</div>';
+  showInfoModal(info);
+}
+function showInfoModal(html){
+  var m=g('info-modal');
+  if(!m){
+    var el=document.createElement('div');
+    el.id='info-modal';
+    el.style.cssText='position:fixed;inset:0;z-index:999;display:flex;align-items:flex-end;background:rgba(0,0,0,.6)';
+    el.innerHTML='<div style="background:var(--s2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto" id="info-modal-body"></div>';
+    el.onclick=function(e){if(e.target===el) el.remove();};
+    document.body.appendChild(el);
+    m=el;
+  }
+  var body=g('info-modal-body');
+  if(body) body.innerHTML=html+'<button onclick="g(\'info-modal\').remove()" style="width:100%;margin-top:16px;padding:12px;background:var(--s3);border:none;border-radius:10px;color:var(--dim);font-size:14px;cursor:pointer">Close</button>';
+}
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
   if(dCat==='my'){le.style.display='none';var h=g('dr-log-hdr');if(h)h.style.display='none';return;}
@@ -3545,10 +3651,10 @@ function rDrLog(){
   var _drDate=drChartDate||today();
   var td=DL.filter(function(d){return d.date===_drDate;}).sort(function(a,b){return b.id-a.id;});
   if(!td.length){le.innerHTML=D('style="padding:16px;text-align:center;color:var(--dim);font-size:14px;background:var(--s2);border-radius:13px"','No drinks logged yet.'); return;}
-  le.innerHTML=td.map(function(d){
+  le.innerHTML=td.map(function(d,_di){
     var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',fmtChartDate(d.date)):'';
     return D('class="ritem"',
-      D('class="ric" style="background:rgba(255,77,184,.1)"',d.e||'&#127866;')+
+      D('class="ric" style="background:rgba(255,77,184,.1);cursor:pointer" onclick="drinkInfo('+_di+')"',d.e||'&#127866;')+
       D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.date&&d.date!==today()?' - '+fmtChartDate(d.date):'')))+
       D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',
         D('class="rval" style="color:var(--pnk)"',fN(d.c))+
@@ -4408,13 +4514,13 @@ function launchApp(){
     {cat:'flowerchild',n:'Roasted Veggie Wrap FC',e:'&#127807;',p:'1 wrap',c:420,pr:12,cb:52,f:18,fi:8,su:6,na:620},
     {cat:'flowerchild',n:'Daily Green Juice FC',e:'&#129388;',p:'12 fl oz',c:80,pr:2,cb:18,f:0,fi:2,su:12,na:40},
     {cat:'flowerchild',n:'Avocado Toast FC',e:'&#129361;',p:'1 order',c:360,pr:10,cb:32,f:22,fi:8,su:2,na:480},
-    {cat:'dintaifung',n:'Xiao Long Bao 6pc',e:'&#127869;',p:'6 dumplings',c:310,pr:18,cb:32,f:12,fi:1,su:2,na:580},
-    {cat:'dintaifung',n:'Xiao Long Bao 10pc',e:'&#127869;',p:'10 dumplings',c:520,pr:30,cb:54,f:20,fi:2,su:3,na:960},
-    {cat:'dintaifung',n:'Truffle XLB 6pc',e:'&#127869;',p:'6 dumplings',c:340,pr:18,cb:32,f:16,fi:1,su:2,na:540},
-    {cat:'dintaifung',n:'Shrimp Pork XLB 6pc',e:'&#127869;',p:'6 dumplings',c:300,pr:16,cb:30,f:12,fi:1,su:2,na:560},
+    {cat:'dintaifung',n:'Xiao Long Bao 6pc',e:'&#129360;',p:'6 dumplings',c:310,pr:18,cb:32,f:12,fi:1,su:2,na:580},
+    {cat:'dintaifung',n:'Xiao Long Bao 10pc',e:'&#129360;',p:'10 dumplings',c:520,pr:30,cb:54,f:20,fi:2,su:3,na:960},
+    {cat:'dintaifung',n:'Truffle XLB 6pc',e:'&#129360;',p:'6 dumplings',c:340,pr:18,cb:32,f:16,fi:1,su:2,na:540},
+    {cat:'dintaifung',n:'Shrimp Pork XLB 6pc',e:'&#129360;',p:'6 dumplings',c:300,pr:16,cb:30,f:12,fi:1,su:2,na:560},
     {cat:'dintaifung',n:'Fried Rice Egg DTF',e:'&#127859;',p:'1 serving',c:480,pr:14,cb:68,f:16,fi:2,su:2,na:820},
     {cat:'dintaifung',n:'Dan Dan Noodles DTF',e:'&#127837;',p:'1 bowl',c:540,pr:20,cb:62,f:24,fi:4,su:6,na:980},
-    {cat:'dintaifung',n:'Spicy Wontons DTF',e:'&#127869;',p:'6 wontons',c:280,pr:14,cb:28,f:12,fi:2,su:4,na:680},
+    {cat:'dintaifung',n:'Spicy Wontons DTF',e:'&#129360;',p:'6 wontons',c:280,pr:14,cb:28,f:12,fi:2,su:4,na:680},
     {cat:'dintaifung',n:'Cucumber Salad DTF',e:'&#129388;',p:'1 serving',c:80,pr:2,cb:10,f:4,fi:2,su:6,na:520},
     {cat:'dintaifung',n:'Braised Beef Noodle DTF',e:'&#127837;',p:'1 bowl',c:620,pr:32,cb:68,f:22,fi:4,su:4,na:1240},
     {cat:'dintaifung',n:'Sesame Noodles DTF',e:'&#127837;',p:'1 serving',c:420,pr:12,cb:58,f:16,fi:3,su:8,na:680},
@@ -4424,7 +4530,7 @@ function launchApp(){
     {cat:'burgerlounge',n:'Bison Burger BL',e:'&#127828;',p:'1 burger',c:580,pr:36,cb:38,f:28,fi:2,su:7,na:820},
     {cat:'burgerlounge',n:'Skinny Fries BL',e:'&#127839;',p:'1 serving',c:320,pr:4,cb:44,f:14,fi:4,su:0,na:480},
     {cat:'burgerlounge',n:'Chocolate Shake BL',e:'&#127849;',p:'1 shake',c:680,pr:14,cb:92,f:28,fi:2,su:72,na:380},
-    {cat:'chipotle',n:'Burrito Bowl Chicken',e:'&#127859;',p:'1 bowl',c:620,pr:46,cb:62,f:18,fi:12,su:4,na:1280},
+    {cat:'chipotle',n:'Burrito Bowl Chicken',e:'&#127798;',p:'1 bowl',c:620,pr:46,cb:62,f:18,fi:12,su:4,na:1280},
     {cat:'chipotle',n:'Chicken Burrito',e:'&#127798;',p:'1 burrito',c:870,pr:50,cb:98,f:26,fi:14,su:6,na:1680},
     {cat:'chipotle',n:'Chicken Tacos 3pc',e:'&#127798;',p:'3 tacos',c:510,pr:36,cb:54,f:16,fi:6,su:2,na:1020},
     {cat:'chipotle',n:'Steak Bowl Chipotle',e:'&#129385;',p:'1 bowl',c:640,pr:42,cb:62,f:22,fi:12,su:4,na:1340},
@@ -4477,8 +4583,8 @@ function launchApp(){
     {n:'White Claw Seltzer',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
     {n:'Truly Hard Seltzer',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
     {n:'High Noon Vodka Soda',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
-    {n:'Aperol Spritz',e:'&#127859;',p:'1 cocktail',c:158,u:1.5,cat:'cocktail'},
-    {n:'Negroni',e:'&#127859;',p:'1 cocktail',c:200,u:2.2,cat:'cocktail'},
+    {n:'Aperol Spritz',e:'&#127864;',p:'1 cocktail',c:158,u:1.5,cat:'cocktail'},
+    {n:'Negroni',e:'&#127864;',p:'1 cocktail',c:200,u:2.2,cat:'cocktail'},
     {n:'GT Synergy Kombucha',e:'&#127861;',p:'16 fl oz',c:60,u:0.2,cat:'kombucha'},
     {n:'Health-Ade Kombucha',e:'&#127861;',p:'16 fl oz',c:70,u:0.2,cat:'kombucha'},
     {n:'Kevita Kombucha',e:'&#127861;',p:'15.2 fl oz',c:35,u:0.2,cat:'kombucha'},
