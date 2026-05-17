@@ -1368,12 +1368,8 @@ function calcWaterForDate(dt) {
 }
 function calcWaterL() { return calcWaterForDate(today()); }
 function calcWaterOz() {
-  var ml=0;
-  tDrinks().forEach(function(d){
-    if(d.cat==='water') ml+=(d.vol||0);
-    else if(d.cat==='coffee') ml+=(d.vol||0)*0.8;
-  });
-  return Math.round(ml/29.5735*10)/10; // fl oz
+  // Uses same logic as calcWaterForDate for consistency across all tabs
+  return Math.round(calcWaterForDate(today())*33.814*10)/10; // litres -> fl oz
 }
 function tCals() { return tMeals().reduce(function(a,m){return a+(m.cals||0);},0); }
 function tDCals() { return tDrinks().reduce(function(a,d){return a+(d.c||d.cals||0);},0); }
@@ -4333,7 +4329,7 @@ function rHistory(){
              ['&#10084;',(selFlSnap.rhr>0?Math.round(selFlSnap.rhr)+' bpm':'--'),'RHR','var(--red)'],
              ['&#128167;',(function(){
               var _wl=calcWaterForDate(histDate);
-              return _wl>0?fD(_wl*33.814,0)+' oz':'--';
+              return _wl>0?fD(_wl*33.814,1)+' oz':'--';
             }()),'water','var(--cyn)']
             ].map(function(t){
               return D('style="background:var(--s3);border-radius:11px;padding:10px 4px;text-align:center;border:.5px solid var(--b2)"',
