@@ -679,8 +679,8 @@ body { height: 100dvh; }
           <div class="pill" onclick="drCat('coffee',this)">&#9749; Coffee</div>
           <div class="pill" onclick="drCat('water',this)">&#128167; Water</div>
           <div class="pill" onclick="drCat('choc',this)">&#127851; Chocolate</div>
-          <div class="pill" onclick="drCat('prosecco',this)">&#127867; Prosecco</div>
-          <div class="pill" onclick="drCat('seltzer',this)">&#128167; Seltzers</div>
+          <div class="pill" onclick="drCat('prosecco',this)">&#127870; Prosecco</div>
+          <div class="pill" onclick="drCat('seltzer',this)">&#128166; Seltzers</div>
           <div class="pill" onclick="drCat('kombucha',this)">&#127861; Kombucha</div>
           <div class="pill" onclick="drCat('tea',this)">&#129751; Tea</div>
         </div>
@@ -1064,6 +1064,14 @@ body { height: 100dvh; }
         <option value="meals">🍽 Meals</option>
         <option value="fastfood">🍔 Fast Food</option>
         <option value="sauces">🫙 Sauces</option>
+        <option value="flowerchild">&#127807; Flower Child</option>
+        <option value="dintaifung">&#127869; Din Tai Fung</option>
+        <option value="burgerlounge">&#127828; Burger Lounge</option>
+        <option value="chipotle">&#127798; Chipotle</option>
+        <option value="pandaexpress">&#127831; Panda Express</option>
+        <option value="panera">&#127869; Panera Bread</option>
+        <option value="innout">&#127828; In-N-Out</option>
+        <option value="kebabshop">&#129361; The Kebab Shop</option>
       </select>
       <!-- Meal type -->
       <div class="flbl">Meal Type</div>
@@ -1150,6 +1158,9 @@ body { height: 100dvh; }
         <option value="tea">🍵 Tea</option>
         <option value="water">💧 Water</option>
         <option value="starbucks">☕ Starbucks</option>
+        <option value="prosecco">&#127870; Prosecco/Champagne</option>
+        <option value="seltzer">&#128166; Seltzers</option>
+        <option value="kombucha">&#127861; Kombucha</option>
         <option value="choc">🍫 Chocolate</option>
       </select>
     </div>
@@ -4412,13 +4423,13 @@ function launchApp(){
   ];
   _rf.forEach(function(f){FOODS.push(f);});
   var _rd=[
-    {n:'Prosecco Glass',e:'&#127867;',p:'5 fl oz',c:98,u:1.4,cat:'prosecco'},
-    {n:'Champagne Glass',e:'&#127867;',p:'5 fl oz',c:95,u:1.4,cat:'prosecco'},
-    {n:'Prosecco Bottle',e:'&#127867;',p:'750ml',c:585,u:8.6,cat:'prosecco'},
-    {n:'Champagne Bottle',e:'&#127867;',p:'750ml',c:570,u:8.6,cat:'prosecco'},
-    {n:'White Claw Seltzer',e:'&#128167;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
-    {n:'Truly Hard Seltzer',e:'&#128167;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
-    {n:'High Noon Vodka Soda',e:'&#128167;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
+    {n:'Prosecco Glass',e:'&#127870;',p:'5 fl oz',c:98,u:1.4,cat:'prosecco'},
+    {n:'Champagne Glass',e:'&#127870;',p:'5 fl oz',c:95,u:1.4,cat:'prosecco'},
+    {n:'Prosecco Bottle',e:'&#127870;',p:'750ml',c:585,u:8.6,cat:'prosecco'},
+    {n:'Champagne Bottle',e:'&#127870;',p:'750ml',c:570,u:8.6,cat:'prosecco'},
+    {n:'White Claw Seltzer',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
+    {n:'Truly Hard Seltzer',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
+    {n:'High Noon Vodka Soda',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
     {n:'Aperol Spritz',e:'&#127859;',p:'1 cocktail',c:158,u:1.5,cat:'cocktail'},
     {n:'Negroni',e:'&#127859;',p:'1 cocktail',c:200,u:2.2,cat:'cocktail'},
     {n:'GT Synergy Kombucha',e:'&#127861;',p:'16 fl oz',c:60,u:0.2,cat:'kombucha'},
