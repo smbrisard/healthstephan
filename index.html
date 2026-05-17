@@ -3326,7 +3326,7 @@ function rSleep() {
   var le=g('sl-last'); if(!le) return;
   if(last){ var ss=slSt(last.hours); le.innerHTML=D('style="display:flex;align-items:baseline;gap:9px;margin-bottom:10px"',D('style="font-family:var(--mn);font-size:44px;font-weight:800;color:var(--blu);line-height:1;letter-spacing:-1px"',hHM(last.hours))+D('class="badge '+ss.c+'"',ss.l))+D('style="font-size:13px;color:var(--dim)"',last.bedtime+' to '+last.wake+' - '+fmtChartDate(last.date))+D('class="callout ci" style="margin-top:10px"',S('','&#128161;')+S('',slAdv(last.hours))); }
   else { le.innerHTML=D('style="text-align:center;color:var(--dim);font-size:14px;padding:8px"','No sleep logged. Tap + to add.'); }
-  var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<1)mxH=8;
+  var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<7)mxH=8; // ensure goal line always visible
   var be=g('sl-bars'), bl=g('sl-lbls');
   if(be){
   var VW=280,VH=200,n=recent.length;
@@ -3337,7 +3337,7 @@ function rSleep() {
       var x=i*colW+1,y=VH-bh-2;
       var slS=slSt(e.hours),col=slS.c==='bg'?'#4da6ff':slS.c==='ba'?'#ffb830':'#ff3b5c';
       return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+col+'" rx="2"/>'
-        +'<text x="'+(x+bw/2)+'" y="'+(y>14?y-3:y+bh+9)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+hHM(e.hours)+'</text>';
+        +'<text x="'+(x+bw/2)+'" y="'+(y>14?y-3:y+bh+9)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.75)" font-family="sans-serif">'+hHM(e.hours)+'</text>';
     }).join('');
     var _gY=Math.round(VH-3-(7/mxH)*175);
     var _avV=recent.length?recent.reduce(function(a,e){return a+e.hours;},0)/recent.length:0;
@@ -3351,7 +3351,7 @@ function rSleep() {
     be.innerHTML='<svg width="100%" height="'+VH+'" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+rects+_gL+_aL+'</svg>';
   }
 }
-  if(bl) bl.innerHTML=recent.map(function(e){return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
+  if(bl) bl.innerHTML=recent.map(function(e){return D('style="flex:1;text-align:center;font-size:11px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
   var _slLeg=g('sl-legend');
   if(_slLeg) _slLeg.innerHTML=
     '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px">'
