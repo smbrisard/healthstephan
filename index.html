@@ -1408,7 +1408,7 @@ function stCol(c) { if(c==='bg') return 'var(--grn)'; if(c==='ba') return 'var(-
 
 // ═══ TOAST ═══
 var _tt = null;
-function toast(msg, warn) {
+function toast(msg, warn, dur) {
   var t = g('toast');
   if (!t) return;
   if (_tt) { clearTimeout(_tt); _tt = null; }
@@ -1422,7 +1422,7 @@ function toast(msg, warn) {
   _tt = setTimeout(function() {
     if (t) t.style.opacity = '0';
     _tt = null;
-  }, 2300);
+  }, dur||2300);
 }
 
 // ═══ NAVIGATION ═══
