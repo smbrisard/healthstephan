@@ -639,8 +639,9 @@ body { height: 100dvh; }
         <div class="slbl">Last Night</div><div class="card" style="margin-bottom:13px" id="sl-last"></div>
         <div class="slbl">7-Day Chart</div>
         <div class="card" style="margin-bottom:13px">
-          <div style="display:flex;gap:5px;align-items:flex-end;height:124px" id="sl-bars"></div>
+          <div style="display:flex;gap:5px;align-items:flex-end;height:200px" id="sl-bars"></div>
           <div style="display:flex;gap:5px;margin-top:5px" id="sl-lbls"></div>
+          <div id="sl-legend"></div>
         </div>
         <div class="g3" style="margin-bottom:13px">
           <div class="card" style="text-align:center;padding:11px 6px"><div style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--blu)" id="sl-avg">--</div><div style="font-size:11px;color:var(--dim);margin-top:2px">Avg</div></div>
@@ -3328,27 +3329,38 @@ function rSleep() {
   var mxH=recent.length?Math.max.apply(null,recent.map(function(e){return e.hours;})):8; if(mxH<1)mxH=8;
   var be=g('sl-bars'), bl=g('sl-lbls');
   if(be){
-  var VW=280,VH=120,n=recent.length;
+  var VW=280,VH=200,n=recent.length;
   if(n>0){
     var colW=Math.floor(VW/n),bw=colW-3;
     var rects=recent.map(function(e,i){
-      var pc=e.hours/mxH,bh=Math.max(Math.round(pc*100),4);
+      var pc=e.hours/mxH,bh=Math.max(Math.round(pc*175),5);
       var x=i*colW+1,y=VH-bh-2;
       var slS=slSt(e.hours),col=slS.c==='bg'?'#4da6ff':slS.c==='ba'?'#ffb830':'#ff3b5c';
       return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+col+'" rx="2"/>'
         +'<text x="'+(x+bw/2)+'" y="'+(y>14?y-3:y+bh+9)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.5)" font-family="sans-serif">'+hHM(e.hours)+'</text>';
     }).join('');
-    var _gY=Math.round(VH-3-(7/mxH)*100);
+    var _gY=Math.round(VH-3-(7/mxH)*175);
     var _avV=recent.length?recent.reduce(function(a,e){return a+e.hours;},0)/recent.length:0;
-    var _aY=_avV>0?Math.round(VH-3-(_avV/mxH)*100):0;
-    var _gL='<line x1="4" y1="'+_gY+'" x2="'+VW+'" y2="'+_gY+'" stroke="rgba(0,212,170,.9)" stroke-width="2" stroke-dasharray="6,4"/>'
-      +'<text x="6" y="'+(_gY-3)+'" font-size="9" font-weight="bold" fill="rgba(0,212,170,1)" font-family="sans-serif">7h goal</text>';
-    var _aL=_avV>0&&Math.abs(_avV-7)>0.2?'<line x1="4" y1="'+_aY+'" x2="'+VW+'" y2="'+_aY+'" stroke="rgba(255,184,48,.9)" stroke-width="1.5" stroke-dasharray="4,3"/>'
-      +'<text x="6" y="'+(_aY-3)+'" font-size="9" fill="rgba(255,184,48,1)" font-family="sans-serif">'+hHM(_avV)+' avg</text>':'';
+    var _aY=_avV>0?Math.round(VH-3-(_avV/mxH)*175):0;
+    var _gL='<line x1="0" y1="'+_gY+'" x2="'+VW+'" y2="'+_gY+'" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-dasharray="8,4"/>'
+      +'<rect x="'+(VW-42)+'" y="'+(_gY-12)+'" width="40" height="13" rx="3" fill="rgba(255,255,255,.15)"/>'
+      +'<text x="'+(VW-22)+'" y="'+(_gY-2)+'" text-anchor="middle" font-size="9" font-weight="bold" fill="rgba(255,255,255,.9)" font-family="sans-serif">7h goal</text>';
+    var _aL=_avV>0&&Math.abs(_avV-7)>0.2?'<line x1="0" y1="'+_aY+'" x2="'+VW+'" y2="'+_aY+'" stroke="rgba(180,140,255,.85)" stroke-width="1.5" stroke-dasharray="5,3"/>'
+      +'<rect x="2" y="'+(_aY-12)+'" width="36" height="13" rx="3" fill="rgba(180,140,255,.2)"/>'
+      +'<text x="20" y="'+(_aY-2)+'" text-anchor="middle" font-size="9" fill="rgba(200,160,255,1)" font-family="sans-serif">'+hHM(_avV)+'</text>':'';
     be.innerHTML='<svg width="100%" height="'+VH+'" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+rects+_gL+_aL+'</svg>';
   }
 }
   if(bl) bl.innerHTML=recent.map(function(e){return D('style="flex:1;text-align:center;font-size:10px;color:var(--dim)"',new Date(e.date+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));}).join('');
+  var _slLeg=g('sl-legend');
+  if(_slLeg) _slLeg.innerHTML=
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px">'
+    +'<div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:2px;background:rgba(255,255,255,.7);border-top:2px dashed rgba(255,255,255,.7)"></div><span style="font-size:10px;color:rgba(255,255,255,.7)">7h goal</span></div>'
+    +(_avV>0&&Math.abs(_avV-7)>0.2?'<div style="display:flex;align-items:center;gap:5px"><div style="width:18px;height:2px;background:rgba(200,160,255,.85);border-top:2px dashed rgba(200,160,255,.85)"></div><span style="font-size:10px;color:rgba(200,160,255,.85)">'+hHM(_avV)+' avg</span></div>':'')
+    +'<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:2px;background:#4da6ff"></div><span style="font-size:10px;color:var(--dim)">&ge;7h</span></div>'
+    +'<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:2px;background:#ffb830"></div><span style="font-size:10px;color:var(--dim)">6-7h</span></div>'
+    +'<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:2px;background:#ff3b5c"></div><span style="font-size:10px;color:var(--dim)">&lt;6h</span></div>'
+    +'</div>';
   var hrs=sorted.map(function(e){return e.hours;});
   set('sl-avg',hrs.length?hHM(hrs.reduce(function(a,b){return a+b;},0)/hrs.length):'--');
   set('sl-best',hrs.length?hHM(Math.max.apply(null,hrs)):'--');
@@ -4395,9 +4407,13 @@ function rHistory(){
               D('style="font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?700:400)+';margin-top:4px"',wk2));
           }).join(''))+
           D('style="position:absolute;left:0;right:0;bottom:'+Math.round(7/mxSl*100)+'px;pointer-events:none"',
-            '<div style="border-top:2px dashed rgba(0,212,170,.9)"><span style="float:right;font-size:9px;color:rgba(0,212,170,1);font-weight:700;line-height:0;margin-top:-9px;margin-right:2px;background:var(--s2);padding:1px 3px">7h</span></div>')+
+            '<div style="border-top:2px dashed rgba(255,255,255,.6)"><span style="float:right;font-size:9px;color:rgba(255,255,255,.8);font-weight:700;line-height:0;margin-top:-9px;margin-right:2px;background:var(--s2);padding:1px 3px;border-radius:2px">7h</span></div>')+
           D('style="position:absolute;left:0;right:0;bottom:'+Math.round(avSl/mxSl*100)+'px;pointer-events:none"',
-            '<div style="border-top:1.5px dashed rgba(255,184,48,.8)"><span style="float:left;font-size:9px;color:rgba(255,184,48,1);font-weight:700;line-height:0;margin-top:-9px;margin-left:2px;background:var(--s2);padding:1px 3px">'+hHM(avSl)+'</span></div>')
+            '<div style="border-top:1.5px dashed rgba(200,160,255,.8)"><span style="float:left;font-size:9px;color:rgba(200,160,255,1);font-weight:700;line-height:0;margin-top:-9px;margin-left:2px;background:var(--s2);padding:1px 3px;border-radius:2px">'+hHM(avSl)+'</span></div>')
+        )+
+        D('style="display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 10px"',
+          '<div style="display:flex;align-items:center;gap:4px"><div style="width:16px;border-top:2px dashed rgba(255,255,255,.6)"></div><span style="font-size:9px;color:rgba(255,255,255,.7)">7h goal</span></div>'
+          +(avSl>0?'<div style="display:flex;align-items:center;gap:4px"><div style="width:16px;border-top:2px dashed rgba(200,160,255,.8)"></div><span style="font-size:9px;color:rgba(200,160,255,1)">'+hHM(avSl)+' avg</span></div>':'')
         )+
         D('style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"',
           D('style="text-align:center;background:var(--s3);border-radius:11px;padding:10px"',D('style="font-family:var(--mn);font-size:17px;font-weight:800;color:var(--blu)"',hHM(avSl))+D('style="font-size:11px;color:var(--dim);margin-top:3px"','avg'))+
