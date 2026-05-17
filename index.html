@@ -368,6 +368,7 @@ body { height: 100dvh; }
                 </linearGradient></defs>
                 <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/>
                 <circle id="hm-ring" cx="48" cy="48" r="40" fill="none" stroke="url(#fgFood)" stroke-width="10" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round"/>
+                <circle id="hm-ring-over" cx="48" cy="48" r="40" fill="none" stroke="#ff4444" stroke-width="10" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" style="display:none"/>
               </svg>
               <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
                 <div style="font-family:var(--mn);font-size:18px;font-weight:800;color:var(--grn)" id="hm-ringv">0</div>
@@ -1552,13 +1553,23 @@ function rHome() {
   var ring=g('hm-ring');
   if(ring){
     ring.style.strokeDashoffset=251-(251*Math.min(pct,1));
-    // Red when over goal, green/gradient when under
-    ring.setAttribute('stroke',pct>1?'#ff4444':'url(#fgFood)');
-    ring.style.stroke=pct>1?'#ff4444':'';
+    // Red when over goal - must use setAttribute for SVG elements
+    // Use overlay ring for red (gradient can't be overridden in Safari SVG)
+    var _ringOver=g('hm-ring-over');
+    if(pct>1){
+      ring.style.display='none';
+      if(_ringOver){_ringOver.style.display='';_ringOver.style.strokeDashoffset=ring.style.strokeDashoffset;}
+    } else {
+      ring.style.display='';
+      if(_ringOver) _ringOver.style.display='none';
+    }
   }
   set('hm-ringv',fN(eaten));
   var _rvEl=g('hm-ringv');
-  if(_rvEl) _rvEl.style.color=pct>1?'var(--red)':'var(--grn)'; set('hm-goallbl',fN(P.calTarget)+' kcal');
+  if(_rvEl){
+    _rvEl.style.color=pct>1?'var(--red)':'var(--grn)';
+    _rvEl.style.webkitTextFillColor=pct>1?'var(--red)':'var(--grn)';
+  } set('hm-goallbl',fN(P.calTarget)+' kcal');
   var _remEl=g('hm-remain');
   if(_remEl){
     if(rem>0){_remEl.textContent=fN(rem)+' remaining';_remEl.style.color='var(--grn)';}
