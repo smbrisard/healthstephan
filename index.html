@@ -1538,22 +1538,22 @@ function rWeeklySummary(){
     '<div class="card" style="margin-bottom:14px">'+
     '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:12px">7-DAY AVERAGES</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px;text-align:center">'+
       '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#128293; Calories</div>'+
       '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--txt)">'+fN(_avgCal)+'</div>'+
       '<div style="font-size:10px;color:var(--dim)">kcal / day</div>'+
     '</div>'+
-    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px;text-align:center">'+
       '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#128564; Sleep</div>'+
       '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:'+(_avgSleep>=7?'var(--grn)':_avgSleep>=6?'var(--amb)':'var(--red)')+'">'+(_avgSleep>0?hHM(_avgSleep):'--')+'</div>'+
       '<div style="font-size:10px;color:var(--dim)">avg / night</div>'+
     '</div>'+
-    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px;text-align:center">'+
       '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#127939; Steps</div>'+
       '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--txt)">'+fN(_avgSteps)+'</div>'+
       '<div style="font-size:10px;color:var(--dim)">avg / day</div>'+
     '</div>'+
-    '<div style="background:var(--s3);border-radius:10px;padding:10px">'+
+    '<div style="background:var(--s3);border-radius:10px;padding:10px;text-align:center">'+
       '<div style="font-size:10px;color:var(--dim);margin-bottom:3px">&#129385; Protein</div>'+
       '<div style="font-family:var(--mn);font-size:20px;font-weight:800;color:var(--grn)">'+(_avgPr>0?_avgPr+'g':'--')+'</div>'+
       '<div style="font-size:10px;color:var(--dim)">avg / day</div>'+
@@ -2919,6 +2919,32 @@ function rFoodGrid() {
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
+
+function foodInfo(id){
+  var m=ML.find(function(x){return x.id===id;});
+  if(!m) return;
+  var _pr=Math.round(m.protein||0),_cb=Math.round(m.carbs||0),_ft=Math.round(m.fat||0);
+  var _su=Math.round(m.sugar||0),_fi=Math.round(m.fiber||0),_na=Math.round(m.sodium||0);
+  var _sf=Math.round(m.sf||0),_ch=Math.round(m.ch||0);
+  var info='<div style="padding:4px 0">'+
+    '<div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:2px">'+(m.emoji||'&#127869;')+' '+m.name+'</div>'+
+    '<div style="font-size:12px;color:var(--dim);margin-bottom:12px">'+(m.serving||'1 serving')+'</div>'+
+    '<div style="font-size:32px;font-weight:800;font-family:var(--mn);color:var(--grn);margin-bottom:12px">'+(m.cals||0)+'<span style="font-size:14px;color:var(--dim)"> kcal</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--grn)">'+_pr+'g</div><div style="font-size:10px;color:var(--dim)">Protein</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--blu)">'+_cb+'g</div><div style="font-size:10px;color:var(--dim)">Carbs</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--amb)">'+_ft+'g</div><div style="font-size:10px;color:var(--dim)">Fat</div></div>'+
+    '<div style="background:var(--s3);border-radius:8px;padding:8px;text-align:center"><div style="font-size:14px;font-weight:700;color:var(--pur)">'+_su+'g</div><div style="font-size:10px;color:var(--dim)">Sugar</div></div>'+
+    '</div>'+
+    (_fi>0||_na>0||_sf>0||_ch>0?'<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--dim)">'+
+      (_fi>0?'<span>Fiber: '+_fi+'g</span>':'')+
+      (_na>0?'<span>Sodium: '+_na+'mg</span>':'')+
+      (_sf>0?'<span>Sat Fat: '+_sf+'g</span>':'')+
+      (_ch>0?'<span>Cholesterol: '+_ch+'mg</span>':'')+
+    '</div>':'')+
+  '</div>';
+  showInfoModal(info);
+}
 function rFoodLog() {
   var le=g('food-log'); if(!le) return;
   var logDate=foodChartDate||today();
@@ -2935,7 +2961,7 @@ function rFoodLog() {
   var col=secColors[mealTab]||'var(--txt)';
   var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
   items.forEach(function(m){
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18;cursor:pointer" onclick="foodInfo('+m.id+')"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals)+' kcal'))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals))+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
   });
   le.innerHTML=html;
 }
@@ -3606,9 +3632,8 @@ function rDrGrid(){
   }).join('');
 }
 
-function drinkInfo(idx){
-  var _todayDr=DL.filter(function(x){return x.date===(drChartDate||today());});
-  var d=_todayDr[idx];
+function drinkInfo(id){
+  var d=DL.find(function(x){return x.id===id;});
   if(!d) return;
   var _u=d.u||0,_na=d.sodium||d.na||0,_cb=d.carbs||d.cb||0,_su=d.sugar||d.sg||0;
   var _pr=d.prot||d.pr||0,_ft=d.fat||d.f||0,_fi=d.fiber||d.fi||0;
@@ -3654,7 +3679,7 @@ function rDrLog(){
   le.innerHTML=td.map(function(d,_di){
     var dateLbl=d.date&&d.date!==today()?D('style="font-size:10px;color:var(--dim)"',fmtChartDate(d.date)):'';
     return D('class="ritem"',
-      D('class="ric" style="background:rgba(255,77,184,.1);cursor:pointer" onclick="drinkInfo('+_di+')"',d.e||'&#127866;')+
+      D('class="ric" style="background:rgba(255,77,184,.1);cursor:pointer" onclick="drinkInfo('+d.id+')"',d.e||'&#127866;')+
       D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.date&&d.date!==today()?' - '+fmtChartDate(d.date):'')))+
       D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',
         D('class="rval" style="color:var(--pnk)"',fN(d.c))+
