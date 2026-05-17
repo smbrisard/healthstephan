@@ -674,7 +674,7 @@ body { height: 100dvh; }
           <div class="pill" onclick="drCat('starbucks',this)">&#9749; Starbucks</div>
           <div class="pill" onclick="drCat('beer',this)">&#127866; Beer</div>
           <div class="pill" onclick="drCat('wine',this)">&#127863; Wine</div>
-          <div class="pill" onclick="drCat('spirits',this)">&#129346; Spirits</div>
+          <div class="pill" onclick="drCat('spirits',this)">&#129347; Spirits</div>
           <div class="pill" onclick="drCat('soft',this)">&#129380; Soft Drinks</div>
           <div class="pill" onclick="drCat('coffee',this)">&#9749; Coffee</div>
           <div class="pill" onclick="drCat('water',this)">&#128167; Water</div>
@@ -1552,10 +1552,18 @@ function rHome() {
   var ring=g('hm-ring');
   if(ring){
     ring.style.strokeDashoffset=251-(251*Math.min(pct,1));
-    ring.style.stroke=pct>1?'var(--red)':'';
+    // Red when over goal, green/gradient when under
+    ring.setAttribute('stroke',pct>1?'#ff4444':'url(#fgFood)');
+    ring.style.stroke=pct>1?'#ff4444':'';
   }
-  set('hm-ringv',fN(eaten)); set('hm-goallbl',fN(P.calTarget)+' kcal');
-  set('hm-remain',rem>0?fN(rem)+' remaining':'Limit reached');
+  set('hm-ringv',fN(eaten));
+  var _rvEl=g('hm-ringv');
+  if(_rvEl) _rvEl.style.color=pct>1?'var(--red)':'var(--grn)'; set('hm-goallbl',fN(P.calTarget)+' kcal');
+  var _remEl=g('hm-remain');
+  if(_remEl){
+    if(rem>0){_remEl.textContent=fN(rem)+' remaining';_remEl.style.color='var(--grn)';}
+    else{_remEl.textContent='Limit exceeded!';_remEl.style.color='var(--red)';}
+  }
   // Consider sync as today if date matches OR if synced recently (within 4hrs)
   // Show daily metrics if synced within 20 hours
   var _syncAgeHrs=P.lastSyncAt?(Date.now()-P.lastSyncAt)/3600000:999;
