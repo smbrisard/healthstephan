@@ -1550,25 +1550,27 @@ function rHome() {
       }
     }
   }
+  // Ring: compute offset first, then show correct ring
+  var _ringOffset=251-(251*Math.min(pct,1));
   var ring=g('hm-ring');
-  if(ring){
-    ring.style.strokeDashoffset=251-(251*Math.min(pct,1));
-    // Red when over goal - must use setAttribute for SVG elements
-    // Use overlay ring for red (gradient can't be overridden in Safari SVG)
-    var _ringOver=g('hm-ring-over');
-    if(pct>1){
-      ring.style.display='none';
-      if(_ringOver){_ringOver.style.display='';_ringOver.style.strokeDashoffset=ring.style.strokeDashoffset;}
-    } else {
-      ring.style.display='';
-      if(_ringOver) _ringOver.style.display='none';
+  var _ringOver=g('hm-ring-over');
+  if(pct>1){
+    // Over goal: hide gradient ring, show red ring
+    if(ring){ring.style.display='none';}
+    if(_ringOver){
+      _ringOver.style.display='';
+      _ringOver.style.strokeDashoffset=_ringOffset;
     }
+  } else {
+    // Under goal: show gradient ring, hide red ring
+    if(ring){ring.style.display='';ring.style.strokeDashoffset=_ringOffset;}
+    if(_ringOver){_ringOver.style.display='none';}
   }
   set('hm-ringv',fN(eaten));
   var _rvEl=g('hm-ringv');
   if(_rvEl){
-    _rvEl.style.color=pct>1?'var(--red)':'var(--grn)';
-    _rvEl.style.webkitTextFillColor=pct>1?'var(--red)':'var(--grn)';
+    var _rvColor=pct>1?'#ff4444':'#00d4aa';
+    _rvEl.style.cssText='color:'+_rvColor+';-webkit-text-fill-color:'+_rvColor+';font-family:var(--mn);font-size:18px;font-weight:800';
   } set('hm-goallbl',fN(P.calTarget)+' kcal');
   var _remEl=g('hm-remain');
   if(_remEl){
