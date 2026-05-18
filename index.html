@@ -3914,7 +3914,7 @@ function rFitness(){
       if(_bs.date>=_tds) continue;
       if(!_bioSnap.rhr&&_bs.rhr&&_bs.rhr!==58&&_bs.rhr!==P.rhr) _bioSnap.rhr=_bs.rhr;
       if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86&&_bs.hrv!==P.hrv) _bioSnap.hrv=_bs.hrv;
-      if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
+      if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&_bs.spo2<99&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
       if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr!==P.rr) _bioSnap.rr=_bs.rr;
       if(!_bioSnap.sleep&&(_bs.sleep||0)>=3&&_bs.sleep!==P.sleepLast) _bioSnap.sleep=_bs.sleep;
       if(_bioSnap.rhr&&_bioSnap.hrv&&_bioSnap.spo2&&_bioSnap.rr&&_bioSnap.sleep) break;
@@ -3938,6 +3938,8 @@ function rFitness(){
     }
     // Reject default initialisation values - these are never real measurements
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14};
+    // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
+    if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
