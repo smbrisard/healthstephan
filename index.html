@@ -517,7 +517,6 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('dairy',this)">&#129371; Dairy</div>
           <div class="pill" onclick="setFCat('grains',this)">&#127806; Grains</div>
           <div class="pill" onclick="setFCat('veg',this)">&#129388; Vegetables</div>
-          <div class="pill" onclick="setFCat('salads',this)">&#129367; Salads</div>
           <div class="pill" onclick="setFCat('fruit',this)">&#127815; Fruit</div>
           <div class="pill" onclick="setFCat('breakfast',this)">&#127371; Breakfast</div>
           <div class="pill" onclick="setFCat('snacks',this)">&#127894; Snacks</div>
@@ -533,7 +532,7 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('panera',this)">&#127869; Panera</div>
           <div class="pill" onclick="setFCat('innout',this)">&#127828; In-N-Out</div>
           <div class="pill" onclick="setFCat('kebabshop',this)">&#129361; Kebab Shop</div>
-          
+          <div class="pill" onclick="setFCat('meals',this)">🍽 Meals</div>
           <div class="pill" onclick="setFCat('fastfood',this)">🍔 Fast Food</div>
         </div>
         <!-- Quick Add row - matches drinks layout -->
@@ -1063,7 +1062,6 @@ body { height: 100dvh; }
         <option value="dairy">🧀 Dairy</option>
         <option value="grains">🍞 Grains</option>
         <option value="veg">🥦 Vegetables</option>
-        <option value="salads">&#129367; Salads</option>
         <option value="fruit">🍎 Fruit</option>
         <option value="breakfast">🥣 Breakfast</option>
         <option value="snacks">🌰 Snacks</option>
@@ -2090,8 +2088,8 @@ var FOODS=[
   {cat:'dairy',n:'Greek Yogurt 200g',e:'&#129371;',p:'200g full fat',c:177,pr:15,cb:7,f:11,fi:0,su:7,as:0,sf:6,na:66,ch:30,po:260,ca:200,ir:0.1,vc:0,vd:0.4,va:32},
   {cat:'dairy',n:'Cheddar 30g',e:'&#129472;',p:'1 slice 30g',c:120,pr:7,cb:0.4,f:10,fi:0,su:0,as:0,sf:6,na:180,ch:30,po:42,ca:200,ir:0.2,vc:0,vd:0.2,va:70},
   {cat:'dairy',n:'Mozzarella 50g',e:'&#129472;',p:'50g',c:142,pr:10,cb:1,f:11,fi:0,su:0,as:0,sf:7,na:165,ch:37,po:21,ca:182,ir:0.1,vc:0,vd:0.2,va:56},
-  {cat:'dairy',n:'Cream Cheese 30g',e:'&#129371;',p:'2 tbsp',c:100,pr:2,cb:1,f:10,fi:0,su:1,as:0,sf:6,na:93,ch:32,po:37,ca:30,ir:0,vc:0,vd:0.3,va:90},
-  {cat:'dairy',n:'Butter 10g',e:'&#129371;',p:'1 tsp',c:72,pr:0.1,cb:0,f:8,fi:0,su:0,as:0,sf:5,na:58,ch:22,po:2,ca:2,ir:0,vc:0,vd:0.1,va:65},
+  {cat:'dairy',n:'Cream Cheese 30g',e:'&#129472;',p:'2 tbsp',c:100,pr:2,cb:1,f:10,fi:0,su:1,as:0,sf:6,na:93,ch:32,po:37,ca:30,ir:0,vc:0,vd:0.3,va:90},
+  {cat:'dairy',n:'Butter 10g',e:'&#129347;',p:'1 tsp',c:72,pr:0.1,cb:0,f:8,fi:0,su:0,as:0,sf:5,na:58,ch:22,po:2,ca:2,ir:0,vc:0,vd:0.1,va:65},
   {cat:'dairy',n:'Cottage Cheese 150g',e:'&#129371;',p:'150g pot',c:120,pr:17,cb:5,f:3,fi:0,su:4,as:0,sf:1.8,na:270,ch:15,po:150,ca:120,ir:0.1,vc:0,vd:0,va:60},
   // GRAINS
   {cat:'grains',n:'White Rice cooked 100g',e:'&#127834;',p:'100g cooked',c:130,pr:2.7,cb:28,f:0.3,fi:0.4,su:0,as:0,sf:0.1,na:1,ch:0,po:35,ca:10,ir:0.2,vc:0,vd:0,va:0},
@@ -2107,13 +2105,13 @@ var FOODS=[
   {cat:'grains',n:'Sweet Potato 150g',e:'&#129364;',p:'150g baked',c:130,pr:2,cb:30,f:0.1,fi:3.8,su:6,as:0,sf:0,na:55,ch:0,po:438,ca:38,ir:0.8,vc:20,vd:0,va:960},
   // VEG
   {cat:'veg',n:'Broccoli 100g',e:'&#129382;',p:'100g steamed',c:34,pr:2.8,cb:6.6,f:0.4,fi:2.6,su:1.7,as:0,sf:0.1,na:33,ch:0,po:316,ca:47,ir:0.7,vc:89,vd:0,va:62},
-  {cat:'veg',n:'Spinach 100g',e:'&#129401;',p:'100g raw',c:23,pr:2.9,cb:3.6,f:0.4,fi:2.2,su:0.4,as:0,sf:0.1,na:79,ch:0,po:558,ca:99,ir:2.7,vc:28,vd:0,va:469},
-  {cat:'veg',n:'Mixed Salad 100g',e:'&#129401;',p:'100g leaves',c:15,pr:1.3,cb:2,f:0.2,fi:1.8,su:1.4,as:0,sf:0,na:25,ch:0,po:200,ca:36,ir:0.9,vc:15,vd:0,va:120},
+  {cat:'veg',n:'Spinach 100g',e:'&#129382;',p:'100g raw',c:23,pr:2.9,cb:3.6,f:0.4,fi:2.2,su:0.4,as:0,sf:0.1,na:79,ch:0,po:558,ca:99,ir:2.7,vc:28,vd:0,va:469},
+  {cat:'veg',n:'Mixed Salad 100g',e:'&#129367;',p:'100g leaves',c:15,pr:1.3,cb:2,f:0.2,fi:1.8,su:1.4,as:0,sf:0,na:25,ch:0,po:200,ca:36,ir:0.9,vc:15,vd:0,va:120},
   {cat:'veg',n:'Avocado half',e:'&#129361;',p:'1 half ~100g',c:160,pr:2,cb:9,f:15,fi:6.7,su:0.7,as:0,sf:2.1,na:7,ch:0,po:485,ca:12,ir:0.6,vc:10,vd:0,va:7},
   {cat:'veg',n:'Avocado whole',e:'&#129361;',p:'1 whole ~200g',c:320,pr:4,cb:18,f:29,fi:13,su:1.3,as:0,sf:4.3,na:14,ch:0,po:970,ca:24,ir:1.2,vc:20,vd:0,va:14},
-  {cat:'veg',n:'Tomatoes 2 medium',e:'&#127813;',p:'2 medium 200g',c:36,pr:1.8,cb:7,f:0.4,fi:2.2,su:4.8,as:0,sf:0.1,na:10,ch:0,po:472,ca:20,ir:0.5,vc:28,vd:0,va:75},
-  {cat:'veg',n:'Cucumber half',e:'&#129401;',p:'Half cucumber 200g',c:24,pr:1.2,cb:4,f:0.2,fi:1.2,su:2.6,as:0,sf:0,na:4,ch:0,po:292,ca:30,ir:0.4,vc:6,vd:0,va:14},
-  {cat:'veg',n:'Bell Pepper',e:'&#127798;',p:'1 medium 120g',c:37,pr:1.2,cb:7.2,f:0.3,fi:2.5,su:5,as:0,sf:0,na:4,ch:0,po:251,ca:12,ir:0.6,vc:128,vd:0,va:157},
+  {cat:'veg',n:'Tomatoes 2 medium',e:'&#129367;',p:'2 medium 200g',c:36,pr:1.8,cb:7,f:0.4,fi:2.2,su:4.8,as:0,sf:0.1,na:10,ch:0,po:472,ca:20,ir:0.5,vc:28,vd:0,va:75},
+  {cat:'veg',n:'Cucumber half',e:'&#129367;',p:'Half cucumber 200g',c:24,pr:1.2,cb:4,f:0.2,fi:1.2,su:2.6,as:0,sf:0,na:4,ch:0,po:292,ca:30,ir:0.4,vc:6,vd:0,va:14},
+  {cat:'veg',n:'Bell Pepper',e:'&#129380;',p:'1 medium 120g',c:37,pr:1.2,cb:7.2,f:0.3,fi:2.5,su:5,as:0,sf:0,na:4,ch:0,po:251,ca:12,ir:0.6,vc:128,vd:0,va:157},
   {cat:'veg',n:'Onion medium',e:'&#129477;',p:'1 medium 110g',c:44,pr:1.2,cb:10,f:0.1,fi:1.9,su:4.7,as:0,sf:0,na:4,ch:0,po:157,ca:23,ir:0.2,vc:7,vd:0,va:0},
   {cat:'veg',n:'Mushrooms 100g',e:'&#127812;',p:'100g raw',c:22,pr:3.1,cb:3.3,f:0.3,fi:1,su:2,as:0,sf:0,na:5,ch:0,po:318,ca:3,ir:0.5,vc:3,vd:0.2,va:0},
   // FRUIT
@@ -2124,15 +2122,15 @@ var FOODS=[
   {cat:'fruit',n:'Strawberries 100g',e:'&#127827;',p:'100g',c:32,pr:0.7,cb:7.7,f:0.3,fi:2,su:4.9,as:0,sf:0,na:1,ch:0,po:153,ca:16,ir:0.4,vc:59,vd:0,va:1},
   {cat:'fruit',n:'Mango half',e:'&#129389;',p:'Half mango 165g',c:99,pr:1.4,cb:25,f:0.6,fi:2.6,su:23,as:0,sf:0.1,na:2,ch:0,po:277,ca:18,ir:0.2,vc:57,vd:0,va:181},
   // MEALS
-  {cat:'fastfood',n:'Margherita Pizza 2 slices',e:'&#127829;',p:'2 slices 280g',c:620,pr:28,cb:74,f:18,fi:4,su:6,as:2,sf:8,na:820,ch:42,po:310,ca:280,ir:3.2,vc:4,vd:0,va:120},
-  {cat:'salads',n:'Chicken Caesar Salad',e:'&#129367;',p:'1 bowl 350g',c:480,pr:38,cb:22,f:16,fi:3,su:3,as:1,sf:4,na:720,ch:88,po:680,ca:140,ir:2.4,vc:12,vd:0.4,va:180},
-  {cat:'grains',n:'Pasta Bolognese',e:'&#127837;',p:'1 serving 400g',c:580,pr:32,cb:68,f:18,fi:4,su:8,as:2,sf:6,na:680,ch:72,po:720,ca:80,ir:4.2,vc:6,vd:0.2,va:80},
-  {cat:'salads',n:'Greek Salad',e:'&#129367;',p:'1 bowl 320g',c:280,pr:9,cb:18,f:22,fi:5,su:8,as:0,sf:6,na:480,ch:28,po:520,ca:180,ir:1.8,vc:18,vd:0,va:140},
-  {cat:'meat',n:'Grilled Salmon',e:'&#129424;',p:'200g with veg',c:367,pr:46,cb:0,f:20,fi:0,su:0,as:0,sf:4,na:180,ch:110,po:880,ca:28,ir:1.0,vc:0,vd:22,va:60},
-  {cat:'fastfood',n:'Cheeseburger',e:'&#127828;',p:'1 burger',c:550,pr:30,cb:46,f:26,fi:2,su:10,as:4,sf:11,na:980,ch:90,po:440,ca:180,ir:3.8,vc:4,vd:0.2,va:80},
-  {cat:'meat',n:'Chicken Stir Fry',e:'&#129385;',p:'1 serving 350g',c:380,pr:32,cb:28,f:14,fi:5,su:8,as:2,sf:3,na:620,ch:80,po:620,ca:80,ir:2.4,vc:40,vd:0,va:280},
-  {cat:'meat',n:'Sushi Salmon Roll',e:'&#127833;',p:'8 pieces 220g',c:410,pr:22,cb:58,f:10,fi:2,su:4,as:2,sf:2,na:640,ch:38,po:390,ca:40,ir:1.2,vc:2,vd:8,va:60},
-  {cat:'breakfast',n:'Avocado Toast',e:'&#129361;',p:'2 slices',c:310,pr:8,cb:34,f:16,fi:8,su:2,as:0,sf:3,na:320,ch:0,po:600,ca:60,ir:2.8,vc:14,vd:0,va:18},
+  {cat:'meals',n:'Margherita Pizza 2 slices',e:'&#127829;',p:'2 slices 280g',c:620,pr:28,cb:74,f:18,fi:4,su:6,as:2,sf:8,na:820,ch:42,po:310,ca:280,ir:3.2,vc:4,vd:0,va:120},
+  {cat:'meals',n:'Chicken Caesar Salad',e:'&#129367;',p:'1 bowl 350g',c:480,pr:38,cb:22,f:16,fi:3,su:3,as:1,sf:4,na:720,ch:88,po:680,ca:140,ir:2.4,vc:12,vd:0.4,va:180},
+  {cat:'meals',n:'Pasta Bolognese',e:'&#127837;',p:'1 serving 400g',c:580,pr:32,cb:68,f:18,fi:4,su:8,as:2,sf:6,na:680,ch:72,po:720,ca:80,ir:4.2,vc:6,vd:0.2,va:80},
+  {cat:'meals',n:'Greek Salad',e:'&#129367;',p:'1 bowl 320g',c:280,pr:9,cb:18,f:22,fi:5,su:8,as:0,sf:6,na:480,ch:28,po:520,ca:180,ir:1.8,vc:18,vd:0,va:140},
+  {cat:'meals',n:'Grilled Salmon',e:'&#129424;',p:'200g with veg',c:367,pr:46,cb:0,f:20,fi:0,su:0,as:0,sf:4,na:180,ch:110,po:880,ca:28,ir:1.0,vc:0,vd:22,va:60},
+  {cat:'meals',n:'Cheeseburger',e:'&#127828;',p:'1 burger',c:550,pr:30,cb:46,f:26,fi:2,su:10,as:4,sf:11,na:980,ch:90,po:440,ca:180,ir:3.8,vc:4,vd:0.2,va:80},
+  {cat:'meals',n:'Chicken Stir Fry',e:'&#129382;',p:'1 serving 350g',c:380,pr:32,cb:28,f:14,fi:5,su:8,as:2,sf:3,na:620,ch:80,po:620,ca:80,ir:2.4,vc:40,vd:0,va:280},
+  {cat:'meals',n:'Sushi Salmon Roll',e:'&#127833;',p:'8 pieces 220g',c:410,pr:22,cb:58,f:10,fi:2,su:4,as:2,sf:2,na:640,ch:38,po:390,ca:40,ir:1.2,vc:2,vd:8,va:60},
+  {cat:'meals',n:'Avocado Toast',e:'&#129361;',p:'2 slices',c:310,pr:8,cb:34,f:16,fi:8,su:2,as:0,sf:3,na:320,ch:0,po:600,ca:60,ir:2.8,vc:14,vd:0,va:18},
   // BREAKFAST
   {cat:'breakfast',n:'Oatmeal with Berries',e:'&#129379;',p:'1 bowl 300g',c:342,pr:12,cb:54,f:8,fi:7,su:14,as:0,sf:1,na:120,ch:0,po:360,ca:120,ir:3.6,vc:8,vd:0,va:20},
   {cat:'breakfast',n:'Overnight Oats',e:'&#129379;',p:'350g jar',c:390,pr:16,cb:60,f:9,fi:8,su:18,as:4,sf:2,na:180,ch:10,po:400,ca:280,ir:4.0,vc:4,vd:1,va:20},
@@ -2145,7 +2143,7 @@ var FOODS=[
   {cat:'nuts',n:'Almonds 30g',e:'&#129372;',p:'30g ~23 nuts',c:164,pr:6,cb:6,f:14,fi:3.5,su:1.2,as:0,sf:1,na:1,ch:0,po:200,ca:76,ir:1.1,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Protein Bar',e:'&#128170;',p:'1 bar 60g',c:220,pr:20,cb:24,f:6,fi:4,su:8,as:6,sf:2,na:180,ch:10,po:160,ca:100,ir:1.0,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Dark Chocolate 40g',e:'&#127851;',p:'40g 85% cocoa',c:220,pr:3,cb:14,f:16,fi:4,su:6,as:5,sf:9,na:10,ch:0,po:280,ca:24,ir:3.2,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Rice Cakes x3',e:'&#129377;',p:'3 plain rice cakes',c:80,pr:2,cb:18,f:0.6,fi:0.4,su:0,as:0,sf:0,na:30,ch:0,po:30,ca:4,ir:0.4,vc:0,vd:0,va:0},
+  {cat:'snacks',n:'Rice Cakes x3',e:'&#127859;',p:'3 plain rice cakes',c:80,pr:2,cb:18,f:0.6,fi:0.4,su:0,as:0,sf:0,na:30,ch:0,po:30,ca:4,ir:0.4,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Hummus with Crackers',e:'&#129379;',p:'100g hummus 30g crackers',c:310,pr:10,cb:34,f:14,fi:7,su:2,as:0,sf:2,na:460,ch:0,po:320,ca:60,ir:2.4,vc:4,vd:0,va:20},
   {cat:'nuts',n:'Peanut Butter 2 tbsp',e:'&#129372;',p:'2 tbsp 32g',c:192,pr:8,cb:6,f:16,fi:2,su:3,as:1,sf:3,na:147,ch:0,po:189,ca:17,ir:0.6,vc:0,vd:0,va:0},
   {cat:'fruit',n:'Banana with Almond Butter',e:'&#127820;',p:'1 banana + 1 tbsp',c:201,pr:4,cb:30,f:8,fi:4,su:16,as:0,sf:1.5,na:2,ch:0,po:516,ca:23,ir:0.6,vc:10,vd:0,va:4},
@@ -2191,9 +2189,9 @@ var FOODS=[
   {cat:'dairy',n:'Gouda 30g',e:'&#129472;',p:'1 slice 30g',c:101,pr:7.1,cb:0.6,f:7.8,fi:0,su:0.4,as:0,sf:5,na:170,ch:24,po:34,ca:198,ir:0.1,vc:0,vd:0.1,va:56},
   {cat:'dairy',n:'Edam 30g',e:'&#129472;',p:'1 slice 30g',c:94,pr:7.4,cb:0.3,f:7.1,fi:0,su:0.1,as:0,sf:4.5,na:274,ch:22,po:34,ca:204,ir:0.1,vc:0,vd:0.1,va:62},
   {cat:'dairy',n:'Blue Cheese 30g',e:'&#129472;',p:'30g',c:101,pr:6.1,cb:0.7,f:8.2,fi:0,su:0.2,as:0,sf:5.3,na:400,ch:24,po:42,ca:150,ir:0.1,vc:0,vd:0.2,va:56},
-  {cat:'dairy',n:'Ricotta 100g',e:'&#129371;',p:'100g',c:174,pr:11.3,cb:3,f:12.5,fi:0,su:0.3,as:0,sf:7.9,na:84,ch:50,po:105,ca:207,ir:0.4,vc:0,vd:0.1,va:124},
+  {cat:'dairy',n:'Ricotta 100g',e:'&#129472;',p:'100g',c:174,pr:11.3,cb:3,f:12.5,fi:0,su:0.3,as:0,sf:7.9,na:84,ch:50,po:105,ca:207,ir:0.4,vc:0,vd:0.1,va:124},
   {cat:'dairy',n:'Halloumi 50g',e:'&#129472;',p:'2 slices grilled',c:157,pr:10,cb:0.5,f:12.5,fi:0,su:0.5,as:0,sf:8,na:640,ch:38,po:24,ca:350,ir:0.1,vc:0,vd:0.1,va:60},
-  {cat:'dairy',n:'Philadelphia 30g',e:'&#129371;',p:'2 tbsp 30g',c:90,pr:2,cb:1.5,f:8.5,fi:0,su:1,as:0,sf:5.5,na:130,ch:28,po:38,ca:40,ir:0,vc:0,vd:0.1,va:74},
+  {cat:'dairy',n:'Philadelphia 30g',e:'&#129472;',p:'2 tbsp 30g',c:90,pr:2,cb:1.5,f:8.5,fi:0,su:1,as:0,sf:5.5,na:130,ch:28,po:38,ca:40,ir:0,vc:0,vd:0.1,va:74},
   // ═══ DELI MEAT ═══
   {cat:'meat',n:'Ham slices 60g',e:'&#129385;',p:'2 slices 60g',c:62,pr:9.6,cb:0.8,f:2.1,fi:0,su:0.5,as:0,sf:0.7,na:800,ch:28,po:168,ca:5,ir:0.5,vc:0,vd:0.1,va:0},
   {cat:'meat',n:'Turkey slices 60g',e:'&#129385;',p:'2 slices 60g',c:66,pr:12,cb:1,f:1.5,fi:0,su:0.5,as:0,sf:0.4,na:680,ch:26,po:174,ca:8,ir:0.6,vc:0,vd:0.1,va:0},
@@ -2218,21 +2216,21 @@ var FOODS=[
   {cat:'nuts',n:'Cashews 30g',e:'&#129372;',p:'30g ~18 nuts',c:157,pr:5.2,cb:9,f:12.4,fi:0.9,su:1.7,as:0,sf:2.2,na:3,ch:0,po:160,ca:10,ir:1.9,vc:0,vd:0,va:0},
   {cat:'nuts',n:'Walnuts 30g',e:'&#129372;',p:'30g ~7 halves',c:196,pr:4.6,cb:4,f:19.6,fi:2,su:0.7,as:0,sf:1.8,na:0,ch:0,po:134,ca:28,ir:0.8,vc:0.4,vd:0,va:0},
   {cat:'nuts',n:'Pistachios 30g',e:'&#129372;',p:'30g ~49 nuts',c:170,pr:6.1,cb:8.3,f:13.7,fi:3,su:2.2,as:0,sf:1.7,na:0,ch:0,po:285,ca:30,ir:1.1,vc:0.7,vd:0,va:11},
-  {cat:'nuts',n:'Chia Seeds 20g',e:'&#129372;',p:'2 tbsp 20g',c:97,pr:3.3,cb:8.3,f:6.2,fi:6.9,su:0,as:0,sf:0.7,na:4,ch:0,po:112,ca:126,ir:1.6,vc:0.5,vd:0,va:1},
-  {cat:'nuts',n:'Sunflower Seeds 30g',e:'&#129372;',p:'3 tbsp 30g',c:175,pr:6,cb:5.9,f:15.3,fi:2.4,su:0.8,as:0,sf:1.6,na:1,ch:0,po:224,ca:22,ir:1.5,vc:0.4,vd:0,va:0},
-  {cat:'veg',n:'Edamame 100g',e:'&#129752;',p:'100g shelled',c:121,pr:11.9,cb:8.9,f:5.2,fi:5.2,su:2.2,as:0,sf:0.6,na:6,ch:0,po:436,ca:60,ir:2.3,vc:6.1,vd:0,va:18},
+  {cat:'nuts',n:'Chia Seeds 20g',e:'&#129379;',p:'2 tbsp 20g',c:97,pr:3.3,cb:8.3,f:6.2,fi:6.9,su:0,as:0,sf:0.7,na:4,ch:0,po:112,ca:126,ir:1.6,vc:0.5,vd:0,va:1},
+  {cat:'nuts',n:'Sunflower Seeds 30g',e:'&#129379;',p:'3 tbsp 30g',c:175,pr:6,cb:5.9,f:15.3,fi:2.4,su:0.8,as:0,sf:1.6,na:1,ch:0,po:224,ca:22,ir:1.5,vc:0.4,vd:0,va:0},
+  {cat:'veg',n:'Edamame 100g',e:'&#129382;',p:'100g shelled',c:121,pr:11.9,cb:8.9,f:5.2,fi:5.2,su:2.2,as:0,sf:0.6,na:6,ch:0,po:436,ca:60,ir:2.3,vc:6.1,vd:0,va:18},
   {cat:'snacks',n:'Greek Yogurt 0% 150g',e:'&#129371;',p:'150g plain non-fat',c:83,pr:15,cb:5.6,f:0.4,fi:0,su:5.6,as:0,sf:0.1,na:55,ch:8,po:195,ca:150,ir:0,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Olives 50g',e:'&#129746;',p:'10 large olives',c:63,pr:0.5,cb:1.7,f:5.9,fi:1.6,su:0,as:0,sf:0.8,na:540,ch:0,po:8,ca:48,ir:1.6,vc:0,vd:0,va:10},
   {cat:'nuts',n:'Fruit & Nut Bar',e:'&#129372;',p:'1 bar 50g',c:200,pr:4,cb:28,f:9,fi:3,su:16,as:4,sf:2,na:50,ch:0,po:180,ca:40,ir:0.8,vc:0,vd:0,va:0},
   // ═══ MORE VEG ═══
-  {cat:'veg',n:'Kale 100g',e:'&#129401;',p:'100g raw',c:49,pr:4.3,cb:8.8,f:0.9,fi:3.6,su:2.3,as:0,sf:0.1,na:38,ch:0,po:491,ca:150,ir:1.5,vc:120,vd:0,va:500},
+  {cat:'veg',n:'Kale 100g',e:'&#129382;',p:'100g raw',c:49,pr:4.3,cb:8.8,f:0.9,fi:3.6,su:2.3,as:0,sf:0.1,na:38,ch:0,po:491,ca:150,ir:1.5,vc:120,vd:0,va:500},
   {cat:'veg',n:'Asparagus 100g',e:'&#129382;',p:'100g steamed',c:20,pr:2.2,cb:3.9,f:0.1,fi:2.1,su:1.9,as:0,sf:0,na:2,ch:0,po:202,ca:24,ir:2.1,vc:5.6,vd:0,va:38},
   {cat:'veg',n:'Courgette 150g',e:'&#129382;',p:'1 medium 150g',c:26,pr:1.9,cb:4.7,f:0.4,fi:1.2,su:3.6,as:0,sf:0.1,na:12,ch:0,po:370,ca:22,ir:0.4,vc:25,vd:0,va:25},
   {cat:'veg',n:'Carrots 100g',e:'&#129365;',p:'100g raw',c:41,pr:0.9,cb:9.6,f:0.2,fi:2.8,su:4.7,as:0,sf:0,na:69,ch:0,po:320,ca:33,ir:0.3,vc:5.9,vd:0,va:835},
   {cat:'veg',n:'Sweetcorn 100g',e:'&#127790;',p:'100g kernels',c:86,pr:3.2,cb:18.7,f:1.2,fi:2,su:3.2,as:0,sf:0.2,na:15,ch:0,po:270,ca:2,ir:0.5,vc:6.8,vd:0,va:10},
-  {cat:'veg',n:'Peas 100g',e:'&#129752;',p:'100g cooked',c:81,pr:5.4,cb:14.5,f:0.4,fi:5.1,su:6.4,as:0,sf:0.1,na:3,ch:0,po:244,ca:25,ir:1.5,vc:14,vd:0,va:38},
+  {cat:'veg',n:'Peas 100g',e:'&#129382;',p:'100g cooked',c:81,pr:5.4,cb:14.5,f:0.4,fi:5.1,su:6.4,as:0,sf:0.1,na:3,ch:0,po:244,ca:25,ir:1.5,vc:14,vd:0,va:38},
   {cat:'veg',n:'Red Onion',e:'&#129477;',p:'1 medium 100g',c:40,pr:1.1,cb:9.3,f:0.1,fi:1.7,su:4.2,as:0,sf:0,na:4,ch:0,po:146,ca:23,ir:0.2,vc:7.4,vd:0,va:0},
-  {cat:'veg',n:'Cherry Tomatoes 100g',e:'&#127813;',p:'100g about 10',c:18,pr:0.9,cb:3.9,f:0.2,fi:1.2,su:2.6,as:0,sf:0,na:5,ch:0,po:237,ca:10,ir:0.3,vc:14,vd:0,va:50},
+  {cat:'veg',n:'Cherry Tomatoes 100g',e:'&#129367;',p:'100g about 10',c:18,pr:0.9,cb:3.9,f:0.2,fi:1.2,su:2.6,as:0,sf:0,na:5,ch:0,po:237,ca:10,ir:0.3,vc:14,vd:0,va:50},
   // ═══ MORE FRUIT ═══
   {cat:'fruit',n:'Grapes 100g',e:'&#127815;',p:'100g seedless',c:67,pr:0.6,cb:17.2,f:0.4,fi:0.9,su:16.3,as:0,sf:0.1,na:2,ch:0,po:191,ca:10,ir:0.4,vc:3.2,vd:0,va:3},
   {cat:'fruit',n:'Pineapple 100g',e:'&#127821;',p:'100g fresh',c:50,pr:0.5,cb:13.1,f:0.1,fi:1.4,su:9.9,as:0,sf:0,na:1,ch:0,po:109,ca:13,ir:0.3,vc:47.8,vd:0,va:3},
@@ -2246,20 +2244,20 @@ var FOODS=[
   {cat:'grains',n:'Tortilla wrap 1 large',e:'&#127798;',p:'1 large 60g',c:190,pr:4.8,cb:32,f:5,fi:2.4,su:1.5,as:0,sf:1.2,na:390,ch:0,po:120,ca:60,ir:2.2,vc:0,vd:0,va:0},
   {cat:'grains',n:'Pitta bread 1',e:'&#129366;',p:'1 pitta 60g',c:165,pr:5.7,cb:33,f:0.7,fi:1.5,su:0.8,as:0,sf:0.1,na:320,ch:0,po:72,ca:16,ir:1.6,vc:0,vd:0,va:0},
   {cat:'grains',n:'Bagel plain',e:'&#129366;',p:'1 bagel 98g',c:270,pr:10.5,cb:53,f:1.7,fi:2.3,su:6,as:3,sf:0.2,na:443,ch:0,po:104,ca:14,ir:3.2,vc:0,vd:0,va:0},
-  {cat:'grains',n:'Lentils cooked 180g',e:'&#129752;',p:'1 cup 180g',c:230,pr:17.9,cb:40,f:0.8,fi:15.6,su:3.6,as:0,sf:0.1,na:4,ch:0,po:730,ca:38,ir:6.6,vc:3,vd:0,va:2},
-  {cat:'grains',n:'Chickpeas cooked 150g',e:'&#129752;',p:'150g',c:219,pr:11.9,cb:36,f:3.6,fi:9.9,su:6.3,as:0,sf:0.4,na:7,ch:0,po:477,ca:80,ir:3.0,vc:1.7,vd:0,va:3},
-  {cat:'grains',n:'Black Beans 150g',e:'&#129752;',p:'150g cooked',c:227,pr:15.2,cb:40.8,f:0.9,fi:15,su:0.6,as:0,sf:0.2,na:2,ch:0,po:611,ca:46,ir:3.6,vc:0,vd:0,va:1},
+  {cat:'grains',n:'Lentils cooked 180g',e:'&#129382;',p:'1 cup 180g',c:230,pr:17.9,cb:40,f:0.8,fi:15.6,su:3.6,as:0,sf:0.1,na:4,ch:0,po:730,ca:38,ir:6.6,vc:3,vd:0,va:2},
+  {cat:'grains',n:'Chickpeas cooked 150g',e:'&#129382;',p:'150g',c:219,pr:11.9,cb:36,f:3.6,fi:9.9,su:6.3,as:0,sf:0.4,na:7,ch:0,po:477,ca:80,ir:3.0,vc:1.7,vd:0,va:3},
+  {cat:'grains',n:'Black Beans 150g',e:'&#129382;',p:'150g cooked',c:227,pr:15.2,cb:40.8,f:0.9,fi:15,su:0.6,as:0,sf:0.2,na:2,ch:0,po:611,ca:46,ir:3.6,vc:0,vd:0,va:1},
   {cat:'grains',n:'Couscous cooked 150g',e:'&#127834;',p:'150g',c:176,pr:6,cb:36,f:0.3,fi:2.2,su:0.1,as:0,sf:0,na:9,ch:0,po:91,ca:12,ir:0.6,vc:0,vd:0,va:0},
   // ═══ MORE MEALS ═══
-  {cat:'grains',n:'Egg Fried Rice',e:'&#127834;',p:'1 serving 350g',c:490,pr:16,cb:74,f:14,fi:3,su:4,as:1,sf:3,na:760,ch:180,po:280,ca:40,ir:2.2,vc:6,vd:0.8,va:80},
-  {cat:'eggs',n:'Shakshuka 2 eggs',e:'&#129370;',p:'2 eggs in tomato sauce',c:290,pr:18,cb:20,f:16,fi:5,su:10,as:2,sf:4,na:640,ch:372,po:680,ca:110,ir:4.0,vc:40,vd:2.2,va:200},
-  {cat:'salads',n:'Tuna Pasta Salad',e:'&#129367;',p:'1 bowl 300g',c:380,pr:28,cb:44,f:8,fi:3,su:3,as:0,sf:1.5,na:560,ch:58,po:480,ca:40,ir:2.4,vc:4,vd:4,va:20},
-  {cat:'fastfood',n:'Chicken Wrap',e:'&#127798;',p:'1 large wrap',c:480,pr:34,cb:46,f:15,fi:4,su:4,as:1,sf:4,na:820,ch:85,po:480,ca:100,ir:3.2,vc:8,vd:0.2,va:60},
-  {cat:'meat',n:'Smoked Salmon Pasta',e:'&#129424;',p:'1 serving 350g',c:510,pr:28,cb:58,f:16,fi:3,su:3,as:0,sf:4,na:720,ch:70,po:520,ca:60,ir:1.8,vc:4,vd:8,va:50},
-  {cat:'grains',n:'Lentil Soup',e:'&#129752;',p:'1 bowl 400ml',c:210,pr:14,cb:36,f:1.5,fi:12,su:5,as:0,sf:0.2,na:540,ch:0,po:620,ca:52,ir:4.4,vc:10,vd:0,va:60},
-  {cat:'eggs',n:'Omelette 3 eggs veg',e:'&#129370;',p:'3 eggs mushroom peppers',c:320,pr:24,cb:8,f:22,fi:2,su:4,as:0,sf:5.5,na:320,ch:558,po:440,ca:90,ir:3.0,vc:50,vd:3.3,va:240},
-  {cat:'meat',n:'Prawn Stir Fry',e:'&#129424;',p:'1 serving 300g with noodles',c:410,pr:26,cb:48,f:10,fi:4,su:6,as:2,sf:1.5,na:840,ch:152,po:420,ca:80,ir:2.4,vc:28,vd:0,va:60},
-  {cat:'fastfood',n:'Falafel Wrap',e:'&#129414;',p:'1 wrap 300g',c:420,pr:14,cb:58,f:14,fi:8,su:5,as:0,sf:2,na:680,ch:0,po:480,ca:100,ir:4.2,vc:12,vd:0,va:60},
+  {cat:'meals',n:'Egg Fried Rice',e:'&#127834;',p:'1 serving 350g',c:490,pr:16,cb:74,f:14,fi:3,su:4,as:1,sf:3,na:760,ch:180,po:280,ca:40,ir:2.2,vc:6,vd:0.8,va:80},
+  {cat:'meals',n:'Shakshuka 2 eggs',e:'&#129370;',p:'2 eggs in tomato sauce',c:290,pr:18,cb:20,f:16,fi:5,su:10,as:2,sf:4,na:640,ch:372,po:680,ca:110,ir:4.0,vc:40,vd:2.2,va:200},
+  {cat:'meals',n:'Tuna Pasta Salad',e:'&#129424;',p:'1 bowl 300g',c:380,pr:28,cb:44,f:8,fi:3,su:3,as:0,sf:1.5,na:560,ch:58,po:480,ca:40,ir:2.4,vc:4,vd:4,va:20},
+  {cat:'meals',n:'Chicken Wrap',e:'&#127798;',p:'1 large wrap',c:480,pr:34,cb:46,f:15,fi:4,su:4,as:1,sf:4,na:820,ch:85,po:480,ca:100,ir:3.2,vc:8,vd:0.2,va:60},
+  {cat:'meals',n:'Smoked Salmon Pasta',e:'&#129424;',p:'1 serving 350g',c:510,pr:28,cb:58,f:16,fi:3,su:3,as:0,sf:4,na:720,ch:70,po:520,ca:60,ir:1.8,vc:4,vd:8,va:50},
+  {cat:'meals',n:'Lentil Soup',e:'&#129379;',p:'1 bowl 400ml',c:210,pr:14,cb:36,f:1.5,fi:12,su:5,as:0,sf:0.2,na:540,ch:0,po:620,ca:52,ir:4.4,vc:10,vd:0,va:60},
+  {cat:'meals',n:'Omelette 3 eggs veg',e:'&#129370;',p:'3 eggs mushroom peppers',c:320,pr:24,cb:8,f:22,fi:2,su:4,as:0,sf:5.5,na:320,ch:558,po:440,ca:90,ir:3.0,vc:50,vd:3.3,va:240},
+  {cat:'meals',n:'Prawn Stir Fry',e:'&#129424;',p:'1 serving 300g with noodles',c:410,pr:26,cb:48,f:10,fi:4,su:6,as:2,sf:1.5,na:840,ch:152,po:420,ca:80,ir:2.4,vc:28,vd:0,va:60},
+  {cat:'meals',n:'Falafel Wrap',e:'&#129366;',p:'1 wrap 300g',c:420,pr:14,cb:58,f:14,fi:8,su:5,as:0,sf:2,na:680,ch:0,po:480,ca:100,ir:4.2,vc:12,vd:0,va:60},
   // ═══ MORE FAST FOOD ═══
   {cat:'fastfood',n:'McD McChicken Sandwich',e:'&#127828;',p:'1 sandwich',c:410,pr:15,cb:41,f:19,fi:2,su:5,as:3,sf:3.5,na:660,ch:40,po:240,ca:100,ir:2.4,vc:0,vd:0,va:0},
   {cat:'fastfood',n:'Pizza Slice Pepperoni',e:'&#127829;',p:'1 large slice 125g',c:360,pr:16,cb:38,f:16,fi:2,su:4,as:1,sf:6,na:780,ch:44,po:220,ca:180,ir:2.8,vc:2,vd:0.2,va:80},
@@ -2268,10 +2266,10 @@ var FOODS=[
   {cat:'fastfood',n:'Pret A Manger Wrap',e:'&#127798;',p:'1 chicken avocado wrap',c:440,pr:28,cb:44,f:16,fi:5,su:4,as:0,sf:4,na:720,ch:70,po:480,ca:80,ir:3.2,vc:12,vd:0.2,va:60},
   {cat:'fastfood',n:'McD Breakfast Wrap',e:'&#127798;',p:'1 wrap',c:394,pr:18,cb:36,f:19,fi:2,su:3,as:1,sf:6,na:840,ch:140,po:220,ca:120,ir:2.4,vc:0,vd:0.6,va:60},
   // ═══ MORE SAUCES ═══
-  {cat:'sauces',n:'Caesar Dressing 2 tbsp',e:'&#129379;',p:'2 tbsp 30g',c:155,pr:1.4,cb:1.8,f:16.4,fi:0,su:1.4,as:1,sf:3,na:310,ch:14,po:18,ca:20,ir:0.1,vc:0,vd:0,va:0},
+  {cat:'sauces',n:'Caesar Dressing 2 tbsp',e:'&#129367;',p:'2 tbsp 30g',c:155,pr:1.4,cb:1.8,f:16.4,fi:0,su:1.4,as:1,sf:3,na:310,ch:14,po:18,ca:20,ir:0.1,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Balsamic Vinegar 1 tbsp',e:'&#129379;',p:'1 tbsp 16ml',c:14,pr:0.1,cb:2.7,f:0,fi:0,su:2.4,as:0,sf:0,na:4,ch:0,po:18,ca:4,ir:0.1,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Hummus 40g',e:'&#129379;',p:'2 tbsp 40g',c:88,pr:3.2,cb:6.2,f:5.8,fi:2.4,su:0.7,as:0,sf:0.8,na:200,ch:0,po:116,ca:22,ir:1.0,vc:1.6,vd:0,va:4},
-  {cat:'nuts',n:'Tahini 15g',e:'&#129379;',p:'1 tbsp',c:89,pr:2.6,cb:3.2,f:8,fi:1.4,su:0.1,as:0,sf:1.1,na:17,ch:0,po:62,ca:64,ir:1.3,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Tahini 15g',e:'&#129372;',p:'1 tbsp',c:89,pr:2.6,cb:3.2,f:8,fi:1.4,su:0.1,as:0,sf:1.1,na:17,ch:0,po:62,ca:64,ir:1.3,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Guacamole 50g',e:'&#129361;',p:'2 tbsp 50g',c:80,pr:1,cb:4.5,f:7.5,fi:3.4,su:0.3,as:0,sf:1.1,na:180,ch:0,po:243,ca:6,ir:0.3,vc:5,vd:0,va:4},
   {cat:'sauces',n:'Sriracha 1 tbsp',e:'&#128293;',p:'1 tbsp 17g',c:15,pr:0.4,cb:3.4,f:0.3,fi:0.2,su:2.4,as:2,sf:0,na:390,ch:0,po:40,ca:3,ir:0.2,vc:12,vd:0,va:40},
   {cat:'sauces',n:'Pesto 25g',e:'&#127807;',p:'2 tbsp 25g',c:130,pr:2.5,cb:1.5,f:13,fi:0.5,su:0.8,as:0,sf:2.5,na:160,ch:2,po:60,ca:50,ir:0.5,vc:2,vd:0,va:40},
@@ -2283,7 +2281,7 @@ var FOODS=[
   {cat:'fruit',n:'Raspberries 100g',e:'&#127827;',p:'100g',c:52,pr:1.2,cb:11.9,f:0.7,fi:6.5,su:4.4,as:0,sf:0,na:1,ch:0,po:151,ca:25,ir:0.7,vc:26,vd:0,va:2},
   {cat:'fruit',n:'Blackberries 100g',e:'&#129744;',p:'100g',c:43,pr:1.4,cb:9.6,f:0.5,fi:5.3,su:4.9,as:0,sf:0,na:1,ch:0,po:162,ca:29,ir:0.6,vc:21,vd:0,va:11},
   {cat:'fruit',n:'Mixed Berries 100g',e:'&#127827;',p:'100g',c:45,pr:0.9,cb:10.5,f:0.4,fi:3.5,su:6,as:0,sf:0,na:1,ch:0,po:130,ca:20,ir:0.5,vc:30,vd:0,va:5},
-  {cat:'fruit',n:'Pomegranate 100g',e:'&#127826;',p:'100g',c:83,pr:1.7,cb:18.7,f:1.2,fi:4,su:13.7,as:0,sf:0.1,na:3,ch:0,po:236,ca:10,ir:0.3,vc:10,vd:0,va:0},
+  {cat:'fruit',n:'Pomegranate 100g',e:'&#127822;',p:'100g',c:83,pr:1.7,cb:18.7,f:1.2,fi:4,su:13.7,as:0,sf:0.1,na:3,ch:0,po:236,ca:10,ir:0.3,vc:10,vd:0,va:0},
   {cat:'fruit',n:'Papaya 100g',e:'&#129389;',p:'100g',c:43,pr:0.5,cb:11,f:0.3,fi:1.7,su:7.8,as:0,sf:0.1,na:8,ch:0,po:182,ca:20,ir:0.3,vc:62,vd:0,va:47},
   {cat:'fruit',n:'Passion Fruit 2 pieces',e:'&#127818;',p:'36g',c:35,pr:0.8,cb:8.4,f:0.3,fi:3.9,su:4,as:0,sf:0,na:5,ch:0,po:121,ca:2,ir:0.3,vc:13,vd:0,va:6},
   {cat:'fruit',n:'Pear medium',e:'&#127824;',p:'178g',c:101,pr:0.6,cb:27,f:0.2,fi:5.5,su:17,as:0,sf:0,na:2,ch:0,po:206,ca:16,ir:0.3,vc:7,vd:0,va:2},
@@ -2294,20 +2292,20 @@ var FOODS=[
   {cat:'fruit',n:'Fig 2 medium',e:'&#127815;',p:'100g',c:74,pr:0.8,cb:19.2,f:0.3,fi:2.9,su:16.3,as:0,sf:0,na:1,ch:0,po:232,ca:35,ir:0.4,vc:2,vd:0,va:7},
   // ── VEGETABLES (MISSING) ────────────────────────────────────────
   {cat:'veg',n:'Cauliflower 100g',e:'&#129382;',p:'100g',c:25,pr:2,cb:5,f:0.3,fi:2,su:1.9,as:0,sf:0.1,na:30,ch:0,po:299,ca:22,ir:0.4,vc:48,vd:0,va:0},
-  {cat:'veg',n:'Beetroot 100g',e:'&#129745;',p:'100g cooked',c:44,pr:1.7,cb:10,f:0.2,fi:2,su:7.9,as:0,sf:0,na:77,ch:0,po:305,ca:16,ir:0.8,vc:4,vd:0,va:2},
+  {cat:'veg',n:'Beetroot 100g',e:'&#129382;',p:'100g cooked',c:44,pr:1.7,cb:10,f:0.2,fi:2,su:7.9,as:0,sf:0,na:77,ch:0,po:305,ca:16,ir:0.8,vc:4,vd:0,va:2},
   {cat:'veg',n:'Celery 2 stalks',e:'&#129382;',p:'80g',c:12,pr:0.6,cb:2.4,f:0.1,fi:1.3,su:1.2,as:0,sf:0,na:96,ch:0,po:228,ca:36,ir:0.1,vc:3,vd:0,va:22},
-  {cat:'veg',n:'Lettuce 2 cups',e:'&#129401;',p:'72g',c:10,pr:0.7,cb:1.7,f:0.2,fi:0.9,su:0.9,as:0,sf:0,na:14,ch:0,po:138,ca:20,ir:0.5,vc:6,vd:0,va:134},
+  {cat:'veg',n:'Lettuce 2 cups',e:'&#129382;',p:'72g',c:10,pr:0.7,cb:1.7,f:0.2,fi:0.9,su:0.9,as:0,sf:0,na:14,ch:0,po:138,ca:20,ir:0.5,vc:6,vd:0,va:134},
   {cat:'veg',n:'Artichoke medium',e:'&#129382;',p:'120g',c:64,pr:4.2,cb:14.3,f:0.4,fi:6.8,su:1.3,as:0,sf:0.1,na:72,ch:0,po:474,ca:56,ir:1.5,vc:12,vd:0,va:2},
   {cat:'veg',n:'Leek 1 medium',e:'&#129382;',p:'89g',c:54,pr:1.3,cb:12.6,f:0.3,fi:1.6,su:3.5,as:0,sf:0,na:18,ch:0,po:180,ca:53,ir:2,vc:11,vd:0,va:47},
-  {cat:'veg',n:'Eggplant 100g',e:'&#129429;',p:'100g',c:25,pr:1,cb:5.9,f:0.2,fi:3,su:2.9,as:0,sf:0,na:2,ch:0,po:229,ca:9,ir:0.2,vc:2,vd:0,va:1},
-  {cat:'veg',n:'Cabbage 100g',e:'&#129401;',p:'100g',c:25,pr:1.3,cb:5.8,f:0.1,fi:2.5,su:3.2,as:0,sf:0,na:18,ch:0,po:170,ca:40,ir:0.5,vc:37,vd:0,va:5},
+  {cat:'veg',n:'Eggplant 100g',e:'&#129382;',p:'100g',c:25,pr:1,cb:5.9,f:0.2,fi:3,su:2.9,as:0,sf:0,na:2,ch:0,po:229,ca:9,ir:0.2,vc:2,vd:0,va:1},
+  {cat:'veg',n:'Cabbage 100g',e:'&#129382;',p:'100g',c:25,pr:1.3,cb:5.8,f:0.1,fi:2.5,su:3.2,as:0,sf:0,na:18,ch:0,po:170,ca:40,ir:0.5,vc:37,vd:0,va:5},
   {cat:'veg',n:'Brussels Sprouts 100g',e:'&#129382;',p:'100g',c:43,pr:3.4,cb:8.9,f:0.3,fi:3.8,su:2.2,as:0,sf:0.1,na:25,ch:0,po:389,ca:42,ir:1.4,vc:85,vd:0,va:38},
-  {cat:'veg',n:'Garlic 2 cloves',e:'&#129476;',p:'6g',c:9,pr:0.4,cb:2,f:0,fi:0.1,su:0.1,as:0,sf:0,na:1,ch:0,po:24,ca:11,ir:0.1,vc:1,vd:0,va:0},
+  {cat:'veg',n:'Garlic 2 cloves',e:'&#129382;',p:'6g',c:9,pr:0.4,cb:2,f:0,fi:0.1,su:0.1,as:0,sf:0,na:1,ch:0,po:24,ca:11,ir:0.1,vc:1,vd:0,va:0},
   // ── EXTRA MEALS ─────────────────────────────────────────────────
-  {cat:'grains',n:'Ramen Bowl',e:'&#127836;',p:'500ml',c:440,pr:20,cb:60,f:14,fi:3,su:5,as:0,sf:5,na:1400,ch:60,po:300,ca:50,ir:2,vc:0,vd:0,va:0},
-  {cat:'fastfood',n:'Tacos x2 Corn',e:'&#127790;',p:'200g',c:360,pr:22,cb:38,f:13,fi:5,su:3,as:0,sf:4,na:580,ch:55,po:350,ca:120,ir:2.5,vc:5,vd:0,va:20},
-  {cat:'salads',n:'Acai Bowl',e:'&#129359;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
-  ,
+  {cat:'meals',n:'Ramen Bowl',e:'&#127836;',p:'500ml',c:440,pr:20,cb:60,f:14,fi:3,su:5,as:0,sf:5,na:1400,ch:60,po:300,ca:50,ir:2,vc:0,vd:0,va:0},
+  {cat:'meals',n:'Tacos x2 Corn',e:'&#127790;',p:'200g',c:360,pr:22,cb:38,f:13,fi:5,su:3,as:0,sf:4,na:580,ch:55,po:350,ca:120,ir:2.5,vc:5,vd:0,va:20},
+  {cat:'meals',n:'Acai Bowl',e:'&#129379;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
+  {cat:'meals',n:'Shakshuka 2 eggs',e:'&#129370;',p:'300g',c:280,pr:16,cb:18,f:16,fi:4,su:8,as:0,sf:4,na:650,ch:370,po:650,ca:80,ir:3,vc:25,vd:1.5,va:80},
 ];
 
 // ═══ FOOD TAB ═══
@@ -3485,8 +3483,8 @@ var DRINKS=[
   {n:'Gin 1.5oz',e:'&#129749;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
   {n:'Tequila 1.5oz',e:'&#129362;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
   {n:'Rum 1.5oz',e:'&#129347;',p:'1.5 fl oz, 40% ABV',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
-  {n:'Gin and Tonic',e:'&#127864;',p:'1.5oz gin + 4oz tonic',c:148,u:1.0,cb:11,sg:10,cat:'spirits',w:''},
-  {n:'Vodka Soda',e:'&#127864;',p:'1.5oz vodka + soda',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
+  {n:'Gin and Tonic',e:'&#129749;',p:'1.5oz gin + 4oz tonic',c:148,u:1.0,cb:11,sg:10,cat:'spirits',w:''},
+  {n:'Vodka Soda',e:'&#129749;',p:'1.5oz vodka + soda',c:97,u:1.0,cb:0,sg:0,cat:'spirits',w:''},
   {n:'Whiskey Sour',e:'&#127864;',p:'3oz cocktail',c:160,u:1.2,cb:10,sg:8,cat:'cocktail',w:''},
   {n:'Old Fashioned',e:'&#129347;',p:'3oz bourbon + bitters',c:154,u:1.5,cb:4,sg:3,cat:'cocktail',w:''},
   {n:'Negroni',e:'&#127864;',p:'3oz classic',c:196,u:1.5,cb:6,sg:3,cat:'cocktail',w:''},
@@ -3496,9 +3494,9 @@ var DRINKS=[
   {n:'Espresso Martini',e:'&#127864;',p:'4oz',c:185,u:1.2,cb:12,sg:10,cat:'cocktail',w:'High sugar'},
   {n:'Manhattan',e:'&#129347;',p:'3oz rye + vermouth',c:164,u:1.5,cb:3,sg:2,cat:'cocktail',w:''},
   {n:'Daiquiri',e:'&#127864;',p:'4oz',c:175,u:1.2,cb:14,sg:10,cat:'cocktail',w:''},
-  {n:'Mojito',e:'&#127864;',p:'8oz',c:168,u:1.0,cb:24,sg:20,cat:'cocktail',w:'High sugar'},
+  {n:'Mojito',e:'&#129749;',p:'8oz',c:168,u:1.0,cb:24,sg:20,cat:'cocktail',w:'High sugar'},
   {n:'Paloma',e:'&#127864;',p:'8oz tequila + grapefruit',c:142,u:1.0,cb:18,sg:14,cat:'cocktail',w:''},
-  {n:'Pina Colada',e:'&#129381;',p:'8oz',c:245,u:1.3,cb:32,sg:26,cat:'cocktail',w:'High sugar and calories'},
+  {n:'Pina Colada',e:'&#129749;',p:'8oz',c:245,u:1.3,cb:32,sg:26,cat:'cocktail',w:'High sugar and calories'},
   {n:'Long Island Iced Tea',e:'&#127864;',p:'12oz',c:275,u:3.0,cb:20,sg:15,cat:'cocktail',w:'Very high alcohol'},
   {n:'Coke 12oz',e:'&#129380;',p:'12oz can',c:140,u:0,cb:39,sg:39,cat:'soft',w:'High sugar'},
   {n:'Diet Coke 12oz',e:'&#129380;',p:'12oz can',c:0,u:0,cb:0,sg:0,cat:'soft',w:''},
@@ -3520,7 +3518,7 @@ var DRINKS=[
   {n:'Iced Tea',e:'&#127784;',p:'12 fl oz, unsweetened',c:3,u:0,cb:1,sg:0,cat:'tea',vol:355},
   {n:'Herbal Tea',e:'&#127807;',p:'8 fl oz, no sugar',c:2,u:0,cb:0,sg:0,cat:'tea',vol:240},
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'coffee',w:''},
-  {n:'Orange Juice',e:'&#127818;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
+  {n:'Orange Juice',e:'&#129381;',p:'8oz',c:110,u:0,cb:26,sg:22,cat:'soft',w:'High sugar'},
   {n:'Energy Drink',e:'&#9889;',p:'8.4oz can',c:110,u:0,cb:28,sg:27,cat:'soft',w:'High caffeine'},
   {n:'Water 8oz',e:'&#128167;',p:'8 fl oz',c:0,u:0,cb:0,sg:0,vol:237,cat:'water',w:''},
   {n:'Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
@@ -3564,14 +3562,14 @@ var DRINKS=[
   {n:'Baileys 1.5oz',e:'&#9749;',p:'1.5 fl oz',c:147,u:0.9,cb:13,sg:12,cat:'spirits',w:'Cream liqueur'},
   {n:'Aperol 1.5oz',e:'&#127864;',p:'1.5 fl oz',c:81,u:0.6,cb:11,sg:10,cat:'spirits',w:'11% ABV'},
   // ── COCKTAILS ─────────────────────────────────────────────────
-  {n:'Moscow Mule',e:'&#127864;',p:'8 fl oz',c:180,u:1.5,cb:18,sg:14,cat:'cocktail',w:''},
+  {n:'Moscow Mule',e:'&#129749;',p:'8 fl oz',c:180,u:1.5,cb:18,sg:14,cat:'cocktail',w:''},
   {n:'Gin Gimlet',e:'&#127864;',p:'3.5 fl oz',c:178,u:1.5,cb:8,sg:6,cat:'cocktail',w:''},
   {n:'Aperol Spritz',e:'&#127864;',p:'6 fl oz',c:125,u:0.8,cb:12,sg:10,cat:'cocktail',w:''},
   {n:'Bloody Mary',e:'&#127864;',p:'8 fl oz',c:140,u:1.5,cb:8,sg:4,cat:'cocktail',w:''},
   {n:'Tequila Sunrise',e:'&#129749;',p:'8 fl oz',c:232,u:1.5,cb:24,sg:20,cat:'cocktail',w:''},
   {n:'Rum & Coke',e:'&#129380;',p:'8 fl oz',c:185,u:1.5,cb:20,sg:18,cat:'cocktail',w:''},
   {n:'French 75',e:'&#129870;',p:'5 fl oz',c:145,u:1.5,cb:5,sg:3,cat:'cocktail',w:'Champagne cocktail'},
-  {n:'Sex on the Beach',e:'&#127864;',p:'8 fl oz',c:259,u:1.5,cb:30,sg:26,cat:'cocktail',w:''},
+  {n:'Sex on the Beach',e:'&#129749;',p:'8 fl oz',c:259,u:1.5,cb:30,sg:26,cat:'cocktail',w:''},
   {n:'White Russian',e:'&#9749;',p:'5 fl oz',c:270,u:1.5,cb:14,sg:12,cat:'cocktail',w:''},
   // ── SOFT DRINKS ───────────────────────────────────────────────
   {n:'Sprite 12oz',e:'&#129380;',p:'12 fl oz',c:140,u:0,cb:38,sg:38,cat:'soft',w:''},
@@ -4684,11 +4682,11 @@ function launchApp(){
     {n:'High Noon Vodka Soda',e:'&#128166;',p:'12 fl oz',c:100,u:1.2,cat:'seltzer'},
     {n:'Aperol Spritz',e:'&#127864;',p:'1 cocktail',c:158,u:1.5,cat:'cocktail'},
     {n:'Negroni',e:'&#127864;',p:'1 cocktail',c:200,u:2.2,cat:'cocktail'},
-    {n:'GT Synergy Kombucha',e:'&#129514;',p:'16 fl oz',c:60,u:0.2,cat:'kombucha'},
-    {n:'Health-Ade Kombucha',e:'&#129514;',p:'16 fl oz',c:70,u:0.2,cat:'kombucha'},
-    {n:'Kevita Kombucha',e:'&#129514;',p:'15.2 fl oz',c:35,u:0.2,cat:'kombucha'},
-    {n:'Brew Dr Kombucha',e:'&#129514;',p:'14 fl oz',c:60,u:0.1,cat:'kombucha'},
-    {n:'Humm Kombucha',e:'&#129514;',p:'14 fl oz',c:50,u:0.1,cat:'kombucha'}
+    {n:'GT Synergy Kombucha',e:'&#127861;',p:'16 fl oz',c:60,u:0.2,cat:'kombucha'},
+    {n:'Health-Ade Kombucha',e:'&#127861;',p:'16 fl oz',c:70,u:0.2,cat:'kombucha'},
+    {n:'Kevita Kombucha',e:'&#127861;',p:'15.2 fl oz',c:35,u:0.2,cat:'kombucha'},
+    {n:'Brew Dr Kombucha',e:'&#127861;',p:'14 fl oz',c:60,u:0.1,cat:'kombucha'},
+    {n:'Humm Kombucha',e:'&#127861;',p:'14 fl oz',c:50,u:0.1,cat:'kombucha'}
   ];
   _rd.forEach(function(d){DRINKS.push(d);});
   // Fix ML entries missing micronutrient fields (from restaurant items)
