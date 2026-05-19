@@ -520,6 +520,7 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('fruit',this)">&#127815; Fruit</div>
           <div class="pill" onclick="setFCat('breakfast',this)">&#127371; Breakfast</div>
           <div class="pill" onclick="setFCat('snacks',this)">&#127894; Snacks</div>
+          <div class="pill" onclick="setFCat('nuts',this)">&#129372; Nuts & Seeds</div>
           <div class="pill" onclick="setFCat('supplements',this)">&#128138; Supplements</div>
           
           <div class="pill" onclick="setFCat('sauces',this)">🫙 Sauces</div>
@@ -1064,6 +1065,7 @@ body { height: 100dvh; }
         <option value="fruit">🍎 Fruit</option>
         <option value="breakfast">🥣 Breakfast</option>
         <option value="snacks">🌰 Snacks</option>
+        <option value="nuts">&#129372; Nuts &amp; Seeds</option>
         <option value="supplements">💊 Supplements</option>
         <option value="meals">🍽 Meals</option>
         <option value="fastfood">🍔 Fast Food</option>
@@ -2137,14 +2139,14 @@ var FOODS=[
   {cat:'breakfast',n:'Greek Yogurt Parfait',e:'&#129371;',p:'300g with granola',c:380,pr:22,cb:48,f:9,fi:3,su:22,as:8,sf:3,na:140,ch:15,po:420,ca:280,ir:1.2,vc:4,vd:0.4,va:30},
   {cat:'breakfast',n:'Granola 50g',e:'&#129379;',p:'50g with milk',c:224,pr:5,cb:30,f:10,fi:3,su:9,as:6,sf:1.5,na:80,ch:5,po:160,ca:42,ir:1.8,vc:0,vd:0,va:0},
   // SNACKS
-  {cat:'snacks',n:'Mixed Nuts 30g',e:'&#129372;',p:'30g handful',c:180,pr:5,cb:7,f:16,fi:2,su:1,as:0,sf:2,na:80,ch:0,po:200,ca:30,ir:0.8,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Almonds 30g',e:'&#129372;',p:'30g ~23 nuts',c:164,pr:6,cb:6,f:14,fi:3.5,su:1.2,as:0,sf:1,na:1,ch:0,po:200,ca:76,ir:1.1,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Mixed Nuts 30g',e:'&#129372;',p:'30g handful',c:180,pr:5,cb:7,f:16,fi:2,su:1,as:0,sf:2,na:80,ch:0,po:200,ca:30,ir:0.8,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Almonds 30g',e:'&#129372;',p:'30g ~23 nuts',c:164,pr:6,cb:6,f:14,fi:3.5,su:1.2,as:0,sf:1,na:1,ch:0,po:200,ca:76,ir:1.1,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Protein Bar',e:'&#128170;',p:'1 bar 60g',c:220,pr:20,cb:24,f:6,fi:4,su:8,as:6,sf:2,na:180,ch:10,po:160,ca:100,ir:1.0,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Dark Chocolate 40g',e:'&#127851;',p:'40g 85% cocoa',c:220,pr:3,cb:14,f:16,fi:4,su:6,as:5,sf:9,na:10,ch:0,po:280,ca:24,ir:3.2,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Rice Cakes x3',e:'&#127849;',p:'3 plain rice cakes',c:80,pr:2,cb:18,f:0.6,fi:0.4,su:0,as:0,sf:0,na:30,ch:0,po:30,ca:4,ir:0.4,vc:0,vd:0,va:0},
+  {cat:'snacks',n:'Rice Cakes x3',e:'&#127859;',p:'3 plain rice cakes',c:80,pr:2,cb:18,f:0.6,fi:0.4,su:0,as:0,sf:0,na:30,ch:0,po:30,ca:4,ir:0.4,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Hummus with Crackers',e:'&#129379;',p:'100g hummus 30g crackers',c:310,pr:10,cb:34,f:14,fi:7,su:2,as:0,sf:2,na:460,ch:0,po:320,ca:60,ir:2.4,vc:4,vd:0,va:20},
-  {cat:'snacks',n:'Peanut Butter 2 tbsp',e:'&#129372;',p:'2 tbsp 32g',c:192,pr:8,cb:6,f:16,fi:2,su:3,as:1,sf:3,na:147,ch:0,po:189,ca:17,ir:0.6,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Banana with Almond Butter',e:'&#127820;',p:'1 banana + 1 tbsp',c:201,pr:4,cb:30,f:8,fi:4,su:16,as:0,sf:1.5,na:2,ch:0,po:516,ca:23,ir:0.6,vc:10,vd:0,va:4},
+  {cat:'nuts',n:'Peanut Butter 2 tbsp',e:'&#129372;',p:'2 tbsp 32g',c:192,pr:8,cb:6,f:16,fi:2,su:3,as:1,sf:3,na:147,ch:0,po:189,ca:17,ir:0.6,vc:0,vd:0,va:0},
+  {cat:'fruit',n:'Banana with Almond Butter',e:'&#127820;',p:'1 banana + 1 tbsp',c:201,pr:4,cb:30,f:8,fi:4,su:16,as:0,sf:1.5,na:2,ch:0,po:516,ca:23,ir:0.6,vc:10,vd:0,va:4},
   {cat:'snacks',n:'Cheese and Crackers',e:'&#129472;',p:'30g cheese 6 crackers',c:220,pr:8,cb:18,f:14,fi:1,su:1,as:0,sf:6,na:380,ch:32,po:80,ca:180,ir:0.4,vc:0,vd:0.2,va:70},
   // STARBUCKS
   {cat:'starbucks',n:'Caffe Latte Tall',e:'&#9749;',p:'354ml whole milk',c:190,pr:13,cb:19,f:7,fi:0,su:17,as:0,sf:4,na:170,ch:25,po:340,ca:450,ir:0,vc:0,vd:2.4,va:80},
@@ -2211,15 +2213,15 @@ var FOODS=[
   {cat:'breakfast',n:'Bircher Muesli',e:'&#129379;',p:'280g with apple',c:340,pr:10,cb:52,f:9,fi:6,su:20,as:2,sf:1.5,na:80,ch:5,po:380,ca:180,ir:3.0,vc:6,vd:0,va:10},
   {cat:'breakfast',n:'Smoked Salmon Bagel',e:'&#129366;',p:'1 bagel with cream cheese + salmon',c:420,pr:22,cb:52,f:13,fi:2,su:4,as:0,sf:5,na:1080,ch:38,po:260,ca:72,ir:2.8,vc:2,vd:6,va:60},
   // ═══ NUTS & SEEDS ═══
-  {cat:'snacks',n:'Cashews 30g',e:'&#129372;',p:'30g ~18 nuts',c:157,pr:5.2,cb:9,f:12.4,fi:0.9,su:1.7,as:0,sf:2.2,na:3,ch:0,po:160,ca:10,ir:1.9,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Walnuts 30g',e:'&#129372;',p:'30g ~7 halves',c:196,pr:4.6,cb:4,f:19.6,fi:2,su:0.7,as:0,sf:1.8,na:0,ch:0,po:134,ca:28,ir:0.8,vc:0.4,vd:0,va:0},
-  {cat:'snacks',n:'Pistachios 30g',e:'&#129372;',p:'30g ~49 nuts',c:170,pr:6.1,cb:8.3,f:13.7,fi:3,su:2.2,as:0,sf:1.7,na:0,ch:0,po:285,ca:30,ir:1.1,vc:0.7,vd:0,va:11},
-  {cat:'snacks',n:'Chia Seeds 20g',e:'&#129379;',p:'2 tbsp 20g',c:97,pr:3.3,cb:8.3,f:6.2,fi:6.9,su:0,as:0,sf:0.7,na:4,ch:0,po:112,ca:126,ir:1.6,vc:0.5,vd:0,va:1},
-  {cat:'snacks',n:'Sunflower Seeds 30g',e:'&#129379;',p:'3 tbsp 30g',c:175,pr:6,cb:5.9,f:15.3,fi:2.4,su:0.8,as:0,sf:1.6,na:1,ch:0,po:224,ca:22,ir:1.5,vc:0.4,vd:0,va:0},
-  {cat:'snacks',n:'Edamame 100g',e:'&#129382;',p:'100g shelled',c:121,pr:11.9,cb:8.9,f:5.2,fi:5.2,su:2.2,as:0,sf:0.6,na:6,ch:0,po:436,ca:60,ir:2.3,vc:6.1,vd:0,va:18},
+  {cat:'nuts',n:'Cashews 30g',e:'&#129372;',p:'30g ~18 nuts',c:157,pr:5.2,cb:9,f:12.4,fi:0.9,su:1.7,as:0,sf:2.2,na:3,ch:0,po:160,ca:10,ir:1.9,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Walnuts 30g',e:'&#129372;',p:'30g ~7 halves',c:196,pr:4.6,cb:4,f:19.6,fi:2,su:0.7,as:0,sf:1.8,na:0,ch:0,po:134,ca:28,ir:0.8,vc:0.4,vd:0,va:0},
+  {cat:'nuts',n:'Pistachios 30g',e:'&#129372;',p:'30g ~49 nuts',c:170,pr:6.1,cb:8.3,f:13.7,fi:3,su:2.2,as:0,sf:1.7,na:0,ch:0,po:285,ca:30,ir:1.1,vc:0.7,vd:0,va:11},
+  {cat:'nuts',n:'Chia Seeds 20g',e:'&#129379;',p:'2 tbsp 20g',c:97,pr:3.3,cb:8.3,f:6.2,fi:6.9,su:0,as:0,sf:0.7,na:4,ch:0,po:112,ca:126,ir:1.6,vc:0.5,vd:0,va:1},
+  {cat:'nuts',n:'Sunflower Seeds 30g',e:'&#129379;',p:'3 tbsp 30g',c:175,pr:6,cb:5.9,f:15.3,fi:2.4,su:0.8,as:0,sf:1.6,na:1,ch:0,po:224,ca:22,ir:1.5,vc:0.4,vd:0,va:0},
+  {cat:'veg',n:'Edamame 100g',e:'&#129382;',p:'100g shelled',c:121,pr:11.9,cb:8.9,f:5.2,fi:5.2,su:2.2,as:0,sf:0.6,na:6,ch:0,po:436,ca:60,ir:2.3,vc:6.1,vd:0,va:18},
   {cat:'snacks',n:'Greek Yogurt 0% 150g',e:'&#129371;',p:'150g plain non-fat',c:83,pr:15,cb:5.6,f:0.4,fi:0,su:5.6,as:0,sf:0.1,na:55,ch:8,po:195,ca:150,ir:0,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Olives 50g',e:'&#129746;',p:'10 large olives',c:63,pr:0.5,cb:1.7,f:5.9,fi:1.6,su:0,as:0,sf:0.8,na:540,ch:0,po:8,ca:48,ir:1.6,vc:0,vd:0,va:10},
-  {cat:'snacks',n:'Fruit & Nut Bar',e:'&#129372;',p:'1 bar 50g',c:200,pr:4,cb:28,f:9,fi:3,su:16,as:4,sf:2,na:50,ch:0,po:180,ca:40,ir:0.8,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Fruit & Nut Bar',e:'&#129372;',p:'1 bar 50g',c:200,pr:4,cb:28,f:9,fi:3,su:16,as:4,sf:2,na:50,ch:0,po:180,ca:40,ir:0.8,vc:0,vd:0,va:0},
   // ═══ MORE VEG ═══
   {cat:'veg',n:'Kale 100g',e:'&#129382;',p:'100g raw',c:49,pr:4.3,cb:8.8,f:0.9,fi:3.6,su:2.3,as:0,sf:0.1,na:38,ch:0,po:491,ca:150,ir:1.5,vc:120,vd:0,va:500},
   {cat:'veg',n:'Asparagus 100g',e:'&#129382;',p:'100g steamed',c:20,pr:2.2,cb:3.9,f:0.1,fi:2.1,su:1.9,as:0,sf:0,na:2,ch:0,po:202,ca:24,ir:2.1,vc:5.6,vd:0,va:38},
@@ -2267,14 +2269,14 @@ var FOODS=[
   {cat:'sauces',n:'Caesar Dressing 2 tbsp',e:'&#129367;',p:'2 tbsp 30g',c:155,pr:1.4,cb:1.8,f:16.4,fi:0,su:1.4,as:1,sf:3,na:310,ch:14,po:18,ca:20,ir:0.1,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Balsamic Vinegar 1 tbsp',e:'&#129379;',p:'1 tbsp 16ml',c:14,pr:0.1,cb:2.7,f:0,fi:0,su:2.4,as:0,sf:0,na:4,ch:0,po:18,ca:4,ir:0.1,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Hummus 40g',e:'&#129379;',p:'2 tbsp 40g',c:88,pr:3.2,cb:6.2,f:5.8,fi:2.4,su:0.7,as:0,sf:0.8,na:200,ch:0,po:116,ca:22,ir:1.0,vc:1.6,vd:0,va:4},
-  {cat:'sauces',n:'Tahini 15g',e:'&#129372;',p:'1 tbsp',c:89,pr:2.6,cb:3.2,f:8,fi:1.4,su:0.1,as:0,sf:1.1,na:17,ch:0,po:62,ca:64,ir:1.3,vc:0,vd:0,va:0},
+  {cat:'nuts',n:'Tahini 15g',e:'&#129372;',p:'1 tbsp',c:89,pr:2.6,cb:3.2,f:8,fi:1.4,su:0.1,as:0,sf:1.1,na:17,ch:0,po:62,ca:64,ir:1.3,vc:0,vd:0,va:0},
   {cat:'sauces',n:'Guacamole 50g',e:'&#129361;',p:'2 tbsp 50g',c:80,pr:1,cb:4.5,f:7.5,fi:3.4,su:0.3,as:0,sf:1.1,na:180,ch:0,po:243,ca:6,ir:0.3,vc:5,vd:0,va:4},
   {cat:'sauces',n:'Sriracha 1 tbsp',e:'&#128293;',p:'1 tbsp 17g',c:15,pr:0.4,cb:3.4,f:0.3,fi:0.2,su:2.4,as:2,sf:0,na:390,ch:0,po:40,ca:3,ir:0.2,vc:12,vd:0,va:40},
   {cat:'sauces',n:'Pesto 25g',e:'&#127807;',p:'2 tbsp 25g',c:130,pr:2.5,cb:1.5,f:13,fi:0.5,su:0.8,as:0,sf:2.5,na:160,ch:2,po:60,ca:50,ir:0.5,vc:2,vd:0,va:40},
   {cat:'sauces',n:'Ranch Dressing 2 tbsp',e:'&#129379;',p:'2 tbsp 30g',c:144,pr:0.4,cb:2.6,f:14.9,fi:0,su:1.8,as:0.5,sf:2.3,na:280,ch:8,po:22,ca:18,ir:0,vc:0,vd:0,va:0},
   // ═══ DRINKS (non-alcoholic foods) ═══
-  {cat:'snacks',n:'Protein Shake Ready-made',e:'&#128167;',p:'500ml bottle',c:130,pr:20,cb:12,f:1.5,fi:0,su:4,as:2,sf:0.5,na:240,ch:15,po:200,ca:280,ir:0.4,vc:0,vd:2,va:0},
-  {cat:'snacks',n:'Trail Mix 40g',e:'&#129372;',p:'40g',c:210,pr:5.6,cb:18.4,f:13.5,fi:2.4,su:11,as:4,sf:2.5,na:40,ch:0,po:220,ca:26,ir:1.0,vc:0.4,vd:0,va:0},
+  {cat:'snacks',n:'Protein Shake Ready-made',e:'&#128170;',p:'500ml bottle',c:130,pr:20,cb:12,f:1.5,fi:0,su:4,as:2,sf:0.5,na:240,ch:15,po:200,ca:280,ir:0.4,vc:0,vd:2,va:0},
+  {cat:'nuts',n:'Trail Mix 40g',e:'&#129372;',p:'40g',c:210,pr:5.6,cb:18.4,f:13.5,fi:2.4,su:11,as:4,sf:2.5,na:40,ch:0,po:220,ca:26,ir:1.0,vc:0.4,vd:0,va:0},
   // ── BERRIES ─────────────────────────────────────────────────────
   {cat:'fruit',n:'Raspberries 100g',e:'&#127827;',p:'100g',c:52,pr:1.2,cb:11.9,f:0.7,fi:6.5,su:4.4,as:0,sf:0,na:1,ch:0,po:151,ca:25,ir:0.7,vc:26,vd:0,va:2},
   {cat:'fruit',n:'Blackberries 100g',e:'&#129744;',p:'100g',c:43,pr:1.4,cb:9.6,f:0.5,fi:5.3,su:4.9,as:0,sf:0,na:1,ch:0,po:162,ca:29,ir:0.6,vc:21,vd:0,va:11},
