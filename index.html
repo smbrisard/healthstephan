@@ -1835,7 +1835,7 @@ function rHome() {
     var col=secColors[sec]||'var(--txt)';
     html+=D('style="font-size:11px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:.8px;margin:10px 0 6px"',sec);
     items.forEach(function(m){
-      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"','P:'+Math.round(m.protein||0)+'g C:'+Math.round(m.carbs||0)+'g F:'+Math.round(m.fat||0)+'g'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
+      html+=D('class="ritem"',D('class="ric" style="background:'+col+'18"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals)+' kcal'))+D('style="display:flex;align-items:center;gap:7px"',D('class="rval" style="color:'+col+'"',fN(m.cals)+' kcal')));
     });
   });
   mEl.innerHTML=html;
@@ -2878,7 +2878,7 @@ function rFoodGrid() {
         D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',r.name)+
         D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',r.servings+' serving'+(r.servings!==1?'s':''))+
         D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--grn)"',fN(r.cals)+' kcal')+
-        D('style="font-size:10px;color:var(--dim)"','P:'+fD(r.protein,1)+'g C:'+fD(r.carbs,1)+'g F:'+fD(r.fat,1)+'g'));
+        D('style="font-size:10px;color:var(--dim)"','P:'+fD(r.protein||0,1)+'g C:'+fD(r.carbs||0,1)+'g F:'+fD(r.fat||0,1)+'g'));
     }).join('');
     return;
   }
@@ -2933,7 +2933,7 @@ function foodInfo(id){
   if(!m) return;
   var _pr=Math.round(m.protein||0),_cb=Math.round(m.carbs||0),_ft=Math.round(m.fat||0);
   var _su=Math.round(m.sugar||0),_fi=Math.round(m.fiber||0),_na=Math.round(m.sodium||0);
-  var _sf=Math.round(m.sf||0),_ch=Math.round(m.ch||0);
+  var _sf=Math.round(m.sf||m.satFat||0),_ch=Math.round(m.ch||m.cholest||0);
   var info='<div style="padding:4px 0">'+
     '<div style="font-size:18px;font-weight:800;color:var(--txt);margin-bottom:2px">'+(m.emoji||'&#127869;')+' '+m.name+'</div>'+
     '<div style="font-size:12px;color:var(--dim);margin-bottom:12px">'+(m.serving||'1 serving')+'</div>'+
