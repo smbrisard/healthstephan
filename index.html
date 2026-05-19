@@ -3128,8 +3128,16 @@ function rNutrition() {
     var fib=meals.reduce(function(a,m){return a+(m.fiber||0);},0);
     var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0)+tDrinks().reduce(function(a,d){return a+(d.sugar||0);},0);
     var sod=meals.reduce(function(a,m){return a+(m.sodium||0);},0);
-    var chol=meals.reduce(function(a,m){return a+(m.cholest||0);},0);
-    var pot=meals.reduce(function(a,m){return a+(m.potassium||0);},0);
+    var chol=meals.reduce(function(a,m){
+      var _ch=m.cholest||m.ch||0;
+      // Sanity check: single meal cholesterol > 600mg is likely a data error
+      return a+(Math.min(_ch,600));
+    },0);
+    var pot=meals.reduce(function(a,m){
+      var _po=m.potassium||m.po||0;
+      // Sanity check: single meal potassium > 2000mg is likely a data error
+      return a+(Math.min(isNaN(_po)?0:_po,2000));
+    },0);
     var cal2=meals.reduce(function(a,m){return a+(m.calcium||0);},0);
     var iron=meals.reduce(function(a,m){return a+(m.iron||0);},0);
     var deficit=P.calTarget-cals;
@@ -4679,13 +4687,12 @@ function launchApp(){
   _rd.forEach(function(d){DRINKS.push(d);});
   // Fix ML entries missing micronutrient fields (from restaurant items)
   ML.forEach(function(m){
-    if(m.sf===undefined) m.sf=Math.round((m.f||0)*0.3);
-    if(m.ch===undefined) m.ch=Math.round((m.pr||0)*1.5);
-    if(m.as===undefined) m.as=0;
-    if(m.po===undefined) m.po=Math.round((m.na||0)*0.5);
-    if(m.ca===undefined) m.ca=0;
-    if(m.ir===undefined) m.ir=0;
-    if(m.vd===undefined) m.vd=0;
+    // Fix estimated micronutrients using correct ML field names
+    var _fat=m.fat||0, _prot=m.protein||0, _sod=m.sodium||0;
+    if(m.sf===undefined&&m.satFat===undefined) m.satFat=Math.round(_fat*0.3);
+    if(m.as===undefined&&m.addedSugar===undefined) m.addedSugar=0;
+    // Do NOT estimate cholesterol or potassium - too unreliable
+    // Leave them as 0 if not set, rather than wrong estimates
   });
   // Remove SL entries with exactly 7.2h that have no explicit manual flag (old default artifact)
   var _slPre=SL.length;
