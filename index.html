@@ -2673,7 +2673,8 @@ function saveRecipeToDatabase(){
     cals:Math.round(per.cals),protein:per.protein,carbs:per.carbs,fat:per.fat,
     fiber:per.fiber||0,sugar:per.sugar||0,satFat:per.satFat||0,sodium:per.sodium||0,
     cholest:per.cholest||0,potassium:per.potassium||0,calcium:per.calcium||0,iron:per.iron||0,
-    savedAt:Date.now()
+    savedAt:Date.now(),
+    cat:(g('recipe-cat')?g('recipe-cat').value:'recipes')
   };
   var ei=recipes.findIndex(function(r){return r.name.toLowerCase()===name.toLowerCase();});
   if(ei>=0){recipes[ei]=entry;toast('✓ Recipe updated!');}
@@ -2898,7 +2899,7 @@ function rFoodGrid() {
   } else {
     // Other categories: built-in FOODS + myFoods that match category
     // Also show recipes in their assigned category
-  var recipesInCat=fCat==='all'?savedRecipes:savedRecipes.filter(function(r){return r.cat===fCat||(!r.cat&&fCat==='meals');});
+  var recipesInCat=fCat==='all'?savedRecipes:savedRecipes.filter(function(r){return r.cat===fCat||(!r.cat&&fCat==='recipes');});
   var myFoodsInCat=myFoods
       .filter(function(f){return fCat==='all'||(f.cat&&f.cat===fCat);})
       .map(function(f){return Object.assign({},f,{_custom:true});});
@@ -4628,6 +4629,12 @@ function launchApp(){
       }
     });
     if(_ch) saveMyFoods(_mf);
+    // Also fix existing saved recipes with no category
+    var _sr=loadRecipes(); var _rch=false;
+    _sr.forEach(function(r){
+      if(!r.cat){r.cat='recipes';_rch=true;}
+    });
+    if(_rch) saveRecipes(_sr);
   }());
   // Restaurant menu items added at runtime
   var _rf=[
@@ -6045,6 +6052,22 @@ window.addEventListener('load', launch);</script>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <div style="flex:1"><div class="flbl" style="margin-bottom:0">Total Servings</div><div style="font-size:10px;color:var(--dim)">Portions this whole recipe yields</div></div>
       <input id="recipe-servings" class="fld" type="number" min="1" value="1" style="width:70px;margin-bottom:0" oninput="_updateRecipeTotals()">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--dim);display:block;margin-bottom:4px">Category (where to find this recipe)</label>
+      <select id="recipe-cat" class="fld" style="margin-bottom:0;color:var(--txt);background:var(--s2)">
+        <option value="recipes">&#128218; Recipes (general)</option>
+        <option value="salads">&#129367; Salads</option>
+        <option value="meat">&#129385; Meat &amp; Fish</option>
+        <option value="eggs">&#129370; Eggs</option>
+        <option value="grains">&#127806; Grains &amp; Carbs</option>
+        <option value="veg">&#129388; Vegetables</option>
+        <option value="breakfast">&#127371; Breakfast</option>
+        <option value="fastfood">&#127828; Fast Food</option>
+        <option value="snacks">&#127894; Snacks</option>
+        <option value="dairy">&#129371; Dairy</option>
+        <option value="nuts">&#129372; Nuts &amp; Seeds</option>
+      </select>
     </div>
     <!-- Ingredient search -->
     <div class="flbl">Add Ingredient</div>
