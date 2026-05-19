@@ -2413,6 +2413,8 @@ function openRecipeBuilder(editIdx){
       if(ni) ni.value=r.name||'';
       if(si) si.value=r.servings||1;
       if(rcCat) rcCat.value=r.cat||'recipes';
+      var ep=g('recipe-emoji-pick'); if(ep) ep.value=r.emoji||'&#128216;';
+      var epv=g('recipe-emoji-preview'); if(epv) epv.textContent=r.emoji||'&#128216;';
       _recipeIngs=(r.ingredients||[]).map(function(i){return Object.assign({},i);});
     }
   }
