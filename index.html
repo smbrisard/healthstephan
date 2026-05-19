@@ -1069,7 +1069,7 @@ body { height: 100dvh; }
         <option value="snacks">🌰 Snacks</option>
         <option value="nuts">&#129372; Nuts &amp; Seeds</option>
         <option value="supplements">💊 Supplements</option>
-        <option value="meals">🍽 Meals</option>
+        
         <option value="fastfood">🍔 Fast Food</option>
         <option value="sauces">🫙 Sauces</option>
         <option value="flowerchild">&#127807; Flower Child</option>
@@ -4602,6 +4602,33 @@ function histNav(dir){
 
 
 function launchApp(){
+  // Migrate myFoods categories based on name keywords
+  (function(){
+    var _mf=loadMyFoods(); var _ch=false;
+    var _cm=[
+      {p:/egg|omelette|shakshuka|frittata/i,c:'eggs'},
+      {p:/salad|caesar|coleslaw/i,c:'salads'},
+      {p:/salmon|tuna|cod|mackerel|sardine|prawn|shrimp|seafood/i,c:'meat'},
+      {p:/chicken|beef|pork|lamb|turkey|steak|mince|bacon|sausage|ham/i,c:'meat'},
+      {p:/pasta|noodle|ramen|quinoa|bread|wrap|tortilla|pita|bagel|rice bowl/i,c:'grains'},
+      {p:/pizza|burger|taco|kebab|fries|mcdonalds|kfc|subway/i,c:'fastfood'},
+      {p:/almond|cashew|walnut|pistachio|pecan|peanut|nut |nuts|seed|tahini/i,c:'nuts'},
+      {p:/apple|banana|orange|mango|berry|berries|grapes|peach|pear|cherry|fruit/i,c:'fruit'},
+      {p:/broccoli|spinach|kale|carrot|tomato|pepper|onion|garlic|courgette|cucumber|lettuce/i,c:'veg'},
+      {p:/milk|yogurt|cheese|butter|cream|dairy/i,c:'dairy'},
+      {p:/oat|granola|pancake|waffle|muesli/i,c:'breakfast'},
+      {p:/protein shake|whey|creatine|supplement|vitamin|bcaa/i,c:'supplements'},
+      {p:/chocolate|biscuit|crisp|cake|cookie/i,c:'snacks'},
+      {p:/sauce|dressing|mayo|ketchup|pesto|salsa|vinegar/i,c:'sauces'},
+    ];
+    _mf.forEach(function(f){
+      if(f.cat&&f.cat!=='meals'&&f.cat!=='meal'&&f.cat!=='custom') return;
+      for(var i=0;i<_cm.length;i++){
+        if(_cm[i].p.test(f.n)){f.cat=_cm[i].c;_ch=true;break;}
+      }
+    });
+    if(_ch) saveMyFoods(_mf);
+  }());
   // Restaurant menu items added at runtime
   var _rf=[
     {cat:'flowerchild',n:'Mother Earth Bowl',e:'&#127807;',p:'1 bowl',c:520,pr:18,cb:62,f:22,fi:10,su:8,na:680},
@@ -6003,7 +6030,7 @@ window.addEventListener('load', launch);</script>
     <div class="fw"><div class="flbl">Save to Category Pill</div>
       <select id="recipe-category" class="fld" style="margin-bottom:8px;color:var(--txt);background:var(--s2)">
         <option value="custom">⭐ Custom (My Foods)</option>
-        <option value="meals">🍽 Meals</option>
+        
         <option value="breakfast">🥣 Breakfast</option>
         <option value="snacks">🌰 Snacks</option>
         <option value="fastfood">🍔 Fast Food</option>
