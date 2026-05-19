@@ -3106,9 +3106,11 @@ function resetMacroTargets(){
   if(!confirm('Reset all macro targets to recommended defaults?')) return;
   var kcal=P.calTarget||1600;
   // Standard macro split: 30% protein, 40% carbs, 30% fat
-  P.protein=Math.round(kcal*0.33/4);   // 33% protein
-  P.carbs=Math.round(kcal*0.42/4);     // 42% carbs
-  P.fat=Math.round(kcal*0.25/9);       // 25% fat
+  // Balanced split: 30% protein, 35% carbs, 35% fat
+  // Realistic for active person eating whole foods (salmon, avocado, olive oil)
+  P.protein=Math.round(kcal*0.30/4);   // ~131g at 1750 kcal
+  P.carbs=Math.round(kcal*0.35/4);     // ~153g at 1750 kcal
+  P.fat=Math.round(kcal*0.35/9);       // ~68g at 1750 kcal
   P.fiber=30; P.sugar=50; P.sodium=2300;
   P.potassium=4700; P.calcium=1300;
   // Update displayed values
