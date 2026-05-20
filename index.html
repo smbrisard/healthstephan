@@ -516,11 +516,13 @@ body { height: 100dvh; }
           <div class="pill" onclick="setFCat('meat',this)">&#129385; Meat &amp; Fish</div>
           <div class="pill" onclick="setFCat('dairy',this)">&#129371; Dairy</div>
           <div class="pill" onclick="setFCat('grains',this)">&#127806; Grains</div>
+          <div class="pill" onclick="setFCat('pizzapasta',this)">&#127829; Pizza &amp; Pasta</div>
           <div class="pill" onclick="setFCat('veg',this)">&#129388; Vegetables</div>
           <div class="pill" onclick="setFCat('salads',this)">&#129367; Salads</div>
           <div class="pill" onclick="setFCat('fruit',this)">&#127815; Fruit</div>
           <div class="pill" onclick="setFCat('breakfast',this)">&#129360; Breakfast</div>
           <div class="pill" onclick="setFCat('snacks',this)">&#127894; Snacks</div>
+          <div class="pill" onclick="setFCat('desserts',this)">&#127856; Desserts</div>
           <div class="pill" onclick="setFCat('nuts',this)">&#129372; Nuts & Seeds</div>
           <div class="pill" onclick="setFCat('supplements',this)">&#128138; Supplements</div>
           
@@ -1062,11 +1064,13 @@ body { height: 100dvh; }
         <option value="meat">🍗 Meat &amp; Fish</option>
         <option value="dairy">🧀 Dairy</option>
         <option value="grains">🍞 Grains</option>
+        <option value="pizzapasta">&#127829; Pizza &amp; Pasta</option>
         <option value="veg">🥦 Vegetables</option>
         <option value="salads">&#129367; Salads</option>
         <option value="fruit">🍎 Fruit</option>
         <option value="breakfast">🥣 Breakfast</option>
         <option value="snacks">🌰 Snacks</option>
+        <option value="desserts">&#127856; Desserts</option>
         <option value="nuts">&#129372; Nuts &amp; Seeds</option>
         <option value="supplements">💊 Supplements</option>
         
@@ -2232,9 +2236,9 @@ var FOODS=[
   {cat:'fruit',n:'Strawberries 100g',e:'&#127827;',p:'100g',c:32,pr:0.7,cb:7.7,f:0.3,fi:2,su:4.9,as:0,sf:0,na:1,ch:0,po:153,ca:16,ir:0.4,vc:59,vd:0,va:1},
   {cat:'fruit',n:'Mango half',e:'&#129389;',p:'Half mango 165g',c:99,pr:1.4,cb:25,f:0.6,fi:2.6,su:23,as:0,sf:0.1,na:2,ch:0,po:277,ca:18,ir:0.2,vc:57,vd:0,va:181},
   // MEALS
-  {cat:'fastfood',n:'Margherita Pizza 2 slices',e:'&#127829;',p:'2 slices 280g',c:620,pr:28,cb:74,f:18,fi:4,su:6,as:2,sf:8,na:820,ch:42,po:310,ca:280,ir:3.2,vc:4,vd:0,va:120},
+  {cat:'pizzapasta',n:'Margherita Pizza 2 slices',e:'&#127829;',p:'2 slices 280g',c:620,pr:28,cb:74,f:18,fi:4,su:6,as:2,sf:8,na:820,ch:42,po:310,ca:280,ir:3.2,vc:4,vd:0,va:120},
   {cat:'salads',n:'Chicken Caesar Salad',e:'&#129367;',p:'1 bowl 350g',c:480,pr:38,cb:22,f:16,fi:3,su:3,as:1,sf:4,na:720,ch:88,po:680,ca:140,ir:2.4,vc:12,vd:0.4,va:180},
-  {cat:'grains',n:'Pasta Bolognese',e:'&#127837;',p:'1 serving 400g',c:580,pr:32,cb:68,f:18,fi:4,su:8,as:2,sf:6,na:680,ch:72,po:720,ca:80,ir:4.2,vc:6,vd:0.2,va:80},
+  {cat:'pizzapasta',n:'Pasta Bolognese',e:'&#127837;',p:'1 serving 400g',c:580,pr:32,cb:68,f:18,fi:4,su:8,as:2,sf:6,na:680,ch:72,po:720,ca:80,ir:4.2,vc:6,vd:0.2,va:80},
   {cat:'salads',n:'Greek Salad',e:'&#129367;',p:'1 bowl 320g',c:280,pr:9,cb:18,f:22,fi:5,su:8,as:0,sf:6,na:480,ch:28,po:520,ca:180,ir:1.8,vc:18,vd:0,va:140},
   {cat:'meat',n:'Grilled Salmon',e:'&#129424;',p:'200g with veg',c:367,pr:46,cb:0,f:20,fi:0,su:0,as:0,sf:4,na:180,ch:110,po:880,ca:28,ir:1.0,vc:0,vd:22,va:60},
   {cat:'fastfood',n:'Cheeseburger',e:'&#127828;',p:'1 burger',c:550,pr:30,cb:46,f:26,fi:2,su:10,as:4,sf:11,na:980,ch:90,po:440,ca:180,ir:3.8,vc:4,vd:0.2,va:80},
@@ -2252,7 +2256,7 @@ var FOODS=[
   {cat:'nuts',n:'Mixed Nuts 30g',e:'&#129372;',p:'30g handful',c:180,pr:5,cb:7,f:16,fi:2,su:1,as:0,sf:2,na:80,ch:0,po:200,ca:30,ir:0.8,vc:0,vd:0,va:0},
   {cat:'nuts',n:'Almonds 30g',e:'&#129372;',p:'30g ~23 nuts',c:164,pr:6,cb:6,f:14,fi:3.5,su:1.2,as:0,sf:1,na:1,ch:0,po:200,ca:76,ir:1.1,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Protein Bar',e:'&#128170;',p:'1 bar 60g',c:220,pr:20,cb:24,f:6,fi:4,su:8,as:6,sf:2,na:180,ch:10,po:160,ca:100,ir:1.0,vc:0,vd:0,va:0},
-  {cat:'snacks',n:'Dark Chocolate 40g',e:'&#127851;',p:'40g 85% cocoa',c:220,pr:3,cb:14,f:16,fi:4,su:6,as:5,sf:9,na:10,ch:0,po:280,ca:24,ir:3.2,vc:0,vd:0,va:0},
+  {cat:'desserts',n:'Dark Chocolate 40g',e:'&#127851;',p:'40g 85% cocoa',c:220,pr:3,cb:14,f:16,fi:4,su:6,as:5,sf:9,na:10,ch:0,po:280,ca:24,ir:3.2,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Rice Cakes x3',e:'&#127859;',p:'3 plain rice cakes',c:80,pr:2,cb:18,f:0.6,fi:0.4,su:0,as:0,sf:0,na:30,ch:0,po:30,ca:4,ir:0.4,vc:0,vd:0,va:0},
   {cat:'snacks',n:'Hummus with Crackers',e:'&#129379;',p:'100g hummus 30g crackers',c:310,pr:10,cb:34,f:14,fi:7,su:2,as:0,sf:2,na:460,ch:0,po:320,ca:60,ir:2.4,vc:4,vd:0,va:20},
   {cat:'nuts',n:'Peanut Butter 2 tbsp',e:'&#129372;',p:'2 tbsp 32g',c:192,pr:8,cb:6,f:16,fi:2,su:3,as:1,sf:3,na:147,ch:0,po:189,ca:17,ir:0.6,vc:0,vd:0,va:0},
@@ -2363,14 +2367,14 @@ var FOODS=[
   {cat:'eggs',n:'Shakshuka 2 eggs',e:'&#129370;',p:'2 eggs in tomato sauce',c:290,pr:18,cb:20,f:16,fi:5,su:10,as:2,sf:4,na:640,ch:372,po:680,ca:110,ir:4.0,vc:40,vd:2.2,va:200},
   {cat:'salads',n:'Tuna Pasta Salad',e:'&#129424;',p:'1 bowl 300g',c:380,pr:28,cb:44,f:8,fi:3,su:3,as:0,sf:1.5,na:560,ch:58,po:480,ca:40,ir:2.4,vc:4,vd:4,va:20},
   {cat:'fastfood',n:'Chicken Wrap',e:'&#127798;',p:'1 large wrap',c:480,pr:34,cb:46,f:15,fi:4,su:4,as:1,sf:4,na:820,ch:85,po:480,ca:100,ir:3.2,vc:8,vd:0.2,va:60},
-  {cat:'meat',n:'Smoked Salmon Pasta',e:'&#129424;',p:'1 serving 350g',c:510,pr:28,cb:58,f:16,fi:3,su:3,as:0,sf:4,na:720,ch:70,po:520,ca:60,ir:1.8,vc:4,vd:8,va:50},
+  {cat:'pizzapasta',n:'Smoked Salmon Pasta',e:'&#129424;',p:'1 serving 350g',c:510,pr:28,cb:58,f:16,fi:3,su:3,as:0,sf:4,na:720,ch:70,po:520,ca:60,ir:1.8,vc:4,vd:8,va:50},
   {cat:'grains',n:'Lentil Soup',e:'&#129379;',p:'1 bowl 400ml',c:210,pr:14,cb:36,f:1.5,fi:12,su:5,as:0,sf:0.2,na:540,ch:0,po:620,ca:52,ir:4.4,vc:10,vd:0,va:60},
   {cat:'eggs',n:'Omelette 3 eggs veg',e:'&#129370;',p:'3 eggs mushroom peppers',c:320,pr:24,cb:8,f:22,fi:2,su:4,as:0,sf:5.5,na:320,ch:558,po:440,ca:90,ir:3.0,vc:50,vd:3.3,va:240},
   {cat:'meat',n:'Prawn Stir Fry',e:'&#129424;',p:'1 serving 300g with noodles',c:410,pr:26,cb:48,f:10,fi:4,su:6,as:2,sf:1.5,na:840,ch:152,po:420,ca:80,ir:2.4,vc:28,vd:0,va:60},
   {cat:'fastfood',n:'Falafel Wrap',e:'&#129366;',p:'1 wrap 300g',c:420,pr:14,cb:58,f:14,fi:8,su:5,as:0,sf:2,na:680,ch:0,po:480,ca:100,ir:4.2,vc:12,vd:0,va:60},
   // ═══ MORE FAST FOOD ═══
   {cat:'fastfood',n:'McD McChicken Sandwich',e:'&#127828;',p:'1 sandwich',c:410,pr:15,cb:41,f:19,fi:2,su:5,as:3,sf:3.5,na:660,ch:40,po:240,ca:100,ir:2.4,vc:0,vd:0,va:0},
-  {cat:'fastfood',n:'Pizza Slice Pepperoni',e:'&#127829;',p:'1 large slice 125g',c:360,pr:16,cb:38,f:16,fi:2,su:4,as:1,sf:6,na:780,ch:44,po:220,ca:180,ir:2.8,vc:2,vd:0.2,va:80},
+  {cat:'pizzapasta',n:'Pizza Slice Pepperoni',e:'&#127829;',p:'1 large slice 125g',c:360,pr:16,cb:38,f:16,fi:2,su:4,as:1,sf:6,na:780,ch:44,po:220,ca:180,ir:2.8,vc:2,vd:0.2,va:80},
   {cat:'fastfood',n:'Fish and Chips',e:'&#129424;',p:'1 portion 400g',c:740,pr:28,cb:82,f:32,fi:5,su:2,as:0,sf:5,na:980,ch:65,po:740,ca:80,ir:2.2,vc:16,vd:3,va:0},
   {cat:'fastfood',n:'Greggs Sausage Roll',e:'&#129366;',p:'1 standard roll 105g',c:311,pr:7.3,cb:24.9,f:20.1,fi:1.1,su:2.2,as:0.5,sf:7.9,na:680,ch:26,po:140,ca:28,ir:1.4,vc:0,vd:0,va:0},
   {cat:'fastfood',n:'Pret A Manger Wrap',e:'&#127798;',p:'1 chicken avocado wrap',c:440,pr:28,cb:44,f:16,fi:5,su:4,as:0,sf:4,na:720,ch:70,po:480,ca:80,ir:3.2,vc:12,vd:0.2,va:60},
@@ -2413,6 +2417,46 @@ var FOODS=[
   {cat:'veg',n:'Garlic 2 cloves',e:'&#129476;',p:'6g',c:9,pr:0.4,cb:2,f:0,fi:0.1,su:0.1,as:0,sf:0,na:1,ch:0,po:24,ca:11,ir:0.1,vc:1,vd:0,va:0},
   // ── EXTRA MEALS ─────────────────────────────────────────────────
   {cat:'grains',n:'Ramen Bowl',e:'&#127836;',p:'500ml',c:440,pr:20,cb:60,f:14,fi:3,su:5,as:0,sf:5,na:1400,ch:60,po:300,ca:50,ir:2,vc:0,vd:0,va:0},
+  // -- PIZZA & PASTA --
+  {cat:'pizzapasta',n:'Spaghetti Carbonara',e:'&#127837;',p:'1 serving 350g',c:620,pr:28,cb:70,f:24,fi:3,su:2,as:0,sf:10,na:680,ch:185,po:420,ca:80,ir:3.2,vc:2,vd:0.8,va:80},
+  {cat:'pizzapasta',n:'Penne Arrabbiata',e:'&#127837;',p:'1 serving 350g',c:440,pr:14,cb:76,f:8,fi:5,su:6,as:0,sf:1.2,na:560,ch:0,po:380,ca:40,ir:2.8,vc:12,vd:0,va:60},
+  {cat:'pizzapasta',n:'Spaghetti Aglio Olio',e:'&#127837;',p:'1 serving 300g',c:520,pr:14,cb:72,f:18,fi:4,su:2,as:0,sf:2.5,na:420,ch:0,po:280,ca:40,ir:2.4,vc:4,vd:0,va:0},
+  {cat:'pizzapasta',n:'Lasagna Bolognese',e:'&#127829;',p:'1 slice 350g',c:590,pr:30,cb:50,f:26,fi:4,su:8,as:2,sf:11,na:780,ch:95,po:560,ca:220,ir:3.8,vc:6,vd:0.4,va:120},
+  {cat:'pizzapasta',n:'Tagliatelle Ragu',e:'&#127837;',p:'1 serving 350g',c:560,pr:28,cb:64,f:18,fi:4,su:6,as:1,sf:6,na:640,ch:70,po:520,ca:60,ir:3.6,vc:4,vd:0.2,va:60},
+  {cat:'pizzapasta',n:'Gnocchi Pesto',e:'&#127837;',p:'1 serving 300g',c:540,pr:14,cb:72,f:22,fi:3,su:2,as:0,sf:4,na:580,ch:8,po:280,ca:100,ir:2.0,vc:4,vd:0,va:60},
+  {cat:'pizzapasta',n:'Ravioli Ricotta Spinach',e:'&#127837;',p:'1 serving 300g',c:460,pr:20,cb:58,f:16,fi:4,su:4,as:0,sf:7,na:620,ch:80,po:360,ca:180,ir:2.4,vc:8,vd:0.4,va:160},
+  {cat:'pizzapasta',n:'Fettuccine Alfredo',e:'&#127837;',p:'1 serving 350g',c:680,pr:22,cb:72,f:32,fi:3,su:4,as:0,sf:18,na:740,ch:120,po:340,ca:180,ir:2.0,vc:0,vd:0.6,va:140},
+  {cat:'pizzapasta',n:'Rigatoni Amatriciana',e:'&#127837;',p:'1 serving 350g',c:520,pr:20,cb:72,f:16,fi:4,su:5,as:0,sf:5,na:820,ch:38,po:420,ca:40,ir:3.0,vc:8,vd:0.2,va:40},
+  {cat:'pizzapasta',n:'Pizza Quattro Stagioni',e:'&#127829;',p:'2 slices 280g',c:580,pr:26,cb:68,f:20,fi:4,su:6,as:1,sf:8,na:860,ch:55,po:380,ca:260,ir:3.4,vc:8,vd:0.4,va:80},
+  {cat:'pizzapasta',n:'Pizza Prosciutto',e:'&#127829;',p:'2 slices 280g',c:540,pr:28,cb:64,f:18,fi:3,su:5,as:1,sf:7,na:920,ch:50,po:360,ca:240,ir:3.0,vc:2,vd:0.4,va:60},
+  {cat:'pizzapasta',n:'Pizza Diavola',e:'&#127829;',p:'2 slices 280g',c:620,pr:28,cb:66,f:24,fi:3,su:5,as:1,sf:9,na:1020,ch:60,po:380,ca:240,ir:3.2,vc:4,vd:0.4,va:60},
+  {cat:'pizzapasta',n:'Pizza Funghi',e:'&#127829;',p:'2 slices 280g',c:480,pr:20,cb:66,f:14,fi:4,su:5,as:1,sf:5,na:740,ch:30,po:340,ca:200,ir:2.8,vc:4,vd:0.2,va:40},
+  {cat:'pizzapasta',n:'Pasta Primavera',e:'&#127837;',p:'1 serving 350g',c:420,pr:14,cb:68,f:10,fi:6,su:6,as:0,sf:2,na:380,ch:8,po:440,ca:80,ir:2.4,vc:28,vd:0,va:120},
+  {cat:'pizzapasta',n:'Pasta Cacio e Pepe',e:'&#127837;',p:'1 serving 300g',c:560,pr:20,cb:68,f:22,fi:3,su:1,as:0,sf:10,na:580,ch:58,po:180,ca:200,ir:2.0,vc:0,vd:0.4,va:60},
+  {cat:'pizzapasta',n:'Pappardelle Mushroom',e:'&#127837;',p:'1 serving 350g',c:480,pr:16,cb:68,f:14,fi:5,su:4,as:0,sf:3,na:480,ch:15,po:480,ca:60,ir:2.8,vc:4,vd:0.2,va:20},
+  // -- DESSERTS --
+  {cat:'desserts',n:'Tiramisu 1 slice',e:'&#127856;',p:'120g slice',c:380,pr:6,cb:38,f:22,fi:1,su:28,as:20,sf:12,na:80,ch:145,po:120,ca:80,ir:0.8,vc:0,vd:0.4,va:100},
+  {cat:'desserts',n:'Cheesecake 1 slice',e:'&#127856;',p:'120g slice',c:400,pr:7,cb:36,f:26,fi:0.5,su:26,as:22,sf:14,na:280,ch:110,po:140,ca:80,ir:0.6,vc:0,vd:0.4,va:180},
+  {cat:'desserts',n:'Chocolate Brownie',e:'&#127851;',p:'1 piece 60g',c:250,pr:3,cb:34,f:12,fi:2,su:22,as:18,sf:6,na:120,ch:40,po:120,ca:20,ir:1.4,vc:0,vd:0,va:30},
+  {cat:'desserts',n:'Ice Cream 2 scoops',e:'&#127846;',p:'2 scoops 100g',c:200,pr:3.5,cb:24,f:10,fi:0,su:20,as:18,sf:6,na:80,ch:38,po:160,ca:120,ir:0.2,vc:0,vd:0.2,va:80},
+  {cat:'desserts',n:'Gelato 2 scoops',e:'&#127846;',p:'2 scoops 100g',c:180,pr:4,cb:26,f:7,fi:0,su:22,as:20,sf:4,na:60,ch:28,po:140,ca:100,ir:0.1,vc:0,vd:0.2,va:60},
+  {cat:'desserts',n:'Chocolate Mousse',e:'&#127851;',p:'150g pot',c:310,pr:5,cb:28,f:20,fi:2,su:24,as:20,sf:11,na:60,ch:80,po:200,ca:60,ir:1.8,vc:0,vd:0.4,va:80},
+  {cat:'desserts',n:'Creme Brulee',e:'&#127859;',p:'1 ramekin 120g',c:320,pr:5,cb:26,f:22,fi:0,su:24,as:22,sf:13,na:80,ch:220,po:120,ca:80,ir:0.4,vc:0,vd:0.6,va:180},
+  {cat:'desserts',n:'Panna Cotta',e:'&#129371;',p:'1 serving 120g',c:220,pr:3,cb:22,f:14,fi:0,su:20,as:18,sf:9,na:40,ch:52,po:80,ca:80,ir:0,vc:0,vd:0.2,va:60},
+  {cat:'desserts',n:'Apple Tart 1 slice',e:'&#127822;',p:'120g slice',c:290,pr:3,cb:40,f:14,fi:2,su:18,as:12,sf:6,na:160,ch:30,po:100,ca:20,ir:0.8,vc:2,vd:0,va:10},
+  {cat:'desserts',n:'Lemon Tart 1 slice',e:'&#127819;',p:'100g slice',c:310,pr:4,cb:36,f:16,fi:1,su:24,as:20,sf:8,na:140,ch:120,po:80,ca:40,ir:0.6,vc:8,vd:0.2,va:60},
+  {cat:'desserts',n:'Chocolate Fondant',e:'&#127851;',p:'1 individual 100g',c:380,pr:6,cb:42,f:20,fi:3,su:30,as:24,sf:11,na:180,ch:80,po:200,ca:40,ir:2.4,vc:0,vd:0,va:30},
+  {cat:'desserts',n:'Profiteroles x3',e:'&#129361;',p:'3 pieces 90g',c:330,pr:5,cb:28,f:22,fi:1,su:18,as:14,sf:11,na:100,ch:90,po:100,ca:60,ir:0.6,vc:0,vd:0.4,va:80},
+  {cat:'desserts',n:'Macaron x2',e:'&#127844;',p:'2 macarons 34g',c:150,pr:2,cb:22,f:6,fi:0.5,su:20,as:18,sf:1.5,na:20,ch:10,po:40,ca:20,ir:0.2,vc:0,vd:0,va:0},
+  {cat:'desserts',n:'Chocolate Cake 1 slice',e:'&#127856;',p:'1 slice 100g',c:370,pr:5,cb:50,f:18,fi:2,su:36,as:30,sf:8,na:240,ch:50,po:160,ca:40,ir:1.6,vc:0,vd:0.2,va:30},
+  {cat:'desserts',n:'Carrot Cake 1 slice',e:'&#129365;',p:'1 slice 100g',c:340,pr:4,cb:44,f:16,fi:2,su:32,as:26,sf:4,na:220,ch:40,po:140,ca:40,ir:1.0,vc:2,vd:0,va:240},
+  {cat:'desserts',n:'Sorbet 1 scoop',e:'&#127826;',p:'1 scoop 80g',c:90,pr:0.3,cb:22,f:0,fi:0.5,su:20,as:18,sf:0,na:10,ch:0,po:60,ca:6,ir:0.1,vc:4,vd:0,va:2},
+  {cat:'desserts',n:'Churros 3 pieces',e:'&#129348;',p:'3 pieces 90g',c:310,pr:4,cb:40,f:14,fi:2,su:12,as:8,sf:3,na:280,ch:10,po:80,ca:20,ir:1.4,vc:0,vd:0,va:0},
+  {cat:'desserts',n:'Waffles with Syrup',e:'&#129349;',p:'2 waffles 150g',c:420,pr:8,cb:62,f:16,fi:2,su:28,as:22,sf:5,na:440,ch:60,po:140,ca:100,ir:2.4,vc:0,vd:0.4,va:40},
+  {cat:'desserts',n:'Crepe with Nutella',e:'&#127856;',p:'1 crepe 120g',c:360,pr:7,cb:48,f:16,fi:2,su:30,as:24,sf:5,na:180,ch:20,po:160,ca:60,ir:1.4,vc:0,vd:0.2,va:20},
+  {cat:'desserts',n:'Mochi Ice Cream x2',e:'&#127846;',p:'2 pieces 84g',c:240,pr:3,cb:40,f:8,fi:0.5,su:22,as:18,sf:4,na:80,ch:20,po:60,ca:20,ir:0.4,vc:0,vd:0,va:0},
+  {cat:'desserts',n:'Sticky Toffee Pudding',e:'&#127856;',p:'1 serving 150g',c:450,pr:5,cb:68,f:18,fi:1,su:50,as:42,sf:10,na:380,ch:80,po:180,ca:80,ir:1.2,vc:0,vd:0.2,va:60},
+  {cat:'desserts',n:'New York Cheesecake',e:'&#127856;',p:'1 slice 140g',c:460,pr:8,cb:42,f:28,fi:0.5,su:32,as:28,sf:16,na:320,ch:130,po:120,ca:80,ir:0.6,vc:0,vd:0.4,va:200},
   {cat:'fastfood',n:'Tacos x2 Corn',e:'&#127790;',p:'200g',c:360,pr:22,cb:38,f:13,fi:5,su:3,as:0,sf:4,na:580,ch:55,po:350,ca:120,ir:2.5,vc:5,vd:0,va:20},
   {cat:'breakfast',n:'Acai Bowl',e:'&#129379;',p:'300g',c:380,pr:8,cb:58,f:14,fi:7,su:30,as:10,sf:3,na:60,ch:0,po:450,ca:80,ir:2,vc:15,vd:0,va:30},
 ];
@@ -4738,14 +4782,17 @@ function launchApp(){
       {p:/salmon|tuna|cod|mackerel|sardine|prawn|shrimp|seafood/i,c:'meat'},
       {p:/chicken|beef|pork|lamb|turkey|steak|mince|bacon|sausage|ham/i,c:'meat'},
       {p:/pasta|noodle|ramen|quinoa|bread|wrap|tortilla|pita|bagel|rice bowl/i,c:'grains'},
-      {p:/pizza|burger|taco|kebab|fries|mcdonalds|kfc|subway/i,c:'fastfood'},
+      {p:/pizza|lasagna|lasagne|carbonara|fettuccine|penne|rigatoni|tagliatelle|gnocchi|ravioli|arrabiata|amatriciana/i,c:'pizzapasta'},
+      {p:/burger|taco|kebab|fries|mcdonalds|kfc|subway/i,c:'fastfood'},
       {p:/almond|cashew|walnut|pistachio|pecan|peanut|nut |nuts|seed|tahini/i,c:'nuts'},
       {p:/apple|banana|orange|mango|berry|berries|grapes|peach|pear|cherry|fruit/i,c:'fruit'},
       {p:/broccoli|spinach|kale|carrot|tomato|pepper|onion|garlic|courgette|cucumber|lettuce/i,c:'veg'},
       {p:/milk|yogurt|cheese|butter|cream|dairy/i,c:'dairy'},
       {p:/oat|granola|pancake|waffle|muesli/i,c:'breakfast'},
       {p:/protein shake|whey|creatine|supplement|vitamin|bcaa/i,c:'supplements'},
-      {p:/chocolate|biscuit|crisp|cake|cookie/i,c:'snacks'},
+      {p:/tiramisu|cheesecake|brownie|mousse|gelato|sorbet|macaron|profiterole|eclair|creme brulee|panna cotta|churros|mochi|toffee pudding|fondant/i,c:'desserts'},
+      {p:/chocolate|biscuit|crisp|cake|cookie|ice cream|waffle|crepe/i,c:'desserts'},
+      {p:/rice cake|cracker|pretzel|popcorn/i,c:'snacks'},
       {p:/sauce|dressing|mayo|ketchup|pesto|salsa|vinegar/i,c:'sauces'},
     ];
     _mf.forEach(function(f){
@@ -6180,10 +6227,12 @@ window.addEventListener('load', launch);</script>
         <option value="meat">&#129385; Meat &amp; Fish</option>
         <option value="eggs">&#129370; Eggs</option>
         <option value="grains">&#127806; Grains</option>
+        <option value="pizzapasta">&#127829; Pizza &amp; Pasta</option>
         <option value="veg">&#129388; Vegetables</option>
         <option value="breakfast">&#127371; Breakfast</option>
         <option value="fastfood">&#127828; Fast Food</option>
         <option value="snacks">&#127894; Snacks</option>
+        <option value="desserts">&#127856; Desserts</option>
         <option value="dairy">&#129371; Dairy</option>
         <option value="nuts">&#129372; Nuts &amp; Seeds</option>
       </select>
