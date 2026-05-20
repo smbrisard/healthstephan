@@ -1182,7 +1182,115 @@ body { height: 100dvh; }
 
 
 <div id="toast"></div>
-<script>var _deBaseCals=0;
+<script>FOOD_EMOJI_MAP = [
+  // FRUITS
+  ['avocado','&#129361;'],
+  ['tomato','&#127813;'],['tomatoes','&#127813;'],
+  ['banana','&#127820;'],['apple','&#127822;'],
+  ['orange','&#127818;'],['lemon','&#127819;'],['lime','&#127819;'],
+  ['strawberr','&#127827;'],['raspberry','&#127827;'],
+  ['blueberr','&#129744;'],['blackberr','&#129744;'],
+  ['cherr','&#127826;'],['peach','&#127825;'],['plum','&#127825;'],
+  ['pear','&#127824;'],['mango','&#129389;'],['papaya','&#129389;'],
+  ['pineapple','&#127821;'],['watermelon','&#127817;'],
+  ['grape','&#127815;'],['kiwi','&#129373;'],['coconut','&#129381;'],
+  ['melon','&#127816;'],['fig','&#127815;'],['date ','&#127815;'],
+  ['passion','&#127818;'],['pomegranate','&#127822;'],
+  ['mixed berr','&#127827;'],['acai','&#129744;'],
+
+  // VEGETABLES
+  ['broccoli','&#129382;'],['spinach','&#129388;'],['kale','&#129388;'],
+  ['lettuce','&#129388;'],['cabbage','&#129388;'],
+  ['carrot','&#129365;'],['beetroot','&#127813;'],
+  ['potato','&#129364;'],['sweet potato','&#127840;'],['yam','&#127840;'],
+  ['cucumber','&#129362;'],['zucchini','&#129362;'],['courgette','&#129362;'],
+  ['bell pepper','&#129745;'],['pepper','&#129745;'],['capsicum','&#129745;'],
+  ['mushroom','&#127812;'],['corn','&#127805;'],
+  ['edamame','&#129752;'],['bean','&#129752;'],['lentil','&#129752;'],
+  ['chickpea','&#129752;'],['pea ','&#129382;'],
+  ['eggplant','&#127814;'],['aubergine','&#127814;'],
+  ['artichoke','&#129382;'],['garlic','&#129476;'],
+  ['onion','&#129477;'],['leek','&#129477;'],
+  ['celery','&#129382;'],['cauliflower','&#129382;'],
+  ['brussels','&#129382;'],['asparagus','&#129382;'],
+  ['courgette','&#129362;'],
+
+  // MEAT & FISH
+  ['chicken','&#127831;'],['turkey','&#129385;'],
+  ['beef','&#129385;'],['steak','&#129385;'],['lamb','&#129385;'],
+  ['pork','&#129385;'],['bacon','&#129385;'],
+  ['ham','&#129385;'],['sausage','&#129385;'],['mince','&#129385;'],
+  ['salmon','&#129424;'],['tuna','&#129424;'],['cod','&#129424;'],
+  ['fish','&#129424;'],['shrimp','&#127844;'],['prawn','&#127844;'],
+  ['lobster','&#127844;'],['crab','&#127844;'],
+
+  // DAIRY
+  ['milk','&#129371;'],['yogurt','&#129371;'],['yoghurt','&#129371;'],
+  ['kefir','&#129371;'],['cheese','&#129472;'],
+  ['parmigiano','&#129472;'],['parmesan','&#129472;'],
+  ['mozzarella','&#129472;'],['cheddar','&#129472;'],
+  ['feta','&#129472;'],['brie','&#129472;'],['gruyere','&#129472;'],
+  ['ricotta','&#129472;'],['halloumi','&#129472;'],
+  ['butter','&#129371;'],['cream cheese','&#129371;'],['cream','&#129371;'],['ghee','&#129371;'],
+
+  // GRAINS & BREAD
+  ['rice','&#127834;'],['pasta','&#127837;'],['spaghetti','&#127837;'],
+  ['noodle','&#127836;'],['bread','&#129366;'],['toast','&#129366;'],
+  ['bagel','&#129366;'],['sourdough','&#129366;'],
+  ['wrap','&#127798;'],['tortilla','&#127798;'],['pitta','&#129366;'],
+  ['oat','&#129379;'],['granola','&#129379;'],['cereal','&#129379;'],
+  ['quinoa','&#127834;'],['couscous','&#127834;'],
+  ['croissant','&#129360;'],['pancake','&#129348;'],['waffle','&#129349;'],
+
+  // NUTS & SEEDS
+  ['almond','&#129372;'],['peanut','&#129372;'],['walnut','&#129372;'],
+  ['cashew','&#129372;'],['pistachio','&#129372;'],['pecan','&#129372;'],
+  ['nut','&#129372;'],['seed','&#129372;'],['tahini','&#129379;'],
+
+  // SWEETS
+  ['chocolate','&#127850;'],['cookie','&#127850;'],['biscuit','&#127850;'],
+  ['cake','&#127856;'],['ice cream','&#127846;'],
+  ['honey','&#127855;'],['jam','&#127826;'],['syrup','&#127855;'],
+
+  // DRINKS
+  ['coffee','&#9749;'],['latte','&#9749;'],['espresso','&#9749;'],
+  ['cappuccino','&#9749;'],['americano','&#9749;'],['matcha','&#9749;'],
+  ['tea','&#127861;'],['kombucha','&#129514;'],
+  ['water','&#128167;'],
+  ['orange juice','&#127818;'],['juice','&#129380;'],
+  ['smoothie','&#129380;'],['shake','&#129380;'],['protein shake','&#128170;'],
+
+  // SUPPLEMENTS
+  ['supplement','&#128138;'],['vitamin','&#128138;'],['whey','&#128138;'],
+  ['protein powder','&#128138;'],['creatine','&#128138;'],['protein bar','&#128170;'],
+  ['bcaa','&#128138;'],['greens powder','&#129388;'],
+
+  // MEALS & FAST FOOD
+  ['salad','&#129367;'],['caesar','&#129367;'],
+  ['soup','&#127858;'],['ramen','&#127836;'],['pho','&#127836;'],
+  ['pizza','&#127829;'],['burger','&#127828;'],
+  ['sandwich','&#129386;'],['sushi','&#127843;'],['dumpling','&#129375;'],
+  ['wonton','&#129375;'],['xlb','&#129375;'],
+  ['taco','&#127790;'],['burrito','&#127791;'],
+  ['stir fry','&#129368;'],['curry','&#129368;'],
+  ['shakshuka','&#129370;'],['omelette','&#129370;'],
+
+  // EGGS
+  ['egg','&#129370;'],
+
+  // SAUCES & CONDIMENTS - specific first, generic last
+  ['olive oil','&#129746;'],['pesto','&#127807;'],
+  ['marinara','&#127813;'],['tomato sauce','&#127813;'],
+  ['ketchup','&#127813;'],['salsa','&#127813;'],
+  ['bbq','&#128293;'],['sriracha','&#128293;'],['hot sauce','&#128293;'],
+  ['guacamole','&#129361;'],['hummus','&#129752;'],
+  ['mayo','&#129371;'],['ranch','&#129379;'],
+  ['soy sauce','&#129379;'],['balsamic','&#129379;'],
+  ['mustard','&#129379;'],['vinegar','&#129379;'],
+  ['dressing','&#129379;'],['sauce','&#129368;'],
+  ['oil','&#129746;'],
+];
+var _deBaseCals=0;
 function updateDrinkEditCals(){
   var units=parseFloat((g('de-units')||{value:1}).value)||1;
   var cc=g('de-cals'); if(cc&&_deBaseCals) cc.value=Math.round(_deBaseCals*units);
