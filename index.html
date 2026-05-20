@@ -3985,9 +3985,11 @@ function rFitness(){
       if(m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
     }
     // Reject default initialisation values - these are never real measurements
-    var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14};
+    var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
     if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
+    // Reject implausible burned reference (default 389 or <100 = no real sync)
+    if(m.key==='activeBurned'&&ydVal&&ydVal<100) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
@@ -4662,13 +4664,13 @@ function launchApp(){
     {cat:'flowerchild',n:'Roasted Veggie Wrap FC',e:'&#127807;',p:'1 wrap',c:420,pr:12,cb:52,f:18,fi:8,su:6,na:620},
     {cat:'flowerchild',n:'Daily Green Juice FC',e:'&#129388;',p:'12 fl oz',c:80,pr:2,cb:18,f:0,fi:2,su:12,na:40},
     {cat:'flowerchild',n:'Avocado Toast FC',e:'&#129361;',p:'1 order',c:360,pr:10,cb:32,f:22,fi:8,su:2,na:480},
-    {cat:'dintaifung',n:'Xiao Long Bao 6pc',e:'&#129360;',p:'6 dumplings',c:310,pr:18,cb:32,f:12,fi:1,su:2,na:580},
-    {cat:'dintaifung',n:'Xiao Long Bao 10pc',e:'&#129360;',p:'10 dumplings',c:520,pr:30,cb:54,f:20,fi:2,su:3,na:960},
-    {cat:'dintaifung',n:'Truffle XLB 6pc',e:'&#129360;',p:'6 dumplings',c:340,pr:18,cb:32,f:16,fi:1,su:2,na:540},
-    {cat:'dintaifung',n:'Shrimp Pork XLB 6pc',e:'&#129360;',p:'6 dumplings',c:300,pr:16,cb:30,f:12,fi:1,su:2,na:560},
-    {cat:'dintaifung',n:'Fried Rice Egg DTF',e:'&#127859;',p:'1 serving',c:480,pr:14,cb:68,f:16,fi:2,su:2,na:820},
+    {cat:'dintaifung',n:'Xiao Long Bao 6pc',e:'&#129375;',p:'6 dumplings',c:310,pr:18,cb:32,f:12,fi:1,su:2,na:580},
+    {cat:'dintaifung',n:'Xiao Long Bao 10pc',e:'&#129375;',p:'10 dumplings',c:520,pr:30,cb:54,f:20,fi:2,su:3,na:960},
+    {cat:'dintaifung',n:'Truffle XLB 6pc',e:'&#129375;',p:'6 dumplings',c:340,pr:18,cb:32,f:16,fi:1,su:2,na:540},
+    {cat:'dintaifung',n:'Shrimp Pork XLB 6pc',e:'&#129375;',p:'6 dumplings',c:300,pr:16,cb:30,f:12,fi:1,su:2,na:560},
+    {cat:'dintaifung',n:'Fried Rice Egg DTF',e:'&#127834;',p:'1 serving',c:480,pr:14,cb:68,f:16,fi:2,su:2,na:820},
     {cat:'dintaifung',n:'Dan Dan Noodles DTF',e:'&#127837;',p:'1 bowl',c:540,pr:20,cb:62,f:24,fi:4,su:6,na:980},
-    {cat:'dintaifung',n:'Spicy Wontons DTF',e:'&#129360;',p:'6 wontons',c:280,pr:14,cb:28,f:12,fi:2,su:4,na:680},
+    {cat:'dintaifung',n:'Spicy Wontons DTF',e:'&#129375;',p:'6 wontons',c:280,pr:14,cb:28,f:12,fi:2,su:4,na:680},
     {cat:'dintaifung',n:'Cucumber Salad DTF',e:'&#129388;',p:'1 serving',c:80,pr:2,cb:10,f:4,fi:2,su:6,na:520},
     {cat:'dintaifung',n:'Braised Beef Noodle DTF',e:'&#127837;',p:'1 bowl',c:620,pr:32,cb:68,f:22,fi:4,su:4,na:1240},
     {cat:'dintaifung',n:'Sesame Noodles DTF',e:'&#127837;',p:'1 serving',c:420,pr:12,cb:58,f:16,fi:3,su:8,na:680},
@@ -4677,7 +4679,7 @@ function launchApp(){
     {cat:'burgerlounge',n:'Veggie Lounge Burger',e:'&#127828;',p:'1 burger',c:440,pr:18,cb:48,f:18,fi:6,su:8,na:680},
     {cat:'burgerlounge',n:'Bison Burger BL',e:'&#127828;',p:'1 burger',c:580,pr:36,cb:38,f:28,fi:2,su:7,na:820},
     {cat:'burgerlounge',n:'Skinny Fries BL',e:'&#127839;',p:'1 serving',c:320,pr:4,cb:44,f:14,fi:4,su:0,na:480},
-    {cat:'burgerlounge',n:'Chocolate Shake BL',e:'&#127849;',p:'1 shake',c:680,pr:14,cb:92,f:28,fi:2,su:72,na:380},
+    {cat:'burgerlounge',n:'Chocolate Shake BL',e:'&#129380;',p:'1 shake',c:680,pr:14,cb:92,f:28,fi:2,su:72,na:380},
     {cat:'chipotle',n:'Burrito Bowl Chicken',e:'&#127798;',p:'1 bowl',c:620,pr:46,cb:62,f:18,fi:12,su:4,na:1280},
     {cat:'chipotle',n:'Chicken Burrito',e:'&#127798;',p:'1 burrito',c:870,pr:50,cb:98,f:26,fi:14,su:6,na:1680},
     {cat:'chipotle',n:'Chicken Tacos 3pc',e:'&#127798;',p:'3 tacos',c:510,pr:36,cb:54,f:16,fi:6,su:2,na:1020},
@@ -4689,10 +4691,10 @@ function launchApp(){
     {cat:'pandaexpress',n:'Orange Chicken Panda',e:'&#127831;',p:'5.4oz',c:420,pr:14,cb:46,f:20,fi:0,su:18,na:620},
     {cat:'pandaexpress',n:'Kung Pao Chicken Panda',e:'&#127831;',p:'5.7oz',c:290,pr:18,cb:22,f:14,fi:4,su:10,na:930},
     {cat:'pandaexpress',n:'Broccoli Beef Panda',e:'&#129382;',p:'5.4oz',c:150,pr:9,cb:14,f:7,fi:2,su:6,na:520},
-    {cat:'pandaexpress',n:'Chow Mein Panda',e:'&#127837;',p:'9.4oz',c:510,pr:13,cb:80,f:16,fi:5,su:8,na:980},
+    {cat:'pandaexpress',n:'Chow Mein Panda',e:'&#127836;',p:'9.4oz',c:510,pr:13,cb:80,f:16,fi:5,su:8,na:980},
     {cat:'pandaexpress',n:'Fried Rice Panda',e:'&#127859;',p:'9.3oz',c:530,pr:11,cb:82,f:16,fi:2,su:6,na:850},
     {cat:'pandaexpress',n:'Super Greens Panda',e:'&#129388;',p:'8.6oz',c:90,pr:6,cb:12,f:3,fi:6,su:4,na:370},
-    {cat:'panera',n:'Broccoli Cheddar Soup',e:'&#129382;',p:'1 bowl',c:360,pr:14,cb:30,f:22,fi:4,su:8,na:1060},
+    {cat:'panera',n:'Broccoli Cheddar Soup',e:'&#127858;',p:'1 bowl',c:360,pr:14,cb:30,f:22,fi:4,su:8,na:1060},
     {cat:'panera',n:'Caesar Salad Panera',e:'&#129367;',p:'1 full salad',c:480,pr:18,cb:26,f:34,fi:4,su:4,na:1060},
     {cat:'panera',n:'Bagel Plain Panera',e:'&#129366;',p:'1 bagel',c:290,pr:10,cb:58,f:2,fi:2,su:6,na:460},
     {cat:'panera',n:'Mac and Cheese Panera',e:'&#127858;',p:'1 bowl',c:970,pr:38,cb:100,f:46,fi:4,su:16,na:1650},
@@ -4703,13 +4705,13 @@ function launchApp(){
     {cat:'innout',n:'Protein Style Burger',e:'&#127828;',p:'lettuce wrap',c:330,pr:22,cb:11,f:25,fi:3,su:7,na:750},
     {cat:'innout',n:'French Fries In-N-Out',e:'&#127839;',p:'1 serving',c:395,pr:7,cb:54,f:18,fi:2,su:0,na:245},
     {cat:'innout',n:'Animal Style Fries',e:'&#127839;',p:'1 serving',c:750,pr:14,cb:64,f:47,fi:4,su:8,na:1350},
-    {cat:'innout',n:'Chocolate Shake In-N-Out',e:'&#127849;',p:'1 shake',c:590,pr:10,cb:82,f:26,fi:0,su:70,na:310},
+    {cat:'innout',n:'Chocolate Shake In-N-Out',e:'&#129380;',p:'1 shake',c:590,pr:10,cb:82,f:26,fi:0,su:70,na:310},
     {cat:'kebabshop',n:'Chicken Doner Kebab',e:'&#129385;',p:'1 kebab',c:620,pr:42,cb:58,f:18,fi:4,su:4,na:980},
     {cat:'kebabshop',n:'Lamb Doner Kebab',e:'&#129385;',p:'1 kebab',c:680,pr:38,cb:58,f:26,fi:4,su:4,na:1080},
     {cat:'kebabshop',n:'Falafel Kebab',e:'&#129386;',p:'1 kebab',c:540,pr:18,cb:72,f:20,fi:10,su:6,na:820},
     {cat:'kebabshop',n:'Chicken Shish Kebab',e:'&#129385;',p:'skewer and pita',c:480,pr:38,cb:42,f:14,fi:3,su:3,na:780},
     {cat:'kebabshop',n:'Loaded Fries TKS',e:'&#127839;',p:'1 serving',c:680,pr:22,cb:72,f:34,fi:6,su:4,na:1240},
-    {cat:'kebabshop',n:'Hummus Pita TKS',e:'&#129379;',p:'1 serving',c:320,pr:10,cb:44,f:12,fi:8,su:2,na:580},
+    {cat:'kebabshop',n:'Hummus Pita TKS',e:'&#129363;',p:'1 serving',c:320,pr:10,cb:44,f:12,fi:8,su:2,na:580},
     {cat:'kebabshop',n:'Baklava TKS',e:'&#127855;',p:'2 pieces',c:280,pr:4,cb:34,f:16,fi:2,su:20,na:80}
   ];
   // Add default micronutrients to restaurant items missing them
