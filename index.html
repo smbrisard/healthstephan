@@ -2814,7 +2814,8 @@ function saveRecipe(){
   if(!_recipeIngs.length){toast('Add at least one ingredient');return;}
   var per=_updateRecipeTotals();
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
-  ML.push({id:Date.now(),date:foodChartDate||today(),name:name,emoji:'&#128216;',
+  var _rEmoji=(g('recipe-emoji-pick')&&g('recipe-emoji-pick').value.trim())?g('recipe-emoji-pick').value.trim():'&#128216;';
+  ML.push({id:Date.now(),date:foodChartDate||today(),name:name,emoji:_rEmoji,
     type:(typeof mealTab!=='undefined'&&mealTab?mealTab.toLowerCase():'lunch'),
     cals:Math.round(per.cals),protein:per.protein,carbs:per.carbs,fat:per.fat,
     fiber:per.fiber||0,sugar:per.sugar||0,satFat:per.satFat||0,sodium:per.sodium||0,
@@ -2832,15 +2833,14 @@ function saveRecipeToDatabase(){
   var per=_updateRecipeTotals();
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
   var recipes=loadRecipes();
-  var _rcCat=(g('recipe-cat')||{value:'custom'}).value||'custom';
+  var _rcCat=(g('recipe-cat')||{value:'recipes'}).value||'recipes';
   var entry={
     name:name,emoji:(g('recipe-emoji-pick')&&g('recipe-emoji-pick').value.trim()?g('recipe-emoji-pick').value.trim():'&#128216;'),cat:_rcCat,servings:srv,
     ingredients:_recipeIngs.map(function(i){return Object.assign({},i);}),
     cals:Math.round(per.cals),protein:per.protein,carbs:per.carbs,fat:per.fat,
     fiber:per.fiber||0,sugar:per.sugar||0,satFat:per.satFat||0,sodium:per.sodium||0,
     cholest:per.cholest||0,potassium:per.potassium||0,calcium:per.calcium||0,iron:per.iron||0,
-    savedAt:Date.now(),
-    cat:(g('recipe-cat')?g('recipe-cat').value:'recipes')
+    savedAt:Date.now()
   };
   var ei=recipes.findIndex(function(r){return r.name.toLowerCase()===name.toLowerCase();});
   if(ei>=0){recipes[ei]=entry;toast('✓ Recipe updated!');}
@@ -6237,22 +6237,7 @@ window.addEventListener('load', launch);</script>
         <option value="nuts">&#129372; Nuts &amp; Seeds</option>
       </select>
     </div>
-    <div style="margin-bottom:12px">
-      <label style="font-size:12px;color:var(--dim);display:block;margin-bottom:4px">Category (where to find this recipe)</label>
-      <select id="recipe-cat" class="fld" style="margin-bottom:0;color:var(--txt);background:var(--s2)">
-        <option value="recipes">&#128218; Recipes (general)</option>
-        <option value="salads">&#129367; Salads</option>
-        <option value="meat">&#129385; Meat &amp; Fish</option>
-        <option value="eggs">&#129370; Eggs</option>
-        <option value="grains">&#127806; Grains &amp; Carbs</option>
-        <option value="veg">&#129388; Vegetables</option>
-        <option value="breakfast">&#127371; Breakfast</option>
-        <option value="fastfood">&#127828; Fast Food</option>
-        <option value="snacks">&#127894; Snacks</option>
-        <option value="dairy">&#129371; Dairy</option>
-        <option value="nuts">&#129372; Nuts &amp; Seeds</option>
-      </select>
-    </div>
+    
     <!-- Ingredient search -->
     <div class="flbl">Add Ingredient</div>
     <div style="position:relative;margin-bottom:6px">
