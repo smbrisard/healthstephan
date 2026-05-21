@@ -413,6 +413,7 @@ body { height: 100dvh; }
             <div style="font-size:20px;margin-bottom:7px">&#128293;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#ff7070" id="hm-burned">389</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px">total burned</div>
+            <div style="font-size:10px;color:rgba(255,112,112,.7);margin-top:1px" id="hm-burned-sub"></div>
             <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
           </div>
           <div class="mtile" style="background:rgba(255,59,92,.12)">
@@ -1778,6 +1779,12 @@ function rHome() {
   var _lastSyncToday=P.lastSyncDate&&P.lastSyncDate===todayLocal();
   var _burnedVal=(_isToday&&_syncIsToday2&&_lastSyncToday&&P.totalBurned&&P.restingEnergy)?(P.totalBurned):(P.burned||0);
   set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
+  var _hmBurnedSub=g('hm-burned-sub');
+  if(_hmBurnedSub){
+    if(P.restingEnergy&&P.burned)
+      _hmBurnedSub.textContent=fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active';
+    else _hmBurnedSub.textContent='';
+  }
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
@@ -4074,7 +4081,7 @@ function rFitness(){
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
-    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500},
+    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500,sub:(P.restingEnergy&&P.burned)?fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active':'',subCol:'rgba(255,112,112,.7)'},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
