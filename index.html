@@ -2812,6 +2812,8 @@ function _recipeMacroBar(label,val,target,color){
 function saveRecipe(){
   var name=(g('recipe-name')||{value:''}).value.trim()||'My Recipe';
   if(!_recipeIngs.length){toast('Add at least one ingredient');return;}
+  // Always save to DB first so cat and emoji are persisted
+  saveRecipeToDatabase();
   var per=_updateRecipeTotals();
   var srv=parseFloat((g('recipe-servings')||{value:1}).value)||1;
   var _rEmoji=(g('recipe-emoji-pick')&&g('recipe-emoji-pick').value.trim())?g('recipe-emoji-pick').value.trim():'&#128216;';
