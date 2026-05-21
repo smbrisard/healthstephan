@@ -4070,7 +4070,7 @@ function rFitness(){
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
-    {e:'&#128293;',key:'activeBurned',raw:P.burned,lb:false,v:fN(Math.round(P.burned||0)),u:'kcal',l:'Active Cal',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.burned||0)/750},
+    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
@@ -4142,8 +4142,9 @@ function rFitness(){
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
     if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
-    // Reject implausible burned reference (default 389 or <100 = no real sync)
-    if(m.key==='activeBurned'&&ydVal&&ydVal<100) ydVal=null;
+    // Reject implausible totalBurned reference
+    // <500 = likely default/no sync, >5000 = data artifact
+    if(m.key==='activeBurned'&&ydVal&&(ydVal<500||ydVal>5000)) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
