@@ -4122,10 +4122,10 @@ function rFitness(){
     for(var _bi=0;_bi<_sfl.length;_bi++){
       var _bs=_sfl[_bi];
       if(_bs.date>=_tds) continue;
-      if(!_bioSnap.rhr&&_bs.rhr&&_bs.rhr!==58&&_bs.rhr!==P.rhr) _bioSnap.rhr=_bs.rhr;
-      if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86&&_bs.hrv!==P.hrv) _bioSnap.hrv=_bs.hrv;
+      if(!_bioSnap.rhr&&_bs.rhr&&_bs.rhr!==58) _bioSnap.rhr=_bs.rhr;
+      if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86) _bioSnap.hrv=_bs.hrv;
       if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&_bs.spo2<99&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
-      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr!==P.rr) _bioSnap.rr=_bs.rr;
+      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<30) _bioSnap.rr=_bs.rr; // cap at 30 to reject outliers
       if(!_bioSnap.sleep&&(_bs.sleep||0)>=3&&_bs.sleep!==P.sleepLast) _bioSnap.sleep=_bs.sleep;
       if(_bioSnap.rhr&&_bioSnap.hrv&&_bioSnap.spo2&&_bioSnap.rr&&_bioSnap.sleep) break;
     }
