@@ -351,8 +351,7 @@ body { height: 100dvh; }
             <div class="eqb"><div class="eqv" style="color:var(--amb)" id="eq-eaten">0</div><div class="eql" style="font-size:9px">food+drinks</div></div>
             <div class="eqop">=</div>
             <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-burned">389</div><div class="eql">deficit</div></div>
-            <div class="eqop">=</div>
-            <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-net">0</div><div class="eql">net</div></div>
+            
           </div>
           <div style="margin-top:12px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden"><div id="hm-dbar" style="height:100%;background:linear-gradient(90deg,var(--pur),var(--pnk));width:0%;transition:width .5s;border-radius:3px"></div></div>
         </div>
@@ -1709,7 +1708,6 @@ function rHome() {
   set('eq-goal',fN(Math.round(_burnedForDeficit))); // show burned as first number
   set('eq-eaten',fN(eaten));
   set('eq-burned',fN(Math.abs(deficit))); // true deficit
-  set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
   if(db){
     if(tCals()<300){
