@@ -413,7 +413,6 @@ body { height: 100dvh; }
             <div style="font-size:20px;margin-bottom:7px">&#128293;</div>
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:#ff7070" id="hm-burned">389</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px">total burned</div>
-            <div style="font-size:10px;color:rgba(255,112,112,.7);margin-top:1px" id="hm-burned-sub"></div>
             <div style="font-size:10px;margin-top:3px;min-height:14px" id="hm-burned-yd"></div>
           </div>
           <div class="mtile" style="background:rgba(255,59,92,.12)">
@@ -1779,12 +1778,6 @@ function rHome() {
   var _lastSyncToday=P.lastSyncDate&&P.lastSyncDate===todayLocal();
   var _burnedVal=(_isToday&&_syncIsToday2&&_lastSyncToday&&P.totalBurned&&P.restingEnergy)?(P.totalBurned):(P.burned||0);
   set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
-  var _hmBurnedSub=g('hm-burned-sub');
-  if(_hmBurnedSub){
-    if(P.restingEnergy&&P.burned)
-      _hmBurnedSub.textContent=fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active';
-    else _hmBurnedSub.textContent='';
-  }
   var _dist=P.distMiles||0;
   set('hm-dist',_dist>0?fD(_dist,1):'--');
   var _hrvel=g('hm-hrv'); if(_hrvel) _hrvel.textContent=P.hrv?fD(P.hrv,1):'--';
@@ -4081,7 +4074,7 @@ function rFitness(){
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
-    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500,sub:(P.restingEnergy&&P.burned)?fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active':'',subCol:'rgba(255,112,112,.7)'},
+    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
@@ -4481,6 +4474,72 @@ function migrateMLMicronutrients(){
 }
 
 var histDate=today();
+
+function rDeficitChart(days30,FL){
+  var last7=days30.slice(-7);
+  var defDays=last7.map(function(d){
+    var snaps=FL.filter(function(f){return f.date===d.dt;});
+    var snap=snaps.length?snaps[snaps.length-1]:null;
+    var burned=snap?(snap.burned||snap.activeBurned||0):0;
+    var deficit=(burned>0&&d.cals>0)?burned-d.cals:null;
+    return {dt:d.dt,deficit:deficit};
+  });
+  var validDays=defDays.filter(function(d){return d.deficit!==null;});
+  if(validDays.length<2) return '';
+  var recDef=P.goal==='lose'?500:P.goal==='build'?-300:0;
+  if(P.goal==='lose'&&P.weight&&P.goalKg){
+    var kgToLose=k2l(P.weight)-P.goalKg;
+    recDef=kgToLose>5?750:kgToLose>2?500:250;
+  }
+  var avgDef=validDays.reduce(function(a,d){return a+d.deficit;},0)/validDays.length;
+  var VW=300,VH=130;
+  var maxAbs=Math.max.apply(null,defDays.map(function(d){return d.deficit!==null?Math.abs(d.deficit):0;}).concat([Math.abs(recDef),Math.abs(avgDef),500]));
+  maxAbs=Math.ceil(maxAbs/100)*100;
+  var midY=60;
+  var scale=midY/maxAbs;
+  var bw=Math.floor(VW/7)-4;
+  var svgContent='';
+  defDays.forEach(function(d,i){
+    var x=i*(bw+4)+2;
+    if(d.deficit===null){svgContent+='<rect x="'+x+'" y="'+midY+'" width="'+bw+'" height="2" fill="rgba(255,255,255,.1)" rx="1"/>';return;}
+    var h=Math.max(Math.abs(d.deficit)*scale,2);
+    var isPos=d.deficit>0;
+    var col=isPos?'rgba(0,212,170,.85)':'rgba(255,60,60,.85)';
+    var y=isPos?midY-h:midY;
+    svgContent+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" fill="'+col+'" rx="2"/>';
+    var label=Math.round(Math.abs(d.deficit)/100)*100;
+    var labelY=isPos?y-3:y+h+9;
+    svgContent+='<text x="'+(x+bw/2)+'" y="'+labelY+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.65)" font-family="sans-serif">'+(isPos?'':'-')+label+'</text>';
+  });
+  // Zero line
+  svgContent+='<line x1="0" y1="'+midY+'" x2="'+VW+'" y2="'+midY+'" stroke="rgba(255,255,255,.25)" stroke-width="1"/>';
+  // Avg line (white dashed)
+  var avgY=midY-avgDef*scale;
+  svgContent+='<line x1="0" y1="'+avgY+'" x2="'+VW+'" y2="'+avgY+'" stroke="rgba(255,255,255,.75)" stroke-width="1.5" stroke-dasharray="5,3"/>';
+  svgContent+='<rect x="2" y="'+(avgY-11)+'" width="54" height="12" rx="3" fill="rgba(0,0,0,.6)"/>';
+  svgContent+='<text x="29" y="'+(avgY-2)+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.9)" font-family="sans-serif">avg '+(avgDef>=0?'+':'')+Math.round(avgDef)+'</text>';
+  // Recommended line (purple dashed)
+  if(recDef!==0){
+    var recY=midY-recDef*scale;
+    svgContent+='<line x1="0" y1="'+recY+'" x2="'+VW+'" y2="'+recY+'" stroke="rgba(180,140,255,.85)" stroke-width="1.5" stroke-dasharray="4,3"/>';
+    svgContent+='<rect x="'+(VW-62)+'" y="'+(recY-11)+'" width="60" height="12" rx="3" fill="rgba(0,0,0,.6)"/>';
+    svgContent+='<text x="'+(VW-32)+'" y="'+(recY-2)+'" text-anchor="middle" font-size="8" fill="rgba(180,140,255,1)" font-family="sans-serif">target +'+recDef+'</text>';
+  }
+  // Day labels
+  defDays.forEach(function(d,i){
+    var x=i*(bw+4)+2+bw/2;
+    svgContent+='<text x="'+x+'" y="'+(VH-4)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.4)" font-family="sans-serif">'+new Date(d.dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,1)+'</text>';
+  });
+  var svg='<svg width="100%" height="'+VH+'" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+svgContent+'</svg>';
+  var legendHtml='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">';
+  legendHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(0,212,170,.85)"></div><span style="font-size:10px;color:var(--dim)">Deficit</span></div>';
+  legendHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(255,60,60,.85)"></div><span style="font-size:10px;color:var(--dim)">Surplus</span></div>';
+  legendHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:16px;border-top:1.5px dashed rgba(255,255,255,.75)"></div><span style="font-size:10px;color:var(--dim)">7-day avg</span></div>';
+  if(recDef!==0) legendHtml+='<div style="display:flex;align-items:center;gap:4px"><div style="width:16px;border-top:1.5px dashed rgba(180,140,255,.85)"></div><span style="font-size:10px;color:var(--dim)">Recommended</span></div>';
+  legendHtml+='</div>';
+  return D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','7-Day Calorie Deficit')
+    +D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:14px"',svg+legendHtml);
+}
 function rHistory(){
   try{
     var hd=g('hist-date'); if(hd) hd.value=histDate;
@@ -4679,6 +4738,7 @@ function rHistory(){
               D('style="font-family:var(--mn);font-size:16px;font-weight:800;color:var(--red)"',fN(wst.cals)+' kcal')+
               D('style="font-size:10px;color:var(--dim);margin-top:2px"',new Date(wst.dt+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}))));
         })():''));
+      html+=rDeficitChart(days30,FL);
     }
     var wtPts=days30.filter(function(d){return d.wt!==null;});
     if(wtPts.length>=2){
