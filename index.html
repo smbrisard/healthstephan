@@ -343,14 +343,14 @@ body { height: 100dvh; }
           </div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <div class="defnum" id="hm-defnum">0</div>
-            <div style="font-size:14px;color:rgba(255,255,255,.4)">kcal net</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.4)">kcal true deficit</div>
           </div>
           <div class="eqrow">
-            <div class="eqb"><div class="eqv" style="color:var(--grn)" id="eq-goal">2200</div><div class="eql">goal</div></div>
+            <div class="eqb"><div class="eqv" style="color:#ff7070" id="eq-goal">2200</div><div class="eql">burned</div></div>
             <div class="eqop">-</div>
             <div class="eqb"><div class="eqv" style="color:var(--amb)" id="eq-eaten">0</div><div class="eql" style="font-size:9px">food+drinks</div></div>
-            <div class="eqop">+</div>
-            <div class="eqb"><div class="eqv" style="color:#ff7070" id="eq-burned">389</div><div class="eql">burned</div></div>
+            <div class="eqop">=</div>
+            <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-burned">389</div><div class="eql">deficit</div></div>
             <div class="eqop">=</div>
             <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-net">0</div><div class="eql">net</div></div>
           </div>
@@ -1699,11 +1699,17 @@ function rHome() {
   var _syncIsToday=P.lastSyncAt&&(new Date(P.lastSyncAt).toDateString()===new Date().toDateString());
   var _lastSyncTodayDef=P.lastSyncDate&&P.lastSyncDate===todayLocal();
   var _burnedForDeficit=Math.round((_syncIsToday&&_lastSyncTodayDef&&P.totalBurned&&P.totalBurned>P.burned)?P.totalBurned:_todayBurned);
-  var eaten=tTotal(), rem=P.calTarget-eaten, deficit=(P.calTarget-eaten)+_burnedForDeficit;
+  var eaten=tTotal(), rem=P.calTarget-eaten;
+  // True deficit = burned - eaten (not goal-based)
+  var deficit=_burnedForDeficit-eaten;
   var _pctRaw=P.calTarget>0?eaten/P.calTarget:0; // uncapped - use for exceeded check
   var pct=Math.min(_pctRaw,1); // capped at 1 for ring progress
-  set('hm-defnum',(deficit>=0?'-':'+')+fN(Math.abs(deficit)));
-  set('eq-goal',fN(P.calTarget)); set('eq-eaten',fN(eaten)); set('eq-burned',fN(Math.round(P.totalBurned||P.burned))); set('eq-net',fN(Math.abs(deficit)));
+  // True deficit: positive = burned more than ate (good)
+  set('hm-defnum',(deficit>0?'+':'-')+fN(Math.abs(deficit)));
+  set('eq-goal',fN(Math.round(_burnedForDeficit))); // show burned as first number
+  set('eq-eaten',fN(eaten));
+  set('eq-burned',fN(Math.abs(deficit))); // true deficit
+  set('eq-net',fN(Math.abs(deficit)));
   var db=g('hm-dbdg');
   if(db){
     if(tCals()<300){
@@ -4486,83 +4492,81 @@ function rDeficitChart(days30,FL){
   });
   var validDays=defDays.filter(function(d){return d.deficit!==null;});
   if(validDays.length<2) return '';
+  // Recommended deficit
   var recDef=P.goal==='lose'?500:P.goal==='build'?-300:0;
   if(P.goal==='lose'&&P.weight&&P.goalKg){
     var kgToLose=k2l(P.weight)-P.goalKg;
     recDef=kgToLose>5?750:kgToLose>2?500:250;
   }
-  var avgDef=validDays.reduce(function(a,d){return a+d.deficit;},0)/validDays.length;
-  // Chart dimensions - much larger and readable
-  var VW=320,VH=200;
-  var padL=10,padR=10,padTop=24,padBot=28;
-  var chartH=VH-padTop-padBot; // 148px usable height
-  var midY=padTop+chartH/2;   // zero line Y
-  var maxAbs=Math.max.apply(null,defDays.map(function(d){
-    return d.deficit!==null?Math.abs(d.deficit):0;
-  }).concat([Math.abs(recDef),Math.abs(avgDef),400]));
-  maxAbs=Math.ceil(maxAbs/200)*200; // round to nearest 200
-  var scale=(chartH/2)/maxAbs;
-  var bw=Math.floor((VW-padL-padR)/7)-6;
-  var svgContent='';
-  // Grid lines at 25% intervals
-  [-1,-0.5,0.5,1].forEach(function(pct){
-    var gy=midY-pct*chartH/2;
-    svgContent+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(VW-padR)+'" y2="'+gy+'" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
-    var label=Math.round(pct*maxAbs);
-    svgContent+='<text x="'+(padL+2)+'" y="'+(gy-2)+'" font-size="9" fill="rgba(255,255,255,.25)" font-family="sans-serif">'+(label>0?'+':'')+label+'</text>';
-  });
-  // Bars
-  defDays.forEach(function(d,i){
-    var x=padL+i*(bw+6)+3;
+  var avgDef=Math.round(validDays.reduce(function(a,d){return a+d.deficit;},0)/validDays.length);
+  // Scale
+  var allVals=validDays.map(function(d){return Math.abs(d.deficit);}).concat([Math.abs(recDef),Math.abs(avgDef),300]);
+  var maxAbs=Math.ceil(Math.max.apply(null,allVals)/250)*250;
+  // Summary stat at top
+  var summaryCol=avgDef>0?'var(--grn)':'var(--red)';
+  var summaryTxt=avgDef>0?'&#9650; '+avgDef+' kcal/day avg deficit':'&#9660; '+Math.abs(avgDef)+' kcal/day avg surplus';
+  var out=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"',
+    D('style="font-size:13px;font-weight:700;color:'+summaryCol+'"',summaryTxt)+
+    D('style="font-size:11px;color:var(--dim)"','vs '+recDef+' target'));
+  // Bar rows - one per day, horizontal layout
+  var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  defDays.forEach(function(d){
+    var dow=new Date(d.dt+'T12:00').getDay();
+    var dayLabel=dayNames[dow];
+    var dateLabel=d.dt.slice(5).replace('-','/');
     if(d.deficit===null){
-      svgContent+='<rect x="'+x+'" y="'+(midY-1)+'" width="'+bw+'" height="2" fill="rgba(255,255,255,.08)" rx="1"/>';
+      out+=D('style="display:flex;align-items:center;gap:8px;margin-bottom:8px;opacity:0.4"',
+        D('style="width:36px;font-size:11px;color:var(--dim);text-align:right;flex-shrink:0"',dayLabel)+
+        D('style="flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:6px;display:flex;align-items:center;padding:0 8px"',
+          D('style="font-size:11px;color:var(--dim)"','No data')));
       return;
     }
-    var h=Math.max(Math.abs(d.deficit)*scale,3);
+    var pct=Math.min(Math.abs(d.deficit)/maxAbs,1)*100;
     var isPos=d.deficit>0;
     var col=isPos?'rgba(0,212,170,.9)':'rgba(255,60,60,.9)';
-    var y=isPos?midY-h:midY;
-    svgContent+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" fill="'+col+'" rx="3"/>';
-    // Value label - inside bar if tall enough, outside if short
-    var labelVal=Math.round(Math.abs(d.deficit));
-    var labelY=isPos?(h>20?y+h-4:y-5):(h>20?y+h-4:y+h+11);
-    svgContent+='<text x="'+(x+bw/2)+'" y="'+labelY+'" text-anchor="middle" font-size="11" font-weight="600" fill="rgba(255,255,255,.9)" font-family="sans-serif">'+(isPos?'+':'-')+labelVal+'</text>';
+    var sign=isPos?'+':'-';
+    var val=Math.abs(Math.round(d.deficit));
+    // Target marker position
+    var targetPct=Math.min(recDef/maxAbs,1)*100;
+    out+=D('style="display:flex;align-items:center;gap:8px;margin-bottom:10px"',
+      D('style="width:36px;font-size:12px;color:var(--txt);text-align:right;flex-shrink:0;font-weight:600"',dayLabel)+
+      D('style="flex:1;position:relative"',
+        // Track
+        D('style="width:100%;height:32px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden;position:relative"',
+          // Bar
+          D('style="position:absolute;left:0;top:0;bottom:0;width:'+pct+'%;background:'+col+';border-radius:8px;transition:width .3s"','')+
+          // Target line
+          (recDef>0?D('style="position:absolute;left:'+targetPct+'%;top:0;bottom:0;width:2px;background:rgba(180,140,255,.9);z-index:2"',''):'')
+        )+
+        // Value label outside bar
+        D('style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:rgba(255,255,255,.95)"',sign+val)
+      )
+    );
   });
-  // Zero line
-  svgContent+='<line x1="'+padL+'" y1="'+midY+'" x2="'+(VW-padR)+'" y2="'+midY+'" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>';
-  // Avg line (white dashed) - with pill label
-  var avgY=midY-avgDef*scale;
-  avgY=Math.max(padTop+8,Math.min(VH-padBot-8,avgY));
-  svgContent+='<line x1="'+padL+'" y1="'+avgY+'" x2="'+(VW-padR)+'" y2="'+avgY+'" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-dasharray="7,4"/>';
-  var avgLabel='avg '+(avgDef>=0?'+':'')+Math.round(avgDef);
-  svgContent+='<rect x="'+(VW-padR-70)+'" y="'+(avgY-11)+'" width="68" height="16" rx="4" fill="rgba(255,255,255,.15)"/>';
-  svgContent+='<text x="'+(VW-padR-36)+'" y="'+(avgY+1)+'" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(255,255,255,1)" font-family="sans-serif">'+avgLabel+'</text>';
-  // Recommended line (purple dashed)
-  if(recDef!==0){
-    var recY=midY-recDef*scale;
-    recY=Math.max(padTop+8,Math.min(VH-padBot-8,recY));
-    svgContent+='<line x1="'+padL+'" y1="'+recY+'" x2="'+(VW-padR)+'" y2="'+recY+'" stroke="rgba(180,140,255,.9)" stroke-width="2" stroke-dasharray="5,3"/>';
-    var recLabel='target +'+(recDef);
-    svgContent+='<rect x="'+(VW-padR-70)+'" y="'+(recY-11)+'" width="68" height="16" rx="4" fill="rgba(180,140,255,.2)"/>';
-    svgContent+='<text x="'+(VW-padR-36)+'" y="'+(recY+1)+'" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(180,140,255,1)" font-family="sans-serif">'+recLabel+'</text>';
-  }
-  // Day labels
-  var dayNames=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  defDays.forEach(function(d,i){
-    var x=padL+i*(bw+6)+3+bw/2;
-    var dow=new Date(d.dt+'T12:00').getDay();
-    svgContent+='<text x="'+x+'" y="'+(VH-6)+'" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.55)" font-family="sans-serif">'+dayNames[dow]+'</text>';
-  });
-  var svg='<svg width="100%" height="'+VH+'px" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg" style="display:block">'+svgContent+'</svg>';
-  // Legend row
-  var legendHtml='<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;align-items:center">';
-  legendHtml+='<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(0,212,170,.9)"></div><span style="font-size:11px;color:var(--dim)">Deficit</span></div>';
-  legendHtml+='<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,60,60,.9)"></div><span style="font-size:11px;color:var(--dim)">Surplus</span></div>';
-  legendHtml+='<div style="display:flex;align-items:center;gap:5px"><div style="width:18px;border-top:2px dashed rgba(255,255,255,.85)"></div><span style="font-size:11px;color:var(--dim)">Avg</span></div>';
-  if(recDef!==0) legendHtml+='<div style="display:flex;align-items:center;gap:5px"><div style="width:18px;border-top:2px dashed rgba(180,140,255,.9)"></div><span style="font-size:11px;color:var(--dim)">Target</span></div>';
-  legendHtml+='</div>';
+  // Avg row highlight
+  var avgPct=Math.min(Math.abs(avgDef)/maxAbs,1)*100;
+  var avgPos=avgDef>0;
+  var avgCol=avgPos?'rgba(0,212,170,.5)':'rgba(255,60,60,.5)';
+  out+=D('style="border-top:.5px solid var(--b1);margin-top:4px;padding-top:10px"',
+    D('style="display:flex;align-items:center;gap:8px"',
+      D('style="width:36px;font-size:11px;color:var(--dim);text-align:right;flex-shrink:0"','Avg')+
+      D('style="flex:1;position:relative"',
+        D('style="width:100%;height:28px;background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden;position:relative;border:.5px solid rgba(255,255,255,.1)"',
+          D('style="position:absolute;left:0;top:0;bottom:0;width:'+avgPct+'%;background:'+avgCol+';border-radius:8px"','')+
+          (recDef>0?D('style="position:absolute;left:'+Math.min(recDef/maxAbs,1)*100+'%;top:0;bottom:0;width:2px;background:rgba(180,140,255,.9)"',''):'')
+        )+
+        D('style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:rgba(255,255,255,.8)"',(avgPos?'+':'-')+Math.abs(avgDef))
+      )
+    )
+  );
+  // Legend
+  out+=D('style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px"',
+    D('style="display:flex;align-items:center;gap:5px"','<div style="width:12px;height:12px;border-radius:3px;background:rgba(0,212,170,.9)"></div><span style="font-size:11px;color:var(--dim)">Deficit (good)</span>')+
+    D('style="display:flex;align-items:center;gap:5px"','<div style="width:12px;height:12px;border-radius:3px;background:rgba(255,60,60,.9)"></div><span style="font-size:11px;color:var(--dim)">Surplus</span>')+
+    (recDef>0?D('style="display:flex;align-items:center;gap:5px"','<div style="width:12px;height:12px;border-radius:3px;background:rgba(180,140,255,.9)"></div><span style="font-size:11px;color:var(--dim)">Target line</span>'):'')
+  );
   return D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','7-Day Calorie Deficit')
-    +D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:14px"',svg+legendHtml);
+    +D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px 14px 10px;margin-bottom:14px"',out);
 }
 
 
