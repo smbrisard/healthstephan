@@ -5445,6 +5445,10 @@ function fetchSync(){
     // HAE fires ~6am with previous day's complete data dated 'yesterday'
     var _freshOvernight=_syncAge<8&&_dataDate===yesterday();
     var _dataIsStrictlyToday=(_dataDate===today())||_freshOvernight;
+    // If freshOvernight and burned/totalBurned currently hold yesterday's value, reset them
+    if(_freshOvernight&&P.stepsToday<100&&P.totalBurned>1500){
+      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+    }
     var _syncIsRecent=_syncAge<20&&_dataIsToday;
     var _allDailyFields=['restingEnergy','walkMiles','cycleMiles']; // only fields that carry from yesterday
     var _strictFields=['stepsToday','burned','distMiles','totalBurned','standHours','exerciseMins']; // ALL reset at midnight - today only
@@ -5474,6 +5478,9 @@ function fetchSync(){
       if(_dataIsStrictlyToday){
         _strictFields.forEach(function(k){
           if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
+            // totalBurned from overnight sync is yesterday's complete value - skip it
+            // It will be properly set once HAE sends today's data
+            if((k==='totalBurned'||k==='burned')&&_freshOvernight&&_dataDate!==today()) return;
             P[k]=parseFloat(d[k]); updated=true;
           }
         });
