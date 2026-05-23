@@ -1785,8 +1785,9 @@ function rHome() {
   set('hm-burned',_burnedVal>0?fN(Math.round(_burnedVal)):'--');
   var _hmBurnedSub=g('hm-burned-sub');
   if(_hmBurnedSub){
-    if(P.restingEnergy&&P.burned)
-      _hmBurnedSub.textContent=fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active';
+    var _rest2=P.restingEnergy||(P.totalBurned&&P.burned?(P.totalBurned-P.burned):0);
+    if(_rest2>0&&P.burned>0)
+      _hmBurnedSub.textContent=fN(Math.round(_rest2))+' rest + '+fN(Math.round(P.burned))+' active';
     else _hmBurnedSub.textContent='';
   }
   var _dist=P.distMiles||0;
@@ -4101,7 +4102,10 @@ function rFitness(){
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
   {e:'&#127939;',key:'steps',raw:P.stepsToday||null,lb:false,md:50,v:fN(P.stepsToday||0),u:'steps',l:'Steps',c:'var(--amb)',bg:'rgba(255,184,48,.12)',pct:(P.stepsToday||0)/(P.steps||10000)},
-    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500,sub:(P.restingEnergy&&P.burned)?fN(Math.round(P.restingEnergy))+' rest + '+fN(Math.round(P.burned))+' active':'',subCol:'rgba(255,112,112,.7)'},
+    {e:'&#128293;',key:'activeBurned',raw:P.totalBurned||P.burned,lb:false,v:fN(Math.round(P.totalBurned||P.burned||0)),u:'kcal',l:'Total Burned',c:'#ff7070',bg:'rgba(255,112,112,.12)',pct:(P.totalBurned||P.burned||0)/2500,sub:(function(){
+      var _rest=P.restingEnergy||(P.totalBurned&&P.burned?(P.totalBurned-P.burned):0);
+      return (_rest>0&&P.burned>0)?fN(Math.round(_rest))+' rest + '+fN(Math.round(P.burned))+' active':'';
+    }()),subCol:'rgba(255,112,112,.7)'},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
@@ -4176,6 +4180,8 @@ function rFitness(){
     // Reject implausible totalBurned reference
     // <500 = likely default/no sync, >5000 = data artifact
     if(m.key==='activeBurned'&&ydVal&&(ydVal<500||ydVal>5000)) ydVal=null;
+    // If today's burned is <600 (early morning) and delta would be huge, suppress
+    if(m.key==='activeBurned'&&ydVal&&(m.raw||0)<600&&Math.abs((m.raw||0)-ydVal)>800) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
