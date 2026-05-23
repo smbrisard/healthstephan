@@ -5491,9 +5491,7 @@ function fetchSync(){
       if(_dataIsStrictlyToday){
         _strictFields.forEach(function(k){
           if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))&&parseFloat(d[k])>=0){
-            // totalBurned from overnight sync is yesterday's complete value - skip it
-            // It will be properly set once HAE sends today's data
-            if((k==='totalBurned'||k==='burned')&&_freshOvernight&&_dataDate!==today()) return;
+            // Allow all values through - launchApp handles stale data cleanup
             P[k]=parseFloat(d[k]); updated=true;
           }
         });
