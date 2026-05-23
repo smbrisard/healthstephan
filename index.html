@@ -4180,8 +4180,8 @@ function rFitness(){
     // Reject implausible totalBurned reference
     // <500 = likely default/no sync, >5000 = data artifact
     if(m.key==='activeBurned'&&ydVal&&(ydVal<500||ydVal>5000)) ydVal=null;
-    // If today's burned is <600 (early morning) and delta would be huge, suppress
-    if(m.key==='activeBurned'&&ydVal&&(m.raw||0)<600&&Math.abs((m.raw||0)-ydVal)>800) ydVal=null;
+    // Suppress burned delta if steps < 200 (just woke up - data unreliable)
+    if(m.key==='activeBurned'&&ydVal&&(P.stepsToday||0)<200) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
