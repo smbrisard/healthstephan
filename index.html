@@ -4907,6 +4907,19 @@ function histNav(dir){
 
 
 function launchApp(){
+  // One-time fix: clear stale burned data from overnight HAE sync
+  // If burned is high but steps are low, it's yesterday's complete value
+  (function(){
+    var _todaySteps=P.stepsToday||0;
+    var _totalB=P.totalBurned||0;
+    var _hourNow=new Date().getHours();
+    // Before 10am with <1000 steps but >1500 burned = stale yesterday data
+    if(_hourNow<10&&_todaySteps<1000&&_totalB>1500){
+      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+      save();
+      console.log('Cleared stale burned data:',_totalB);
+    }
+  }());
   // Migrate myFoods categories based on name keywords
   (function(){
     var _mf=loadMyFoods(); var _ch=false;
