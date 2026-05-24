@@ -1910,9 +1910,8 @@ function rHome() {
   _hmD('hm-dist-yd',P.distMiles||0,_distYd,false,' mi');
 
   // RHR delta - scan FL for different value
-  var _hmRhrRef=null;
-  if(_hmYdSnap&&_hmYdSnap.rhr>0&&_hmYdSnap.rhr!==P.rhr) _hmRhrRef=_hmYdSnap.rhr;
-  if(!_hmRhrRef){for(var _hri=0;_hri<_hmFLall.length;_hri++){var _hrs2=_hmFLall[_hri];if(_hrs2.date<today()&&_hrs2.rhr&&_hrs2.rhr!==P.rhr){_hmRhrRef=_hrs2.rhr;break;}}}
+  // Use yesterday's snap rhr directly - if same as today delta=0 (correct)
+  var _hmRhrRef=(_hmYdSnap&&_hmYdSnap.rhr>0)?_hmYdSnap.rhr:null;
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
