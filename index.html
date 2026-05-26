@@ -1911,17 +1911,18 @@ function rHome() {
 
   // RHR delta - scan FL for different value
   // Use yesterday's snap rhr directly - if same as today delta=0 (correct)
+  // RHR reference: use yesterday's FL snap rhr strictly
   var _hmRhrRef=null;
-  if(_hmYdSnap&&_hmYdSnap.rhr>0) _hmRhrRef=_hmYdSnap.rhr;
-  // Fallback: scan FL for most recent past day with valid rhr
-  if(!_hmRhrRef&&_hmFLall){
-    var _ydStr2R=yesterday();
+  var _ydStrRhr=yesterday();
+  if(_hmFLall){
     for(var _ri=0;_ri<_hmFLall.length;_ri++){
-      if(_hmFLall[_ri].date===_ydStr2R&&_hmFLall[_ri].rhr>0){
+      if(_hmFLall[_ri].date===_ydStrRhr&&(_hmFLall[_ri].rhr||0)>0){
         _hmRhrRef=_hmFLall[_ri].rhr; break;
       }
     }
   }
+  // If no yesterday FL entry, use P.prevRhr (saved previous value)
+  if(!_hmRhrRef&&P.prevRhr>0) _hmRhrRef=P.prevRhr;
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
@@ -4199,7 +4200,7 @@ function rFitness(){
     if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
     // Reject implausible totalBurned reference
     // <300 = no real data, >4000 = artifact (max realistic day ~3500)
-    if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>4000)) ydVal=null;
+    if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>3500)) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
