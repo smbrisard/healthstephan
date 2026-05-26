@@ -4096,22 +4096,30 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
-  // Populate prevRhr etc from FL if not yet set (catches cold-start)
-  // Populate prevX from FL: find most recent past snap where value DIFFERS from today
-  // This avoids setting prevRhr=65 when all snaps have the same stale value
+  // Populate prevRhr etc strictly from yesterday's FL snap
   (function(){
-    var _todayS=today();
+    var _ydS=yesterday(); var _todayS=today();
     var _sortedFLp=FL.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    // First: strictly yesterday's snap
     for(var _fpi=0;_fpi<_sortedFLp.length;_fpi++){
       var _fps=_sortedFLp[_fpi];
-      if(_fps.date>=_todayS) continue;
-      if(!P.prevRhr&&_fps.rhr&&_fps.rhr!==P.rhr) P.prevRhr=_fps.rhr;
-      if(!P.prevHrv&&_fps.hrv&&_fps.hrv!==P.hrv) P.prevHrv=_fps.hrv;
-      if(!P.prevSpo2&&_fps.spo2&&Math.abs(_fps.spo2-P.spo2)>0.05) P.prevSpo2=_fps.spo2;
-      if(!P.prevRr&&_fps.rr&&_fps.rr!==P.rr) P.prevRr=_fps.rr;
-      if(!P.prevSleep&&_fps.sleep&&_fps.sleep!==P.sleepLast) P.prevSleep=_fps.sleep;
-      // Stop once we have all we need
-      if(P.prevRhr&&P.prevHrv&&P.prevSpo2&&P.prevRr&&P.prevSleep) break;
+      if(_fps.date!==_ydS) continue;
+      if(!P.prevRhr&&(_fps.rhr||0)>0) P.prevRhr=_fps.rhr;
+      if(!P.prevHrv&&(_fps.hrv||0)>0) P.prevHrv=_fps.hrv;
+      if(!P.prevSpo2&&(_fps.spo2||0)>0) P.prevSpo2=_fps.spo2;
+      if(!P.prevRr&&(_fps.rr||0)>0&&_fps.rr<35) P.prevRr=_fps.rr;
+      if(!P.prevSleep&&(_fps.sleep||0)>0) P.prevSleep=_fps.sleep;
+    }
+    // Fallback: most recent past snap if yesterday missing
+    for(var _fpi2=0;_fpi2<_sortedFLp.length;_fpi2++){
+      var _fps2=_sortedFLp[_fpi2];
+      if(_fps2.date>=_todayS) continue;
+      if(!P.prevRhr&&(_fps2.rhr||0)>0) P.prevRhr=_fps2.rhr;
+      if(!P.prevHrv&&(_fps2.hrv||0)>0) P.prevHrv=_fps2.hrv;
+      if(!P.prevSpo2&&(_fps2.spo2||0)>0) P.prevSpo2=_fps2.spo2;
+      if(!P.prevRr&&(_fps2.rr||0)>0&&_fps2.rr<35) P.prevRr=_fps2.rr;
+      if(!P.prevSleep&&(_fps2.sleep||0)>0) P.prevSleep=_fps2.sleep;
+      if(P.prevRhr&&P.prevHrv&&P.prevSpo2) break;
     }
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
@@ -4163,7 +4171,7 @@ function rFitness(){
     for(var _bi=0;_bi<_sfl.length;_bi++){
       var _bs=_sfl[_bi];
       if(_bs.date>=_tds) continue;
-      if(!_bioSnap.rhr&&_bs.rhr&&_bs.rhr!==58) _bioSnap.rhr=_bs.rhr;
+      if(!_bioSnap.rhr&&(_bs.rhr||0)>0&&_bs.date===yesterday()) _bioSnap.rhr=_bs.rhr;
       if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86) _bioSnap.hrv=_bs.hrv;
       if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&_bs.spo2<99&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
       if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<40) _bioSnap.rr=_bs.rr; // cap at 40 to reject extreme outliersect outliers
@@ -4200,7 +4208,7 @@ function rFitness(){
     if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
     // Reject implausible totalBurned reference
     // <300 = no real data, >4000 = artifact (max realistic day ~3500)
-    if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>3500)) ydVal=null;
+    if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>4500)) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
