@@ -1902,7 +1902,7 @@ function rHome() {
   var _lastSyncTodayHm=P.lastSyncDate&&P.lastSyncDate===todayLocal();
   var // Use totalBurned if available, else burned, else 0
   _hmBurnedToday=_lastSyncTodayHm?(P.totalBurned||P.burned||0):0;
-  var _hmBurnedYd=_hmYdSnap?(_hmYdSnap.activeBurned||_hmYdSnap.burned)||null:null;
+  var _hmBurnedYd=_hmYdSnap?(_hmYdSnap.burned||_hmYdSnap.activeBurned||null):null;
   _hmD('hm-burned-yd',_hmBurnedToday,_hmBurnedYd,false,' kcal');
 
   // Distance delta
@@ -1911,7 +1911,17 @@ function rHome() {
 
   // RHR delta - scan FL for different value
   // Use yesterday's snap rhr directly - if same as today delta=0 (correct)
-  var _hmRhrRef=(_hmYdSnap&&_hmYdSnap.rhr>0)?_hmYdSnap.rhr:null;
+  var _hmRhrRef=null;
+  if(_hmYdSnap&&_hmYdSnap.rhr>0) _hmRhrRef=_hmYdSnap.rhr;
+  // Fallback: scan FL for most recent past day with valid rhr
+  if(!_hmRhrRef&&_hmFLall){
+    var _ydStr2R=yesterday();
+    for(var _ri=0;_ri<_hmFLall.length;_ri++){
+      if(_hmFLall[_ri].date===_ydStr2R&&_hmFLall[_ri].rhr>0){
+        _hmRhrRef=_hmFLall[_ri].rhr; break;
+      }
+    }
+  }
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
@@ -3594,7 +3604,7 @@ function rSleep() {
     +'<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:2px;background:#ffb830"></div><span style="font-size:10px;color:var(--dim)">6-7h</span></div>'
     +'<div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:2px;background:#ff3b5c"></div><span style="font-size:10px;color:var(--dim)">&lt;6h</span></div>'
     +'</div>';
-  var hrs=sorted.map(function(e){return e.hours;});
+  var hrs=recent.map(function(e){return e.hours;}); // 7-day only for avg/best/worst
   set('sl-avg',hrs.length?hHM(hrs.reduce(function(a,b){return a+b;},0)/hrs.length):'--');
   set('sl-best',hrs.length?hHM(Math.max.apply(null,hrs)):'--');
   set('sl-worst',hrs.length?hHM(Math.min.apply(null,hrs)):'--');
@@ -4174,7 +4184,12 @@ function rFitness(){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
-      if(m.key==='activeBurned'&&ydSnap) ydVal=ydSnap.burned||null;
+      if(m.key==='activeBurned'&&ydSnap){
+        // Use burned (total) preferably, fall back to activeBurned for old snaps
+        ydVal=ydSnap.burned||(ydSnap.activeBurned?null:null)||null;
+        // If burned field missing or same as activeBurned (old snap format), use it anyway
+        if(!ydVal&&ydSnap.activeBurned) ydVal=ydSnap.activeBurned;
+      }
     }
     // Reject default initialisation values - these are never real measurements
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
