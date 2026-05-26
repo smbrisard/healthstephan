@@ -4193,15 +4193,13 @@ function rFitness(){
     }
     // Reject default initialisation values - these are never real measurements
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
-    // For biometrics: if ydSnap value equals today's value, check if it's genuinely same or stale fallback
-    if((m.key==='rhr'||m.key==='hrv')&&ydVal===m.raw&&_bioSnap[m.key]) ydVal=_bioSnap[m.key];
+    // Only use bioSnap if ydSnap has no valid value
+    if((m.key==='rhr'||m.key==='hrv')&&!ydVal&&_bioSnap[m.key]) ydVal=_bioSnap[m.key];
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
     if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
     // Reject implausible totalBurned reference
-    // <500 = likely default/no sync, >5000 = data artifact
-    if(m.key==='activeBurned'&&ydVal&&(ydVal<500||ydVal>5000)) ydVal=null;
-    // Suppress burned delta if steps < 200 (just woke up - data unreliable)
-    if(m.key==='activeBurned'&&ydVal&&(P.stepsToday||0)<200) ydVal=null;
+    // <300 = no real data, >4000 = artifact (max realistic day ~3500)
+    if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>4000)) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
     var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr,sleep:_bioSnap.sleep};
