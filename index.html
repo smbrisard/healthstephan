@@ -420,6 +420,7 @@ body { height: 100dvh; }
             <div style="font-family:var(--mn);font-size:24px;font-weight:800;color:var(--red);line-height:1" id="hm-rhr">--</div>
             <div style="font-size:11px;color:var(--dim);margin-top:3px">bpm RHR</div>
             <div style="font-size:11px;color:var(--dim);margin-top:2px" id="hm-rhr-yd"></div>
+            <div id="rhr-debug" style="font-size:9px;color:var(--amb);margin-top:2px;word-break:break-all"></div>
           </div>
           <div class="mtile" style="background:rgba(0,212,170,.12)">
             <div style="font-size:20px;margin-bottom:7px">🧍</div>
@@ -1923,6 +1924,9 @@ function rHome() {
   }
   // If no yesterday FL entry, use P.prevRhr (saved previous value)
   if(!_hmRhrRef&&P.prevRhr>0) _hmRhrRef=P.prevRhr;
+  var _ydFLrhr=(_hmFLall&&_hmFLall.length)?_hmFLall.filter(function(f){return f.date===_ydStrRhr;})[0]:null;
+  var _rhrDbg='RHR: today='+P.rhr+' prev='+P.prevRhr+' ydFL='+(_ydFLrhr?_ydFLrhr.rhr:'none')+' ref='+_hmRhrRef;
+  var _dbgEl=g('rhr-debug'); if(_dbgEl) _dbgEl.textContent=_rhrDbg;
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
