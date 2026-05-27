@@ -1927,8 +1927,8 @@ function rHome() {
 
   // Stand/Exercise delta
   if(_hmYdSnap){
-    _hmD('hm-stand-yd',P.standHours||0,_hmYdSnap.standHours||0,false,' hrs');
-    _hmD('hm-exmin-yd',P.exerciseMins||0,_hmYdSnap.exerciseMins||0,false,' min');
+    _hmD('hm-stand-yd',P.standHours||0,_hmYdSnap?(_hmYdSnap.standHours||P.prevStand||null):(P.prevStand||null),false,' hrs');
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_hmYdSnap?(_hmYdSnap.exerciseMins||P.prevExMins||null):(P.prevExMins||null),false,' min');
   }
 
   // Weight vs yesterday (from WL entries)
@@ -4109,6 +4109,8 @@ function rFitness(){
       if(!P.prevSpo2&&(_fps.spo2||0)>0) P.prevSpo2=_fps.spo2;
       if(!P.prevRr&&(_fps.rr||0)>0&&_fps.rr<35) P.prevRr=_fps.rr;
       if(!P.prevSleep&&(_fps.sleep||0)>0) P.prevSleep=_fps.sleep;
+      if(!P.prevStand&&(_fps.standHours||0)>0) P.prevStand=_fps.standHours;
+      if(!P.prevExMins&&(_fps.exerciseMins||0)>0) P.prevExMins=_fps.exerciseMins;
     }
     // Fallback: most recent past snap if yesterday missing
     for(var _fpi2=0;_fpi2<_sortedFLp.length;_fpi2++){
@@ -4119,7 +4121,9 @@ function rFitness(){
       if(!P.prevSpo2&&(_fps2.spo2||0)>0) P.prevSpo2=_fps2.spo2;
       if(!P.prevRr&&(_fps2.rr||0)>0&&_fps2.rr<35) P.prevRr=_fps2.rr;
       if(!P.prevSleep&&(_fps2.sleep||0)>0) P.prevSleep=_fps2.sleep;
-      if(P.prevRhr&&P.prevHrv&&P.prevSpo2) break;
+      if(!P.prevStand&&(_fps2.standHours||0)>0) P.prevStand=_fps2.standHours;
+      if(!P.prevExMins&&(_fps2.exerciseMins||0)>0) P.prevExMins=_fps2.exerciseMins;
+      if(P.prevRhr&&P.prevHrv&&P.prevSpo2&&P.prevStand) break;
     }
   })();
   var tiles=[ {e:'&#128205;',key:'dist',raw:P.distMiles||null,lb:false,v:(P.distMiles&&P.distMiles>0)?fD(P.distMiles,1):'--',u:'mi',l:'Distance',c:'#38bdf8',bg:'rgba(56,189,248,.12)',pct:(P.distMiles||0)/10},
