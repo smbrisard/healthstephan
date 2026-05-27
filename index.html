@@ -1683,6 +1683,7 @@ function rHome() {
     P.exerciseMins=0; P.standHours=0;
     P.burned=0; P.totalBurned=0; P.restingEnergy=null;
     P.stepsToday=0; P.distMiles=0; P.waterToday=0;
+    P.exerciseMins=0; P.standHours=0;
   }
   // Zero all daily metrics if sync date is older than yesterday
   if(P.lastSyncDate&&P.lastSyncDate!==today()&&P.lastSyncDate!==yesterday()){
@@ -1891,11 +1892,14 @@ function rHome() {
   // Sleep delta - use SL log directly
   // Use FL snap sleep as reference (same source as Fitness tile)
   // Falls back to SL log if snap has no sleep value
+  // Sleep reference: FL snap → SL log → prevSleep
   var _ydSnapSleep=_hmYdSnap?(_hmYdSnap.sleep||0):0;
-  var _todaySl2=today();
-  var _prevSl=SL.filter(function(s){return s.date<_todaySl2&&(s.hours||0)>=3;})
-    .sort(function(a,b){if(b.date!==a.date)return b.date.localeCompare(a.date);return (b.hours||0)-(a.hours||0);})[0];
-  var _sleepRef=_ydSnapSleep>0?_ydSnapSleep:(_prevSl?_prevSl.hours:null);
+  var _todaySl2=today(); var _ydSl2=yesterday();
+  var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
+    .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
+  if(!_prevSl) _prevSl=SL.filter(function(s){return s.date<_todaySl2&&(s.hours||0)>=3;})
+    .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
+  var _sleepRef=_ydSnapSleep>0?_ydSnapSleep:(_prevSl?_prevSl.hours:(P.prevSleep||null));
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
 
   // Burned delta
@@ -4946,6 +4950,10 @@ function launchApp(){
     if(_hourNow<12&&_todaySteps<3000&&_totalB>1500){
       P.burned=0; P.totalBurned=0; P.restingEnergy=null;
       save();
+    }
+    // Also clear stale exercise mins (>0 before any activity today)
+    if(_hourNow<10&&_todaySteps<100&&(P.exerciseMins||0)>0){
+      P.exerciseMins=0; P.standHours=0; save();
     }
   }());
   // Migrate myFoods categories based on name keywords
