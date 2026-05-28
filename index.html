@@ -1684,6 +1684,9 @@ function rHome() {
     P.burned=0; P.totalBurned=0; P.restingEnergy=null;
     P.stepsToday=0; P.distMiles=0; P.waterToday=0;
     P.exerciseMins=0; P.standHours=0;
+    // Clear prev biometrics so they repopulate from yesterday's FL snap
+    P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
+    P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
   }
   // Zero all daily metrics if sync date is older than yesterday
   if(P.lastSyncDate&&P.lastSyncDate!==today()&&P.lastSyncDate!==yesterday()){
@@ -5506,16 +5509,18 @@ function fetchSync(){
     var updated=false;
     // Capture yesterday's biometrics from FL BEFORE any sync overwrites P values
     // This is the most reliable source since it reflects the actual finalized daily values
-    var _todayForSnap=today();
+    var _todayForSnap=today(); var _ydForSnap=yesterday();
     var _pastSnaps=FL.filter(function(f){return f.date<_todayForSnap;}).sort(function(a,b){return b.date.localeCompare(a.date);});
-    if(_pastSnaps.length>0){
-      var _latestPast=_pastSnaps[0];
-      if(_latestPast.rhr) P.prevRhr=_latestPast.rhr;
-      if(_latestPast.hrv) P.prevHrv=_latestPast.hrv;
-      if(_latestPast.spo2) P.prevSpo2=_latestPast.spo2;
-      if(_latestPast.rr) P.prevRr=_latestPast.rr;
-      if(_latestPast.sleep) P.prevSleep=_latestPast.sleep;
-    }
+    // Scan past snaps for valid biometrics - prioritize yesterday, skip 0 values
+    _pastSnaps.forEach(function(s){
+      var _isYd=s.date===_ydForSnap;
+      // Only set if: yesterday OR not yet found a valid value
+      if((!P.prevRhr||(s.rhr&&_isYd))&&s.rhr>0) P.prevRhr=s.rhr;
+      if((!P.prevHrv||(s.hrv&&_isYd))&&s.hrv>0) P.prevHrv=s.hrv;
+      if((!P.prevSpo2||(s.spo2&&_isYd))&&s.spo2>0) P.prevSpo2=s.spo2;
+      if((!P.prevRr||(s.rr&&_isYd))&&s.rr>0&&s.rr<35) P.prevRr=s.rr;
+      if((!P.prevSleep||(s.sleep&&_isYd))&&s.sleep>0) P.prevSleep=s.sleep;
+    });
     if(_syncIsRecent){
       // Update general daily fields (today or yesterday ok)
       _allDailyFields.forEach(function(k){
