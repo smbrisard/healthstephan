@@ -4103,6 +4103,13 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
+  // ONE-TIME FIX: force prevRhr from yesterday's actual HAE value
+  // This runs every launch but only updates if yesterday snap has valid rhr
+  (function(){
+    var _ydFix=yesterday();
+    var _ydFixSnap=FL.filter(function(f){return f.date===_ydFix&&(f.rhr||0)>0;});
+    if(_ydFixSnap.length>0) P.prevRhr=_ydFixSnap[_ydFixSnap.length-1].rhr;
+  }());
   // Populate prevRhr etc strictly from yesterday's FL snap
   (function(){
     var _ydS=yesterday(); var _todayS=today();
@@ -5631,7 +5638,7 @@ function fetchSync(){
       }
       var _lwSync=latWt();
       snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
-        rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
+        rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
         standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:_lwSync?k2l(_lwSync.weight):null};
       // Save today's snap — also save yesterday's if it doesn't exist yet
