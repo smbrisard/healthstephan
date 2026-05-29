@@ -4103,12 +4103,25 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
-  // ONE-TIME FIX: force prevRhr from yesterday's actual HAE value
-  // This runs every launch but only updates if yesterday snap has valid rhr
+  // ONE-TIME FIX: correct yesterday's FL snap rhr to actual HAE value
+  // The snap was saving P.rhr instead of d.rhr - correct it retroactively
   (function(){
     var _ydFix=yesterday();
-    var _ydFixSnap=FL.filter(function(f){return f.date===_ydFix&&(f.rhr||0)>0;});
-    if(_ydFixSnap.length>0) P.prevRhr=_ydFixSnap[_ydFixSnap.length-1].rhr;
+    // Find yesterday's snap and check if rhr matches today's (sign of stale save)
+    var _ydSnaps=FL.filter(function(f){return f.date===_ydFix;});
+    if(_ydSnaps.length>0){
+      var _ydS=_ydSnaps[_ydSnaps.length-1];
+      // If yesterday snap rhr === today's rhr, it was saved stale - use prevRhr from day before
+      if(_ydS.rhr===P.rhr){
+        // Scan for a snap 2 days ago for better reference
+        var _2dAgo=new Date(); _2dAgo.setDate(_2dAgo.getDate()-2);
+        var _2dStr=_2dAgo.getFullYear()+'-'+String(_2dAgo.getMonth()+1).padStart(2,'0')+'-'+String(_2dAgo.getDate()).padStart(2,'0');
+        var _2dSnap=FL.filter(function(f){return f.date===_2dStr&&(f.rhr||0)>0;});
+        if(_2dSnap.length>0) P.prevRhr=_2dSnap[_2dSnap.length-1].rhr;
+      } else if(_ydS.rhr>0){
+        P.prevRhr=_ydS.rhr;
+      }
+    }
   }());
   // Populate prevRhr etc strictly from yesterday's FL snap
   (function(){
