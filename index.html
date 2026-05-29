@@ -1919,17 +1919,9 @@ function rHome() {
   // RHR delta - scan FL for different value
   // Use yesterday's snap rhr directly - if same as today delta=0 (correct)
   // RHR reference: use yesterday's FL snap rhr strictly
-  var _hmRhrRef=null;
-  var _ydStrRhr=yesterday();
-  if(_hmFLall){
-    for(var _ri=0;_ri<_hmFLall.length;_ri++){
-      if(_hmFLall[_ri].date===_ydStrRhr&&(_hmFLall[_ri].rhr||0)>0){
-        _hmRhrRef=_hmFLall[_ri].rhr; break;
-      }
-    }
-  }
-  // If no yesterday FL entry, use P.prevRhr (saved previous value)
-  if(!_hmRhrRef&&P.prevRhr>0) _hmRhrRef=P.prevRhr;
+  // Use P.prevRhr directly - set at launch from yesterday's snap
+  // This is more reliable than FL scan which may have stale rhr values
+  var _hmRhrRef=P.prevRhr>0?P.prevRhr:null;
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
