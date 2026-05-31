@@ -4216,6 +4216,20 @@ function rFitness(){
   var yd_k={dist:'dist',steps:'steps',activeBurned:'burned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
+    // Sleep: always use SL log - more accurate than FL snap (especially for manual entries)
+    if(m.key==='sleep'){
+      var _allSLSorted2=SL.slice().sort(function(a,b){
+        return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));
+      });
+      var _ydSLFi2=null;
+      for(var _sli2=0;_sli2<_allSLSorted2.length;_sli2++){
+        var _sle2=_allSLSorted2[_sli2];
+        if((_sle2.hours||0)<3) continue;
+        if(_sle2.hours===P.sleepLast&&_sle2.date===today()) continue;
+        _ydSLFi2=_sle2; break;
+      }
+      if(_ydSLFi2) ydVal=_ydSLFi2.hours;
+    }
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
       if(m.key==='activeBurned'&&ydSnap){
