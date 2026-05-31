@@ -4227,10 +4227,31 @@ function rFitness(){
     }
     // Reject default initialisation values - these are never real measurements
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
-    // Only use bioSnap if ydSnap has no valid value
+    // Use P.prevRhr/prevHrv as reference (set from FL scan at launch - most reliable)
+    if(m.key==='rhr'&&!ydVal&&P.prevRhr>0) ydVal=P.prevRhr;
+    if(m.key==='hrv'&&!ydVal&&P.prevHrv>0) ydVal=P.prevHrv;
+    // Also use bioSnap if prevX not available
     if((m.key==='rhr'||m.key==='hrv')&&!ydVal&&_bioSnap[m.key]) ydVal=_bioSnap[m.key];
+    // Sleep: SL log takes priority over FL snap (manual entry more accurate than HAE)
+    if(m.key==='sleep'){
+      // Find yesterday's sleep from SL log - check yesterday and recent entries
+      var _allSLSorted=SL.slice().sort(function(a,b){
+        return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));
+      });
+      // Skip today's current sleep entry (P.sleepLast), get the previous one
+      var _ydSLFi=null;
+      for(var _sli=0;_sli<_allSLSorted.length;_sli++){
+        var _sle=_allSLSorted[_sli];
+        if((_sle.hours||0)<3) continue;
+        // Skip if this is today's entry matching current sleep
+        if(_sle.hours===P.sleepLast&&_sle.date===today()) continue;
+        _ydSLFi=_sle; break;
+      }
+      if(_ydSLFi) ydVal=_ydSLFi.hours;
+    }
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
-    if(m.key==='spo2'&&ydVal&&ydVal>=100) ydVal=null;
+    if(m.key==='spo2'&&ydVal&&ydVal>100) ydVal=null; // only reject >100, 100% is valid
+
     // Reject implausible totalBurned reference
     // <300 = no real data, >4000 = artifact (max realistic day ~3500)
     if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>4500)) ydVal=null;
@@ -5565,7 +5586,7 @@ function fetchSync(){
         var _v=parseFloat(d[k]);
         if(k==='stepsToday'||k==='burned'||k==='standHours'||k==='exerciseMins') _v=Math.round(_v);
         // Reject physiologically implausible rr values
-        if(k==='rr'&&(_v<6||_v>30)) return; // reject implausible rr (normal rest 6-20, exercise up to 30)
+        if(k==='rr'&&(_v<6||_v>=30)) return; // reject rr>=30 as implausible
         // Save previous biometric before overwriting - only if value is changing
         if(_bioKeys[k]&&P[k]&&P[k]!==_v) P[_bioKeys[k]]=P[k];
         P[k]=_v; updated=true;
