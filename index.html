@@ -4218,6 +4218,10 @@ function rFitness(){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
     // Sleep: use SL log for yesterday strictly, then FL snap
     if(m.key==='sleep'){
+      // DEBUG
+      var _slDbg=SL.slice(-5).map(function(s){return s.date+':'+s.hours;}).join('|');
+      toast('SL entries: '+_slDbg+' yd='+ydStr,false,4000);
+
       var _ydStrSl=ydStr; // strictly yesterday's date
       var _ydSLFi2=SL.filter(function(s){return s.date===_ydStrSl&&(s.hours||0)>=3;})
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
