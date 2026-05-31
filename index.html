@@ -4221,6 +4221,7 @@ function rFitness(){
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
       // Only show delta if yesterday has an SL entry
       ydVal=_prevSlFi?_prevSlFi.hours:null;
+      toast('SL yd='+_ydSl2Fi+' found='+(_prevSlFi?_prevSlFi.hours:'none')+' raw='+m.raw,false,5000);
     }
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
