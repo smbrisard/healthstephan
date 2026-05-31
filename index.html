@@ -4093,6 +4093,8 @@ function rFitness(){
   var e2=g('fi-date'); if(e2) e2.textContent=new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
+  // Clear implausible rr value stored in localStorage
+  if((P.rr||0)>25){P.rr=0; save();}
   // ONE-TIME FIX: correct yesterday's FL snap rhr to actual HAE value
   // The snap was saving P.rhr instead of d.rhr - correct it retroactively
   (function(){
