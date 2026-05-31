@@ -4221,7 +4221,6 @@ function rFitness(){
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
       // Only show delta if yesterday has an SL entry
       ydVal=_prevSlFi?_prevSlFi.hours:null;
-      toast('SL yd='+_ydSl2Fi+' found='+(_prevSlFi?_prevSlFi.hours:'none')+' raw='+m.raw,false,5000);
     }
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
@@ -4239,23 +4238,7 @@ function rFitness(){
     if(m.key==='hrv'&&!ydVal&&P.prevHrv>0) ydVal=P.prevHrv;
     // Also use bioSnap if prevX not available
     if((m.key==='rhr'||m.key==='hrv')&&!ydVal&&_bioSnap[m.key]) ydVal=_bioSnap[m.key];
-    // Sleep: SL log takes priority over FL snap (manual entry more accurate than HAE)
-    if(m.key==='sleep'){
-      // Find yesterday's sleep from SL log - check yesterday and recent entries
-      var _allSLSorted=SL.slice().sort(function(a,b){
-        return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));
-      });
-      // Skip today's current sleep entry (P.sleepLast), get the previous one
-      var _ydSLFi=null;
-      for(var _sli=0;_sli<_allSLSorted.length;_sli++){
-        var _sle=_allSLSorted[_sli];
-        if((_sle.hours||0)<3) continue;
-        // Skip if this is today's entry matching current sleep
-        if(_sle.hours===P.sleepLast&&_sle.date===today()) continue;
-        _ydSLFi=_sle; break;
-      }
-      if(_ydSLFi) ydVal=_ydSLFi.hours;
-    }
+
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
     if(m.key==='spo2'&&ydVal&&ydVal>100) ydVal=null; // only reject >100, 100% is valid
 
