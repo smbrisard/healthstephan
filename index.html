@@ -1896,15 +1896,11 @@ function rHome() {
   // Use FL snap sleep as reference (same source as Fitness tile)
   // Falls back to SL log if snap has no sleep value
   // Sleep reference: FL snap → SL log → prevSleep
-  var _ydSnapSleep=_hmYdSnap?(_hmYdSnap.sleep||0):0;
-  var _todaySl2=today(); var _ydSl2=yesterday();
-  // SL log takes priority - manually entered sleep is more accurate than HAE snap
+  // Sleep reference: use yesterday's SL entry strictly
+  var _ydSl2=yesterday();
   var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
     .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
-  if(!_prevSl) _prevSl=SL.filter(function(s){return s.date<_todaySl2&&(s.hours||0)>=3;})
-    .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
-  // Use SL log first, then FL snap, then P.prevSleep
-  var _sleepRef=_prevSl?_prevSl.hours:(_ydSnapSleep>0?_ydSnapSleep:(P.prevSleep||null));
+  var _sleepRef=_prevSl?_prevSl.hours:(P.prevSleep||null);
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
 
   // Burned delta
@@ -4199,7 +4195,7 @@ function rFitness(){
       if(!_bioSnap.rhr&&(_bs.rhr||0)>0&&_bs.date===yesterday()) _bioSnap.rhr=_bs.rhr;
       if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86) _bioSnap.hrv=_bs.hrv;
       if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&_bs.spo2<99&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
-      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<30) _bioSnap.rr=_bs.rr; // cap at 30 to reject outliersect outliers
+      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<=25) _bioSnap.rr=_bs.rr; // cap at 25 to reject outliersect outliers
       if(!_bioSnap.sleep&&(_bs.sleep||0)>=3&&_bs.sleep!==P.sleepLast) _bioSnap.sleep=_bs.sleep;
       if(_bioSnap.rhr&&_bioSnap.hrv&&_bioSnap.spo2&&_bioSnap.rr&&_bioSnap.sleep) break;
     }
@@ -4216,24 +4212,12 @@ function rFitness(){
   var yd_k={dist:'dist',steps:'steps',activeBurned:'burned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
-    // Sleep: use SL log for yesterday strictly, then FL snap
+    // Sleep: use yesterday's SL entry as reference
     if(m.key==='sleep'){
-      // DEBUG
-      var _slDbg=SL.slice(-5).map(function(s){return s.date+':'+s.hours;}).join('|');
-      toast('SL entries: '+_slDbg+' yd='+ydStr,false,4000);
-
-      var _ydStrSl=ydStr; // strictly yesterday's date
-      var _ydSLFi2=SL.filter(function(s){return s.date===_ydStrSl&&(s.hours||0)>=3;})
+      var _ydSLFi2=SL.filter(function(s){return s.date===ydStr&&(s.hours||0)>=3;})
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
-      // Also check today's date for manually entered last night's sleep
-      if(!_ydSLFi2){
-        var _todaySLAll=SL.filter(function(s){return s.date===today()&&(s.hours||0)>=3;})
-          .sort(function(a,b){return (b.hours||0)-(a.hours||0);});
-        // If multiple today entries, second one is yesterday's manually entered sleep
-        if(_todaySLAll.length>1) _ydSLFi2=_todaySLAll[1];
-      }
       if(_ydSLFi2) ydVal=_ydSLFi2.hours;
-      // Otherwise keep ydVal from FL snap
+      else if(P.prevSleep>0) ydVal=P.prevSleep;
     }
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
@@ -5605,7 +5589,7 @@ function fetchSync(){
         var _v=parseFloat(d[k]);
         if(k==='stepsToday'||k==='burned'||k==='standHours'||k==='exerciseMins') _v=Math.round(_v);
         // Reject physiologically implausible rr values
-        if(k==='rr'&&(_v<6||_v>=30)) return; // reject rr>=30 as implausible
+        if(k==='rr'&&(_v<6||_v>25)) return; // reject rr>25 as implausible for resting
         // Save previous biometric before overwriting - only if value is changing
         if(_bioKeys[k]&&P[k]&&P[k]!==_v) P[_bioKeys[k]]=P[k];
         P[k]=_v; updated=true;
