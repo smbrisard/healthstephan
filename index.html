@@ -1898,11 +1898,13 @@ function rHome() {
   // Sleep reference: FL snap → SL log → prevSleep
   var _ydSnapSleep=_hmYdSnap?(_hmYdSnap.sleep||0):0;
   var _todaySl2=today(); var _ydSl2=yesterday();
+  // SL log takes priority - manually entered sleep is more accurate than HAE snap
   var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
     .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
   if(!_prevSl) _prevSl=SL.filter(function(s){return s.date<_todaySl2&&(s.hours||0)>=3;})
     .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
-  var _sleepRef=_ydSnapSleep>0?_ydSnapSleep:(_prevSl?_prevSl.hours:(P.prevSleep||null));
+  // Use SL log first, then FL snap, then P.prevSleep
+  var _sleepRef=_prevSl?_prevSl.hours:(_ydSnapSleep>0?_ydSnapSleep:(P.prevSleep||null));
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
 
   // Burned delta
