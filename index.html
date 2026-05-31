@@ -4967,8 +4967,8 @@ function launchApp(){
       save();
     }
     // Also clear stale exercise mins (>0 before any activity today)
-    if(_hourNow<10&&_todaySteps<100&&(P.exerciseMins||0)>0){
-      P.exerciseMins=0; P.standHours=0; save();
+    if(_hourNow<10&&_todaySteps<500&&(P.exerciseMins||0)>60){
+      P.exerciseMins=0; save();
     }
   }());
   // Migrate myFoods categories based on name keywords
