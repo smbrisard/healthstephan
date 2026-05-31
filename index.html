@@ -4214,12 +4214,12 @@ function rFitness(){
   var yd_k={dist:'dist',steps:'steps',activeBurned:'burned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
-    // Sleep: use yesterday's SL entry as reference
+    // Sleep: same logic as Home - use yesterday's SL entry strictly
     if(m.key==='sleep'){
-      var _ydSLFi2=SL.filter(function(s){return s.date===ydStr&&(s.hours||0)>=3;})
+      var _ydSl2Fi=yesterday();
+      var _prevSlFi=SL.filter(function(s){return s.date===_ydSl2Fi&&(s.hours||0)>=3;})
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
-      if(_ydSLFi2) ydVal=_ydSLFi2.hours;
-      else if(P.prevSleep>0) ydVal=P.prevSleep;
+      ydVal=_prevSlFi?_prevSlFi.hours:(P.prevSleep||null);
     }
     // null OR undefined - old snaps missing fields
     if(ydVal===null||ydVal===undefined){
