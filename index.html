@@ -3090,7 +3090,10 @@ function rFoodGrid() {
     });
     // Add recipes assigned to this category
     var recipeTiles=recipesInCat.map(function(r){return Object.assign({},r,{_isRecipe:true,n:r.name,c:r.cals,e:r.emoji||'&#128216;',p:r.servings+' serving'+(r.servings!==1?'s':''),_custom:true});});
-    var list=recipeTiles.concat(myFoodsInCat).concat(builtInInCat);
+    // Sort merged list alphabetically (recipes stay at top)
+    var list=recipeTiles.concat(
+      myFoodsInCat.concat(builtInInCat).sort(function(a,b){return a.n.localeCompare(b.n);})
+    );
   }
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
