@@ -4983,6 +4983,15 @@ function launchApp(){
     if(_hourNow<10&&_todaySteps<500&&(P.exerciseMins||0)>60){
       P.exerciseMins=0; save();
     }
+    // Day change detection at launch - before fetchSync runs
+    if(P.lastSyncDate&&P.lastSyncDate!==today()){
+      P.exerciseMins=0; P.standHours=0;
+      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+      P.stepsToday=0; P.distMiles=0; P.waterToday=0;
+      P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
+      P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
+      save();
+    }
   }());
   // Migrate myFoods categories based on name keywords
   (function(){
