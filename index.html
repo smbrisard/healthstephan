@@ -4157,6 +4157,8 @@ function rFitness(){
     }()),subCol:'rgba(255,112,112,.7)'},
     {e:'&#10084;&#65039;',key:'rhr',raw:P.rhr||null,lb:true,md:1,v:P.rhr||'--',u:'bpm',l:'Resting HR',c:'var(--red)',bg:'rgba(255,59,92,.12)',pct:Math.min((P.rhr||60)/100,1)},
     {e:'&#9889;',key:'hrv',raw:P.hrv||null,lb:false,v:P.hrv?fD(Math.round(P.hrv*10)/10,1):'--',u:'ms',l:'HRV',c:'var(--grn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.hrv||0)/100,1)},
+    {e:'&#129698;',key:'vo2Max',raw:P.vo2Max||null,lb:false,v:P.vo2Max?fD(P.vo2Max,1):'--',u:'ml/kg/min',l:'VO2 Max',c:'var(--cyn)',bg:'rgba(0,212,170,.12)',pct:Math.min((P.vo2Max||0)/60,1),sub:(function(){var v=P.vo2Max||0;return v>=55?'Elite':v>=48?'Superior':v>=42?'Excellent':v>=35?'Good':v>0?'Fair':'';})(),subCol:'var(--cyn)'},
+    {e:'&#128694;',key:'walkingSpeed',raw:P.walkingSpeed||null,lb:false,v:P.walkingSpeed?fD(P.walkingSpeed,1):'--',u:'mph',l:'Walking Speed',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.walkingSpeed||0)/4,1),sub:(function(){var v=P.walkingSpeed||0;return v>=3.5?'Brisk':v>=2.5?'Moderate':v>=1.5?'Slow':v>0?'Very slow':'';})(),subCol:'var(--blu)'},
     {e:'&#129441;',key:'spo2',raw:P.spo2||null,lb:false,md:0.1,v:P.spo2?fD(P.spo2,0)+'%':'--',u:'SpO2',l:'Blood O2',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:Math.min((P.spo2||97)/100,1)},
     {e:'&#127774;&#65039;',key:'rr',raw:P.rr||null,lb:true,md:0.5,v:P.rr?fD(P.rr,0):'--',u:'br/min',l:'Resp Rate',c:'var(--cyn)',bg:'rgba(0,229,255,.12)',pct:Math.min((P.rr||14)/20,1)},
     {e:'&#128564;',key:'sleep',raw:P.sleepLast,lb:false,v:(P.sleepLast>0?hHM(P.sleepLast):'--'),u:'',l:'Last Sleep',c:'var(--blu)',bg:'rgba(77,166,255,.12)',pct:(P.sleepLast||7)/9,sub:P.sleepLast>=7?'Optimal':P.sleepLast>=6?'Good':P.sleepLast>=5?'Fair':P.sleepLast>0?'Poor':'',subCol:P.sleepLast>=7?'var(--grn)':P.sleepLast>=6?'var(--amb)':'var(--red)'},
@@ -4215,7 +4217,7 @@ function rFitness(){
     var arrow=diff>0?'&#9650;':'&#9660;';
     return D('style="font-size:10px;color:'+col+';margin-top:2px;font-family:var(--mn)"',arrow+' '+Math.abs(parseFloat(diff.toFixed(1)))+' vs yd');
   }
-  var yd_k={dist:'dist',steps:'steps',activeBurned:'burned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins'};
+  var yd_k={dist:'dist',steps:'steps',activeBurned:'burned',wt:'wt',burned:'burned',rhr:'rhr',hrv:'hrv',spo2:'spo2',rr:'rr',sleep:'sleep',water:'water',standHours:'standHours',exerciseMins:'exerciseMins',vo2Max:'vo2Max',walkingSpeed:'walkingSpeed'};
   ge.innerHTML=tiles.map(function(m){
     var ydVal=(ydSnap&&yd_k[m.key]!==undefined)?ydSnap[yd_k[m.key]]:null;
     // Sleep delta: use yesterday's SL entry only, never FL snap
@@ -5550,7 +5552,7 @@ function fetchSync(){
     var _allDailyFields=['restingEnergy','walkMiles','cycleMiles']; // only fields that carry from yesterday
     var _strictFields=['stepsToday','burned','distMiles','totalBurned','standHours','exerciseMins']; // ALL reset at midnight - today only
     // sleepLast is intentionally excluded - always derived from SL log
-    var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic'];
+    var fields=['rhr','hrv','spo2','rr','waterToday','bpSystolic','bpDiastolic','vo2Max','walkingSpeed'];
     var updated=false;
     // Capture yesterday's biometrics from FL BEFORE any sync overwrites P values
     // This is the most reliable source since it reflects the actual finalized daily values
@@ -5676,7 +5678,7 @@ function fetchSync(){
       }
       var _lwSync=latWt();
       snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
-        rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,
+        rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,vo2Max:P.vo2Max||null,walkingSpeed:P.walkingSpeed||null,
         standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:_lwSync?k2l(_lwSync.weight):null};
       // Save today's snap — also save yesterday's if it doesn't exist yet
