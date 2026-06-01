@@ -2757,6 +2757,7 @@ function _doSaveRecipeIng(i,cat){
     vc:0,vd:0,va:0,cat:cat,custom:true};
   var ei=myFoods.findIndex(function(f){return f.n.toLowerCase()===ing.name.toLowerCase();});
   if(ei>=0){myFoods[ei]=entry;}else{myFoods.push(entry);}
+  myFoods.sort(function(a,b){return a.n.localeCompare(b.n);});
   saveMyFoods(myFoods);
   _recipeIngs[i]._fromDB=true;
   _renderRecipeIngs();
@@ -5241,7 +5242,10 @@ function saveCustomDrinkToLibraryOnly(){
     closeM('custom-drink-m'); rDrGrid(); toast(name+' updated!'); return;
   }
   if(md.find(function(d){return d.n===name;})){toast(name+' already in My Drinks',true);return;}
-  md.push(_ent); saveMyDrinks(md);
+  md.push(_ent);
+  // Keep my drinks alphabetical
+  md.sort(function(a,b){return a.n.localeCompare(b.n);});
+  saveMyDrinks(md);
   closeM('custom-drink-m'); rDrGrid(); toast(name+' saved to My Drinks!');
 }
 function addCustomDrink(){
@@ -6178,6 +6182,8 @@ function cfAdd() {
     var exists=custom.some(function(f){return f.n===name;});
     if(!exists){
       custom.push({n:name,e:emoji,c:cals,pr:prot,cb:carbs,f:fat,fi:fiber,na:sodium,p:'1 serving',cat:'custom'});
+      // Keep custom foods alphabetical
+      custom.sort(function(a,b){return a.n.localeCompare(b.n);});
       try{localStorage.setItem('hs_custom_foods',JSON.stringify(custom));}catch(e){}
     }
   }
