@@ -4067,6 +4067,26 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: sort existing custom foods and drinks alphabetically
+  (function(){
+    try{
+      var _mf=loadMyFoods();
+      if(_mf&&_mf.length>1){
+        _mf.sort(function(a,b){return a.n.localeCompare(b.n);});
+        saveMyFoods(_mf);
+      }
+      var _md=loadMyDrinks();
+      if(_md&&_md.length>1){
+        _md.sort(function(a,b){return a.n.localeCompare(b.n);});
+        saveMyDrinks(_md);
+      }
+      var _cf=JSON.parse(localStorage.getItem('hs_custom_foods')||'[]');
+      if(_cf&&_cf.length>1){
+        _cf.sort(function(a,b){return a.n.localeCompare(b.n);});
+        localStorage.setItem('hs_custom_foods',JSON.stringify(_cf));
+      }
+    }catch(e){}
+  }());
   // ONE-TIME FIX: correct yesterday's FL snap rhr to actual HAE value
   // The snap was saving P.rhr instead of d.rhr - correct it retroactively
   (function(){
