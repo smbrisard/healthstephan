@@ -824,7 +824,7 @@ body { height: 100dvh; }
 <div class="modal" id="food-m"><div class="mbg" onclick="closeM('food-m')"></div>
   <div class="msheet"><div class="mhandle"></div>
     <div style="display:flex;align-items:center;gap:13px;margin-bottom:12px">
-      <div style="font-size:46px;line-height:1" id="fm-em">&#127829;</div>
+      <div style="font-size:46px;line-height:1" id="fm-em">&#9749;</div>
       <div style="flex:1"><div style="font-size:18px;font-weight:800" id="fm-name">Food</div><div style="font-size:13px;color:var(--dim);margin-top:2px" id="fm-portion">Portion</div></div>
     </div>
     <div style="display:flex;align-items:baseline;gap:7px;margin-bottom:5px"><div style="font-family:var(--mn);font-size:42px;font-weight:800;color:var(--grn);letter-spacing:-1px" id="fm-cals">0</div><div style="font-size:13px;color:var(--dim)">kcal / serving</div></div>
@@ -3984,17 +3984,20 @@ function rDrChart(){
 function openDrinkAsFood(idx){
   if(idx<0||idx>=FOODS.length) return;
   var f=FOODS[idx];
-  selF=f; fSrv=1.0;
-  var m=g('food-m');
-  if(!m) return;
-  // Populate food modal with this item
-  var ne=g('fm-name'); if(ne) ne.textContent=f.n;
-  var ee=g('fm-emoji'); if(ee) ee.textContent=f.e.replace(/&#(\d+);/,function(_,c){return String.fromCodePoint(parseInt(c));});
-  var ce=g('fm-cal'); if(ce) ce.textContent=Math.round(f.c*fSrv);
-  var pe=g('fm-pro'); if(pe) pe.textContent=Math.round((f.pr||0)*fSrv)+'g';
-  var cbe=g('fm-carb'); if(cbe) cbe.textContent=Math.round((f.cb||0)*fSrv)+'g';
-  var fe=g('fm-fat'); if(fe) fe.textContent=Math.round((f.f||0)*fSrv)+'g';
-  openM('food-m');
+  // Open drink modal with food item data
+  selDr={n:f.n,e:f.e,c:f.c,p:f.p,u:0,cb:f.cb||0,w:'',cat:'starbucks'};
+  dQty=1;
+  g('dm-em').innerHTML=f.e;
+  set('dm-name',f.n); set('dm-portion',f.p);
+  set('dm-qty',1); set('dm-total',fN(f.c)+' kcal');
+  sH('dm-info',[['kcal',fN(f.c),'var(--pnk)'],['carbs',(f.cb||0)+'g','var(--amb)'],['protein',(f.pr||0)+'g','var(--grn)']].map(function(p){
+    return D('style="flex:1;background:var(--s3);border-radius:9px;padding:9px;text-align:center"',
+      D('style="font-family:var(--mn);font-size:15px;font-weight:700;color:'+p[2]+'"',p[1])+
+      D('style="font-size:10px;color:var(--dim);margin-top:2px"',p[0]));
+  }).join(''));
+  var we=g('dm-warn'); if(we) we.innerHTML='';
+  var de=g('dm-date'); if(de) de.value=today();
+  openM('dr-m');
 }
 function openDrink(idx){
   // idx < 0 means custom drink - handled separately
