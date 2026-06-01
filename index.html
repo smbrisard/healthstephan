@@ -4094,7 +4094,7 @@ function rFitness(){
   var _lw=latWt(), _lwLbs=_lw?fD(k2l(_lw.weight),1)+'lb':'--';
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
-  if((P.rr||0)>25){P.rr=0; save();}
+  if((P.rr||0)>35){P.rr=0; save();}
   // ONE-TIME FIX: correct yesterday's FL snap rhr to actual HAE value
   // The snap was saving P.rhr instead of d.rhr - correct it retroactively
   (function(){
@@ -4197,7 +4197,7 @@ function rFitness(){
       if(!_bioSnap.rhr&&(_bs.rhr||0)>0&&_bs.date===yesterday()) _bioSnap.rhr=_bs.rhr;
       if(!_bioSnap.hrv&&_bs.hrv&&_bs.hrv!==86) _bioSnap.hrv=_bs.hrv;
       if(!_bioSnap.spo2&&_bs.spo2&&_bs.spo2!==97&&_bs.spo2<99&&Math.abs(_bs.spo2-(P.spo2||0))>0.05) _bioSnap.spo2=_bs.spo2;
-      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<=25) _bioSnap.rr=_bs.rr; // cap at 25 to reject outliersect outliers
+      if(!_bioSnap.rr&&_bs.rr&&_bs.rr!==14&&_bs.rr<=35) _bioSnap.rr=_bs.rr; // cap at 35ect outliers
       if(!_bioSnap.sleep&&(_bs.sleep||0)>=3&&_bs.sleep!==P.sleepLast) _bioSnap.sleep=_bs.sleep;
       if(_bioSnap.rhr&&_bioSnap.hrv&&_bioSnap.spo2&&_bioSnap.rr&&_bioSnap.sleep) break;
     }
@@ -5576,7 +5576,7 @@ function fetchSync(){
         var _v=parseFloat(d[k]);
         if(k==='stepsToday'||k==='burned'||k==='standHours'||k==='exerciseMins') _v=Math.round(_v);
         // Reject physiologically implausible rr values
-        if(k==='rr'&&(_v<6||_v>25)) return; // reject rr>25 as implausible for resting
+        if(k==='rr'&&(_v<6||_v>35)) return; // reject rr>35 as implausible
         // Save previous biometric before overwriting - only if value is changing
         if(_bioKeys[k]&&P[k]&&P[k]!==_v) P[_bioKeys[k]]=P[k];
         P[k]=_v; updated=true;
