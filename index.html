@@ -6325,8 +6325,6 @@ function _lookupBarcode(barcode){
 // --- COCKTAIL BUILDER ---
 var _cktlIngs=[];
 function openCocktailBuilder(){
-  var _dbgEl=g('cocktail-m');
-  toast('cktl-m='+(!!_dbgEl)+' class='+(_dbgEl?_dbgEl.className:'?'),false,4000);
   _cktlIngs=[];
   var nm=g('cktl-name');if(nm)nm.value='';
   var sv=g('cktl-servings');if(sv)sv.value='1';
