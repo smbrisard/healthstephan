@@ -3746,6 +3746,8 @@ var DRINKS=[
   {n:'Rooibos Tea',e:'&#127807;',p:'8 fl oz',c:2,u:0,cb:0,sg:0,cat:'tea',w:'Caffeine free'},
   {n:'Sencha Green Tea',e:'&#127808;',p:'8 fl oz',c:2,u:0,cb:0,sg:0,cat:'tea',w:''},
   {n:'Turmeric Latte',e:'&#129361;',p:'8 fl oz',c:80,u:0,cb:8,sg:6,cat:'tea',w:'Golden milk'},
+  {n:'Americano Black',e:'&#9749;',p:'12 fl oz',c:15,u:0,cb:3,sg:0,cat:'coffee',w:'Black, no sugar'},
+  {n:'Americano with Milk',e:'&#9749;',p:'12 fl oz',c:35,u:0,cb:5,sg:2,cat:'coffee',w:'With splash of milk'},
   {n:'Bulletproof Coffee',e:'&#9749;',p:'8 fl oz',c:230,u:0,cb:0,sg:0,cat:'coffee',w:'Butter + MCT oil'},
   {n:'Cold Brew 12oz',e:'&#9749;',p:'12 fl oz black',c:5,u:0,cb:0,sg:0,cat:'coffee',w:'High caffeine'},
   {n:'Espresso Double',e:'&#9749;',p:'2 fl oz',c:6,u:0,cb:0,sg:0,cat:'coffee',w:''},
@@ -3844,7 +3846,10 @@ function rDrGrid(){
     var _isDrC=d._custom||false;
     var _drIdx=_isDrC?-1:DRINKS.indexOf(d);
     var _mdi=_isDrC?_myDrs.findIndex(function(x){return x.n===d.n;}): -1;
-    var _dcFn=_isDrC?'addMyDrinkToLog('+_mdi+')':'openDrink('+_drIdx+')';
+    // Starbucks items come from FOODS - use food index
+    var _isSbFood=d._isFood&&d.cat==='starbucks';
+    var _sbFoodIdx=_isSbFood?FOODS.findIndex(function(f){return f.n===d.n&&f.cat==='starbucks';}): -1;
+    var _dcFn=_isDrC?'addMyDrinkToLog('+_mdi+')':(_isSbFood?'openDrinkAsFood('+_sbFoodIdx+')':'openDrink('+_drIdx+')');
     var _ddb=_isDrC?'<button onclick="event.stopPropagation();deleteMyDrink('+_mdi+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.25);border:none;border-radius:50%;width:26px;height:26px;color:#FF3B5C;font-size:14px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation">\u00d7</button>':'';
     var _dpb=_isDrC?'<button onclick="event.stopPropagation();editMyDrink('+_mdi+')" style="position:absolute;top:4px;left:4px;background:rgba(77,166,255,.25);border:none;border-radius:50%;width:26px;height:26px;color:var(--blu);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation">&#9998;</button>':'';
     return '<div style="position:relative" class="dtile" onclick="'+_dcFn+'">'+_ddb+_dpb+D('style="font-size:24px;margin-bottom:5px"',d.e)+D('style="font-size:13px;font-weight:600;margin-bottom:3px"',d.n)+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:var(--pnk)"',fN(d.c)+' kcal')+(d.u>0?D('style="font-size:11px;color:var(--dim)"',d.u+' units'):D('style="font-size:11px;color:var(--grn)"','Non-alcoholic'))+'</div>';
@@ -3974,6 +3979,21 @@ function rDrChart(){
     return D('style="flex:1;text-align:center;font-size:10px;color:'+(isSel?'var(--txt)':'var(--dim)')+';font-weight:'+(isSel?'700':'400')+'" onclick="selectDrChartDay(\''+dt+'\')"',
       new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'}).slice(0,3));
   }).join('');
+}
+function openDrinkAsFood(idx){
+  if(idx<0||idx>=FOODS.length) return;
+  var f=FOODS[idx];
+  selF=f; fSrv=1.0;
+  var m=g('food-m');
+  if(!m) return;
+  // Populate food modal with this item
+  var ne=g('fm-name'); if(ne) ne.textContent=f.n;
+  var ee=g('fm-emoji'); if(ee) ee.textContent=f.e.replace(/&#(\d+);/,function(_,c){return String.fromCodePoint(parseInt(c));});
+  var ce=g('fm-cal'); if(ce) ce.textContent=Math.round(f.c*fSrv);
+  var pe=g('fm-pro'); if(pe) pe.textContent=Math.round((f.pr||0)*fSrv)+'g';
+  var cbe=g('fm-carb'); if(cbe) cbe.textContent=Math.round((f.cb||0)*fSrv)+'g';
+  var fe=g('fm-fat'); if(fe) fe.textContent=Math.round((f.f||0)*fSrv)+'g';
+  openM('food-m');
 }
 function openDrink(idx){
   // idx < 0 means custom drink - handled separately
