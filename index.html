@@ -5270,7 +5270,11 @@ function addCustomDrink(){
     saveMyDrinks(md); _editMyDrinkIdx=-1;
     closeM('custom-drink-m'); rDrGrid(); toast(name+' updated!'); return;
   }
-  if(!md.find(function(d){return d.n===name;})){md.push(_ent);saveMyDrinks(md);}
+  if(!md.find(function(d){return d.n===name;})){
+    md.push(_ent);
+    md.sort(function(a,b){return a.n.localeCompare(b.n);});
+    saveMyDrinks(md);
+  }
   for(var _ci=0;_ci<cdQty;_ci++){
     DL.push({id:Date.now()+_ci,date:date,n:name,e:_cdEmoji,c:Math.round(cals),
       u:_uVal,cat:drCatVal,sugar:sugar,carbs:carbs,prot:prot,fat:fat,fiber:fiber,sodium:sodium,vol:0});
@@ -6396,6 +6400,7 @@ function saveCocktailToLibrary(){
   md.push({n:name,e:'&#127864;',p:'1 serving',c:Math.round(p.cals),u:Math.round(p.units*10)/10,
     cat:cat,sg:Math.round(p.sugar*10)/10,cb:Math.round(p.carbs*10)/10,
     pr:Math.round(p.prot*10)/10,ft:Math.round(p.fat*10)/10,vol:0,custom:true,_isCktl:true});
+  md.sort(function(a,b){return a.n.localeCompare(b.n);});
   saveMyDrinks(md);toast(name+' saved to My Drinks!');
 }
 // --- END COCKTAIL BUILDER ---
