@@ -4070,6 +4070,16 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: sort existing recipes alphabetically
+  (function(){
+    try{
+      var _sr=loadRecipes();
+      if(_sr&&_sr.length>1){
+        _sr.sort(function(a,b){return(a.name||'').localeCompare(b.name||'');});
+        saveRecipes(_sr);
+      }
+    }catch(e){}
+  }());
   // ONE-TIME: sort existing custom foods and drinks alphabetically
   (function(){
     try{
@@ -6494,7 +6504,7 @@ window.addEventListener('load', launch);</script>
       <button onclick="saveRecipeToDatabase()" style="padding:14px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:14px;color:var(--grn);font-size:14px;font-weight:700;touch-action:manipulation">Save to DB</button>
     </div>
     <button onclick="closeRecipeModal()" style="width:100%;padding:12px;background:var(--s2);border-radius:13px;border:.5px solid var(--b1);color:var(--dim);font-size:13px;font-weight:700;touch-action:manipulation">Cancel</button>
-  </div></div>
+  </div></div>
 <div class="modal" id="cocktail-m"><div class="mbg" onclick="closeCocktailBuilder()"></div>
   <div class="msheet" style="max-height:92vh;overflow-y:auto">
     <div class="mhandle"></div>
