@@ -3090,10 +3090,9 @@ function rFoodGrid() {
     });
     // Add recipes assigned to this category
     var recipeTiles=recipesInCat.map(function(r){return Object.assign({},r,{_isRecipe:true,n:r.name,c:r.cals,e:r.emoji||'&#128216;',p:r.servings+' serving'+(r.servings!==1?'s':''),_custom:true});});
-    // Sort merged list alphabetically (recipes stay at top)
-    var list=recipeTiles.concat(
-      myFoodsInCat.concat(builtInInCat).sort(function(a,b){return a.n.localeCompare(b.n);})
-    );
+    // Sort all items alphabetically including recipes
+    var list=recipeTiles.concat(myFoodsInCat).concat(builtInInCat);
+    list.sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
   }
   var rem=P.calTarget-tTotal();
   ge.innerHTML=list.map(function(f){
@@ -3846,6 +3845,7 @@ function rDrGrid(){
     FOODS.filter(function(f){return f.cat==='starbucks';}).map(function(f){return {n:f.n,e:f.e,c:f.c,cat:'starbucks',_isFood:true};}):
     DRINKS.filter(function(d){return d.cat===dCat;})));
   var list=_myDrInCat.concat(_builtInDr);
+  list.sort(function(a,b){return a.n.localeCompare(b.n);});
   ge.innerHTML=list.map(function(d,i){
     var _isDrC=d._custom||false;
     var _drIdx=_isDrC?-1:DRINKS.indexOf(d);
