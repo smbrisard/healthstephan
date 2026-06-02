@@ -4239,11 +4239,9 @@ function rFitness(){
     }
     // Reject default initialisation values - these are never real measurements
     var _bioDefaults={spo2:97,rhr:58,hrv:86,rr:14,activeBurned:389};
-    // Use P.prevRhr/prevHrv as reference (set from FL scan at launch - most reliable)
-    if(m.key==='rhr'&&!ydVal&&P.prevRhr>0) ydVal=P.prevRhr;
-    if(m.key==='hrv'&&!ydVal&&P.prevHrv>0) ydVal=P.prevHrv;
-    // Also use bioSnap if prevX not available
-    if((m.key==='rhr'||m.key==='hrv')&&!ydVal&&_bioSnap[m.key]) ydVal=_bioSnap[m.key];
+    // Always use P.prevRhr/prevHrv - most reliable yesterday reference
+    if(m.key==='rhr'&&P.prevRhr>0) ydVal=P.prevRhr;
+    if(m.key==='hrv'&&P.prevHrv>0) ydVal=P.prevHrv;
 
     // Also reject implausible spo2 reference values (100 = likely old default/manual entry)
     if(m.key==='spo2'&&ydVal&&ydVal>100) ydVal=null; // only reject >100, 100% is valid
