@@ -4253,7 +4253,7 @@ function rFitness(){
     if(m.key==='activeBurned'&&ydVal&&(ydVal<300||ydVal>4500)) ydVal=null;
     if(_bioDefaults[m.key]!==undefined&&ydVal===_bioDefaults[m.key]) ydVal=null;
     // Also use bioSnap if ydSnap value equals today's value (stale snapshot)
-    var _bsMap={rhr:_bioSnap.rhr,hrv:_bioSnap.hrv,spo2:_bioSnap.spo2,rr:_bioSnap.rr}; // sleep excluded - handled separately
+    var _bsMap={spo2:_bioSnap.spo2,rr:_bioSnap.rr}; // rhr/hrv/sleep excluded - handled by prevRhr/prevHrv
     if(_bsMap.hasOwnProperty(m.key)&&_bsMap[m.key]!==null&&_bsMap[m.key]!==undefined){
       // Use bioSnap if: ydSnap is missing the field OR ydSnap has same value as today
       if(ydVal===null||ydVal===undefined||parseFloat(ydVal)===parseFloat(m.raw)) ydVal=_bsMap[m.key];
