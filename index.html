@@ -5602,7 +5602,7 @@ function fetchSync(){
       // Preserves last known good values
     }
     if(d.stepsToday||d.totalBurned||d.rhr) updated=true;
-    var _bioKeys={rhr:'prevRhr',hrv:'prevHrv',spo2:'prevSpo2',rr:'prevRr'};
+    var _bioKeys={spo2:'prevSpo2',rr:'prevRr'}; // rhr/hrv excluded - prevRhr/prevHrv set only at launch
     fields.forEach(function(k){
       if(d[k]!==undefined&&d[k]!==null&&!isNaN(parseFloat(d[k]))){
         var _v=parseFloat(d[k]);
