@@ -1899,6 +1899,13 @@ function rHome() {
   var _ydSl2=yesterday();
   var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
     .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
+  // Fallback: most recent SL entry from last 3 days (handles timezone travel)
+  if(!_prevSl){
+    var _todaySl3=today();
+    var _recentSl=SL.filter(function(s){return s.date<_todaySl3&&(s.hours||0)>=3;})
+      .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
+    if(_recentSl) _prevSl=_recentSl;
+  }
   var _sleepRef=_prevSl?_prevSl.hours:(P.prevSleep||null);
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
 
@@ -4225,7 +4232,12 @@ function rFitness(){
       var _ydSl2Fi=yesterday();
       var _prevSlFi=SL.filter(function(s){return s.date===_ydSl2Fi&&(s.hours||0)>=3;})
         .sort(function(a,b){return (b.hours||0)-(a.hours||0);})[0];
-      // Only show delta if yesterday has an SL entry
+      // Fallback: most recent past SL entry (handles timezone travel)
+      if(!_prevSlFi){
+        var _todaySl4=today();
+        _prevSlFi=SL.filter(function(s){return s.date<_todaySl4&&(s.hours||0)>=3;})
+          .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0]||null;
+      }
       ydVal=_prevSlFi?_prevSlFi.hours:null;
     }
     // null OR undefined - old snaps missing fields
