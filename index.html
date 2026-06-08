@@ -5686,6 +5686,20 @@ function fetchSync(){
         var _slSnap=FL.filter(function(f){return f.date===d.sleepDate;});
         if(_slSnap.length){_slSnap[_slSnap.length-1].sleep=parseFloat(d.sleepLast);}
       }
+      // Update yesterday's burned with finalized overnight values
+      // HAE sends yesterday's complete data in the morning freshOvernight sync
+      if(_freshOvernight&&d.totalBurned&&d.totalBurned>500){
+        var _ydStr3=yesterday();
+        var _ydSnap3=FL.filter(function(f){return f.date===_ydStr3;});
+        if(_ydSnap3.length){
+          var _ys=_ydSnap3[_ydSnap3.length-1];
+          // Only update if the new value is higher (more complete data)
+          if(d.totalBurned>(_ys.burned||0)){
+            _ys.burned=d.totalBurned;
+            _ys.activeBurned=d.burned||_ys.activeBurned;
+          }
+        }
+      }
       var _lwSync=latWt();
       snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
         rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,vo2Max:P.vo2Max||null,walkingSpeed:P.walkingSpeed||null,
