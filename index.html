@@ -3467,40 +3467,55 @@ function saveWt() {
 }
 function drawWtChart(entries) {
   var cv=g('wt-canvas'); if(!cv) return;
-  var W=cv.parentElement.offsetWidth-26, H=130;
+  var showLabels=(wtR==='7d'||wtR==='1m')&&entries.length<=31;
+  var bottomPad=showLabels?32:10;
+  var W=cv.parentElement.offsetWidth-26, H=showLabels?162:130;
   cv.width=W*2; cv.height=H*2; cv.style.width=W+'px'; cv.style.height=H+'px';
+  cv.parentElement.style.height=H+'px';
   var ctx=cv.getContext('2d'); ctx.scale(2,2); ctx.clearRect(0,0,W,H);
-  if(entries.length<2){ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Log at least 2 weights',W/2,H/2);return;}
+  if(entries.length<2){
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='13px sans-serif';
+    ctx.textAlign='center';ctx.fillText('Log at least 2 weights',W/2,H/2);return;
+  }
   var vals=entries.map(function(e){return k2l(e.weight);});
   var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
-  var pad=Math.max((mx-mn)*0.2,1); mn-=pad; mx+=pad;
+  var pad=Math.max((mx-mn)*0.25,0.5); mn-=pad; mx+=pad;
+  var chartH=H-bottomPad-10;
   function px(i){return 20+(W-40)*i/(entries.length-1);}
-  function py(v){return H-10-(H-20)*(v-mn)/(mx-mn);}
-  // Grid line
-  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(20,H/2); ctx.lineTo(W-20,H/2); ctx.stroke();
+  function py(v){return 10+chartH*(1-(v-mn)/(mx-mn));}
   // Gradient fill
-  var grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'rgba(180,120,255,.3)'); grad.addColorStop(1,'rgba(180,120,255,.0)');
+  var grad=ctx.createLinearGradient(0,0,0,chartH);
+  grad.addColorStop(0,'rgba(180,120,255,.25)'); grad.addColorStop(1,'rgba(180,120,255,.0)');
   ctx.beginPath(); ctx.moveTo(px(0),py(vals[0]));
   entries.forEach(function(e,i){if(i>0)ctx.lineTo(px(i),py(vals[i]));});
-  ctx.lineTo(px(entries.length-1),H); ctx.lineTo(px(0),H); ctx.closePath();
-  ctx.fillStyle=grad; ctx.fill();
+  ctx.lineTo(px(entries.length-1),H-bottomPad); ctx.lineTo(px(0),H-bottomPad);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
   // Line
-  ctx.strokeStyle='var(--pur)'; ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(180,120,255,.9)'; ctx.lineWidth=2; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(px(0),py(vals[0]));
   entries.forEach(function(e,i){if(i>0)ctx.lineTo(px(i),py(vals[i]));});
   ctx.stroke();
-  // Points + labels
+  // Points, weight labels at bottom, date labels
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   entries.forEach(function(e,i){
-    var x=px(i),y=py(vals[i]);
-    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
-    ctx.fillStyle='var(--pur)'; ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+    var x=px(i), y=py(vals[i]);
+    // Point
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(180,120,255,1)'; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.5; ctx.stroke();
+    if(showLabels){
+      // Weight value below point
+      ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(fD(vals[i],1),x,H-bottomPad+11);
+      // Date label at very bottom
+      var d=new Date(e.date+'T12:00');
+      var lbl=wtR==='7d'?(d.getMonth()+1)+'/'+d.getDate():months[d.getMonth()]+' '+d.getDate();
+      ctx.fillStyle='rgba(255,255,255,.45)'; ctx.font='8px sans-serif';
+      ctx.fillText(lbl,x,H-2);
+    }
   });
-  // Store points for click detection
+  // Store points for click
   cv._wtPoints=entries.map(function(e,i){return{x:px(i),y:py(k2l(e.weight)),e:e};});
-  // Click handler
   cv.onclick=function(ev){
     var rect=cv.getBoundingClientRect();
     var cx=(ev.clientX-rect.left)*(W/rect.width);
@@ -3511,9 +3526,10 @@ function drawWtChart(entries) {
       var d=Math.sqrt((p.x-cx)*(p.x-cx)+(p.y-cy)*(p.y-cy));
       if(d<minD){minD=d;closest=p;}
     });
-    if(closest&&minD<20){
+    if(closest&&minD<24){
       var lbs=fD(k2l(closest.e.weight),1);
-      toast(closest.e.date+': '+lbs+' lbs',false,2500);
+      var dd=new Date(closest.e.date+'T12:00');
+      toast(dd.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+': '+lbs+' lbs',false,2500);
     }
   };
   cv.style.cursor='pointer';
@@ -4931,7 +4947,7 @@ function rHistory(){
         return x.toFixed(1)+','+y.toFixed(1);
       }).join(' ');
       var wtChg=wtPts[wtPts.length-1].wt-wtPts[0].wt;
-      html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','Weight Trend — Last 30 Days');
+      html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"',(function(){var _wtRMap={'7d':'Weight Trend — Last 7 Days','1m':'Weight Trend — Last 30 Days','3m':'Weight Trend — Last 3 Months','all':'Weight Trend — All Time'};return _wtRMap[wtR]||'Weight Trend';})());
       html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:20px"',
         '<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:70px;display:block"><polyline points="'+svgPts+'" fill="none" stroke="var(--pur)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+
         wtPts.map(function(d){
