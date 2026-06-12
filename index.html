@@ -2126,7 +2126,12 @@ var FOOD_EMOJI_MAP = [
   ['cashew','&#129372;'],        // 🥜
   ['pistachio','&#129372;'],     // 🥜
   ['nut','&#129372;'],           // 🥜
-  ['seed','&#129379;'],          // 🥣
+  ['sesame','&#129378;'],       // 🥢 (check before generic seed)
+  ['chia','&#129368;'],          // 🍲
+  ['flax','&#129368;'],          // 🍲
+  ['pumpkin seed','&#129378;'],  // 🥢
+  ['sunflower seed','&#129378;'],// 🥢
+  ['seed','&#129372;'],          // 🥜 (generic seed → nut emoji, more accurate than bowl)
   ['hummus','&#129752;'],        // 🫘
   ['popcorn','&#127871;'],       // 🍿 U+1F37F
   ['pretzel','&#129384;'],       // 🥨 U+1F968
@@ -2367,13 +2372,13 @@ var FOODS=[
   {cat:'fruit',n:'Cantaloupe 150g',e:'&#127816;',p:'150g',c:51,pr:1,cb:12,f:0,fi:1,su:12,as:0,sf:0,na:25,ch:0,po:427,ca:14,ir:0.3,vc:36,vd:0,va:170},
   {cat:'fruit',n:'Clementine 1 medium',e:'&#127818;',p:'1 medium 75g',c:35,pr:1,cb:9,f:0,fi:1,su:7,as:0,sf:0,na:1,ch:0,po:131,ca:22,ir:0.1,vc:36,vd:0,va:11},
   {cat:'fruit',n:'Coconut Flesh 50g',e:'&#129381;',p:'50g',c:177,pr:2,cb:8,f:17,fi:5,su:3,as:0,sf:15,na:10,ch:0,po:203,ca:7,ir:1.3,vc:2,vd:0,va:0},
-  {cat:'fruit',n:'Dragon Fruit 150g',e:'&#127829;',p:'150g',c:75,pr:2,cb:18,f:0,fi:4,su:8,as:0,sf:0,na:8,ch:0,po:272,ca:18,ir:0.2,vc:9,vd:0,va:0},
+  {cat:'fruit',n:'Dragon Fruit 150g',e:'&#128009;',p:'150g',c:75,pr:2,cb:18,f:0,fi:4,su:8,as:0,sf:0,na:8,ch:0,po:272,ca:18,ir:0.2,vc:9,vd:0,va:0},
   {cat:'fruit',n:'Grapefruit half',e:'&#127818;',p:'half 120g',c:52,pr:1,cb:13,f:0,fi:2,su:9,as:0,sf:0,na:0,ch:0,po:184,ca:28,ir:0.1,vc:44,vd:0,va:28},
   {cat:'fruit',n:'Guava 100g',e:'&#127823;',p:'100g',c:68,pr:3,cb:14,f:1,fi:5,su:9,as:0,sf:0,na:2,ch:0,po:417,ca:18,ir:0.3,vc:228,vd:0,va:31},
   {cat:'fruit',n:'Honeydew 150g',e:'&#127816;',p:'150g',c:54,pr:1,cb:14,f:0,fi:1,su:13,as:0,sf:0,na:27,ch:0,po:228,ca:9,ir:0.2,vc:18,vd:0,va:3},
   {cat:'fruit',n:'Lychee 100g',e:'&#127827;',p:'100g about 7',c:66,pr:1,cb:17,f:0,fi:1,su:15,as:0,sf:0,na:1,ch:0,po:171,ca:5,ir:0.3,vc:72,vd:0,va:0},
   {cat:'fruit',n:'Mandarin 1 medium',e:'&#127818;',p:'1 medium 88g',c:47,pr:1,cb:12,f:0,fi:2,su:9,as:0,sf:0,na:2,ch:0,po:160,ca:37,ir:0.3,vc:27,vd:0,va:14},
-  {cat:'fruit',n:'Nectarine medium',e:'&#127829;',p:'1 medium 142g',c:62,pr:2,cb:15,f:0,fi:2,su:11,as:0,sf:0,na:0,ch:0,po:285,ca:9,ir:0.4,vc:8,vd:0,va:24},
+  {cat:'fruit',n:'Nectarine medium',e:'&#127825;',p:'1 medium 142g',c:62,pr:2,cb:15,f:0,fi:2,su:11,as:0,sf:0,na:0,ch:0,po:285,ca:9,ir:0.4,vc:8,vd:0,va:24},
   {cat:'fruit',n:'Pomelo 200g',e:'&#127818;',p:'200g',c:72,pr:1,cb:18,f:0,fi:2,su:16,as:0,sf:0,na:2,ch:0,po:410,ca:12,ir:0.2,vc:116,vd:0,va:0},
   {cat:'fruit',n:'Starfruit 100g',e:'&#11088;',p:'100g',c:31,pr:1,cb:7,f:0,fi:3,su:4,as:0,sf:0,na:2,ch:0,po:133,ca:3,ir:0.1,vc:35,vd:0,va:3},
   {cat:'fruit',n:'Tangerine 1 medium',e:'&#127818;',p:'1 medium 88g',c:47,pr:1,cb:12,f:0,fi:2,su:9,as:0,sf:0,na:2,ch:0,po:160,ca:37,ir:0.3,vc:27,vd:0,va:14},
@@ -5123,7 +5128,7 @@ function launchApp(){
     {cat:'dintaifung',n:'Spicy Wontons DTF',e:'&#129375;',p:'6 wontons',c:280,pr:14,cb:28,f:12,fi:2,su:4,na:680},
     {cat:'dintaifung',n:'Cucumber Salad DTF',e:'&#129388;',p:'1 serving',c:80,pr:2,cb:10,f:4,fi:2,su:6,na:520},
     {cat:'dintaifung',n:'Braised Beef Noodle DTF',e:'&#127837;',p:'1 bowl',c:620,pr:32,cb:68,f:22,fi:4,su:4,na:1240},
-    {cat:'dintaifung',n:'Sesame Noodles DTF',e:'&#127837;',p:'1 serving',c:420,pr:12,cb:58,f:16,fi:3,su:8,na:680},
+    {cat:'dintaifung',n:'Sesame Noodles DTF',e:'&#129378;',p:'1 serving',c:420,pr:12,cb:58,f:16,fi:3,su:8,na:680},
     {cat:'burgerlounge',n:'Classic Burger BL',e:'&#127828;',p:'1 burger',c:560,pr:32,cb:38,f:30,fi:2,su:8,na:780},
     {cat:'burgerlounge',n:'Turkey Burger BL',e:'&#127828;',p:'1 burger',c:480,pr:36,cb:36,f:18,fi:2,su:6,na:720},
     {cat:'burgerlounge',n:'Veggie Lounge Burger',e:'&#127828;',p:'1 burger',c:440,pr:18,cb:48,f:18,fi:6,su:8,na:680},
@@ -6021,7 +6026,7 @@ function cfSearch(query) {
   }).slice(0,12);
   if(localResults.length>0){
     window._cfProducts=localResults.map(function(f){
-      return {name:f.n,brand:f.p||'Built-in',cals:f.c||0,protein:f.pr||0,carbs:f.cb||0,fat:f.f||0,fiber:f.fi||0,sodium:f.na||0};
+      return {name:f.n,brand:f.p||'Built-in',cals:f.c||0,protein:f.pr||0,carbs:f.cb||0,fat:f.f||0,fiber:f.fi||0,sodium:f.na||0,emoji:f.e||''};
     });
     sr.innerHTML=window._cfProducts.map(function(p,i){
       return '<div onclick="cfSelect('+i+')" style="padding:11px 12px;border-bottom:.5px solid var(--b1);cursor:pointer;display:flex;justify-content:space-between;align-items:center;touch-action:manipulation">'
@@ -6120,7 +6125,7 @@ function cfSelect(idx) {
   var ef=g('cf-fat'); if(ef) ef.value=fat;
   var efb=g('cf-fiber'); if(efb) efb.value=fiber;
   var es=g('cf-sodium'); if(es) es.value=sodium;
-  var eem=g('cf-emoji'); if(eem) eem.value='';
+  var eem=g('cf-emoji'); if(eem) eem.value=p.emoji?decodeEmoji(p.emoji):'';
   // Clear results
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
 }
