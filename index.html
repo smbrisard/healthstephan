@@ -3750,9 +3750,10 @@ function syncSleepToProfile(){
   // Get today and yesterday strings
   var _td2=today();
   var _yd2=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
-  // Filter to only valid recent entries (today or yesterday, >=3h)
+  // Filter to valid recent entries - allow up to 3 days back for timezone travel
+  var _d2ago=(function(){var d=new Date();d.setDate(d.getDate()-2);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   var _validEntries=SL.filter(function(s){
-    return (s.date===_td2||s.date===_yd2)&&(s.hours||0)>=3;
+    return (s.date===_td2||s.date===_yd2||s.date===_d2ago)&&(s.hours||0)>=3;
   });
   // Pick most recent date first; if same date, pick longest hours
   var latest=_validEntries.length
@@ -3764,7 +3765,7 @@ function syncSleepToProfile(){
   // No fallback - only show sleep from today or yesterday
   var td=_td2; var yd=_yd2;
   // Only show sleep if it's from today or last night (yesterday)
-  if(latest&&(latest.date===td||latest.date===yd)&&(latest.hours||0)>=3){
+  if(latest&&(latest.date===td||latest.date===yd||latest.date===_d2ago)&&(latest.hours||0)>=3){
     P.sleepLast=latest.hours;
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
