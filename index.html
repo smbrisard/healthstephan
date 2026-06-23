@@ -6554,71 +6554,84 @@ function setScanMeal(meal, btn) {
 }
 
 function analyzeFoodPhoto(b64, mime) {
-  toast('Starting analysis, b64 size: '+Math.round(b64.length/1024)+'KB',false,3000);
   var hour = new Date().getHours();
   var timeOfDay = hour<11?'morning (breakfast time)':hour<15?'midday (lunch time)':hour<20?'evening (dinner time)':'night (snack time)';
   var _ak='';
   try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
-  if(!_ak){ toast('NO API KEY FOUND'); return; }
-  if(!SYNC_URL){ toast('NO SYNC URL FOUND'); return; }
+  if(!_ak){
+    var sl2=g('scan-loading'); if(sl2) sl2.style.display='none';
+    var si2=g('scan-items');
+    if(si2) si2.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Add your Anthropic API key in Settings to use food scanning.</div>';
+    return;
+  }
+  if(!SYNC_URL){
+    var sl3=g('scan-loading'); if(sl3) sl3.style.display='none';
+    var si3=g('scan-items');
+    if(si3) si3.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Val Town sync URL required. Add it in Settings.</div>';
+    return;
+  }
   var _visionUrl=SYNC_URL.replace(/\/$/,'')+'/vision';
-  toast('Calling: '+_visionUrl,false,4000);
   fetch(_visionUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ imageBase64: b64, mimeType: mime, apiKey: _ak, timeOfDay: timeOfDay })
   })
-  .then(function(r){
-    toast('Val Town response status: '+r.status,false,4000);
-    return r.text();
-  })
-  .then(function(rawText) {
-    toast('Raw response (first 100): '+rawText.substring(0,100),false,5000);
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
     var sl = g('scan-loading'); if(sl) sl.style.display='none';
-    var data;
-    try{ data=JSON.parse(rawText); } catch(e){ 
-      var si=g('scan-items'); if(si) si.innerHTML='<div style="color:var(--red);padding:20px">JSON parse error: '+e.message+'<br>Raw: '+rawText.substring(0,200)+'</div>';
+    if(data.error){
+      var si=g('scan-items');
+      if(si) si.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Error: '+data.error+'</div>';
       return;
     }
-    if(data.error){var si=g('scan-items'); if(si) si.innerHTML='<div style="color:var(--red);padding:20px">API Error: '+data.error+'</div>'; return;}
-    var text = (data.result||'').replace(/```json|```/g,'').trim();
-    toast('Result text (first 100): '+text.substring(0,100),false,5000);
+    var text=(data.result||'').replace(/```json|```/g,'').trim();
+    // Sometimes Claude wraps in object instead of array
+    if(text.charAt(0)==='{') text='['+text+']';
     try {
-      var items = JSON.parse(text);
-      if(!Array.isArray(items)) items = [items];
-      _scanItems = items.map(function(it, i) {
+      var items=JSON.parse(text);
+      if(!Array.isArray(items)) items=[items];
+      _scanItems=items.map(function(it,i){
         return {
-          id: i, name: it.name||'Unknown item', emoji: it.emoji||'🍽',
-          portion: it.portion||'1 serving', category: it.category||'snacks',
-          mealType: it.mealType||_scanMealType,
-          cals: Math.round(it.cals||0), protein: parseFloat((it.protein||0).toFixed(1)),
-          carbs: parseFloat((it.carbs||0).toFixed(1)), fat: parseFloat((it.fat||0).toFixed(1)),
-          fiber: parseFloat((it.fiber||0).toFixed(1)), sugar: parseFloat((it.sugar||0).toFixed(1)),
-          satFat: parseFloat((it.satFat||0).toFixed(1)), sodium: Math.round(it.sodium||0),
-          cholesterol: Math.round(it.cholesterol||0), potassium: Math.round(it.potassium||0),
-          calcium: Math.round(it.calcium||0), iron: parseFloat((it.iron||0).toFixed(1)),
-          vitC: Math.round(it.vitC||0), vitD: parseFloat((it.vitD||0).toFixed(1)),
-          vitA: Math.round(it.vitA||0), _expanded: false
+          id:i, name:it.name||'Unknown item',
+          emoji:it.emoji||'&#127869;',
+          portion:it.portion||'1 serving',
+          category:it.category||'snacks',
+          mealType:it.mealType||_scanMealType,
+          cals:Math.round(it.cals||0),
+          protein:parseFloat((it.protein||0).toFixed(1)),
+          carbs:parseFloat((it.carbs||0).toFixed(1)),
+          fat:parseFloat((it.fat||0).toFixed(1)),
+          fiber:parseFloat((it.fiber||0).toFixed(1)),
+          sugar:parseFloat((it.sugar||0).toFixed(1)),
+          satFat:parseFloat((it.satFat||0).toFixed(1)),
+          sodium:Math.round(it.sodium||0),
+          cholesterol:Math.round(it.cholesterol||0),
+          potassium:Math.round(it.potassium||0),
+          calcium:Math.round(it.calcium||0),
+          iron:parseFloat((it.iron||0).toFixed(1)),
+          vitC:Math.round(it.vitC||0),
+          vitD:parseFloat((it.vitD||0).toFixed(1)),
+          vitA:Math.round(it.vitA||0),
+          _expanded:false
         };
       });
-      if(_scanItems.length && _scanItems[0].mealType) {
-        _scanMealType = _scanItems[0].mealType;
-        var tabs = document.querySelectorAll('#scan-meal-tabs .pill');
-        tabs.forEach(function(t){ t.classList.remove('on'); });
-        var mealMap = {'Breakfast':0,'Lunch':1,'Dinner':2,'Snack':3};
-        var mi = mealMap[_scanMealType]; if(tabs[mi]) tabs[mi].classList.add('on');
+      if(_scanItems.length&&_scanItems[0].mealType){
+        _scanMealType=_scanItems[0].mealType;
+        var tabs=document.querySelectorAll('#scan-meal-tabs .pill');
+        tabs.forEach(function(t){t.classList.remove('on');});
+        var mealMap={'Breakfast':0,'Lunch':1,'Dinner':2,'Snack':3};
+        var mi=mealMap[_scanMealType]; if(tabs[mi]) tabs[mi].classList.add('on');
       }
       renderScanItems();
     } catch(e) {
-      var si = g('scan-items');
-      if(si) si.innerHTML = '<div style="color:var(--red);padding:20px">Parse error: '+e.message+'<br>Text: '+text.substring(0,300)+'</div>';
+      var si=g('scan-items');
+      if(si) si.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Could not read response. Please re-scan.</div>';
     }
   })
-  .catch(function(e) {
-    var sl = g('scan-loading'); if(sl) sl.style.display='none';
-    var si = g('scan-items');
-    if(si) si.innerHTML = '<div style="color:var(--red);padding:20px">Fetch error: '+e.message+'</div>';
-    toast('Fetch error: '+e.message,false,5000);
+  .catch(function(e){
+    var sl=g('scan-loading'); if(sl) sl.style.display='none';
+    var si=g('scan-items');
+    if(si) si.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Connection error. Check your internet and try again.</div>';
   });
 }
 function renderScanItems() {
