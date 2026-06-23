@@ -6503,7 +6503,7 @@ function handleFoodPhoto(input) {
     // Resize image to max 800px and compress to reduce payload size
     var img = new Image();
     img.onload = function() {
-      var maxSize = 800;
+      var maxSize = 600; // Keep small for Val Town payload limit
       var w = img.width, h = img.height;
       if(w > maxSize || h > maxSize) {
         if(w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
@@ -6513,7 +6513,7 @@ function handleFoodPhoto(input) {
       canvas.width = w; canvas.height = h;
       var ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      var compressed = canvas.toDataURL('image/jpeg', 0.7);
+      var compressed = canvas.toDataURL('image/jpeg', 0.5); // 50% quality ~50-80KB
       var b64 = compressed.split(',')[1];
       openScanModal();
       analyzeFoodPhoto(b64, 'image/jpeg');
@@ -6554,90 +6554,73 @@ function setScanMeal(meal, btn) {
 }
 
 function analyzeFoodPhoto(b64, mime) {
+  toast('Starting analysis, b64 size: '+Math.round(b64.length/1024)+'KB',false,3000);
   var hour = new Date().getHours();
   var timeOfDay = hour<11?'morning (breakfast time)':hour<15?'midday (lunch time)':hour<20?'evening (dinner time)':'night (snack time)';
-
-  var prompt = 'Analyze this food/meal photo taken in the ' + timeOfDay + '. Identify ALL visible food items and estimate portions. Return ONLY a valid JSON array with no other text, markdown, or explanation. Each item must have these exact fields:\n' +
-    '{"name":"string","emoji":"single emoji character","portion":"string e.g. 200g or 1 cup","category":"one of: breakfast/meat/grains/veg/fruit/dairy/nuts/snacks/sauces/pizzapasta/desserts/bread/eggs","mealType":"one of: Breakfast/Lunch/Dinner/Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"sugar":number,"satFat":number,"sodium":number,"cholesterol":number,"potassium":number,"calcium":number,"iron":number,"vitC":number,"vitD":number,"vitA":number}\n' +
-    'Be specific with names. Estimate realistic portions. All numbers are per the estimated portion. Return ONLY the JSON array.';
-
   var _ak='';
   try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
-  if(!_ak){
-    var sl2=g('scan-loading'); if(sl2) sl2.style.display='none';
-    var si2=g('scan-items');
-    if(si2) si2.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Add your Anthropic API key in Settings (gear icon) to use food scanning.</div>';
-    return;
-  }
-  if(!SYNC_URL){
-    var sl3=g('scan-loading'); if(sl3) sl3.style.display='none';
-    var si3=g('scan-items');
-    if(si3) si3.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Val Town sync URL required. Add it in Settings.</div>';
-    return;
-  }
-  // Route through Val Town to avoid CORS
+  if(!_ak){ toast('NO API KEY FOUND'); return; }
+  if(!SYNC_URL){ toast('NO SYNC URL FOUND'); return; }
   var _visionUrl=SYNC_URL.replace(/\/$/,'')+'/vision';
+  toast('Calling: '+_visionUrl,false,4000);
   fetch(_visionUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ imageBase64: b64, mimeType: mime, apiKey: _ak, timeOfDay: timeOfDay })
   })
-  .then(function(r){ return r.json(); })
-  .then(function(data) {
-    if(data.error){throw new Error(data.error);}
+  .then(function(r){
+    toast('Val Town response status: '+r.status,false,4000);
+    return r.text();
+  })
+  .then(function(rawText) {
+    toast('Raw response (first 100): '+rawText.substring(0,100),false,5000);
     var sl = g('scan-loading'); if(sl) sl.style.display='none';
+    var data;
+    try{ data=JSON.parse(rawText); } catch(e){ 
+      var si=g('scan-items'); if(si) si.innerHTML='<div style="color:var(--red);padding:20px">JSON parse error: '+e.message+'<br>Raw: '+rawText.substring(0,200)+'</div>';
+      return;
+    }
+    if(data.error){var si=g('scan-items'); if(si) si.innerHTML='<div style="color:var(--red);padding:20px">API Error: '+data.error+'</div>'; return;}
     var text = (data.result||'').replace(/```json|```/g,'').trim();
+    toast('Result text (first 100): '+text.substring(0,100),false,5000);
     try {
       var items = JSON.parse(text);
       if(!Array.isArray(items)) items = [items];
       _scanItems = items.map(function(it, i) {
         return {
-          id: i,
-          name: it.name||'Unknown item',
-          emoji: it.emoji||'&#127869;',
-          portion: it.portion||'1 serving',
-          category: it.category||'snacks',
+          id: i, name: it.name||'Unknown item', emoji: it.emoji||'🍽',
+          portion: it.portion||'1 serving', category: it.category||'snacks',
           mealType: it.mealType||_scanMealType,
-          cals: Math.round(it.cals||0),
-          protein: parseFloat((it.protein||0).toFixed(1)),
-          carbs: parseFloat((it.carbs||0).toFixed(1)),
-          fat: parseFloat((it.fat||0).toFixed(1)),
-          fiber: parseFloat((it.fiber||0).toFixed(1)),
-          sugar: parseFloat((it.sugar||0).toFixed(1)),
-          satFat: parseFloat((it.satFat||0).toFixed(1)),
-          sodium: Math.round(it.sodium||0),
-          cholesterol: Math.round(it.cholesterol||0),
-          potassium: Math.round(it.potassium||0),
-          calcium: Math.round(it.calcium||0),
-          iron: parseFloat((it.iron||0).toFixed(1)),
-          vitC: Math.round(it.vitC||0),
-          vitD: parseFloat((it.vitD||0).toFixed(1)),
-          vitA: Math.round(it.vitA||0),
-          _expanded: false
+          cals: Math.round(it.cals||0), protein: parseFloat((it.protein||0).toFixed(1)),
+          carbs: parseFloat((it.carbs||0).toFixed(1)), fat: parseFloat((it.fat||0).toFixed(1)),
+          fiber: parseFloat((it.fiber||0).toFixed(1)), sugar: parseFloat((it.sugar||0).toFixed(1)),
+          satFat: parseFloat((it.satFat||0).toFixed(1)), sodium: Math.round(it.sodium||0),
+          cholesterol: Math.round(it.cholesterol||0), potassium: Math.round(it.potassium||0),
+          calcium: Math.round(it.calcium||0), iron: parseFloat((it.iron||0).toFixed(1)),
+          vitC: Math.round(it.vitC||0), vitD: parseFloat((it.vitD||0).toFixed(1)),
+          vitA: Math.round(it.vitA||0), _expanded: false
         };
       });
-      // Set meal type from first item's suggestion
       if(_scanItems.length && _scanItems[0].mealType) {
         _scanMealType = _scanItems[0].mealType;
         var tabs = document.querySelectorAll('#scan-meal-tabs .pill');
         tabs.forEach(function(t){ t.classList.remove('on'); });
         var mealMap = {'Breakfast':0,'Lunch':1,'Dinner':2,'Snack':3};
-        var mi = mealMap[_scanMealType];
-        if(tabs[mi]) tabs[mi].classList.add('on');
+        var mi = mealMap[_scanMealType]; if(tabs[mi]) tabs[mi].classList.add('on');
       }
       renderScanItems();
     } catch(e) {
       var si = g('scan-items');
-      if(si) si.innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Could not parse response. Please try re-scanning.</div>';
+      if(si) si.innerHTML = '<div style="color:var(--red);padding:20px">Parse error: '+e.message+'<br>Text: '+text.substring(0,300)+'</div>';
     }
   })
   .catch(function(e) {
     var sl = g('scan-loading'); if(sl) sl.style.display='none';
     var si = g('scan-items');
-    if(si) si.innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Error: '+e.message+'</div>';
+    if(si) si.innerHTML = '<div style="color:var(--red);padding:20px">Fetch error: '+e.message+'</div>';
+    toast('Fetch error: '+e.message,false,5000);
   });
 }
-
 function renderScanItems() {
   var si = g('scan-items'); if(!si) return;
   if(!_scanItems.length) {
