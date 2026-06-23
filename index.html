@@ -967,6 +967,8 @@ body { height: 100dvh; }
     <div class="callout ci" style="margin-bottom:14px"><span>&#128162;</span><span>Paste your Val Town URL to auto-sync Apple Health data.</span></div>
     <div class="fw"><div class="flbl">Val Town URL</div>
       <input class="fld" type="url" id="sync-url-input" placeholder="https://yourname--abc.web.val.run"></div>
+    <div class="fw" style="margin-top:10px"><div class="flbl">Anthropic API Key <span style="font-size:11px;color:var(--dim)">(for food photo scan)</span></div>
+      <input class="fld" type="password" id="anthropic-key-input" placeholder="sk-ant-..."></div>
     <button class="btn btn-r" onclick="saveSyncSettings()" style="margin-bottom:9px">Save &amp; Sync Now</button>
     <button onclick="fetchSync();closeM('sync-m');" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--grn);font-size:15px;font-weight:600;background:rgba(0,212,170,.06);margin-bottom:9px;touch-action:manipulation">Sync Now</button>
     <button onclick="closeM('sync-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
@@ -5928,10 +5930,15 @@ function fetchSync(){
 function openSyncSettings(){
   initSync(); // Ensure URL is loaded
   var inp=g('sync-url-input');if(inp)inp.value=SYNC_URL||'';
+  var akInp=g('anthropic-key-input');
+  if(akInp){try{akInp.value=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}}
   openM('sync-m');
 }
 function saveSyncSettings(){
   var inp=g('sync-url-input');
+  // Save API key if provided
+  var akInp=g('anthropic-key-input');
+  if(akInp&&akInp.value.trim()){try{localStorage.setItem('hs_anthropic_key',akInp.value.trim());}catch(e){}}
   if(inp&&inp.value.trim()){setSyncURL(inp.value.trim());closeM('sync-m');fetchSync();toast('Sync URL saved');}
   else{SYNC_URL='';try{localStorage.removeItem('hs_sync_url');}catch(e){}closeM('sync-m');toast('Sync disabled');}
 }
@@ -6539,9 +6546,17 @@ function analyzeFoodPhoto(b64, mime) {
     '{"name":"string","emoji":"single emoji character","portion":"string e.g. 200g or 1 cup","category":"one of: breakfast/meat/grains/veg/fruit/dairy/nuts/snacks/sauces/pizzapasta/desserts/bread/eggs","mealType":"one of: Breakfast/Lunch/Dinner/Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"sugar":number,"satFat":number,"sodium":number,"cholesterol":number,"potassium":number,"calcium":number,"iron":number,"vitC":number,"vitD":number,"vitA":number}\n' +
     'Be specific with names. Estimate realistic portions. All numbers are per the estimated portion. Return ONLY the JSON array.';
 
+  var _ak='';
+  try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
+  if(!_ak){
+    var sl2=g('scan-loading'); if(sl2) sl2.style.display='none';
+    var si2=g('scan-items');
+    if(si2) si2.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Add your Anthropic API key in Settings (gear icon) to use food scanning.</div>';
+    return;
+  }
   fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': _ak, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
