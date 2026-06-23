@@ -6500,10 +6500,25 @@ function handleFoodPhoto(input) {
   var file = input.files[0];
   var reader = new FileReader();
   reader.onload = function(e) {
-    var b64 = e.target.result.split(',')[1];
-    var mime = file.type || 'image/jpeg';
-    openScanModal();
-    analyzeFoodPhoto(b64, mime);
+    // Resize image to max 800px and compress to reduce payload size
+    var img = new Image();
+    img.onload = function() {
+      var maxSize = 800;
+      var w = img.width, h = img.height;
+      if(w > maxSize || h > maxSize) {
+        if(w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var compressed = canvas.toDataURL('image/jpeg', 0.7);
+      var b64 = compressed.split(',')[1];
+      openScanModal();
+      analyzeFoodPhoto(b64, 'image/jpeg');
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
   input.value = '';
