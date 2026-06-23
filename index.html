@@ -5176,9 +5176,13 @@ function launchApp(){
       P.burned=0; P.totalBurned=0; P.restingEnergy=null;
       save();
     }
-    // Also clear stale exercise mins (>0 before any activity today)
-    if(_hourNow<10&&_todaySteps<500&&(P.exerciseMins||0)>60){
+    // Clear stale exercise mins: early morning + very few steps = yesterday's data
+    if(_hourNow<9&&_todaySteps<200&&(P.exerciseMins||0)>30){
       P.exerciseMins=0; save();
+    }
+    // Also clear stale stand hours
+    if(_hourNow<9&&_todaySteps<200&&(P.standHours||0)>8){
+      P.standHours=0; save();
     }
     // Day change detection at launch - before fetchSync runs
     if(P.lastSyncDate&&P.lastSyncDate!==today()){
