@@ -996,8 +996,9 @@ body { height: 100dvh; }
     <!-- Search results -->
     <div id="cf-results" style="max-height:180px;overflow-y:auto;margin-bottom:4px"></div>
 
-    <!-- Barcode entry button -->
-    <button onclick="cfBarcode()" style="width:100%;padding:12px;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.3);border-radius:12px;color:var(--blu);font-size:14px;font-weight:700;margin-bottom:10px;touch-action:manipulation">&#128290; Enter Barcode</button>
+    <!-- Camera scan button -->
+    <button onclick="openFoodCamera()" style="width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;touch-action:manipulation">&#128247; Scan Food with Camera</button>
+    <input type="file" id="food-cam-input" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
 
     <!-- Divider -->
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0">
@@ -6250,6 +6251,24 @@ function cfSelect(idx) {
   var eem=g('cf-emoji'); if(eem) eem.value=p.emoji?decodeEmoji(p.emoji):'';
   // Clear results
   var sr=g('cf-results'); if(sr) sr.innerHTML='';
+  // If replacing/adding a scan item, update scan review instead
+  if(window._scanReplacePending){
+    window._scanReplacePending=false;
+    var _em=p.emoji?decodeEmoji(p.emoji):getFoodEmoji(name);
+    var _sp={name:name,emoji:_em,portion:p.brand||'1 serving',
+      category:'custom',mealType:_scanMealType,
+      cals:cals,protein:prot,carbs:carbs,fat:fat,
+      fiber:fiber,sugar:0,satFat:0,sodium:sodium,
+      cholesterol:0,potassium:0,calcium:0,iron:0,vitC:0,vitD:0,vitA:0,
+      id:_scanReplaceIdx>=0?_scanReplaceIdx:_scanItems.length,_expanded:false};
+    if(_scanReplaceIdx>=0&&_scanReplaceIdx<_scanItems.length) _scanItems[_scanReplaceIdx]=_sp;
+    else _scanItems.push(_sp);
+    _scanReplaceIdx=-1;
+    closeM('custom-food-m');
+    openM('scan-m');
+    renderScanItems();
+    return;
+  }
 }
 
 // Custom user food database stored separately
@@ -6456,6 +6475,297 @@ function cfAdd() {
   save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome(); rNutrition();
   toast(name+' \u2713 added to log!');
 }
+
+// ═══════════════════════════════════════════════════════
+// FOOD CAMERA SCAN (replaces barcode scanner)
+// Uses Claude vision API to identify foods and macros
+// ═══════════════════════════════════════════════════════
+var _scanItems = [];
+var _scanMealType = 'Lunch';
+
+function openFoodCamera() {
+  var inp = g('food-cam-input');
+  if(inp) inp.click();
+}
+
+function handleFoodPhoto(input) {
+  if(!input.files||!input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result.split(',')[1];
+    var mime = file.type || 'image/jpeg';
+    openScanModal();
+    analyzeFoodPhoto(b64, mime);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function openScanModal() {
+  _scanItems = [];
+  // Set meal type based on time of day
+  var h = new Date().getHours();
+  _scanMealType = h<11?'Breakfast':h<15?'Lunch':h<20?'Dinner':'Snack';
+  // Update meal tab UI
+  var tabs = document.querySelectorAll('#scan-meal-tabs .pill');
+  tabs.forEach(function(t){ t.classList.remove('on'); });
+  var mealMap = {'Breakfast':0,'Lunch':1,'Dinner':2,'Snack':3};
+  if(tabs[mealMap[_scanMealType]]) tabs[mealMap[_scanMealType]].classList.add('on');
+  // Set date
+  var sd = g('scan-date'); if(sd) sd.value = today();
+  // Show loading
+  var sl = g('scan-loading'); if(sl) sl.style.display='block';
+  var si = g('scan-items'); if(si) si.innerHTML='';
+  var st = g('scan-totals'); if(st) st.innerHTML='';
+  openM('scan-m');
+}
+
+function closeScanModal() {
+  closeM('scan-m');
+}
+
+function setScanMeal(meal, btn) {
+  _scanMealType = meal;
+  document.querySelectorAll('#scan-meal-tabs .pill').forEach(function(t){ t.classList.remove('on'); });
+  if(btn) btn.classList.add('on');
+}
+
+function analyzeFoodPhoto(b64, mime) {
+  var hour = new Date().getHours();
+  var timeOfDay = hour<11?'morning (breakfast time)':hour<15?'midday (lunch time)':hour<20?'evening (dinner time)':'night (snack time)';
+
+  var prompt = 'Analyze this food/meal photo taken in the ' + timeOfDay + '. Identify ALL visible food items and estimate portions. Return ONLY a valid JSON array with no other text, markdown, or explanation. Each item must have these exact fields:\n' +
+    '{"name":"string","emoji":"single emoji character","portion":"string e.g. 200g or 1 cup","category":"one of: breakfast/meat/grains/veg/fruit/dairy/nuts/snacks/sauces/pizzapasta/desserts/bread/eggs","mealType":"one of: Breakfast/Lunch/Dinner/Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":number,"sugar":number,"satFat":number,"sodium":number,"cholesterol":number,"potassium":number,"calcium":number,"iron":number,"vitC":number,"vitD":number,"vitA":number}\n' +
+    'Be specific with names. Estimate realistic portions. All numbers are per the estimated portion. Return ONLY the JSON array.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 2000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var sl = g('scan-loading'); if(sl) sl.style.display='none';
+    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    // Strip any markdown fences
+    text = text.replace(/```json|```/g,'').trim();
+    try {
+      var items = JSON.parse(text);
+      if(!Array.isArray(items)) items = [items];
+      _scanItems = items.map(function(it, i) {
+        return {
+          id: i,
+          name: it.name||'Unknown item',
+          emoji: it.emoji||'&#127869;',
+          portion: it.portion||'1 serving',
+          category: it.category||'snacks',
+          mealType: it.mealType||_scanMealType,
+          cals: Math.round(it.cals||0),
+          protein: parseFloat((it.protein||0).toFixed(1)),
+          carbs: parseFloat((it.carbs||0).toFixed(1)),
+          fat: parseFloat((it.fat||0).toFixed(1)),
+          fiber: parseFloat((it.fiber||0).toFixed(1)),
+          sugar: parseFloat((it.sugar||0).toFixed(1)),
+          satFat: parseFloat((it.satFat||0).toFixed(1)),
+          sodium: Math.round(it.sodium||0),
+          cholesterol: Math.round(it.cholesterol||0),
+          potassium: Math.round(it.potassium||0),
+          calcium: Math.round(it.calcium||0),
+          iron: parseFloat((it.iron||0).toFixed(1)),
+          vitC: Math.round(it.vitC||0),
+          vitD: parseFloat((it.vitD||0).toFixed(1)),
+          vitA: Math.round(it.vitA||0),
+          _expanded: false
+        };
+      });
+      // Set meal type from first item's suggestion
+      if(_scanItems.length && _scanItems[0].mealType) {
+        _scanMealType = _scanItems[0].mealType;
+        var tabs = document.querySelectorAll('#scan-meal-tabs .pill');
+        tabs.forEach(function(t){ t.classList.remove('on'); });
+        var mealMap = {'Breakfast':0,'Lunch':1,'Dinner':2,'Snack':3};
+        var mi = mealMap[_scanMealType];
+        if(tabs[mi]) tabs[mi].classList.add('on');
+      }
+      renderScanItems();
+    } catch(e) {
+      var si = g('scan-items');
+      if(si) si.innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Could not parse response. Please try re-scanning.</div>';
+    }
+  })
+  .catch(function(e) {
+    var sl = g('scan-loading'); if(sl) sl.style.display='none';
+    var si = g('scan-items');
+    if(si) si.innerHTML = '<div style="color:var(--red);padding:20px;text-align:center">Error: '+e.message+'</div>';
+  });
+}
+
+function renderScanItems() {
+  var si = g('scan-items'); if(!si) return;
+  if(!_scanItems.length) {
+    si.innerHTML = '<div style="color:var(--dim);padding:20px;text-align:center">No items identified. Try re-scanning.</div>';
+    renderScanTotals(); return;
+  }
+  si.innerHTML = _scanItems.map(function(it, i) {
+    var micros = it._expanded ?
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;padding-top:8px;border-top:.5px solid var(--b1)">' +
+        '<div style="font-size:11px;color:var(--dim)">Fiber: <span style="color:var(--txt)">' + it.fiber + 'g</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Sugar: <span style="color:var(--txt)">' + it.sugar + 'g</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Sat Fat: <span style="color:var(--txt)">' + it.satFat + 'g</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Sodium: <span style="color:var(--txt)">' + it.sodium + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Cholesterol: <span style="color:var(--txt)">' + it.cholesterol + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Potassium: <span style="color:var(--txt)">' + it.potassium + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Calcium: <span style="color:var(--txt)">' + it.calcium + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Iron: <span style="color:var(--txt)">' + it.iron + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Vit C: <span style="color:var(--txt)">' + it.vitC + 'mg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Vit D: <span style="color:var(--txt)">' + it.vitD + 'mcg</span></div>' +
+        '<div style="font-size:11px;color:var(--dim)">Vit A: <span style="color:var(--txt)">' + it.vitA + 'mcg</span></div>' +
+      '</div>' : '';
+    return '<div style="background:var(--s2);border-radius:14px;padding:12px;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:flex-start;gap:10px">' +
+        '<div style="font-size:28px;flex-shrink:0">' + it.emoji + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-weight:700;font-size:14px;margin-bottom:2px">' + it.name + '</div>' +
+          '<div style="font-size:12px;color:var(--dim);margin-bottom:6px">' + it.portion + '</div>' +
+          '<div style="display:flex;gap:10px">' +
+            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--pnk)">' + it.cals + '</div><div style="font-size:9px;color:var(--dim)">kcal</div></div>' +
+            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--grn)">' + it.protein + 'g</div><div style="font-size:9px;color:var(--dim)">protein</div></div>' +
+            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--amb)">' + it.carbs + 'g</div><div style="font-size:9px;color:var(--dim)">carbs</div></div>' +
+            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--pur)">' + it.fat + 'g</div><div style="font-size:9px;color:var(--dim)">fat</div></div>' +
+          '</div>' +
+          micros +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
+          '<button onclick="scanToggleMicros(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:var(--dim);font-size:11px;cursor:pointer;touch-action:manipulation" title="Toggle micros">' + (it._expanded?'▲':'▼') + '</button>' +
+          '<button onclick="scanReplaceItem(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.15);border:none;color:var(--blu);font-size:13px;cursor:pointer;touch-action:manipulation" title="Replace item">&#128260;</button>' +
+          '<button onclick="scanRemoveItem(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,59,92,.15);border:none;color:var(--red);font-size:14px;cursor:pointer;touch-action:manipulation">&#215;</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  renderScanTotals();
+}
+
+function renderScanTotals() {
+  var st = g('scan-totals'); if(!st) return;
+  if(!_scanItems.length) { st.innerHTML=''; return; }
+  var totals = _scanItems.reduce(function(acc, it) {
+    acc.cals += it.cals; acc.protein += it.protein;
+    acc.carbs += it.carbs; acc.fat += it.fat;
+    return acc;
+  }, {cals:0,protein:0,carbs:0,fat:0});
+  st.innerHTML =
+    '<div style="font-size:11px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">' + _scanItems.length + ' item' + (_scanItems.length!==1?'s':'') + ' total</div>' +
+    '<div style="display:flex;gap:12px;justify-content:space-around">' +
+      '<div style="text-align:center"><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--pnk)">' + Math.round(totals.cals) + '</div><div style="font-size:10px;color:var(--dim)">kcal</div></div>' +
+      '<div style="text-align:center"><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--grn)">' + totals.protein.toFixed(1) + 'g</div><div style="font-size:10px;color:var(--dim)">protein</div></div>' +
+      '<div style="text-align:center"><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--amb)">' + totals.carbs.toFixed(1) + 'g</div><div style="font-size:10px;color:var(--dim)">carbs</div></div>' +
+      '<div style="text-align:center"><div style="font-family:var(--mn);font-size:22px;font-weight:800;color:var(--pur)">' + totals.fat.toFixed(1) + 'g</div><div style="font-size:10px;color:var(--dim)">fat</div></div>' +
+    '</div>';
+}
+
+function scanToggleMicros(i) {
+  if(_scanItems[i]) { _scanItems[i]._expanded = !_scanItems[i]._expanded; renderScanItems(); }
+}
+
+function scanRemoveItem(i) {
+  _scanItems.splice(i, 1);
+  // Re-index IDs
+  _scanItems.forEach(function(it, idx){ it.id = idx; });
+  renderScanItems();
+  toast('Item removed');
+}
+
+function scanReplaceItem(i) {
+  // Open food search modal, on selection replace item at index i
+  _scanReplaceIdx = i;
+  // Use existing custom food search
+  var cf = g('cf-name'); if(cf) { cf.value=''; cf.focus(); }
+  closeM('scan-m');
+  openM('custom-food-m');
+  toast('Search for the correct item, then tap to select', false, 3000);
+  // Override cfSelect to replace scan item
+  window._scanReplacePending = true;
+}
+
+var _scanReplaceIdx = -1;
+
+function scanAddManual() {
+  _scanReplaceIdx = -1; // -1 means add new
+  window._scanReplacePending = true;
+  closeM('scan-m');
+  openM('custom-food-m');
+  toast('Search for item to add to this meal', false, 3000);
+}
+
+function logScanItems() {
+  if(!_scanItems.length) { toast('No items to log'); return; }
+  var sd = g('scan-date');
+  var logDate = sd&&sd.value ? sd.value : today();
+  var newCustom = [];
+  _scanItems.forEach(function(it) {
+    // Log to food log
+    ML.push({
+      id: Date.now() + Math.random(),
+      date: logDate,
+      name: it.name,
+      emoji: it.emoji,
+      type: (it.mealType||_scanMealType).toLowerCase(),
+      cals: it.cals,
+      protein: it.protein,
+      carbs: it.carbs,
+      fat: it.fat,
+      fiber: it.fiber||0,
+      sugar: it.sugar||0,
+      satFat: it.satFat||0,
+      sodium: it.sodium||0,
+      cholesterol: it.cholesterol||0,
+      potassium: it.potassium||0,
+      calcium: it.calcium||0,
+      iron: it.iron||0,
+      vitC: it.vitC||0,
+      vitD: it.vitD||0,
+      vitA: it.vitA||0,
+      addedSugar: 0
+    });
+    // Save new items to custom foods database
+    var existing = FOODS.find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
+    var existingCustom = loadMyFoods().find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
+    if(!existing && !existingCustom) {
+      newCustom.push(it);
+      var mf = loadMyFoods();
+      mf.push({
+        n: it.name, e: it.emoji, c: it.cals, pr: it.protein,
+        cb: it.carbs, f: it.fat, fi: it.fiber||0, na: it.sodium||0,
+        p: it.portion, cat: it.category||'snacks'
+      });
+      mf.sort(function(a,b){ return a.n.localeCompare(b.n); });
+      saveMyFoods(mf);
+    }
+  });
+  // Set mealTab to match
+  mealTab = _scanMealType;
+  save();
+  closeM('scan-m');
+  rFood(); rHome(); rNutrition();
+  var msg = _scanItems.length + ' item' + (_scanItems.length!==1?'s':'') + ' logged to ' + _scanMealType;
+  if(newCustom.length) msg += ' · ' + newCustom.length + ' new item' + (newCustom.length!==1?'s':'') + ' saved to database';
+  toast(msg + ' ✓');
+}
+// ═══════════════════════════════════════════════════════
+// END FOOD CAMERA SCAN
+// ═══════════════════════════════════════════════════════
 
 // Barcode scanning via camera
 var _bcStream=null;
@@ -6754,5 +7064,40 @@ window.addEventListener('load', launch);</script>
     <button onclick="closeCocktailBuilder()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;touch-action:manipulation">Cancel</button>
   </div>
 </div>
+
+<div class="modal" id="scan-m"><div class="mbg" onclick="closeScanModal()"></div>
+<div class="msheet" style="max-height:92vh;overflow-y:auto">
+<div class="mhandle"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+  <div style="font-size:18px;font-weight:800">&#128247; Scan Results</div>
+  <button onclick="openFoodCamera()" style="padding:6px 12px;background:rgba(0,212,170,.15);border:.5px solid var(--grn);border-radius:20px;color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">&#128256; Re-scan</button>
+</div>
+<!-- Meal type selector -->
+<div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto" id="scan-meal-tabs">
+  <div class="pill on" onclick="setScanMeal('Breakfast',this)">&#9728; Breakfast</div>
+  <div class="pill" onclick="setScanMeal('Lunch',this)">&#127803; Lunch</div>
+  <div class="pill" onclick="setScanMeal('Dinner',this)">&#127762; Dinner</div>
+  <div class="pill" onclick="setScanMeal('Snack',this)">&#127822; Snack</div>
+</div>
+<!-- Loading state -->
+<div id="scan-loading" style="display:none;text-align:center;padding:40px">
+  <div style="font-size:36px;margin-bottom:12px">&#129302;</div>
+  <div style="color:var(--grn);font-weight:700">Analyzing your meal...</div>
+  <div style="color:var(--dim);font-size:12px;margin-top:6px">Claude is identifying foods and calculating macros</div>
+</div>
+<!-- Results list -->
+<div id="scan-items"></div>
+<!-- Add item manually -->
+<button onclick="scanAddManual()" style="width:100%;padding:10px;background:rgba(255,255,255,.06);border:.5px solid var(--b1);border-radius:12px;color:var(--dim);font-size:13px;margin-top:4px;margin-bottom:14px;touch-action:manipulation">&#43; Add missed item</button>
+<!-- Totals -->
+<div id="scan-totals" style="background:var(--s2);border-radius:12px;padding:12px;margin-bottom:14px"></div>
+<!-- Date selector -->
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+  <div style="font-size:12px;color:var(--dim);flex-shrink:0">Date:</div>
+  <input type="date" id="scan-date" class="fld" style="flex:1;margin-bottom:0">
+</div>
+<!-- Log button -->
+<button onclick="logScanItems()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--grn),#00aa88);border-radius:14px;color:#000;font-size:16px;font-weight:800;touch-action:manipulation">&#10003; Log All Items</button>
+</div></div>
 </body>
 </html>
