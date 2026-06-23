@@ -6496,19 +6496,15 @@ function openFoodCamera() {
 }
 
 function handleFoodPhoto(input) {
-  toast('Photo received, processing...');
-  if(!input.files||!input.files[0]){toast('No file selected');return;}
+  if(!input.files||!input.files[0]) return;
   var file = input.files[0];
-  toast('File: '+file.name+' '+Math.round(file.size/1024)+'KB');
   var reader = new FileReader();
   reader.onload = function(e) {
     var b64 = e.target.result.split(',')[1];
     var mime = file.type || 'image/jpeg';
-    toast('Opening scan modal...');
     openScanModal();
     analyzeFoodPhoto(b64, mime);
   };
-  reader.onerror = function(e){toast('FileReader error: '+e);};
   reader.readAsDataURL(file);
   input.value = '';
 }
@@ -6558,32 +6554,24 @@ function analyzeFoodPhoto(b64, mime) {
     if(si2) si2.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Add your Anthropic API key in Settings (gear icon) to use food scanning.</div>';
     return;
   }
-  toast('Calling Claude API with key: '+_ak.substring(0,12)+'...',false,3000);
-  fetch('https://api.anthropic.com/v1/messages', {
+  if(!SYNC_URL){
+    var sl3=g('scan-loading'); if(sl3) sl3.style.display='none';
+    var si3=g('scan-items');
+    if(si3) si3.innerHTML='<div style="color:var(--amb);padding:20px;text-align:center">&#128273; Val Town sync URL required. Add it in Settings.</div>';
+    return;
+  }
+  // Route through Val Town to avoid CORS
+  var _visionUrl=SYNC_URL.replace(/\/$/,'')+'/vision';
+  fetch(_visionUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': _ak, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-calls': 'true' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
-          { type: 'text', text: prompt }
-        ]
-      }]
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageBase64: b64, mimeType: mime, apiKey: _ak, timeOfDay: timeOfDay })
   })
-  .then(function(r){
-    toast('API response status: '+r.status,false,3000);
-    return r.json();
-  })
+  .then(function(r){ return r.json(); })
   .then(function(data) {
-    toast('API data type: '+typeof data+' keys: '+Object.keys(data).join(','),false,4000);
+    if(data.error){throw new Error(data.error);}
     var sl = g('scan-loading'); if(sl) sl.style.display='none';
-    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
-    // Strip any markdown fences
-    text = text.replace(/```json|```/g,'').trim();
+    var text = (data.result||'').replace(/```json|```/g,'').trim();
     try {
       var items = JSON.parse(text);
       if(!Array.isArray(items)) items = [items];
