@@ -6540,7 +6540,10 @@ function openScanModal() {
   var sl = g('scan-loading'); if(sl) sl.style.display='block';
   var si = g('scan-items'); if(si) si.innerHTML='';
   var st = g('scan-totals'); if(st) st.innerHTML='';
-  openM('scan-m');
+  // Close any open modals first
+  document.querySelectorAll('.modal.on').forEach(function(m){m.classList.remove('on');});
+  document.body.style.overflow='hidden';
+  var scanEl=g('scan-m'); if(scanEl) scanEl.classList.add('on');
 }
 
 function closeScanModal() {
