@@ -998,8 +998,8 @@ body { height: 100dvh; }
     <!-- Search results -->
     <div id="cf-results" style="max-height:180px;overflow-y:auto;margin-bottom:4px"></div>
 
-    <!-- Camera scan button -->
-    <button onclick="openFoodCamera()" style="width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;touch-action:manipulation">&#128247; Scan Food with Camera</button>
+    <!-- Camera scan button - label wraps input for iOS compatibility -->
+    <label for="food-cam-input" style="display:block;width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;text-align:center;cursor:pointer;box-sizing:border-box">&#128247; Scan Food with Camera</label>
     <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
 
     <!-- Divider -->
@@ -6496,19 +6496,15 @@ function openFoodCamera() {
 }
 
 function handleFoodPhoto(input) {
-  alert('handleFoodPhoto called, files: '+(input.files?input.files.length:0));
   if(!input.files||!input.files[0]) return;
   var file = input.files[0];
-  alert('File selected: '+file.name+' type:'+file.type);
   var reader = new FileReader();
   reader.onload = function(e) {
     var b64 = e.target.result.split(',')[1];
     var mime = file.type || 'image/jpeg';
-    alert('b64 length: '+b64.length+' mime: '+mime);
     openScanModal();
     analyzeFoodPhoto(b64, mime);
   };
-  reader.onerror = function(e){alert('FileReader error: '+JSON.stringify(e));};
   reader.readAsDataURL(file);
   input.value = '';
 }
@@ -6543,7 +6539,6 @@ function setScanMeal(meal, btn) {
 }
 
 function analyzeFoodPhoto(b64, mime) {
-  alert('analyzeFoodPhoto called, SYNC_URL: '+(SYNC_URL||'EMPTY')+' ak exists: '+(!!localStorage.getItem('hs_anthropic_key')));
   var hour = new Date().getHours();
   var timeOfDay = hour<11?'morning (breakfast time)':hour<15?'midday (lunch time)':hour<20?'evening (dinner time)':'night (snack time)';
 
