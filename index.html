@@ -1004,7 +1004,6 @@ body { height: 100dvh; }
     <label for="food-cam-input" style="display:block;width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;text-align:center;cursor:pointer;box-sizing:border-box">&#128247; Scan Food with Camera</label>
     <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
     <div id="cf-scan-totals" style="display:none;margin-bottom:8px"></div>
-    <button id="cf-scan-log-btn" onclick="logScanItems()" style="display:none;width:100%;padding:12px;background:linear-gradient(135deg,var(--grn),#00aa88);border-radius:12px;color:#000;font-size:14px;font-weight:800;margin-bottom:8px;touch-action:manipulation">&#10003; Log All Items</button>
     <button id="cf-scan-back-btn" onclick="resetScanView()" style="display:none;width:100%;padding:8px;background:rgba(255,255,255,.06);border:.5px solid var(--b1);border-radius:12px;color:var(--dim);font-size:12px;margin-bottom:8px;touch-action:manipulation">&#8592; Back to Search</button>
 
     <!-- Divider -->
@@ -6656,51 +6655,59 @@ function analyzeFoodPhoto(b64, mime) {
   });
 }
 function renderScanItems() {
-  var si = g('cf-scan-results'); if(!si) return;
-  if(!_scanItems.length) {
-    si.innerHTML = '<div style="color:var(--dim);padding:20px;text-align:center">No items identified. Try re-scanning.</div>';
+  var si=g('cf-scan-results'); if(!si) return;
+  if(!_scanItems.length){
+    si.innerHTML='<div style="color:var(--dim);padding:20px;text-align:center">No items identified.</div>';
     renderScanTotals(); return;
   }
-  si.innerHTML = _scanItems.map(function(it, i) {
-    var micros = it._expanded ?
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px;padding-top:8px;border-top:.5px solid var(--b1)">' +
-        '<div style="font-size:11px;color:var(--dim)">Fiber: <span style="color:var(--txt)">' + it.fiber + 'g</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Sugar: <span style="color:var(--txt)">' + it.sugar + 'g</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Sat Fat: <span style="color:var(--txt)">' + it.satFat + 'g</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Sodium: <span style="color:var(--txt)">' + it.sodium + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Cholesterol: <span style="color:var(--txt)">' + it.cholesterol + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Potassium: <span style="color:var(--txt)">' + it.potassium + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Calcium: <span style="color:var(--txt)">' + it.calcium + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Iron: <span style="color:var(--txt)">' + it.iron + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Vit C: <span style="color:var(--txt)">' + it.vitC + 'mg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Vit D: <span style="color:var(--txt)">' + it.vitD + 'mcg</span></div>' +
-        '<div style="font-size:11px;color:var(--dim)">Vit A: <span style="color:var(--txt)">' + it.vitA + 'mcg</span></div>' +
-      '</div>' : '';
-    return '<div style="background:var(--s2);border-radius:14px;padding:12px;margin-bottom:10px">' +
-      '<div style="display:flex;align-items:flex-start;gap:10px">' +
-        '<div style="font-size:28px;flex-shrink:0">' + it.emoji + '</div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="font-weight:700;font-size:14px;margin-bottom:2px">' + it.name + '</div>' +
-          '<div style="font-size:12px;color:var(--dim);margin-bottom:6px">' + it.portion + '</div>' +
-          '<div style="display:flex;gap:10px">' +
-            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--pnk)">' + it.cals + '</div><div style="font-size:9px;color:var(--dim)">kcal</div></div>' +
-            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--grn)">' + it.protein + 'g</div><div style="font-size:9px;color:var(--dim)">protein</div></div>' +
-            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--amb)">' + it.carbs + 'g</div><div style="font-size:9px;color:var(--dim)">carbs</div></div>' +
-            '<div style="text-align:center"><div style="font-family:var(--mn);font-size:15px;font-weight:700;color:var(--pur)">' + it.fat + 'g</div><div style="font-size:9px;color:var(--dim)">fat</div></div>' +
-          '</div>' +
-          micros +
-        '</div>' +
-        '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
-          '<button onclick="scanToggleMicros(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:var(--dim);font-size:11px;cursor:pointer;touch-action:manipulation" title="Toggle micros">' + (it._expanded?'▲':'▼') + '</button>' +
-          '<button onclick="scanReplaceItem(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.15);border:none;color:var(--blu);font-size:13px;cursor:pointer;touch-action:manipulation" title="Replace item">&#128260;</button>' +
-          '<button onclick="scanRemoveItem(' + i + ')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,59,92,.15);border:none;color:var(--red);font-size:14px;cursor:pointer;touch-action:manipulation">&#215;</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+  // ── Action buttons at top ──
+  var mealBtns=['Breakfast','Lunch','Dinner','Snack'].map(function(m){
+    return '<button onclick="setScanMealAndLog(\''+m+'\')" style="flex:1;padding:7px 4px;border-radius:10px;font-size:11px;font-weight:700;border:.5px solid var(--b1);background:'+(m===_scanMealType?'rgba(0,212,170,.2)':'rgba(255,255,255,.06)')+';color:'+(m===_scanMealType?'var(--grn)':'var(--dim)')+';touch-action:manipulation">'+m+'</button>';
   }).join('');
+  var actionsHtml=
+    D('style="margin-bottom:12px"',
+      D('style="font-size:11px;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px"','Log to meal:')+
+      D('style="display:flex;gap:5px"',mealBtns))+
+    D('style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px"',
+      '<button onclick="logScanItems()" style="padding:10px;border-radius:12px;background:linear-gradient(135deg,var(--grn),#00aa88);color:#000;font-size:13px;font-weight:800;touch-action:manipulation">&#10003; Log All Items</button>'+
+      '<button onclick="saveScanAsRecipe()" style="padding:10px;border-radius:12px;background:rgba(180,120,255,.15);border:.5px solid var(--pur);color:var(--pur);font-size:13px;font-weight:700;touch-action:manipulation">&#128216; Save as Recipe</button>')+
+    D('style="margin-bottom:12px"',
+      '<button onclick="saveAllScanToDatabase()" style="width:100%;padding:9px;border-radius:12px;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.3);color:var(--blu);font-size:12px;font-weight:700;touch-action:manipulation">&#128190; Save All Items to My Foods Database</button>');
+  // ── Item cards ──
+  var itemsHtml=_scanItems.map(function(it,i){
+    var micros=it._expanded?
+      D('style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:8px;padding-top:8px;border-top:.5px solid var(--b1)"',
+        [['Fiber',it.fiber+'g'],['Sugar',it.sugar+'g'],['Sat Fat',it.satFat+'g'],
+         ['Sodium',it.sodium+'mg'],['Cholest',it.cholesterol+'mg'],['Potassium',it.potassium+'mg'],
+         ['Calcium',it.calcium+'mg'],['Iron',it.iron+'mg'],['Vit C',it.vitC+'mg'],
+         ['Vit D',it.vitD+'mcg'],['Vit A',it.vitA+'mcg']].map(function(m){
+           return D('style="font-size:11px;color:var(--dim)"',m[0]+': '+S('style="color:var(--txt)"',m[1]));
+         }).join('')):'';
+    // Category selector for DB save
+    var catOpts=['breakfast','meat','grains','veg','fruit','dairy','nuts','snacks','sauces','pizzapasta','desserts','bread','eggs'];
+    var catSel='<select onchange="setScanItemCat('+i+',this.value)" style="font-size:11px;background:var(--s3);border:.5px solid var(--b1);border-radius:6px;color:var(--txt);padding:2px 4px;margin-top:4px">';
+    catOpts.forEach(function(c){catSel+='<option value="'+c+'"'+(it.category===c?' selected':'')+'>'+c+'</option>';});
+    catSel+='</select>';
+    return D('style="background:var(--s2);border-radius:12px;padding:11px;margin-bottom:8px"',
+      D('style="display:flex;align-items:flex-start;gap:9px"',
+        D('style="font-size:26px;flex-shrink:0"',it.emoji)+
+        D('style="flex:1;min-width:0"',
+          D('style="font-weight:700;font-size:13px"',it.name)+
+          D('style="font-size:11px;color:var(--dim);margin-bottom:5px"',it.portion+' · '+catSel)+
+          D('style="display:flex;gap:8px"',
+            D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--pnk)"',it.cals)+D('style="font-size:9px;color:var(--dim)"','kcal'))+
+            D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--grn)"',it.protein+'g')+D('style="font-size:9px;color:var(--dim)"','prot'))+
+            D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--amb)"',it.carbs+'g')+D('style="font-size:9px;color:var(--dim)"','carbs'))+
+            D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--pur)"',it.fat+'g')+D('style="font-size:9px;color:var(--dim)"','fat')))+
+          micros)+
+        D('style="display:flex;flex-direction:column;gap:3px;flex-shrink:0"',
+          '<button onclick="scanToggleMicros('+i+')" style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:var(--dim);font-size:10px;cursor:pointer;touch-action:manipulation">'+(it._expanded?'▲':'▼')+'</button>'+
+          '<button onclick="scanReplaceItem('+i+')" style="width:26px;height:26px;border-radius:50%;background:rgba(77,166,255,.12);border:none;color:var(--blu);font-size:12px;cursor:pointer;touch-action:manipulation">&#128260;</button>'+
+          '<button onclick="scanRemoveItem('+i+')" style="width:26px;height:26px;border-radius:50%;background:rgba(255,59,92,.12);border:none;color:var(--red);font-size:13px;cursor:pointer;touch-action:manipulation">&#215;</button>')));
+  }).join('');
+  si.innerHTML=actionsHtml+itemsHtml;
   renderScanTotals();
 }
-
 function renderScanTotals() {
   var st = g('cf-scan-totals'); if(!st) return;
   if(!_scanItems.length) { st.innerHTML=''; return; }
@@ -6709,8 +6716,6 @@ function renderScanTotals() {
     acc.carbs += it.carbs; acc.fat += it.fat;
     return acc;
   }, {cals:0,protein:0,carbs:0,fat:0});
-  // Show/hide log button
-  var clb=g('cf-scan-log-btn'); if(clb) clb.style.display=_scanItems.length?'block':'none';
   var cbb=g('cf-scan-back-btn'); if(cbb) cbb.style.display=_scanItems.length?'block':'none';
   if(!_scanItems.length){st.style.display='none';return;}
   st.style.display='block';
@@ -6805,13 +6810,75 @@ function logScanItems() {
   });
   // Set mealTab to match
   mealTab = _scanMealType;
+  foodChartDate = today();
   save();
   closeM('custom-food-m');
   resetScanView();
   rFood(); rHome(); rNutrition();
+  // Switch to the right meal tab
+  document.querySelectorAll('.mtab').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.mtab').forEach(function(t){if(t.textContent.toLowerCase().indexOf(_scanMealType.toLowerCase())>=0)t.classList.add('on');});
   var msg = _scanItems.length + ' item' + (_scanItems.length!==1?'s':'') + ' logged to ' + _scanMealType;
   if(newCustom.length) msg += ' · ' + newCustom.length + ' new item' + (newCustom.length!==1?'s':'') + ' saved to database';
   toast(msg + ' ✓');
+}
+function setScanMealAndLog(meal){
+  _scanMealType=meal;
+  logScanItems();
+}
+function setScanItemCat(i,cat){
+  if(_scanItems[i]) _scanItems[i].category=cat;
+}
+function saveScanAsRecipe(){
+  if(!_scanItems.length){toast('No items to save');return;}
+  // Build recipe name from items
+  var rName=_scanItems.length===1?_scanItems[0].name:'Scanned Meal '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  var rName=prompt('Recipe name:',rName); if(!rName) return;
+  // Calculate totals
+  var tot=_scanItems.reduce(function(acc,it){
+    acc.cals+=it.cals;acc.protein+=it.protein;acc.carbs+=it.carbs;acc.fat+=it.fat;
+    acc.fiber+=it.fiber||0;acc.sugar+=it.sugar||0;acc.satFat+=it.satFat||0;
+    acc.sodium+=it.sodium||0;acc.cholest+=it.cholesterol||0;
+    acc.potassium+=it.potassium||0;acc.calcium+=it.calcium||0;acc.iron+=it.iron||0;
+    return acc;
+  },{cals:0,protein:0,carbs:0,fat:0,fiber:0,sugar:0,satFat:0,sodium:0,cholest:0,potassium:0,calcium:0,iron:0});
+  var recipes=loadRecipes();
+  recipes.push({
+    name:rName,emoji:_scanItems[0].emoji||'&#128216;',cat:'recipes',servings:1,
+    ingredients:_scanItems.map(function(it){
+      return {name:it.name,e:it.emoji,cals:it.cals,protein:it.protein,carbs:it.carbs,
+        fat:it.fat,fiber:it.fiber||0,sugar:it.sugar||0,sodium:it.sodium||0,_fromDB:false};
+    }),
+    cals:Math.round(tot.cals),protein:parseFloat(tot.protein.toFixed(1)),
+    carbs:parseFloat(tot.carbs.toFixed(1)),fat:parseFloat(tot.fat.toFixed(1)),
+    fiber:parseFloat(tot.fiber.toFixed(1)),sugar:parseFloat(tot.sugar.toFixed(1)),
+    satFat:parseFloat(tot.satFat.toFixed(1)),sodium:Math.round(tot.sodium),
+    cholest:Math.round(tot.cholest),potassium:Math.round(tot.potassium),
+    calcium:Math.round(tot.calcium),iron:parseFloat(tot.iron.toFixed(1)),
+    savedAt:Date.now()
+  });
+  recipes.sort(function(a,b){return(a.name||'').localeCompare(b.name||'');});
+  saveRecipes(recipes);
+  toast('Recipe \"'+rName+'\" saved ✓');
+  closeM('custom-food-m'); resetScanView(); rFoodGrid();
+}
+function saveAllScanToDatabase(){
+  if(!_scanItems.length){toast('No items to save');return;}
+  var mf=loadMyFoods(); var added=0;
+  _scanItems.forEach(function(it){
+    var exists=FOODS.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();})||
+               mf.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();});
+    if(!exists){
+      mf.push({n:it.name,e:it.emoji,c:it.cals,pr:it.protein,cb:it.carbs,f:it.fat,
+        fi:it.fiber||0,su:it.sugar||0,na:it.sodium||0,p:it.portion,cat:it.category||'snacks'});
+      added++;
+    }
+  });
+  mf.sort(function(a,b){return a.n.localeCompare(b.n);});
+  saveMyFoods(mf);
+  if(added>0) toast(added+' new item'+(added!==1?'s':'')+' saved to My Foods ✓');
+  else toast('All items already in database');
+  rFoodGrid();
 }
 // ═══════════════════════════════════════════════════════
 // END FOOD CAMERA SCAN
