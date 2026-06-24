@@ -1906,6 +1906,9 @@ function rHome() {
   // Use FL snap sleep as reference (same source as Fitness tile)
   // Falls back to SL log if snap has no sleep value
   // Sleep reference: FL snap → SL log → prevSleep
+  // DEBUG sleep
+  var _slDbg=SL.slice(-4).map(function(s){return s.date+'='+s.hours+'h';}).join('|');
+  toast('today='+today()+' yd='+yesterday()+' SL='+_slDbg,false,6000);
   // Sleep reference: use yesterday's SL entry strictly
   var _ydSl2=yesterday();
   var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
