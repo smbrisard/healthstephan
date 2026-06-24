@@ -997,10 +997,15 @@ body { height: 100dvh; }
 
     <!-- Search results -->
     <div id="cf-results" style="max-height:180px;overflow-y:auto;margin-bottom:4px"></div>
+    <!-- Scan results (shown after photo scan) -->
+    <div id="cf-scan-results" style="display:none"></div>
 
     <!-- Camera scan button - label wraps input for iOS compatibility -->
     <label for="food-cam-input" style="display:block;width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;text-align:center;cursor:pointer;box-sizing:border-box">&#128247; Scan Food with Camera</label>
     <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
+    <div id="cf-scan-totals" style="display:none;margin-bottom:8px"></div>
+    <button id="cf-scan-log-btn" onclick="logScanItems()" style="display:none;width:100%;padding:12px;background:linear-gradient(135deg,var(--grn),#00aa88);border-radius:12px;color:#000;font-size:14px;font-weight:800;margin-bottom:8px;touch-action:manipulation">&#10003; Log All Items</button>
+    <button id="cf-scan-back-btn" onclick="resetScanView()" style="display:none;width:100%;padding:8px;background:rgba(255,255,255,.06);border:.5px solid var(--b1);border-radius:12px;color:var(--dim);font-size:12px;margin-bottom:8px;touch-action:manipulation">&#8592; Back to Search</button>
 
     <!-- Divider -->
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0">
@@ -6540,12 +6545,25 @@ function openScanModal() {
   var sl = g('scan-loading'); if(sl) sl.style.display='block';
   var si = g('scan-items'); if(si) si.innerHTML='';
   var st = g('scan-totals'); if(st) st.innerHTML='';
-  // Close any open modals first
-  document.querySelectorAll('.modal.on').forEach(function(m){m.classList.remove('on');});
-  document.body.style.overflow='hidden';
-  var scanEl=g('scan-m'); if(scanEl) scanEl.classList.add('on');
+  // Show scan UI inside custom-food-m
+  var cfr=g('cf-results'); if(cfr) cfr.style.display='none';
+  var csr=g('cf-scan-results');
+  if(csr){
+    csr.style.display='block';
+    csr.innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:32px">&#129302;</div><div style="color:var(--grn);font-weight:700;margin-top:8px">Analyzing your meal...</div></div>';
+  }
+  // Make sure custom-food-m is open
+  openM('custom-food-m');
 }
 
+function resetScanView() {
+  var csr=g('cf-scan-results'); if(csr){csr.style.display='none';csr.innerHTML='';}
+  var cst=g('cf-scan-totals'); if(cst) cst.style.display='none';
+  var clb=g('cf-scan-log-btn'); if(clb) clb.style.display='none';
+  var cbb=g('cf-scan-back-btn'); if(cbb) cbb.style.display='none';
+  var cfr=g('cf-results'); if(cfr) cfr.style.display='';
+  _scanItems=[];
+}
 function closeScanModal() {
   closeM('scan-m');
 }
@@ -6638,7 +6656,7 @@ function analyzeFoodPhoto(b64, mime) {
   });
 }
 function renderScanItems() {
-  var si = g('scan-items'); if(!si) return;
+  var si = g('cf-scan-results'); if(!si) return;
   if(!_scanItems.length) {
     si.innerHTML = '<div style="color:var(--dim);padding:20px;text-align:center">No items identified. Try re-scanning.</div>';
     renderScanTotals(); return;
@@ -6684,13 +6702,18 @@ function renderScanItems() {
 }
 
 function renderScanTotals() {
-  var st = g('scan-totals'); if(!st) return;
+  var st = g('cf-scan-totals'); if(!st) return;
   if(!_scanItems.length) { st.innerHTML=''; return; }
   var totals = _scanItems.reduce(function(acc, it) {
     acc.cals += it.cals; acc.protein += it.protein;
     acc.carbs += it.carbs; acc.fat += it.fat;
     return acc;
   }, {cals:0,protein:0,carbs:0,fat:0});
+  // Show/hide log button
+  var clb=g('cf-scan-log-btn'); if(clb) clb.style.display=_scanItems.length?'block':'none';
+  var cbb=g('cf-scan-back-btn'); if(cbb) cbb.style.display=_scanItems.length?'block':'none';
+  if(!_scanItems.length){st.style.display='none';return;}
+  st.style.display='block';
   st.innerHTML =
     '<div style="font-size:11px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">' + _scanItems.length + ' item' + (_scanItems.length!==1?'s':'') + ' total</div>' +
     '<div style="display:flex;gap:12px;justify-content:space-around">' +
@@ -6783,7 +6806,8 @@ function logScanItems() {
   // Set mealTab to match
   mealTab = _scanMealType;
   save();
-  closeM('scan-m');
+  closeM('custom-food-m');
+  resetScanView();
   rFood(); rHome(); rNutrition();
   var msg = _scanItems.length + ' item' + (_scanItems.length!==1?'s':'') + ' logged to ' + _scanMealType;
   if(newCustom.length) msg += ' · ' + newCustom.length + ' new item' + (newCustom.length!==1?'s':'') + ' saved to database';
