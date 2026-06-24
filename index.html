@@ -1001,7 +1001,11 @@ body { height: 100dvh; }
     <div id="cf-scan-results" style="display:none"></div>
 
     <!-- Camera scan button - label wraps input for iOS compatibility -->
-    <label for="food-cam-input" style="display:block;width:100%;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:14px;font-weight:700;margin-bottom:10px;text-align:center;cursor:pointer;box-sizing:border-box">&#128247; Scan Food with Camera</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <label for="food-cam-live" style="display:block;padding:12px;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.3);border-radius:12px;color:var(--grn);font-size:13px;font-weight:700;text-align:center;cursor:pointer">&#128247; Live Camera</label>
+      <label for="food-cam-input" style="display:block;padding:12px;background:rgba(0,212,170,.08);border:.5px solid rgba(0,212,170,.2);border-radius:12px;color:var(--grn);font-size:13px;font-weight:700;text-align:center;cursor:pointer">&#128444; Photo Library</label>
+    </div>
+    <input type="file" id="food-cam-live" accept="image/*" capture="environment" style="display:none" onchange="handleFoodPhoto(this)">
     <input type="file" id="food-cam-input" accept="image/*" style="display:none" onchange="handleFoodPhoto(this)">
     <div id="cf-scan-totals" style="display:none;margin-bottom:8px"></div>
     <button id="cf-scan-back-btn" onclick="resetScanView()" style="display:none;width:100%;padding:8px;background:rgba(255,255,255,.06);border:.5px solid var(--b1);border-radius:12px;color:var(--dim);font-size:12px;margin-bottom:8px;touch-action:manipulation">&#8592; Back to Search</button>
@@ -1909,7 +1913,9 @@ function rHome() {
   // Fallback: most recent SL entry from last 3 days (handles timezone travel)
   if(!_prevSl){
     var _todaySl3=today();
-    var _recentSl=SL.filter(function(s){return s.date<_todaySl3&&(s.hours||0)>=3;})
+    // Allow up to 4 days back for timezone travel
+    var _d4ago=(function(){var d=new Date();d.setDate(d.getDate()-4);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+    var _recentSl=SL.filter(function(s){return s.date<_todaySl3&&s.date>=_d4ago&&(s.hours||0)>=3;})
       .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
     if(_recentSl) _prevSl=_recentSl;
   }
@@ -3759,8 +3765,9 @@ function syncSleepToProfile(){
   var _yd2=(function(){var d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   // Filter to valid recent entries - allow up to 3 days back for timezone travel
   var _d2ago=(function(){var d=new Date();d.setDate(d.getDate()-2);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  var _d3ago=(function(){var d=new Date();d.setDate(d.getDate()-3);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   var _validEntries=SL.filter(function(s){
-    return (s.date===_td2||s.date===_yd2||s.date===_d2ago)&&(s.hours||0)>=3;
+    return (s.date===_td2||s.date===_yd2||s.date===_d2ago||s.date===_d3ago)&&(s.hours||0)>=3;
   });
   // Pick most recent date first; if same date, pick longest hours
   var latest=_validEntries.length
@@ -3772,7 +3779,7 @@ function syncSleepToProfile(){
   // No fallback - only show sleep from today or yesterday
   var td=_td2; var yd=_yd2;
   // Only show sleep if it's from today or last night (yesterday)
-  if(latest&&(latest.date===td||latest.date===yd||latest.date===_d2ago)&&(latest.hours||0)>=3){
+  if(latest&&(latest.date===td||latest.date===yd||latest.date===_d2ago||latest.date===_d3ago)&&(latest.hours||0)>=3){
     P.sleepLast=latest.hours;
     P.sleepBedtime=latest.bedtime||'';
     P.sleepWake=latest.wake||'';
@@ -4393,7 +4400,8 @@ function rFitness(){
       // Fallback: most recent past SL entry (handles timezone travel)
       if(!_prevSlFi){
         var _todaySl4=today();
-        _prevSlFi=SL.filter(function(s){return s.date<_todaySl4&&(s.hours||0)>=3;})
+        var _d4ago2=(function(){var d=new Date();d.setDate(d.getDate()-4);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+        _prevSlFi=SL.filter(function(s){return s.date<_todaySl4&&s.date>=_d4ago2&&(s.hours||0)>=3;})
           .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0]||null;
       }
       ydVal=_prevSlFi?_prevSlFi.hours:null;
