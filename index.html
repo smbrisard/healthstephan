@@ -6519,32 +6519,49 @@ function openFoodCamera() {
 }
 
 function handleFoodPhoto(input) {
-  if(!input.files||!input.files[0]) return;
+  if(!input||!input.files||!input.files[0]) return;
   var file = input.files[0];
+  // Show modal immediately so user knows it's working
+  openScanModal();
   var reader = new FileReader();
   reader.onload = function(e) {
-    // Resize image to max 800px and compress to reduce payload size
+    var dataUrl = e.target.result;
+    // Compress via canvas
     var img = new Image();
     img.onload = function() {
-      var maxSize = 600; // Keep small for Val Town payload limit
-      var w = img.width, h = img.height;
-      if(w > maxSize || h > maxSize) {
-        if(w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      try {
+        var maxSize = 600;
+        var w = img.width, h = img.height;
+        if(w > maxSize || h > maxSize) {
+          if(w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        var b64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+        analyzeFoodPhoto(b64, 'image/jpeg');
+      } catch(e) {
+        // Canvas failed — send original (may be large but try anyway)
+        var b64 = dataUrl.split(',')[1];
+        analyzeFoodPhoto(b64, file.type||'image/jpeg');
       }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      var compressed = canvas.toDataURL('image/jpeg', 0.5); // 50% quality ~50-80KB
-      var b64 = compressed.split(',')[1];
-      openScanModal();
-      analyzeFoodPhoto(b64, 'image/jpeg');
     };
-    img.src = e.target.result;
+    img.onerror = function() {
+      // Image load failed — try sending raw
+      var b64 = dataUrl.split(',')[1];
+      analyzeFoodPhoto(b64, file.type||'image/jpeg');
+    };
+    img.src = dataUrl;
+  };
+  reader.onerror = function(){
+    var si=g('cf-scan-results');
+    if(si) si.innerHTML='<div style="color:var(--red);padding:20px;text-align:center">Could not read photo. Please try again.</div>';
   };
   reader.readAsDataURL(file);
-  input.value = '';
+  // Reset input AFTER reading so iOS doesn't lose the file reference
+  setTimeout(function(){input.value='';},3000);
 }
 
 function openScanModal() {
