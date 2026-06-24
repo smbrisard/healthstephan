@@ -1906,9 +1906,6 @@ function rHome() {
   // Use FL snap sleep as reference (same source as Fitness tile)
   // Falls back to SL log if snap has no sleep value
   // Sleep reference: FL snap → SL log → prevSleep
-  // DEBUG sleep
-  var _slDbg=SL.slice(-4).map(function(s){return s.date+'='+s.hours+'h';}).join('|');
-  toast('today='+today()+' yd='+yesterday()+' SL='+_slDbg,false,6000);
   // Sleep reference: use yesterday's SL entry strictly
   var _ydSl2=yesterday();
   var _prevSl=SL.filter(function(s){return s.date===_ydSl2&&(s.hours||0)>=3;})
@@ -1922,7 +1919,12 @@ function rHome() {
       .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0];
     if(_recentSl) _prevSl=_recentSl;
   }
-  var _sleepRef=_prevSl?_prevSl.hours:(P.prevSleep||null);
+  // Also check FL snap for yesterday if no SL entry found
+  if(!_prevSl&&P.prevSleep>0) _prevSl={hours:P.prevSleep};
+  // Also check ydSnap sleep field
+  var _hmYdSnap2=FL.filter(function(f){return f.date===_ydSl2;})[0];
+  if(!_prevSl&&_hmYdSnap2&&_hmYdSnap2.sleep>0) _prevSl={hours:_hmYdSnap2.sleep};
+  var _sleepRef=_prevSl?_prevSl.hours:null;
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
 
   // Burned delta
@@ -4407,6 +4409,12 @@ function rFitness(){
         _prevSlFi=SL.filter(function(s){return s.date<_todaySl4&&s.date>=_d4ago2&&(s.hours||0)>=3;})
           .sort(function(a,b){return b.date.localeCompare(a.date)||((b.hours||0)-(a.hours||0));})[0]||null;
       }
+      // Fallback to FL snap sleep for yesterday
+      if(!_prevSlFi){
+        var _ydSnapFi2=FL.filter(function(f){return f.date===_ydSl2Fi;})[0];
+        if(_ydSnapFi2&&_ydSnapFi2.sleep>0) _prevSlFi={hours:_ydSnapFi2.sleep};
+      }
+      if(!_prevSlFi&&P.prevSleep>0) _prevSlFi={hours:P.prevSleep};
       ydVal=_prevSlFi?_prevSlFi.hours:null;
     }
     // null OR undefined - old snaps missing fields
