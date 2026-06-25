@@ -5064,18 +5064,19 @@ function rHistory(){
           _macCard('🥩','Protein',_avgs.protein,_tgt.protein,'g',false)+
           _macCard('🍞','Carbs',_avgs.carbs,_tgt.carbs,'g',false)+
           _macCard('🥑','Fat',_avgs.fat,_tgt.fat,'g',false))+
-        // Micros list
-        D('style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px"','Micros')+
-        _micRow('🌾','Fiber',_avgs.fiber,_tgt.fiber,'g',false)+
-        _micRow('🍬','Sugar',_avgs.sugar,_tgt.sugar,'g',true)+
-        _micRow('🧂','Sodium',_avgs.sodium,_tgt.sodium,'mg',true)+
-        _micRow('🥛','Calcium',_avgs.calcium,_tgt.calcium,'mg',false)+
-        _micRow('🩸','Iron',_avgs.iron,_tgt.iron,'mg',false)+
-        _micRow('⚡','Potassium',_avgs.potassium,_tgt.potassium,'mg',false)+
-        _micRow('🍊','Vitamin C',_avgs.vitC,_tgt.vitC,'mg',false)+
-        _micRow('☀️','Vitamin D',_avgs.vitD,_tgt.vitD,'mcg',false)+
-        _micRow('🥚','Cholesterol',_avgs.cholest,_tgt.cholest,'mg',true)+
-        D('style="padding-top:4px"',_micRow('🧈','Sat. Fat',_avgs.satFat,_tgt.satFat,'g',true)));
+        // Micros grid - same look as macros
+        D('style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px"','Micros')+
+        D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px"',
+          _macCard('🌾','Fiber',_avgs.fiber,_tgt.fiber,'g',false)+
+          _macCard('🍬','Sugar',_avgs.sugar,_tgt.sugar,'g',true)+
+          _macCard('🧂','Sodium',_avgs.sodium,_tgt.sodium,'mg',true)+
+          _macCard('🥛','Calcium',_avgs.calcium,_tgt.calcium,'mg',false)+
+          _macCard('🩸','Iron',_avgs.iron,_tgt.iron,'mg',false)+
+          _macCard('⚡','Potassium',_avgs.potassium,_tgt.potassium,'mg',false)+
+          _macCard('🍊','Vitamin C',_avgs.vitC,_tgt.vitC,'mg',false)+
+          _macCard('☀️','Vitamin D',_avgs.vitD,_tgt.vitD,'mcg',false)+
+          _macCard('🥚','Cholesterol',_avgs.cholest,_tgt.cholest,'mg',true)+
+          _macCard('🧈','Sat. Fat',_avgs.satFat,_tgt.satFat,'g',true)));
     }
 
     var slVals=last7.map(function(d){return d.sl||0;});
