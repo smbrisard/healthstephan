@@ -4971,6 +4971,113 @@ function rHistory(){
           D('style="display:flex;align-items:center;gap:5px;margin-left:auto"',D('style="width:14px;height:2px;background:rgba(255,255,255,.5)"','')+S('style="font-size:11px;color:var(--dim)"','Target'))));
       html+=mc;
     }
+
+    // ── 7-DAY NUTRITION AVERAGES ──────────────────────────────────────────────
+    var _nutDays=[];
+    for(var _ni=0;_ni<7;_ni++){
+      var _nd=new Date(); _nd.setDate(_nd.getDate()-6+_ni);
+      var _ndt=_nd.getFullYear()+'-'+String(_nd.getMonth()+1).padStart(2,'0')+'-'+String(_nd.getDate()).padStart(2,'0');
+      var _nml=ML.filter(function(m){return m.date===_ndt;});
+      var _ndrl=DL.filter(function(d){return d.date===_ndt;});
+      if(_nml.length||_ndrl.length){
+        _nutDays.push({
+          cals:_nml.reduce(function(a,m){return a+m.cals;},0)+_ndrl.reduce(function(a,d){return a+d.c;},0),
+          protein:_nml.reduce(function(a,m){return a+(m.protein||0);},0),
+          carbs:_nml.reduce(function(a,m){return a+(m.carbs||0);},0),
+          fat:_nml.reduce(function(a,m){return a+(m.fat||0);},0),
+          fiber:_nml.reduce(function(a,m){return a+(m.fiber||0);},0),
+          sugar:_nml.reduce(function(a,m){return a+(m.sugar||0);},0),
+          sodium:_nml.reduce(function(a,m){return a+(m.sodium||0);},0),
+          potassium:_nml.reduce(function(a,m){return a+(m.potassium||0);},0),
+          calcium:_nml.reduce(function(a,m){return a+(m.calcium||0);},0),
+          iron:_nml.reduce(function(a,m){return a+(m.iron||0);},0),
+          vitC:_nml.reduce(function(a,m){return a+(m.vitC||0);},0),
+          vitD:_nml.reduce(function(a,m){return a+(m.vitD||0);},0),
+          cholest:_nml.reduce(function(a,m){return a+(m.cholest||0);},0),
+          satFat:_nml.reduce(function(a,m){return a+(m.satFat||0);},0)
+        });
+      }
+    }
+    if(_nutDays.length>=1){
+      var _nd=_nutDays.length;
+      function _navg(k){return _nutDays.reduce(function(a,d){return a+(d[k]||0);},0)/_nd;}
+      var _avgs={cals:_navg('cals'),protein:_navg('protein'),carbs:_navg('carbs'),fat:_navg('fat'),
+        fiber:_navg('fiber'),sugar:_navg('sugar'),sodium:_navg('sodium'),potassium:_navg('potassium'),
+        calcium:_navg('calcium'),iron:_navg('iron'),vitC:_navg('vitC'),vitD:_navg('vitD'),
+        cholest:_navg('cholest'),satFat:_navg('satFat')};
+      // Targets
+      var _tgt={cals:P.calTarget||1750,protein:P.protein||131,carbs:P.carbs||153,fat:P.fat||68,
+        fiber:P.fiber||30,sugar:P.sugar||50,sodium:P.sodium||2300,potassium:P.potassium||4700,
+        calcium:P.calcium||1300,iron:18,vitC:90,vitD:15,cholest:300,satFat:20};
+      // Status indicator function
+      function _nutStatus(val,tgt,lowerBetter){
+        if(!val) return {col:'rgba(255,255,255,.2)',icon:'—',txt:'No data'};
+        var pct=val/tgt;
+        if(lowerBetter){
+          if(pct<=0.9) return {col:'var(--grn)',icon:'✓',txt:'Good'};
+          if(pct<=1.1) return {col:'var(--amb)',icon:'⚠',txt:'Near limit'};
+          return {col:'var(--red)',icon:'↑',txt:'Over limit'};
+        } else {
+          if(pct>=0.9&&pct<=1.3) return {col:'var(--grn)',icon:'✓',txt:'On target'};
+          if(pct<0.9) return {col:'var(--amb)',icon:'↓',txt:'Below target'};
+          return {col:'var(--amb)',icon:'↑',txt:'Above target'};
+        }
+      }
+      // Progress bar
+      function _nutBar(val,tgt,lowerBetter){
+        var pct=Math.min(val/tgt,1.5);
+        var st=_nutStatus(val,tgt,lowerBetter);
+        return '<div style="background:rgba(255,255,255,.08);border-radius:4px;height:5px;margin-top:5px">'+
+          '<div style="background:'+st.col+';border-radius:4px;height:5px;width:'+Math.min(pct*100,100)+'%;transition:width .3s"></div></div>';
+      }
+      // Macro card builder
+      function _macCard(icon,label,val,tgt,unit,lowerBetter){
+        var st=_nutStatus(val,tgt,lowerBetter);
+        var pct=val?Math.round(val/tgt*100):0;
+        return D('style="background:var(--s3);border-radius:12px;padding:12px"',
+          D('style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px"',
+            D('style="font-size:12px;color:var(--dim)"',icon+' '+label)+
+            S('style="font-size:11px;font-weight:700;color:'+st.col+'"',st.icon+' '+st.txt))+
+          D('style="display:flex;align-items:baseline;gap:4px"',
+            S('style="font-family:var(--mn);font-size:20px;font-weight:800"',val?fD(val,val>=10?0:1):'--')+
+            S('style="font-size:11px;color:var(--dim)"',unit+' / '+fD(tgt,tgt>=10?0:1)+unit+' target'))+
+          _nutBar(val,tgt,lowerBetter));
+      }
+      // Micro row builder  
+      function _micRow(icon,label,val,tgt,unit,lowerBetter){
+        var st=_nutStatus(val,tgt,lowerBetter);
+        return D('style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--b1)"',
+          D('style="display:flex;align-items:center;gap:6px"',
+            S('style="font-size:16px"',icon)+
+            D('',D('style="font-size:12px;font-weight:600"',label)+D('style="font-size:10px;color:var(--dim)"','target: '+fD(tgt,tgt>=10?0:1)+unit)))+
+          D('style="text-align:right"',
+            S('style="font-family:var(--mn);font-size:14px;font-weight:700"',val?fD(val,val>=10?0:1):'--')+
+            S('style="font-size:10px;color:var(--dim)"',unit)+
+            D('style="font-size:10px;font-weight:700;color:'+st.col+'"',st.icon+' '+st.txt)));
+      }
+      html+=D('style="font-size:12px;font-weight:700;color:var(--txt);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px"','7-Day Nutrition Averages');
+      html+=D('style="background:var(--s2);border-radius:14px;border:.5px solid var(--b1);padding:14px;margin-bottom:20px"',
+        // Macros grid
+        D('style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px"','Macros')+
+        D('style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"',
+          _macCard('🔥','Calories',_avgs.cals,_tgt.cals,'kcal',false)+
+          _macCard('🥩','Protein',_avgs.protein,_tgt.protein,'g',false)+
+          _macCard('🍞','Carbs',_avgs.carbs,_tgt.carbs,'g',false)+
+          _macCard('🥑','Fat',_avgs.fat,_tgt.fat,'g',false))+
+        // Micros list
+        D('style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px"','Micros')+
+        _micRow('🌾','Fiber',_avgs.fiber,_tgt.fiber,'g',false)+
+        _micRow('🍬','Sugar',_avgs.sugar,_tgt.sugar,'g',true)+
+        _micRow('🧂','Sodium',_avgs.sodium,_tgt.sodium,'mg',true)+
+        _micRow('🥛','Calcium',_avgs.calcium,_tgt.calcium,'mg',false)+
+        _micRow('🩸','Iron',_avgs.iron,_tgt.iron,'mg',false)+
+        _micRow('⚡','Potassium',_avgs.potassium,_tgt.potassium,'mg',false)+
+        _micRow('🍊','Vitamin C',_avgs.vitC,_tgt.vitC,'mg',false)+
+        _micRow('☀️','Vitamin D',_avgs.vitD,_tgt.vitD,'mcg',false)+
+        _micRow('🥚','Cholesterol',_avgs.cholest,_tgt.cholest,'mg',true)+
+        D('style="padding-top:4px"',_micRow('🧈','Sat. Fat',_avgs.satFat,_tgt.satFat,'g',true)));
+    }
+
     var slVals=last7.map(function(d){return d.sl||0;});
     var slWithData=slVals.filter(function(v){return v>0;});
     if(slWithData.length>=1){
