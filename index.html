@@ -5318,6 +5318,16 @@ function launchApp(){
     if(_hourNow<9&&_todaySteps<200&&(P.standHours||0)>8){
       P.standHours=0; save();
     }
+    // Aggressive stale detection for timezone travel:
+    // If before noon but steps>5000 AND stand>8hrs AND burned>2000 = full yesterday day loaded
+    if(_hourNow<12&&_todaySteps>5000&&(P.standHours||0)>8&&_totalB>2000){
+      P.stepsToday=0; P.distMiles=0; P.waterToday=0;
+      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+      P.exerciseMins=0; P.standHours=0;
+      P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
+      P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
+      save();
+    }
     // Day change detection at launch - before fetchSync runs
     if(P.lastSyncDate&&P.lastSyncDate!==today()){
       P.exerciseMins=0; P.standHours=0;
