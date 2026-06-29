@@ -3239,7 +3239,8 @@ function rFoodGrid() {
     var _delFn=f._isRecipe?'deleteRecipeFromDB('+_recipeIdx+')':'deleteFoodFromDB('+_delArg+','+_isCustomFood+')';
     var _delBtn=D('onclick="event.stopPropagation();'+_delFn+'" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
     var _mfIdx2=_isCustomFood?_myIdx:-1;
-    var _migrBtn=(_isCustomFood&&!f._isRecipe&&_mfIdx2>=0)?'<button onclick="event.stopPropagation();migrateFoodToDrink('+_mfIdx2+')" style="position:absolute;top:4px;right:36px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drinks">&#8680;</button>':'';
+    var _mfName=_isCustomFood?encodeURIComponent(f.n):'';  
+    var _migrBtn=(_isCustomFood&&!f._isRecipe&&_mfIdx2>=0)?'<button onclick="event.stopPropagation();migrateFoodToDrinkByName(decodeURIComponent(\''+_mfName+'\'))" style="position:absolute;top:4px;right:36px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drinks">&#8680;</button>':'';
     var _recipeEditIdx=f._isRecipe?savedRecipes.findIndex(function(r){return r.name===f.n;}):-1;
     var _editBtn=f._isRecipe?D('onclick="event.stopPropagation();openRecipeBuilder('+_recipeEditIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):
       (_isCustomFood?D('onclick="event.stopPropagation();editMyFood('+_myIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):'');
@@ -6535,6 +6536,12 @@ function deleteMyDrink(idx){
   rDrGrid();
 }
 function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
+function migrateFoodToDrinkByName(name){
+  var myFoods=loadMyFoods();
+  var idx=myFoods.findIndex(function(f){return f.n===name;});
+  if(idx<0){toast('Item not found: '+name);return;}
+  migrateFoodToDrink(idx);
+}
 function migrateFoodToDrink(idx){
   var myFoods=loadMyFoods();
   var item=myFoods[idx];
