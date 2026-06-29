@@ -3238,10 +3238,12 @@ function rFoodGrid() {
     var _delArg=f._isRecipe?_recipeIdx:(_isCustomFood?_myIdx:'\''+f.n+'\'');
     var _delFn=f._isRecipe?'deleteRecipeFromDB('+_recipeIdx+')':'deleteFoodFromDB('+_delArg+','+_isCustomFood+')';
     var _delBtn=D('onclick="event.stopPropagation();'+_delFn+'" style="position:absolute;top:4px;right:4px;background:'+_delBg+';border:none;border-radius:50%;width:'+_delSize+';height:'+_delSize+';color:var(--red);font-size:14px;cursor:pointer;line-height:'+_delSize+';text-align:center;touch-action:manipulation"','\u00d7');
+    var _mfIdx2=_isCustomFood?_myIdx:-1;
+    var _migrBtn=(_isCustomFood&&!f._isRecipe&&_mfIdx2>=0)?'<button onclick="event.stopPropagation();migrateFoodToDrink('+_mfIdx2+')" style="position:absolute;top:4px;right:36px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drinks">&#8680;</button>':'';
     var _recipeEditIdx=f._isRecipe?savedRecipes.findIndex(function(r){return r.name===f.n;}):-1;
     var _editBtn=f._isRecipe?D('onclick="event.stopPropagation();openRecipeBuilder('+_recipeEditIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):
       (_isCustomFood?D('onclick="event.stopPropagation();editMyFood('+_myIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):'');
-    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_editBtn+_delBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+(f.pr||f.protein||0)+'g C:'+(f.cb||f.carbs||0)+'g F:'+(f.f||f.fat||0)+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_editBtn+_delBtn+_migrBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+(f.pr||f.protein||0)+'g C:'+(f.cb||f.carbs||0)+'g F:'+(f.f||f.fat||0)+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -6533,6 +6535,27 @@ function deleteMyDrink(idx){
   rDrGrid();
 }
 function loadMyFoods(){try{return JSON.parse(localStorage.getItem('hs_myfoods')||'[]');}catch(e){return [];}}
+function migrateFoodToDrink(idx){
+  var myFoods=loadMyFoods();
+  var item=myFoods[idx];
+  if(!item){toast('Item not found');return;}
+  var name=item.n;
+  var drCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer'];
+  var cat=prompt('Move to drinks - choose category:\n'+drCats.join(', '),_isScanDrink(item)?item.cat:'soft');
+  if(!cat) return;
+  cat=cat.toLowerCase().trim();
+  if(drCats.indexOf(cat)<0){toast('Use one of: '+drCats.join(', '));return;}
+  var md=loadMyDrinks();
+  if(!md.find(function(d){return d.n===name;})){
+    md.push({n:item.n,e:item.e,c:item.c||0,u:0,cb:item.cb||0,sg:item.su||0,cat:cat,p:item.p||'1 serving',w:'',_custom:true});
+    md.sort(function(a,b){return a.n.localeCompare(b.n);});
+    saveMyDrinks(md);
+  }
+  myFoods.splice(idx,1);
+  saveMyFoods(myFoods);
+  toast('Moved to Drinks ✓');
+  rFoodGrid(); rDrGrid();
+}
 function deleteMyFood(name){
   var myFoods=loadMyFoods();
   myFoods=myFoods.filter(function(f){return f.n!==name;});
@@ -6838,21 +6861,16 @@ function renderScanItems() {
            return D('style="font-size:11px;color:var(--dim)"',m[0]+': '+S('style="color:var(--txt)"',m[1]));
          }).join('')):'';
     // Category selector for DB save
-    var _isDrinkItem=_isScanDrink(it);
-    var catOpts=_isDrinkItem?
-      ['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer']:
-      ['breakfast','meat','grains','veg','fruit','dairy','nuts','snacks','sauces','pizzapasta','desserts','bread','eggs'];
+    var catOpts=['breakfast','meat','grains','veg','fruit','dairy','nuts','snacks','sauces','pizzapasta','desserts','bread','eggs'];
     var catSel='<select onchange="setScanItemCat('+i+',this.value)" style="font-size:11px;background:var(--s3);border:.5px solid var(--b1);border-radius:6px;color:var(--txt);padding:2px 4px;margin-top:4px">';
     catOpts.forEach(function(c){catSel+='<option value="'+c+'"'+(it.category===c?' selected':'')+'>'+c+'</option>';});
     catSel+='</select>';
     return D('style="background:var(--s2);border-radius:12px;padding:11px;margin-bottom:8px"',
       D('style="display:flex;align-items:flex-start;gap:9px"',
-        D('style="font-size:26px;flex-shrink:0;position:relative"',
-          it.emoji+(_isScanDrink(it)?'<span style="position:absolute;top:-4px;right:-4px;font-size:10px">🥤</span>':''))+ 
+        D('style="font-size:26px;flex-shrink:0"',it.emoji)+
         D('style="flex:1;min-width:0"',
           D('style="font-weight:700;font-size:13px"',it.name)+
-          D('style="font-size:11px;color:var(--dim);margin-bottom:5px"',
-            '<span onclick="scanEditPortion('+i+')" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px">'+it.portion+'</span> · '+catSel)+
+          D('style="font-size:11px;color:var(--dim);margin-bottom:5px"',it.portion+' · '+catSel)+
           D('style="display:flex;gap:8px"',
             D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--pnk)"',it.cals)+D('style="font-size:9px;color:var(--dim)"','kcal'))+
             D('style="text-align:center"',D('style="font-family:var(--mn);font-size:14px;font-weight:700;color:var(--grn)"',it.protein+'g')+D('style="font-size:9px;color:var(--dim)"','prot'))+
@@ -6901,63 +6919,15 @@ function scanRemoveItem(i) {
 }
 
 function scanReplaceItem(i) {
-  if(!_scanItems[i]) return;
-  var wrongItem=_scanItems[i].name;
-  // Give user two options: search or tell Claude
-  var choice=confirm('Item: "'+wrongItem+'"\n\nOK = Tell Claude what it actually is\nCancel = Search database manually');
-  if(choice){
-    // Ask Claude with correction
-    var correction=prompt('What is this item actually? Be specific (e.g. "Mango lassi 300ml"):');
-    if(!correction) return;
-    scanAskClaude(i, correction);
-  } else {
-    // Open food search
-    _scanReplaceIdx = i;
-    var cf = g('cf-name'); if(cf) { cf.value=''; cf.focus(); }
-    closeM('scan-m');
-    openM('custom-food-m');
-    toast('Search for the correct item, then tap to select', false, 3000);
-    window._scanReplacePending = true;
-  }
-}
-function scanAskClaude(i, correction) {
-  var _ak='';
-  try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
-  if(!_ak||!SYNC_URL){toast('API key or sync URL missing');return;}
-  var _visionUrl=SYNC_URL.replace(/\/$/,'')+'/identify';
-  toast('Asking Claude about "'+correction+'"...',false,3000);
-  fetch(_visionUrl,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({query:correction,apiKey:_ak})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.error){toast('Error: '+data.error);return;}
-    var text=(data.result||'').replace(/```json|```/g,'').trim();
-    if(text.charAt(0)==='{') text='['+text+']';
-    try{
-      var items=JSON.parse(text);
-      var it=Array.isArray(items)?items[0]:items;
-      if(it&&it.name){
-        _scanItems[i]={
-          id:i,name:it.name,emoji:it.emoji||'&#127869;',portion:it.portion||'1 serving',
-          category:it.category||'snacks',mealType:_scanItems[i].mealType||_scanMealType,
-          cals:Math.round(it.cals||0),protein:parseFloat((it.protein||0).toFixed(1)),
-          carbs:parseFloat((it.carbs||0).toFixed(1)),fat:parseFloat((it.fat||0).toFixed(1)),
-          fiber:parseFloat((it.fiber||0).toFixed(1)),sugar:parseFloat((it.sugar||0).toFixed(1)),
-          satFat:parseFloat((it.satFat||0).toFixed(1)),sodium:Math.round(it.sodium||0),
-          cholesterol:Math.round(it.cholesterol||0),potassium:Math.round(it.potassium||0),
-          calcium:Math.round(it.calcium||0),iron:parseFloat((it.iron||0).toFixed(1)),
-          vitC:Math.round(it.vitC||0),vitD:parseFloat((it.vitD||0).toFixed(1)),
-          vitA:Math.round(it.vitA||0),_expanded:false
-        };
-        renderScanItems();
-        toast('Updated to: '+it.name+' ('+Math.round(it.cals||0)+' kcal) ✓');
-      }
-    }catch(e){toast('Could not parse response. Try again.');}
-  })
-  .catch(function(e){toast('Connection error: '+e.message);});
+  // Open food search modal, on selection replace item at index i
+  _scanReplaceIdx = i;
+  // Use existing custom food search
+  var cf = g('cf-name'); if(cf) { cf.value=''; cf.focus(); }
+  closeM('scan-m');
+  openM('custom-food-m');
+  toast('Search for the correct item, then tap to select', false, 3000);
+  // Override cfSelect to replace scan item
+  window._scanReplacePending = true;
 }
 
 var _scanReplaceIdx = -1;
@@ -6976,46 +6946,43 @@ function logScanItems() {
   var logDate = sd&&sd.value ? sd.value : today();
   var newCustom = [];
   _scanItems.forEach(function(it) {
-    if(_isScanDrink(it)){
-      // Route to drink log
-      DL.push({id:Date.now()+Math.random(),date:logDate,
-        n:it.name,e:it.emoji,c:it.cals,u:0,
-        cat:it.category||'soft',sugar:it.sugar||0,carbs:it.carbs||0,vol:0});
-      // Save to My Drinks if new
-      var md=loadMyDrinks();
-      var existsDr=md.find(function(d){return d.n.toLowerCase()===it.name.toLowerCase();});
-      if(!existsDr){
-        newCustom.push(it);
-        md.push({n:it.name,e:it.emoji,c:it.cals,u:0,cb:it.carbs||0,sg:it.sugar||0,
-          cat:it.category||'soft',p:it.portion,w:'',_custom:true});
-        md.sort(function(a,b){return a.n.localeCompare(b.n);});
-        saveMyDrinks(md);
-      }
-    } else {
-      // Route to food log
-      ML.push({
-        id: Date.now() + Math.random(),
-        date: logDate, name: it.name, emoji: it.emoji,
-        type: (it.mealType||_scanMealType).toLowerCase(),
-        cals: it.cals, protein: it.protein, carbs: it.carbs, fat: it.fat,
-        fiber: it.fiber||0, sugar: it.sugar||0, satFat: it.satFat||0,
-        sodium: it.sodium||0, cholesterol: it.cholesterol||0,
-        potassium: it.potassium||0, calcium: it.calcium||0,
-        iron: it.iron||0, vitC: it.vitC||0, vitD: it.vitD||0,
-        vitA: it.vitA||0, addedSugar: 0
+    // Log to food log
+    ML.push({
+      id: Date.now() + Math.random(),
+      date: logDate,
+      name: it.name,
+      emoji: it.emoji,
+      type: (it.mealType||_scanMealType).toLowerCase(),
+      cals: it.cals,
+      protein: it.protein,
+      carbs: it.carbs,
+      fat: it.fat,
+      fiber: it.fiber||0,
+      sugar: it.sugar||0,
+      satFat: it.satFat||0,
+      sodium: it.sodium||0,
+      cholesterol: it.cholesterol||0,
+      potassium: it.potassium||0,
+      calcium: it.calcium||0,
+      iron: it.iron||0,
+      vitC: it.vitC||0,
+      vitD: it.vitD||0,
+      vitA: it.vitA||0,
+      addedSugar: 0
+    });
+    // Save new items to custom foods database
+    var existing = FOODS.find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
+    var existingCustom = loadMyFoods().find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
+    if(!existing && !existingCustom) {
+      newCustom.push(it);
+      var mf = loadMyFoods();
+      mf.push({
+        n: it.name, e: it.emoji, c: it.cals, pr: it.protein,
+        cb: it.carbs, f: it.fat, fi: it.fiber||0, na: it.sodium||0,
+        p: it.portion, cat: it.category||'snacks'
       });
-      // Save new items to My Foods
-      var existing=FOODS.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();});
-      var existingCustom=loadMyFoods().find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();});
-      if(!existing&&!existingCustom){
-        newCustom.push(it);
-        var mf=loadMyFoods();
-        mf.push({n:it.name,e:it.emoji,c:it.cals,pr:it.protein,
-          cb:it.carbs,f:it.fat,fi:it.fiber||0,na:it.sodium||0,
-          p:it.portion,cat:it.category||'snacks'});
-        mf.sort(function(a,b){return a.n.localeCompare(b.n);});
-        saveMyFoods(mf);
-      }
+      mf.sort(function(a,b){ return a.n.localeCompare(b.n); });
+      saveMyFoods(mf);
     }
   });
   // Set mealTab to match
@@ -7032,13 +6999,12 @@ function logScanItems() {
   if(newCustom.length) msg += ' · ' + newCustom.length + ' new item' + (newCustom.length!==1?'s':'') + ' saved to database';
   toast(msg + ' ✓');
 }
-// Drink category detection
 var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','juice','smoothie','shake','drink'];
 function _isScanDrink(it){
+  if(!it) return false;
   if(_drinkCats.indexOf(it.category)>=0) return true;
-  var nm=(it.name||'').toLowerCase();
-  return _drinkCats.some(function(c){return nm.indexOf(c)>=0;})||
-    /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|spirits|whiskey|vodka|gin|rum|kombucha|kefir)\b/i.test(nm);
+  var nm=(it.name||it.n||'').toLowerCase();
+  return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
 }
 function setScanMealAndLog(meal){
   _scanMealType=meal;
@@ -7046,13 +7012,6 @@ function setScanMealAndLog(meal){
 }
 function setScanItemCat(i,cat){
   if(_scanItems[i]) _scanItems[i].category=cat;
-}
-function scanEditPortion(i){
-  if(!_scanItems[i]) return;
-  var newPortion=prompt('Edit portion for '+_scanItems[i].name+':',_scanItems[i].portion);
-  if(!newPortion||newPortion===_scanItems[i].portion) return;
-  _scanItems[i].portion=newPortion;
-  renderScanItems();
 }
 function saveScanAsRecipe(){
   if(!_scanItems.length){toast('No items to save');return;}
@@ -7090,31 +7049,20 @@ function saveScanAsRecipe(){
 function saveAllScanToDatabase(){
   if(!_scanItems.length){toast('No items to save');return;}
   var mf=loadMyFoods(); var added=0;
-  var md=loadMyDrinks(); var addedDr=0;
   _scanItems.forEach(function(it){
-    if(_isScanDrink(it)){
-      var existsDr=md.find(function(d){return d.n.toLowerCase()===it.name.toLowerCase();});
-      if(!existsDr){
-        md.push({n:it.name,e:it.emoji,c:it.cals,u:0,cb:it.carbs||0,sg:it.sugar||0,
-          cat:it.category||'soft',p:it.portion,w:'',_custom:true});
-        addedDr++;
-      }
-    } else {
-      var exists=FOODS.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();})||
-                 mf.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();});
-      if(!exists){
-        mf.push({n:it.name,e:it.emoji,c:it.cals,pr:it.protein,cb:it.carbs,f:it.fat,
-          fi:it.fiber||0,su:it.sugar||0,na:it.sodium||0,p:it.portion,cat:it.category||'snacks'});
-        added++;
-      }
+    var exists=FOODS.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();})||
+               mf.find(function(f){return f.n.toLowerCase()===it.name.toLowerCase();});
+    if(!exists){
+      mf.push({n:it.name,e:it.emoji,c:it.cals,pr:it.protein,cb:it.carbs,f:it.fat,
+        fi:it.fiber||0,su:it.sugar||0,na:it.sodium||0,p:it.portion,cat:it.category||'snacks'});
+      added++;
     }
   });
-  if(added>0){mf.sort(function(a,b){return a.n.localeCompare(b.n);});saveMyFoods(mf);}
-  if(addedDr>0){md.sort(function(a,b){return a.n.localeCompare(b.n);});saveMyDrinks(md);}
-  var total=added+addedDr;
-  if(total>0) toast(total+' item'+(total!==1?'s':'')+' saved'+(addedDr?' ('+addedDr+' to drinks)':'')+'  ✓');
+  mf.sort(function(a,b){return a.n.localeCompare(b.n);});
+  saveMyFoods(mf);
+  if(added>0) toast(added+' new item'+(added!==1?'s':'')+' saved to My Foods ✓');
   else toast('All items already in database');
-  rFoodGrid(); rDrGrid();
+  rFoodGrid();
 }
 // ═══════════════════════════════════════════════════════
 // END FOOD CAMERA SCAN
