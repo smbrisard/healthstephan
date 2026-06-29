@@ -4249,6 +4249,26 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: fix sugar overstatement in ML entries (sugar > carbs is impossible)
+  (function(){
+    try{
+      var _fixed=0;
+      ML.forEach(function(m){
+        if(!m.sugar||m.sugar<=0) return;
+        // Sugar cannot exceed total carbs
+        if(m.carbs>0&&m.sugar>m.carbs){
+          m.sugar=parseFloat((m.carbs*0.5).toFixed(1));
+          _fixed++;
+        }
+        // Sugar > 30g on a single savory item with <200 kcal is suspicious
+        if(m.sugar>20&&m.cals<200&&(m.carbs||0)<30){
+          m.sugar=parseFloat((Math.min(m.sugar,m.carbs*0.4||5)).toFixed(1));
+          _fixed++;
+        }
+      });
+      if(_fixed>0){save();}
+    }catch(e){}
+  }());
   // ONE-TIME: sort existing recipes alphabetically
   (function(){
     try{
