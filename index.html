@@ -6671,15 +6671,24 @@ function cfAdd() {
   var satFat2=parseFloat((g('cf-satfat')||{value:0}).value)||0;
   var cholest2=parseFloat((g('cf-cholest')||{value:0}).value)||0;
   // Use category for food DB if saving to MyFoods
-  ML.push({id:Date.now(),date:date,name:name+(_srv!==1?' x'+fD(_srv,1):''),emoji:emoji,type:type,
-    cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
-    fiber:Math.round(fiber*_srv*10)/10,sugar:Math.round(sugar2*_srv*10)/10,satFat:Math.round(satFat2*_srv*10)/10,
-    sodium:Math.round(sodium*_srv),cholest:Math.round(cholest2*_srv),
-    potassium:Math.round(potassium2*_srv),calcium:Math.round(calcium2*_srv),
-    iron:Math.round(iron2*_srv*10)/10,vitC:0,vitD:0});
-  P.mealsLogged=(P.mealsLogged||0)+1;
-  save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome(); rNutrition();
-  toast(name+' \u2713 added to log!');
+  // Route drinks to DL, food to ML
+  var _cfItem={name:name,category:catVal||'custom'};
+  if(_isScanDrink(_cfItem)){
+    DL.push({id:Date.now(),date:date,n:name,e:emoji,c:Math.round(cals*_srv),
+      u:0,cat:catVal||'soft',sugar:Math.round(sugar2*_srv*10)/10,
+      carbs:Math.round(carbs*_srv*10)/10,vol:0});
+    toast(name+' \u2713 added to drinks!');
+  } else {
+    ML.push({id:Date.now(),date:date,name:name+(_srv!==1?' x'+fD(_srv,1):''),emoji:emoji,type:type,
+      cals:Math.round(cals*_srv),protein:Math.round(prot*_srv*10)/10,carbs:Math.round(carbs*_srv*10)/10,fat:Math.round(fat*_srv*10)/10,
+      fiber:Math.round(fiber*_srv*10)/10,sugar:Math.round(sugar2*_srv*10)/10,satFat:Math.round(satFat2*_srv*10)/10,
+      sodium:Math.round(sodium*_srv),cholest:Math.round(cholest2*_srv),
+      potassium:Math.round(potassium2*_srv),calcium:Math.round(calcium2*_srv),
+      iron:Math.round(iron2*_srv*10)/10,vitC:0,vitD:0});
+    P.mealsLogged=(P.mealsLogged||0)+1;
+    toast(name+' \u2713 added to log!');
+  }
+  save(); closeM('custom-food-m'); closeM('cf-m'); rFood(); rHome(); rNutrition(); rDrLog();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6900,7 +6909,7 @@ function renderScanItems() {
     var catSel='<select onchange="setScanItemCat('+i+',this.value)" style="font-size:11px;background:var(--s3);border:.5px solid var(--b1);border-radius:6px;color:var(--txt);padding:2px 4px;margin-top:4px">';
     catOpts.forEach(function(c){catSel+='<option value="'+c+'"'+(it.category===c?' selected':'')+'>'+c+'</option>';});
     catSel+='</select>';
-    return D('style="background:var(--s2);border-radius:12px;padding:11px;margin-bottom:8px"',
+    return D('data-scan-idx="'+i+'" style="background:var(--s2);border-radius:12px;padding:11px;margin-bottom:8px"',
       D('style="display:flex;align-items:flex-start;gap:9px"',
         D('style="font-size:26px;flex-shrink:0"',it.emoji)+
         D('style="flex:1;min-width:0"',
@@ -6954,15 +6963,38 @@ function scanRemoveItem(i) {
 }
 
 function scanReplaceItem(i) {
-  // Open food search modal, on selection replace item at index i
-  _scanReplaceIdx = i;
-  // Use existing custom food search
-  var cf = g('cf-name'); if(cf) { cf.value=''; cf.focus(); }
-  closeM('scan-m');
+  if(!_scanItems[i]) return;
+  var existing=g('scan-replace-bar-'+i);
+  if(existing){existing.remove();return;}
+  var csr=g('cf-scan-results'); if(!csr) return;
+  var cards=csr.querySelectorAll('[data-scan-idx]');
+  var bar=document.createElement('div');
+  bar.id='scan-replace-bar-'+i;
+  bar.style.cssText='background:var(--s3);border-radius:10px;padding:10px;margin-top:6px';
+  bar.innerHTML='<div style="font-size:11px;color:var(--dim);margin-bottom:6px">Replace with:</div>'+
+    '<input id="scan-ask-inp-'+i+'" type="text" placeholder="Describe the correct item (e.g. Mango lassi 300ml)" style="width:100%;padding:8px;background:var(--s2);border:.5px solid var(--b1);border-radius:8px;color:var(--txt);font-size:13px;box-sizing:border-box;margin-bottom:7px">'+
+    '<div style="display:flex;gap:6px">'+
+    '<button onclick="scanAskClaudeFromBar('+i+')" style="flex:1;padding:8px;border-radius:8px;background:rgba(0,212,170,.15);border:.5px solid var(--grn);color:var(--grn);font-size:12px;font-weight:700;touch-action:manipulation">&#129302; Ask Claude</button>'+
+    '<button onclick="scanReplaceFromDB('+i+')" style="flex:1;padding:8px;border-radius:8px;background:rgba(77,166,255,.12);border:.5px solid var(--blu);color:var(--blu);font-size:12px;font-weight:700;touch-action:manipulation">&#128269; Search DB</button>'+
+    '</div>';
+  if(cards[i]) cards[i].appendChild(bar);
+  else csr.appendChild(bar);
+  setTimeout(function(){var inp=g('scan-ask-inp-'+i);if(inp)inp.focus();},100);
+}
+function scanAskClaudeFromBar(i){
+  var inp=g('scan-ask-inp-'+i);
+  var txt=inp?inp.value.trim():'';
+  if(!txt){toast('Please describe the correct item');return;}
+  var bar=g('scan-replace-bar-'+i); if(bar) bar.remove();
+  scanAskClaude(i,txt);
+}
+function scanReplaceFromDB(i){
+  var bar=g('scan-replace-bar-'+i); if(bar) bar.remove();
+  _scanReplaceIdx=i;
+  var cf=g('cf-name'); if(cf) cf.value='';
   openM('custom-food-m');
-  toast('Search for the correct item, then tap to select', false, 3000);
-  // Override cfSelect to replace scan item
-  window._scanReplacePending = true;
+  toast('Search for the correct item then tap to select',false,3000);
+  window._scanReplacePending=true;
 }
 
 var _scanReplaceIdx = -1;
@@ -6996,7 +7028,7 @@ function logScanItems() {
       sugar: it.sugar||0,
       satFat: it.satFat||0,
       sodium: it.sodium||0,
-      cholesterol: it.cholesterol||0,
+      cholest: it.cholesterol||0,
       potassium: it.potassium||0,
       calcium: it.calcium||0,
       iron: it.iron||0,
