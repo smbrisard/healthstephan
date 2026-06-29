@@ -3310,6 +3310,12 @@ function updateMeServing(){
   if(cp) cp.value=Math.round(_meBase.protein*srv*10)/10;
   if(cb) cb.value=Math.round(_meBase.carbs*srv*10)/10;
   if(cf) cf.value=Math.round(_meBase.fat*srv*10)/10;
+  // Scale all micros proportionally
+  [['me-fiber','fiber'],['me-sugar','sugar'],['me-sodium','sodium'],
+   ['me-satfat','satFat'],['me-potassium','potassium'],['me-calcium','calcium'],
+   ['me-iron','iron'],['me-cholest','cholest']].forEach(function(p){
+    var el=g(p[0]); if(el) el.value=Math.round(_meBase[p[1]]*srv*10)/10;
+  });
 }
 function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
@@ -3324,7 +3330,9 @@ function openMealEdit(id) {
   _meFlds.forEach(function(pair){
     var el=g(pair[0]); if(el) el.value=m[pair[1]]||0;
   });
-  _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0};
+  _meBase={cals:m.cals||0,protein:m.protein||0,carbs:m.carbs||0,fat:m.fat||0,
+    fiber:m.fiber||0,sugar:m.sugar||0,sodium:m.sodium||0,satFat:m.satFat||0,
+    potassium:m.potassium||0,calcium:m.calcium||0,iron:m.iron||0,cholest:m.cholest||0};
   var msrv=g('me-srv'); if(msrv) msrv.value='1';
   var mc=g('me-cals'),mp=g('me-prot'),mcb=g('me-carbs'),mf=g('me-fat'),mt=g('me-type'),md=g('me-date');
   if(mc) mc.value=m.cals||0;
