@@ -883,7 +883,8 @@ body { height: 100dvh; }
     </div>
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="me-date"></div>
     <button class="btn btn-r" onclick="saveMealEdit()" style="margin-bottom:9px">Save Changes</button>
-    <button onclick="deleteMealEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);touch-action:manipulation">Delete Entry</button>
+    <button onclick="saveMealEditToDB()" style="width:100%;padding:12px;border-radius:13px;border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:14px;font-weight:600;background:rgba(0,212,170,.08);margin-top:8px;touch-action:manipulation">&#128190; Save to My Foods Database</button>
+    <button onclick="deleteMealEdit()" style="width:100%;padding:13px;border-radius:13px;border:.5px solid rgba(255,59,92,.3);color:var(--red);font-size:15px;font-weight:600;background:rgba(255,59,92,.06);margin-top:8px;touch-action:manipulation">Delete Entry</button>
   
     <button onclick="closeM('meal-edit-m')" style="width:100%;padding:13px;border-radius:13px;border:.5px solid var(--b2);color:var(--dim);font-size:15px;font-weight:600;background:transparent;margin-top:8px;touch-action:manipulation">Cancel</button>
   </div>
@@ -3342,6 +3343,29 @@ function openMealEdit(id) {
   if(mt) mt.value=m.type||'Dinner';
   if(md) md.value=m.date||todayLocal();
   openM('meal-edit-m');
+}
+function saveMealEditToDB(){
+  var _idStore=g('me-id-store');
+  var _id=_editMealId||(_idStore&&_idStore.value?parseInt(_idStore.value):null);
+  if(!_id){toast('No item selected');return;}
+  var m=ML.find(function(x){return x.id===_id;});
+  if(!m){toast('Item not found');return;}
+  // Read current form values (in case user edited before saving to DB)
+  var nm=(g('me-emoji')||{value:m.emoji}).value;
+  var name=m.name.replace(/ x[\d.]+$/,''); // strip serving suffix like ' x0.5'
+  var existing=FOODS.find(function(f){return f.n.toLowerCase()===name.toLowerCase();})||
+               loadMyFoods().find(function(f){return f.n.toLowerCase()===name.toLowerCase();});
+  if(existing){toast('Already in database');return;}
+  var mf=loadMyFoods();
+  mf.push({
+    n:name,e:decodeEmoji(nm)||m.emoji||'&#127869;',
+    c:m.cals||0,pr:m.protein||0,cb:m.carbs||0,f:m.fat||0,
+    fi:m.fiber||0,su:m.sugar||0,na:m.sodium||0,
+    p:'1 serving',cat:'snacks'
+  });
+  mf.sort(function(a,b){return a.n.localeCompare(b.n);});
+  saveMyFoods(mf);
+  toast('"'+name+'" saved to My Foods ✓');
 }
 function saveMealEdit() {
   // Read ID from hidden field as fallback if global was lost
@@ -6987,6 +7011,47 @@ function scanAskClaudeFromBar(i){
   if(!txt){toast('Please describe the correct item');return;}
   var bar=g('scan-replace-bar-'+i); if(bar) bar.remove();
   scanAskClaude(i,txt);
+}
+function scanAskClaude(i, correction) {
+  var _ak='';
+  try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
+  if(!_ak||!SYNC_URL){toast('API key or sync URL missing');return;}
+  var _idUrl=SYNC_URL.replace(/\/$/,'')+'/identify';
+  toast('Asking Claude about "'+correction+'"...',false,3000);
+  fetch(_idUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({query:correction,apiKey:_ak})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('Error: '+data.error);return;}
+    var text=(data.result||'').replace(/```json|```/g,'').trim();
+    if(text.charAt(0)==='{') text='['+text+']';
+    try{
+      var items=JSON.parse(text);
+      var it=Array.isArray(items)?items[0]:items;
+      if(it&&it.name){
+        _scanItems[i]={
+          id:i,name:it.name,emoji:it.emoji||'&#127869;',portion:it.portion||'1 serving',
+          category:it.category||'snacks',mealType:_scanItems[i]?(_scanItems[i].mealType||_scanMealType):_scanMealType,
+          cals:Math.round(it.cals||0),protein:parseFloat((it.protein||0).toFixed(1)),
+          carbs:parseFloat((it.carbs||0).toFixed(1)),fat:parseFloat((it.fat||0).toFixed(1)),
+          fiber:parseFloat((it.fiber||0).toFixed(1)),sugar:parseFloat((it.sugar||0).toFixed(1)),
+          satFat:parseFloat((it.satFat||0).toFixed(1)),sodium:Math.round(it.sodium||0),
+          cholesterol:Math.round(it.cholesterol||0),potassium:Math.round(it.potassium||0),
+          calcium:Math.round(it.calcium||0),iron:parseFloat((it.iron||0).toFixed(1)),
+          vitC:Math.round(it.vitC||0),vitD:parseFloat((it.vitD||0).toFixed(1)),
+          vitA:Math.round(it.vitA||0),_expanded:false
+        };
+        renderScanItems();
+        toast('Updated to: '+it.name+' ('+Math.round(it.cals||0)+' kcal) ✓');
+      } else {
+        toast('Could not identify that item. Try being more specific.');
+      }
+    }catch(e){toast('Could not parse response. Try again.');}
+  })
+  .catch(function(e){toast('Connection error: '+e.message);});
 }
 function scanReplaceFromDB(i){
   var bar=g('scan-replace-bar-'+i); if(bar) bar.remove();
