@@ -954,6 +954,8 @@ body { height: 100dvh; }
       <div><div class="flbl">Protein (g)</div><input class="fld" type="number" id="de-prot" placeholder="0" step="0.1" style="margin-bottom:0"></div>
       <div><div class="flbl">Fat (g)</div><input class="fld" type="number" id="de-fat" placeholder="0" step="0.1" style="margin-bottom:0"></div>
       <div><div class="flbl">Carbs (g)</div><input class="fld" type="number" id="de-carbs" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sugar (g)</div><input class="fld" type="number" id="de-sugar" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">Sodium (mg)</div><input class="fld" type="number" id="de-sodium" placeholder="0" style="margin-bottom:0"></div>
       <div><div class="flbl">Fiber (g)</div><input class="fld" type="number" id="de-fiber" placeholder="0" step="0.1" style="margin-bottom:0"></div>
     </div>
     <div class="fw"><div class="flbl">Date</div><input class="fld" type="date" id="de-date"></div>
@@ -4154,6 +4156,10 @@ function openDrinkEdit(id){
   setDE('de-fat',d.fat||0);
   setDE('de-carbs',d.carbs||d.cb||0);
   setDE('de-fiber',d.fiber||0);
+  setDE('de-sugar',d.sugar||d.sg||0);
+  setDE('de-sodium',d.sodium||0);
+  window._deBaseSugar=d.sugar||d.sg||0;
+  window._deBaseSodium=d.sodium||0;
   openM('drink-edit-m');
 }
 function saveDrinkEdit(){
@@ -4161,21 +4167,14 @@ function saveDrinkEdit(){
   for(var i=0;i<DL.length;i++){
     if(DL[i].id===_editDrinkId){
       var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
-      var _newCals=parseInt((g('de-cals')||{value:0}).value)||0;
-      var _oldCals=DL[i].c||0;
-      var _srvRatio=(_oldCals>0&&_newCals>0)?_newCals/_oldCals:1;
-      if(dc) DL[i].c=_newCals||DL[i].c;
+      if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
       var _eNA=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
       if(du) DL[i].u=_eNA?0:(parseFloat(du.value)||0);
       if(dd&&dd.value) DL[i].date=dd.value;
       var gDE=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
       DL[i].prot=gDE('de-prot'); DL[i].fat=gDE('de-fat');
       DL[i].carbs=gDE('de-carbs'); DL[i].fiber=gDE('de-fiber');
-      // If sugar/sodium fields are still at base value, scale them with calories
-      var _deSugar=gDE('de-sugar'); var _deSodium=gDE('de-sodium');
-      var _baseSugar=window._deBaseSugar||0; var _baseSodium=window._deBaseSodium||0;
-      DL[i].sugar=(_deSugar===_baseSugar&&_srvRatio!==1)?Math.round(_baseSugar*_srvRatio*10)/10:_deSugar;
-      DL[i].sodium=(_deSodium===_baseSodium&&_srvRatio!==1)?Math.round(_baseSodium*_srvRatio):_deSodium;
+      DL[i].sugar=gDE('de-sugar'); DL[i].sodium=gDE('de-sodium');
       break;
     }
   }
