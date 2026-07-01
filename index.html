@@ -3481,7 +3481,7 @@ function rNutrition() {
     var carb=meals.reduce(function(a,m){return a+(m.carbs||0);},0)+tDrinks().reduce(function(a,d){return a+(d.carbs||0);},0);
     var fat=meals.reduce(function(a,m){return a+(m.fat||0);},0);
     var fib=meals.reduce(function(a,m){return a+(m.fiber||0);},0);
-    var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0)+tDrinks().reduce(function(a,d){return a+(d.sugar||0);},0);
+    var sug=meals.reduce(function(a,m){return a+(m.sugar||0);},0)+tDrinks().reduce(function(a,d){var _sg=d.sugar||d.sg||0; return a+_sg;},0);
     var sod=meals.reduce(function(a,m){return a+(m.sodium||0);},0);
     var chol=meals.reduce(function(a,m){
       var _ch=m.cholest||m.ch||0;
@@ -4119,7 +4119,7 @@ function rDrLog(){
     var _dTimeStr=_dTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
     return D('class="ritem"',
       D('class="ric" style="background:rgba(255,77,184,.1);cursor:pointer" onclick="drinkInfo('+d.id+')"',d.e||'&#127866;')+
-      D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal &middot; '+_dTimeStr+(d.date&&d.date!==today()?' - '+fmtChartDate(d.date):'')))+
+      D('class="rmain"',D('class="rname"',d.n)+D('class="rsub"',(d.u>0?d.u+' units - ':'')+fN(d.c)+' kcal'+(d.sugar>0?' · '+fD(d.sugar,1)+'g sugar':'')+' · '+_dTimeStr+(d.date&&d.date!==today()?' - '+fmtChartDate(d.date):'')))+
       D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',
         D('class="rval" style="color:var(--pnk)"',fN(d.c))+
         D('style="width:28px;height:28px;border-radius:50%;background:rgba(255,77,184,.1);border:.5px solid rgba(255,77,184,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--pnk);touch-action:manipulation" onclick="openDrinkEdit('+d.id+')"','&#9998;')+
@@ -4160,6 +4160,7 @@ function saveDrinkEdit(){
       var gDE=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
       DL[i].prot=gDE('de-prot'); DL[i].fat=gDE('de-fat');
       DL[i].carbs=gDE('de-carbs'); DL[i].fiber=gDE('de-fiber');
+      DL[i].sugar=gDE('de-sugar'); DL[i].sodium=gDE('de-sodium');
       break;
     }
   }
