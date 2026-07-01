@@ -1309,6 +1309,11 @@ var _deBaseCals=0;
 function updateDrinkEditCals(){
   var units=parseFloat((g('de-units')||{value:1}).value)||1;
   var cc=g('de-cals'); if(cc&&_deBaseCals) cc.value=Math.round(_deBaseCals*units);
+  // Scale micros proportionally
+  [['de-sugar','_deBaseSugar'],['de-carbs','_deBaseCarbs'],['de-sodium','_deBaseSodium']].forEach(function(p){
+    var el=g(p[0]); var base=window[p[1]]||0;
+    if(el&&base) el.value=Math.round(base*units*10)/10;
+  });
 }
 
 
@@ -4134,6 +4139,9 @@ function openDrinkEdit(id){
   var info=g('de-info'); if(info) info.innerHTML=(d.e||'&#127866;')+' <strong>'+d.n+'</strong>';
   var dc=g('de-cals'),du=g('de-units'),dq=g('de-qty'),dd=g('de-date');
   _deBaseCals=d.c||0;
+  window._deBaseSugar=d.sugar||d.sg||0;
+  window._deBaseCarbs=d.carbs||d.cb||0;
+  window._deBaseSodium=d.sodium||0;
   if(dc) dc.value=d.c||0;
   if(du) du.value=d.u||1;
   var lbl=g('de-units-label');
@@ -4153,14 +4161,21 @@ function saveDrinkEdit(){
   for(var i=0;i<DL.length;i++){
     if(DL[i].id===_editDrinkId){
       var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
-      if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
+      var _newCals=parseInt((g('de-cals')||{value:0}).value)||0;
+      var _oldCals=DL[i].c||0;
+      var _srvRatio=(_oldCals>0&&_newCals>0)?_newCals/_oldCals:1;
+      if(dc) DL[i].c=_newCals||DL[i].c;
       var _eNA=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
       if(du) DL[i].u=_eNA?0:(parseFloat(du.value)||0);
       if(dd&&dd.value) DL[i].date=dd.value;
       var gDE=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
       DL[i].prot=gDE('de-prot'); DL[i].fat=gDE('de-fat');
       DL[i].carbs=gDE('de-carbs'); DL[i].fiber=gDE('de-fiber');
-      DL[i].sugar=gDE('de-sugar'); DL[i].sodium=gDE('de-sodium');
+      // If sugar/sodium fields are still at base value, scale them with calories
+      var _deSugar=gDE('de-sugar'); var _deSodium=gDE('de-sodium');
+      var _baseSugar=window._deBaseSugar||0; var _baseSodium=window._deBaseSodium||0;
+      DL[i].sugar=(_deSugar===_baseSugar&&_srvRatio!==1)?Math.round(_baseSugar*_srvRatio*10)/10:_deSugar;
+      DL[i].sodium=(_deSodium===_baseSodium&&_srvRatio!==1)?Math.round(_baseSodium*_srvRatio):_deSodium;
       break;
     }
   }
@@ -4239,9 +4254,13 @@ function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
   var _isNonAlc=['water','tea','coffee','soft','choc'].indexOf(selDr.cat)>=0;
-  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i*1000,date:ld,n:selDr.n,
-    e:selDr.e,c:selDr.c,u:_isNonAlc?0:(selDr.u||0),cat:selDr.cat,
-    sugar:selDr.sg||0,carbs:selDr.cb||0,vol:selDr.vol||0});
+  // Get serving multiplier from drink modal
+  var _dmSrv=parseFloat((g('dm-srv')||{value:1}).value)||1;
+  for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i*1000,date:ld,n:selDr.n+(_dmSrv!==1?' x'+_dmSrv:''),
+    e:selDr.e,c:Math.round(selDr.c*_dmSrv),u:_isNonAlc?0:Math.round((selDr.u||0)*_dmSrv*10)/10,cat:selDr.cat,
+    sugar:Math.round((selDr.sg||selDr.sugar||0)*_dmSrv*10)/10,
+    carbs:Math.round((selDr.cb||0)*_dmSrv*10)/10,
+    vol:Math.round((selDr.vol||0)*_dmSrv),sodium:Math.round((selDr.na||0)*_dmSrv)});
   save(); closeM('dr-m'); rDrinks(); toast('Drink logged!');
 }
 
@@ -4282,6 +4301,30 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: migrate DL entries - add sugar from carbs where missing
+  (function(){
+    try{
+      var _changed=false;
+      DL.forEach(function(d){
+        if(d.sugar===undefined||d.sugar===null){
+          // Estimate sugar from carbs based on drink category
+          var cb=d.carbs||d.cb||0;
+          var cat=d.cat||'';
+          var sg=0;
+          if(['water','spirits','beer','wine'].indexOf(cat)>=0) sg=0;
+          else if(cat==='coffee') sg=Math.round(cb*0.5*10)/10; // half carbs are sugar in coffee
+          else if(cat==='tea') sg=Math.round(cb*0.8*10)/10; // chai/sweet tea mostly sugar
+          else if(cat==='soft'||cat==='choc'||cat==='cocktail') sg=Math.round(cb*0.9*10)/10;
+          else sg=Math.round(cb*0.7*10)/10; // generic fallback
+          d.sugar=sg;
+          _changed=true;
+        }
+        // Also copy sg to sugar for consistency
+        if(d.sg!==undefined&&!d.sugar) { d.sugar=d.sg; _changed=true; }
+      });
+      if(_changed) save();
+    }catch(e){}
+  }());
   // ONE-TIME: fix sugar overstatement in ML entries (sugar > carbs is impossible)
   (function(){
     try{
