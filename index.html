@@ -4304,22 +4304,20 @@ function rFitness(){
   (function(){
     try{
       var _changed=false;
+      var _sweetCats=['coffee','tea','soft','choc','cocktail'];
       DL.forEach(function(d){
-        if(d.sugar===undefined||d.sugar===null){
-          // Estimate sugar from carbs based on drink category
-          var cb=d.carbs||d.cb||0;
-          var cat=d.cat||'';
-          var sg=0;
-          if(['water','spirits','beer','wine'].indexOf(cat)>=0) sg=0;
-          else if(cat==='coffee') sg=Math.round(cb*0.5*10)/10; // half carbs are sugar in coffee
-          else if(cat==='tea') sg=Math.round(cb*0.8*10)/10; // chai/sweet tea mostly sugar
-          else if(cat==='soft'||cat==='choc'||cat==='cocktail') sg=Math.round(cb*0.9*10)/10;
-          else sg=Math.round(cb*0.7*10)/10; // generic fallback
-          d.sugar=sg;
+        var cb=d.carbs||d.cb||0;
+        var cat=d.cat||'';
+        // Copy sg→sugar first
+        if(d.sg>0&&(!d.sugar||d.sugar===0)){d.sugar=d.sg;_changed=true;return;}
+        // For sweet categories: always re-estimate if carbs exist (catches old entries with sugar=0)
+        if(_sweetCats.indexOf(cat)>=0&&cb>0){
+          if(cat==='coffee') d.sugar=Math.round(cb*0.5*10)/10;
+          else if(cat==='tea') d.sugar=Math.round(cb*0.85*10)/10;
+          else if(cat==='soft'||cat==='choc') d.sugar=Math.round(cb*0.9*10)/10;
+          else if(cat==='cocktail') d.sugar=Math.round(cb*0.7*10)/10;
           _changed=true;
         }
-        // Also copy sg to sugar for consistency
-        if(d.sg!==undefined&&!d.sugar) { d.sugar=d.sg; _changed=true; }
       });
       if(_changed) save();
     }catch(e){}
@@ -6868,6 +6866,10 @@ function setScanMeal(meal, btn) {
   document.querySelectorAll('#scan-meal-tabs .pill').forEach(function(t){ t.classList.remove('on'); });
   if(btn) btn.classList.add('on');
 }
+function _setScanMealUI(meal, btn) {
+  _scanMealType = meal;
+  renderScanItems(); // re-render to update button highlights
+}
 
 function analyzeFoodPhoto(b64, mime) {
   var hour = new Date().getHours();
@@ -6957,8 +6959,10 @@ function renderScanItems() {
     renderScanTotals(); return;
   }
   // ── Action buttons at top ──
+  var _mealIcons={'Breakfast':'☀️','Lunch':'🌤','Dinner':'🌙','Snack':'🍎'};
   var mealBtns=['Breakfast','Lunch','Dinner','Snack'].map(function(m){
-    return '<button onclick="setScanMealAndLog(\''+m+'\')" style="flex:1;padding:7px 4px;border-radius:10px;font-size:11px;font-weight:700;border:.5px solid var(--b1);background:'+(m===_scanMealType?'rgba(0,212,170,.2)':'rgba(255,255,255,.06)')+';color:'+(m===_scanMealType?'var(--grn)':'var(--dim)')+';touch-action:manipulation">'+m+'</button>';
+    var active=m===_scanMealType;
+    return '<button onclick="_setScanMealUI(\''+m+'\',this)" style="flex:1;padding:7px 4px;border-radius:10px;font-size:11px;font-weight:700;border:.5px solid '+(active?'var(--grn)':'var(--b1)')+';background:'+(active?'rgba(0,212,170,.2)':'rgba(255,255,255,.06)')+';color:'+(active?'var(--grn)':'var(--dim)')+';touch-action:manipulation">'+(_mealIcons[m]||'')+' '+m+'</button>';
   }).join('');
   var actionsHtml=
     D('style="margin-bottom:12px"',
@@ -7129,6 +7133,13 @@ function logScanItems() {
   var logDate = sd&&sd.value ? sd.value : today();
   var newCustom = [];
   _scanItems.forEach(function(it) {
+    if(_isScanDrink(it)){
+      // Route to drink log
+      DL.push({id:Date.now()+Math.random(),date:logDate,
+        n:it.name,e:it.emoji,c:it.cals,u:0,
+        cat:it.category||'soft',sugar:it.sugar||0,
+        carbs:it.carbs||0,vol:0,sodium:it.sodium||0});
+    } else {
     // Log to food log
     ML.push({
       id: Date.now() + Math.random(),
@@ -7153,7 +7164,17 @@ function logScanItems() {
       vitA: it.vitA||0,
       addedSugar: 0
     });
-    // Save new items to custom foods database
+    }
+    // Save new items to database
+    if(_isScanDrink(it)){
+      var _md=loadMyDrinks();
+      if(!_md.find(function(d){return d.n.toLowerCase()===it.name.toLowerCase();})){
+        newCustom.push(it);
+        _md.push({n:it.name,e:it.emoji,c:it.cals,u:0,cb:it.carbs||0,sg:it.sugar||0,cat:it.category||'soft',p:it.portion,w:'',_custom:true});
+        _md.sort(function(a,b){return a.n.localeCompare(b.n);});
+        saveMyDrinks(_md);
+      }
+    } else {
     var existing = FOODS.find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
     var existingCustom = loadMyFoods().find(function(f){ return f.n.toLowerCase()===it.name.toLowerCase(); });
     if(!existing && !existingCustom) {
@@ -7167,6 +7188,7 @@ function logScanItems() {
       mf.sort(function(a,b){ return a.n.localeCompare(b.n); });
       saveMyFoods(mf);
     }
+    } // end else (food)
   });
   // Set mealTab to match
   mealTab = _scanMealType;
