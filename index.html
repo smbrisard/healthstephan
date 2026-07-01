@@ -6659,6 +6659,13 @@ function saveToMyFoods(){
   closeM('cf-m'); closeM('custom-food-m');
 }
 function saveCustomFood(){cfAdd();}
+var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','juice','smoothie','shake','drink'];
+function _isScanDrink(it){
+  if(!it) return false;
+  if(_drinkCats.indexOf(it.category)>=0) return true;
+  var nm=(it.name||it.n||'').toLowerCase();
+  return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
+}
 function cfAdd() {
   var name=(g('cf-name')||{value:''}).value.trim();
   var cals=parseFloat((g('cf-cals')||{value:0}).value)||0;
@@ -6694,8 +6701,9 @@ function cfAdd() {
   var sugar2=parseFloat((g('cf-sugar')||{value:0}).value)||0;
   var satFat2=parseFloat((g('cf-satfat')||{value:0}).value)||0;
   var cholest2=parseFloat((g('cf-cholest')||{value:0}).value)||0;
-  // Use category for food DB if saving to MyFoods
   // Route drinks to DL, food to ML
+  var catVal='custom'; // default, overridden if category selector exists
+  try{var _catEl=document.querySelector('#cf-scan-results select');if(_catEl)catVal=_catEl.value;}catch(e){}
   var _cfItem={name:name,category:catVal||'custom'};
   if(_isScanDrink(_cfItem)){
     DL.push({id:Date.now(),date:date,n:name,e:emoji,c:Math.round(cals*_srv),
@@ -7131,13 +7139,7 @@ function logScanItems() {
   if(newCustom.length) msg += ' · ' + newCustom.length + ' new item' + (newCustom.length!==1?'s':'') + ' saved to database';
   toast(msg + ' ✓');
 }
-var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','juice','smoothie','shake','drink'];
-function _isScanDrink(it){
-  if(!it) return false;
-  if(_drinkCats.indexOf(it.category)>=0) return true;
-  var nm=(it.name||it.n||'').toLowerCase();
-  return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
-}
+
 function setScanMealAndLog(meal){
   _scanMealType=meal;
   logScanItems();
