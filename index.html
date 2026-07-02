@@ -444,7 +444,7 @@ body { height: 100dvh; }
           <button onclick="openWtModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pur);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">⚖️</span>Weight</button>
           <button onclick="openM('sl-m')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--blu);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">😴</span>Sleep</button>
           <button onclick="openMeasModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pnk);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">📏</span>Measure</button>
-          <button onclick="showTab('nutrition')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--grn);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">🥗</span>Nutrition</button>
+          <button onclick="logWaterQuick(12)" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:#38bdf8;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">💧</span>Water</button>
         </div>
       </div>
     </div>
@@ -1930,7 +1930,9 @@ function rHome() {
   // Also check FL snap for yesterday if no SL entry found
   if(!_prevSl&&P.prevSleep>0) _prevSl={hours:P.prevSleep};
   // Also check ydSnap sleep field
-  var _hmYdSnap2=FL.filter(function(f){return f.date===_ydSl2;})[0];
+  var _d2ago2=(function(){var d=new Date();d.setDate(d.getDate()-2);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+  var _hmYdSnap2=FL.filter(function(f){return f.date===_ydSl2||f.date===_d2ago2;})
+    .sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   if(!_prevSl&&_hmYdSnap2&&_hmYdSnap2.sleep>0) _prevSl={hours:_hmYdSnap2.sleep};
   var _sleepRef=_prevSl?_prevSl.hours:null;
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
@@ -3991,6 +3993,16 @@ var DRINKS=[
 ];
 
 
+function logWaterQuick(oz){
+  // Log water as a drink entry
+  var _wd=DRINKS.find(function(d){return d.cat==='water'&&d.vol>0;});
+  var _wVol=_wd?_wd.vol:237; // default 8oz = 237ml
+  DL.push({id:Date.now(),date:today(),n:'Water '+oz+'oz',e:'💧',
+    c:0,u:0,cb:0,sg:0,sugar:0,vol:Math.round(oz*29.57),cat:'water',w:''});
+  P.waterToday=(P.waterToday||0)+oz;
+  save(); rHome(); rDrLog();
+  toast('💧 '+oz+' fl oz logged');
+}
 function drCat(cat,btn){
   dCat=cat;
   document.querySelectorAll('#dr-cats .pill').forEach(function(p){p.classList.remove('on');});
