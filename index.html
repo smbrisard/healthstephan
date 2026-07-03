@@ -455,7 +455,7 @@ body { height: 100dvh; }
 
     <!-- PROFILE -->
     <div class="scr" id="sc-profile">
-      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v21bp</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
+      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v213</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
         <div class="card" style="text-align:center;margin-bottom:14px">
           <div class="avatar" id="pr-av" onclick="openAvatarUpload()" style="cursor:pointer;overflow:hidden;position:relative">ST<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);font-size:9px;color:#fff;text-align:center;padding:3px;font-weight:600">EDIT</div></div>
@@ -4004,6 +4004,16 @@ var DRINKS=[
 ];
 
 
+function resetTodayFoodLog(){
+  var td=today(); var yd=yesterday();
+  var count=ML.filter(function(m){return m.date===td;}).length;
+  var drcount=DL.filter(function(d){return d.date===td;}).length;
+  if(!count&&!drcount){toast('Nothing logged today');return;}
+  ML.forEach(function(m){if(m.date===td) m.date=yd;});
+  DL.forEach(function(d){if(d.date===td) d.date=yd;});
+  save(); rFood(); rHome(); rNutrition(); rDrLog();
+  toast('Moved '+count+' food + '+drcount+' drinks to yesterday ✓');
+}
 function logWaterQuick(oz){
   // Log water as a drink entry
   var _wd=DRINKS.find(function(d){return d.cat==='water'&&d.vol>0;});
