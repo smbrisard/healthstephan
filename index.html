@@ -1491,12 +1491,19 @@ function calcWaterForDate(dt) {
     // vol may be 0 for custom/Starbucks drinks - estimate from calories
     // Coffee/tea: ~3ml per kcal is a good proxy (110kcal latte ~ 330ml)
     var _vol=d.vol||0;
-    if(_vol===0&&d.c>0){
-      // Estimate serving size from calories if not stored
-      if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
-      else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
-      else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
-      else if(d.cat==='water') _vol=240; // default glass if no vol
+    if(_vol===0){
+      if(d.cat==='water'||d.cat==='seltzer'){
+        // Extract oz from name e.g. 'Water 20oz' → 591ml
+        var _ozM=(d.n||'').match(/(\d+)\s*oz/i);
+        var _flM=(d.n||'').match(/(\d+\.?\d*)\s*(fl oz|L|ml)/i);
+        if(_ozM) _vol=Math.round(parseInt(_ozM[1])*29.57);
+        else if(_flM) _vol=Math.round(parseFloat(_flM[1])*29.57);
+        else _vol=355; // default 12oz if can't parse
+      } else if(d.c>0){
+        if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
+        else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
+        else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
+      }
     }
     if(d.cat==='water') ml+=_vol;
     else if(d.cat==='coffee'||d.cat==='starbucks') ml+=_vol*0.5;
