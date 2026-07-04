@@ -3997,9 +3997,9 @@ var DRINKS=[
   {n:'Iced Latte 16oz',e:'&#9749;',p:'16 fl oz whole milk',c:190,u:0,cb:23,sg:18,cat:'coffee',w:''},
   {n:'Oat Milk Cappuccino',e:'&#9749;',p:'8 fl oz',c:90,u:0,cb:11,sg:5,cat:'coffee',w:''},
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'coffee',w:''},
-  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'pH 9+'},
+  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'pH 9+'},
   {n:'Coconut Water 11oz',e:'&#127850;',p:'11 fl oz',c:60,u:0,cb:15,sg:12,vol:325,cat:'water',w:''},
-  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'With electrolytes'},
+  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'With electrolytes'},
   {n:'Lemon Water 16oz',e:'&#127819;',p:'16 fl oz',c:10,u:0,cb:3,sg:0,cat:'water',w:''},
   {n:'Protein Water',e:'&#128167;',p:'16 fl oz',c:70,u:0,cb:1,sg:0,cat:'water',w:'25g protein'},
   {n:'Sparkling Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
@@ -4340,6 +4340,20 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: fix vol:0 on water DL entries using name parsing
+  (function(){
+    try{
+      var _wFixed=false;
+      DL.forEach(function(d){
+        if((d.cat==='water'||d.cat==='seltzer')&&(!d.vol||d.vol===0)){
+          var _ozM=(d.n||'').match(/(\d+)\s*oz/i);
+          if(_ozM){ d.vol=Math.round(parseInt(_ozM[1])*29.57); _wFixed=true; }
+          else{ d.vol=355; _wFixed=true; } // default 12oz
+        }
+      });
+      if(_wFixed) save();
+    }catch(e){}
+  }());
   // ONE-TIME: migrate DL entries - add sugar from carbs where missing
   (function(){
     try{
