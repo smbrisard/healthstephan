@@ -3475,6 +3475,14 @@ function buildNF(f) {
 function addFood() {
   if(!selF) return;
   var f=selF, de=g('fm-date'), ld=de&&de.value?de.value:today();
+  // Route starbucks/drink items to drink log
+  if(_isScanDrink(f)){
+    DL.push({id:Date.now(),date:ld,n:f.n,e:f.e,c:Math.round((f.c||0)*fSrv),
+      u:0,cat:f.cat||'coffee',sugar:(f.su||0)*fSrv,carbs:(f.cb||0)*fSrv,vol:0,sodium:0});
+    P.mealsLogged=(P.mealsLogged||0)+1;
+    save(); closeM('food-m'); rDrLog(); rHome(); rNutrition();
+    toast(f.n+' added to drinks ✓'); return;
+  }
   ML.push({id:Date.now(),date:ld,name:f.n,emoji:f.e,type:mealTab.toLowerCase(),cals:Math.round(f.c*fSrv),protein:f.pr*fSrv,carbs:f.cb*fSrv,fat:f.f*fSrv,fiber:f.fi*fSrv,sugar:f.su*fSrv,satFat:f.sf*fSrv,sodium:f.na*fSrv,cholest:f.ch*fSrv,potassium:f.po*fSrv,calcium:f.ca*fSrv,iron:f.ir*fSrv,vitC:f.vc*fSrv,vitD:f.vd*fSrv,vitA:f.va*fSrv,addedSugar:f.as*fSrv});
   P.mealsLogged=(P.mealsLogged||0)+1; save(); closeM('food-m');
   var rem=P.calTarget-tTotal(); toast(rem<0?'Added - '+fN(Math.abs(rem))+' over':'Added to '+mealTab+'!',rem<0);
@@ -3998,9 +4006,9 @@ var DRINKS=[
   {n:'Iced Latte 16oz',e:'&#9749;',p:'16 fl oz whole milk',c:190,u:0,cb:23,sg:18,cat:'coffee',w:''},
   {n:'Oat Milk Cappuccino',e:'&#9749;',p:'8 fl oz',c:90,u:0,cb:11,sg:5,cat:'coffee',w:''},
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'coffee',w:''},
-  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'pH 9+'},
+  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'pH 9+'},
   {n:'Coconut Water 11oz',e:'&#127850;',p:'11 fl oz',c:60,u:0,cb:15,sg:12,vol:325,cat:'water',w:''},
-  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'With electrolytes'},
+  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'With electrolytes'},
   {n:'Lemon Water 16oz',e:'&#127819;',p:'16 fl oz',c:10,u:0,cb:3,sg:0,cat:'water',w:''},
   {n:'Protein Water',e:'&#128167;',p:'16 fl oz',c:70,u:0,cb:1,sg:0,cat:'water',w:'25g protein'},
   {n:'Sparkling Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
@@ -6713,22 +6721,21 @@ function analyzeDrinkPhoto(b64){
   var _ak='';
   try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
   if(!_ak||!SYNC_URL){toast('Add API key in Settings to use drink scanning');return;}
-  var _vUrl=SYNC_URL.replace(/\/$/,'')+'/identify';
-  // Use identify endpoint with a drink-focused prompt
-  var _drPrompt='Look at this drink/beverage image. Identify what it is and estimate: name, emoji, volume/portion, category (coffee/tea/beer/wine/spirits/soft/cocktail/kombucha/choc/smoothie/shake), calories, carbs (g), sugar (g), protein (g), fat (g), sodium (mg), alcohol units (0 if non-alcoholic). Return ONLY JSON: {"name":"string","emoji":"emoji","portion":"string","category":"string","cals":number,"carbs":number,"sugar":number,"protein":number,"fat":number,"sodium":number,"units":number}';
+  var _vUrl=SYNC_URL.replace(/\/$/,'')+'/vision';
+  var _drPrompt='Identify this drink/beverage from the photo. Return ONLY a JSON array with ONE item: [{"name":"string","emoji":"single emoji","portion":"string e.g. 355ml","category":"one of: coffee/tea/beer/wine/spirits/soft/cocktail/kombucha/choc/smoothie/shake/water","mealType":"Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":0,"sugar":number,"satFat":0,"sodium":number,"cholesterol":0,"potassium":0,"calcium":0,"iron":0,"vitC":0,"vitD":0,"vitA":0}]';
   fetch(_vUrl,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({imageBase64:b64,mimeType:'image/jpeg',apiKey:_ak,query:_drPrompt})
+    body:JSON.stringify({imageBase64:b64,mimeType:'image/jpeg',apiKey:_ak,timeOfDay:'daytime',prompt:_drPrompt})
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.error){toast('Error: '+data.error);return;}
     var text=(data.result||'').replace(/```json|```/g,'').trim();
-    if(text.charAt(0)==='[') text=text.slice(1,text.lastIndexOf(']'));
     try{
-      var it=JSON.parse(text);
-      if(!it.name){toast('Could not identify drink. Try again.');return;}
+      var parsed=JSON.parse(text);
+      var it=Array.isArray(parsed)?parsed[0]:parsed;
+      if(!it||!it.name){toast('Could not identify drink. Try again.');return;}
       // Fill the custom drink form
       var sF=function(id,v){var e=g(id);if(e)e.value=v||'';};
       sF('cd-name',it.name);
@@ -6739,6 +6746,8 @@ function analyzeDrinkPhoto(b64){
       sF('cd-fat',it.fat||0);
       sF('cd-sodium',it.sodium||0);
       sF('cd-units',it.units||0);
+      // Store portion for reference
+      var cdPor=g('cd-portion'); if(cdPor) cdPor.value=it.portion||'1 serving';
       var cdEm=g('cd-emoji'); if(cdEm) cdEm.value=it.emoji||'&#127866;';
       var cdEp=g('cd-emoji-preview'); if(cdEp) cdEp.textContent=it.emoji||'&#127866;';
       var cdCat=g('cd-cat'); if(cdCat) cdCat.value=it.category||'soft';
@@ -6900,10 +6909,11 @@ function saveToMyFoods(){
   closeM('cf-m'); closeM('custom-food-m');
 }
 function saveCustomFood(){cfAdd();}
-var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','juice','smoothie','shake','drink'];
+var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','juice','smoothie','shake','drink','starbucks'];
 function _isScanDrink(it){
   if(!it) return false;
-  if(_drinkCats.indexOf(it.category)>=0) return true;
+  var cat=it.category||it.cat||'';
+  if(_drinkCats.indexOf(cat)>=0) return true;
   var nm=(it.name||it.n||'').toLowerCase();
   return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
 }
