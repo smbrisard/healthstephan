@@ -4115,12 +4115,27 @@ function rDrGrid(){
     return;
   }
   var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
+  // Also show drink recipes in their category pill
+  if(dCat!=='all'&&dCat!=='my'&&dCat!=='drrecipes'){
+    var _catRecs=loadDrinkRecipes().filter(function(r){return r.cat===dCat;});
+    if(_catRecs.length){
+      var _recHtml=_catRecs.map(function(r,i){
+        return D('class="fcard" style="position:relative" onclick="openDrinkRecipe(loadDrinkRecipes().indexOf(r))"',
+          D('style="font-size:24px;margin-bottom:4px"',r.emoji||'&#127864;')+
+          D('style="font-size:11px;font-weight:700;line-height:1.2"',r.name)+
+          D('style="font-size:10px;color:var(--grn)"','&#128216; Recipe')+
+          D('style="font-family:var(--mn);font-size:11px;font-weight:700"',fN(r.cals)+' kcal'));
+      }).join('');
+      // Will be prepended below after built-in list
+      window._drRecHtml=_recHtml;
+    } else { window._drRecHtml=''; }
+  } else { window._drRecHtml=''; }
   var _builtInDr=(dCat==='all')?DRINKS:(dCat==='my'?[]:(dCat==='starbucks'?
     FOODS.filter(function(f){return f.cat==='starbucks';}).map(function(f){return {n:f.n,e:f.e,c:f.c,cat:'starbucks',_isFood:true};}):
     DRINKS.filter(function(d){return d.cat===dCat;})));
   var list=_myDrInCat.concat(_builtInDr);
   list.sort(function(a,b){return a.n.localeCompare(b.n);});
-  ge.innerHTML=list.map(function(d,i){
+  ge.innerHTML=(window._drRecHtml||'')+list.map(function(d,i){
     var _isDrC=d._custom||false;
     var _drIdx=_isDrC?-1:DRINKS.indexOf(d);
     var _mdi=_isDrC?_myDrs.findIndex(function(x){return x.n===d.n;}): -1;
@@ -6703,9 +6718,13 @@ function migrateRecipeToDrink(idx){
   var recipes=loadRecipes();
   var r=recipes[idx]; if(!r){toast('Recipe not found');return;}
   var drCats2=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','smoothie','shake'];
-  var cat=prompt('Move "'+r.name+'" to drink recipes.\nChoose category:\n'+drCats2.join(', '),'smoothie');
-  if(!cat) return;
-  cat=cat.toLowerCase().trim();
+  var catRaw=prompt('Move "'+r.name+'" to drink recipes.\nType a category:\n'+drCats2.join(' | '),'smoothie');
+  if(!catRaw) return;
+  var cat=catRaw.toLowerCase().trim();
+  // Fuzzy match - find closest category
+  var _matched=drCats2.find(function(c){return c===cat||c.startsWith(cat)||cat.startsWith(c);});
+  if(!_matched){toast('Unknown category. Use: '+drCats2.join(', '));return;}
+  cat=_matched;
   var dr=loadDrinkRecipes();
   dr.push({
     name:r.name,emoji:r.emoji||'&#127864;',cat:cat,
