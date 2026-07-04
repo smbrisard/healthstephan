@@ -455,7 +455,7 @@ body { height: 100dvh; }
 
     <!-- PROFILE -->
     <div class="scr" id="sc-profile">
-      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v213</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
+      <div class="phdr"><div><div class="ptitle">Profile</div><div style="font-size:10px;color:var(--dim);margin-top:2px">v21bp</div></div><button onclick="toggleTheme()" style="padding:8px 16px;border-radius:20px;background:var(--s2);border:.5px solid var(--b1);color:var(--txt);font-size:13px;font-weight:600;touch-action:manipulation">☀️/🌙</button></div>
       <div class="sec" style="padding-top:8px;padding-bottom:100px">
         <div class="card" style="text-align:center;margin-bottom:14px">
           <div class="avatar" id="pr-av" onclick="openAvatarUpload()" style="cursor:pointer;overflow:hidden;position:relative">ST<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);font-size:9px;color:#fff;text-align:center;padding:3px;font-weight:600">EDIT</div></div>
@@ -1492,19 +1492,12 @@ function calcWaterForDate(dt) {
     // vol may be 0 for custom/Starbucks drinks - estimate from calories
     // Coffee/tea: ~3ml per kcal is a good proxy (110kcal latte ~ 330ml)
     var _vol=d.vol||0;
-    if(_vol===0){
-      if(d.cat==='water'||d.cat==='seltzer'){
-        // Extract oz from name e.g. 'Water 20oz' → 591ml
-        var _ozM=(d.n||'').match(/(\d+)\s*oz/i);
-        var _flM=(d.n||'').match(/(\d+\.?\d*)\s*(fl oz|L|ml)/i);
-        if(_ozM) _vol=Math.round(parseInt(_ozM[1])*29.57);
-        else if(_flM) _vol=Math.round(parseFloat(_flM[1])*29.57);
-        else _vol=355; // default 12oz if can't parse
-      } else if(d.c>0){
-        if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
-        else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
-        else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
-      }
+    if(_vol===0&&d.c>0){
+      // Estimate serving size from calories if not stored
+      if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
+      else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
+      else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
+      else if(d.cat==='water') _vol=240; // default glass if no vol
     }
     if(d.cat==='water') ml+=_vol;
     else if(d.cat==='coffee'||d.cat==='starbucks') ml+=_vol*0.5;
@@ -3217,7 +3210,7 @@ function rFoodGrid() {
       return D('class="ftile" style="position:relative" onclick="addRecipeFromDB('+ri+')"',
         D('onclick="event.stopPropagation();openRecipeBuilder('+ri+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F')+
         D('onclick="event.stopPropagation();deleteRecipeFromDB('+ri+')" style="position:absolute;top:4px;right:4px;background:rgba(255,59,92,.25);border:none;border-radius:50%;width:26px;height:26px;color:var(--red);font-size:14px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation"','\u00d7')+
-        D('onclick="event.stopPropagation();migrateRecipeToDrink('+ri+')" style="position:absolute;top:4px;right:34px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drink Recipes"','\u2192\uD83C\uDF7A')+
+        D('onclick="event.stopPropagation();migrateRecipeToDrink('+ri+')" style="position:absolute;top:4px;right:34px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drink Recipes"','\u2192\uD83E\uDD64')+
         D('style="font-size:24px;margin-bottom:6px"',r.emoji||'&#128216;')+
         D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',r.name)+
         D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',r.servings+' serving'+(r.servings!==1?'s':''))+
@@ -3272,10 +3265,9 @@ function rFoodGrid() {
     var _mfName=_isCustomFood?encodeURIComponent(f.n):'';  
     var _migrBtn=(_isCustomFood&&!f._isRecipe&&_mfIdx2>=0)?'<button onclick="event.stopPropagation();migrateFoodToDrinkByName(decodeURIComponent(\''+_mfName+'\'))" style="position:absolute;top:4px;right:36px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;line-height:26px;text-align:center;touch-action:manipulation" title="Move to Drinks">&#8680;</button>':'';
     var _recipeEditIdx=f._isRecipe?savedRecipes.findIndex(function(r){return r.name===f.n;}):-1;
-    var _recipeMigrBtn=f._isRecipe&&_recipeEditIdx>=0?'<button onclick="event.stopPropagation();migrateRecipeToDrink('+_recipeEditIdx+')" style="position:absolute;top:4px;right:32px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:26px;height:26px;color:var(--grn);font-size:11px;cursor:pointer;touch-action:manipulation" title="Move to Drink Recipes">&#8594;&#127864;</button>':'';
     var _editBtn=f._isRecipe?D('onclick="event.stopPropagation();openRecipeBuilder('+_recipeEditIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):
       (_isCustomFood?D('onclick="event.stopPropagation();editMyFood('+_myIdx+')" style="position:absolute;top:4px;left:4px;background:rgba(0,212,170,.15);border:none;border-radius:50%;width:22px;height:22px;color:var(--grn);font-size:12px;cursor:pointer;line-height:22px;text-align:center;touch-action:manipulation"','\u270F'):'');
-    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_editBtn+_delBtn+_migrBtn+_recipeMigrBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+(f.pr||f.protein||0)+'g C:'+(f.cb||f.carbs||0)+'g F:'+(f.f||f.fat||0)+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
+    return D('class="ftile" style="position:relative" onclick="'+_clickFn+'"',_editBtn+_delBtn+_migrBtn+D('style="font-size:24px;margin-bottom:6px"',f.e)+D('style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:3px"',f.n)+D('style="font-size:10px;color:var(--dim);margin-bottom:3px"',toImperial(f.p))+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+(over?'var(--red)':'var(--grn)')+'"',fN(f.c)+' kcal')+D('style="font-size:10px;color:var(--dim)"','P:'+(f.pr||f.protein||0)+'g C:'+(f.cb||f.carbs||0)+'g F:'+(f.f||f.fat||0)+'g')+(over?D('style="font-size:10px;font-weight:700;color:var(--red);margin-top:2px"','+'+fN(f.c-rem)+' over'):''));
   }).join('')||D('style="grid-column:1/-1;padding:20px;text-align:center;color:var(--dim);font-size:14px"','No foods found. Try a different search.');
 }
 
@@ -4000,9 +3992,9 @@ var DRINKS=[
   {n:'Iced Latte 16oz',e:'&#9749;',p:'16 fl oz whole milk',c:190,u:0,cb:23,sg:18,cat:'coffee',w:''},
   {n:'Oat Milk Cappuccino',e:'&#9749;',p:'8 fl oz',c:90,u:0,cb:11,sg:5,cat:'coffee',w:''},
   {n:'Oat Milk Latte',e:'&#9749;',p:'12oz',c:130,u:0,cb:16,sg:12,cat:'coffee',w:''},
-  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'pH 9+'},
+  {n:'Alkaline Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'pH 9+'},
   {n:'Coconut Water 11oz',e:'&#127850;',p:'11 fl oz',c:60,u:0,cb:15,sg:12,vol:325,cat:'water',w:''},
-  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',vol:591,w:'With electrolytes'},
+  {n:'Electrolyte Water 20oz',e:'&#128167;',p:'20 fl oz',c:0,u:0,cb:0,sg:0,cat:'water',w:'With electrolytes'},
   {n:'Lemon Water 16oz',e:'&#127819;',p:'16 fl oz',c:10,u:0,cb:3,sg:0,cat:'water',w:''},
   {n:'Protein Water',e:'&#128167;',p:'16 fl oz',c:70,u:0,cb:1,sg:0,cat:'water',w:'25g protein'},
   {n:'Sparkling Water 12oz',e:'&#128167;',p:'12 fl oz',c:0,u:0,cb:0,sg:0,vol:355,cat:'water',w:''},
@@ -4099,43 +4091,31 @@ function showDrinkGrid(){
 function rDrGrid(){
   var ge=g('dr-grid'); if(!ge) return;
   var _myDrs=loadMyDrinks();
-  // Drink recipes category
+  // Drink Recipes pill
   if(dCat==='drrecipes'){
     var _drRecs=loadDrinkRecipes();
-    var ge2=g('dr-grid'); if(!ge2) return;
-    if(!_drRecs.length){ge2.innerHTML='<div style="color:var(--dim);padding:20px;text-align:center">No drink recipes yet.<br>Save a recipe or migrate from Food Recipes.</div>';return;}
-    ge2.innerHTML=_drRecs.map(function(r,i){
-      return D('class="fcard" onclick="openDrinkRecipe('+i+')"',
-        D('style="font-size:28px;margin-bottom:4px"',r.emoji||'&#127864;')+
-        D('style="font-size:12px;font-weight:600;line-height:1.2"',r.name)+
-        D('style="font-size:11px;color:var(--dim)"',fN(r.cals)+' kcal')+
-        D('style="font-size:10px;color:var(--dim)"',r.cat)+
-        '<button onclick="event.stopPropagation();deleteDrinkRecipe('+i+')" style="position:absolute;top:4px;right:4px;background:none;border:none;color:var(--red);font-size:14px;cursor:pointer">&#215;</button>');
+    if(!_drRecs.length){ge.innerHTML='<div style="color:var(--dim);padding:20px;text-align:center">No drink recipes yet. Migrate from Food → Recipes.</div>';return;}
+    ge.innerHTML=_drRecs.map(function(r,i){
+      return '<div class="drcard">'+'<div class="drem">'+(r.emoji||'&#127864;')+'</div>'+'<div class="drinfo" onclick="openDrinkRecipe('+i+')" style="cursor:pointer">'+'<div class="drname">'+r.name+'</div>'+'<div class="drpill">&#128218; '+r.cat+'</div>'+'<div class="drsub">'+fN(r.cals)+' kcal'+(r.protein>0?' &middot; '+fD(r.protein,1)+'g prot':'')+'</div>'+'</div>'+'<div style="display:flex;flex-direction:column;gap:4px">'+'<button onclick="event.stopPropagation();editDrinkRecipe('+i+')" style="width:28px;height:28px;border-radius:50%;background:rgba(0,212,170,.1);border:none;color:var(--grn);font-size:13px;cursor:pointer">&#9998;</button>'+'<button onclick="event.stopPropagation();deleteDrinkRecipe('+i+')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,59,92,.1);border:none;color:var(--red);font-size:14px;cursor:pointer">&#215;</button>'+'</div></div>';
     }).join('');
     return;
   }
-  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
-  // Also show drink recipes in their category pill
-  if(dCat!=='all'&&dCat!=='my'&&dCat!=='drrecipes'){
+  // Category pills - also show matching drink recipes at top
+  var _catRecHtml='';
+  if(dCat!=='all'&&dCat!=='my'){
     var _catRecs=loadDrinkRecipes().filter(function(r){return r.cat===dCat;});
-    if(_catRecs.length){
-      var _recHtml=_catRecs.map(function(r,i){
-        return D('class="fcard" style="position:relative" onclick="openDrinkRecipe(loadDrinkRecipes().indexOf(r))"',
-          D('style="font-size:24px;margin-bottom:4px"',r.emoji||'&#127864;')+
-          D('style="font-size:11px;font-weight:700;line-height:1.2"',r.name)+
-          D('style="font-size:10px;color:var(--grn)"','&#128216; Recipe')+
-          D('style="font-family:var(--mn);font-size:11px;font-weight:700"',fN(r.cals)+' kcal'));
-      }).join('');
-      // Will be prepended below after built-in list
-      window._drRecHtml=_recHtml;
-    } else { window._drRecHtml=''; }
-  } else { window._drRecHtml=''; }
+    _catRecHtml=_catRecs.map(function(r,i){
+      var _ri=loadDrinkRecipes().findIndex(function(x){return x.name===r.name;});
+      return '<div class="drcard">'+'<div class="drem">'+(r.emoji||'&#127864;')+'</div>'+'<div class="drinfo" onclick="openDrinkRecipe('+_ri+')" style="cursor:pointer">'+'<div class="drname">'+r.name+'</div>'+'<div class="drpill">&#128218; Recipe</div>'+'<div class="drsub">'+fN(r.cals)+' kcal</div>'+'</div>'+'<div style="display:flex;flex-direction:column;gap:4px">'+'<button onclick="event.stopPropagation();editDrinkRecipe('+_ri+')" style="width:28px;height:28px;border-radius:50%;background:rgba(0,212,170,.1);border:none;color:var(--grn);font-size:13px;cursor:pointer">&#9998;</button>'+'<button onclick="event.stopPropagation();deleteDrinkRecipe('+_ri+')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,59,92,.1);border:none;color:var(--red);font-size:14px;cursor:pointer">&#215;</button>'+'</div></div>';
+    }).join('');
+  }
+  var _myDrInCat=_myDrs.filter(function(d){return dCat==='all'||dCat==='my'||d.cat===dCat;}).map(function(d){return Object.assign({},d,{_custom:true});});
   var _builtInDr=(dCat==='all')?DRINKS:(dCat==='my'?[]:(dCat==='starbucks'?
     FOODS.filter(function(f){return f.cat==='starbucks';}).map(function(f){return {n:f.n,e:f.e,c:f.c,cat:'starbucks',_isFood:true};}):
     DRINKS.filter(function(d){return d.cat===dCat;})));
   var list=_myDrInCat.concat(_builtInDr);
   list.sort(function(a,b){return a.n.localeCompare(b.n);});
-  ge.innerHTML=(window._drRecHtml||'')+list.map(function(d,i){
+  ge.innerHTML=(_catRecHtml||'')+list.map(function(d,i){
     var _isDrC=d._custom||false;
     var _drIdx=_isDrC?-1:DRINKS.indexOf(d);
     var _mdi=_isDrC?_myDrs.findIndex(function(x){return x.n===d.n;}): -1;
@@ -4183,29 +4163,6 @@ function showInfoModal(html){
   }
   var body=g('info-modal-body');
   if(body) body.innerHTML=html+'<button onclick="g(\'info-modal\').remove()" style="width:100%;margin-top:16px;padding:12px;background:var(--s3);border:none;border-radius:10px;color:var(--dim);font-size:14px;cursor:pointer">Close</button>';
-}
-function openDrinkRecipe(idx){
-  var dr=loadDrinkRecipes(); var r=dr[idx]; if(!r) return;
-  selDr={n:r.name,e:r.emoji||'&#127864;',c:r.cals||0,u:0,
-    cb:r.carbs||0,sg:r.sugar||0,sugar:r.sugar||0,cat:r.cat||'soft',
-    vol:0,w:'Drink Recipe'};
-  g('dm-em').innerHTML=r.emoji||'&#127864;';
-  set('dm-name',r.name);
-  set('dm-portion',r.servings>1?r.servings+' servings':'1 serving');
-  dQty=1;
-  // Build info pills
-  var info=g('dm-info');
-  if(info) info.innerHTML=
-    D('style="background:var(--s3);border-radius:8px;padding:4px 8px;font-size:12px"',fN(r.cals)+' kcal')+
-    (r.protein>0?D('style="background:var(--s3);border-radius:8px;padding:4px 8px;font-size:12px"',fD(r.protein,1)+'g protein'):'');
-  openM('dr-m');
-}
-function deleteDrinkRecipe(idx){
-  var dr=loadDrinkRecipes();
-  dr.splice(idx,1);
-  saveDrinkRecipes(dr);
-  rDrGrid();
-  toast('Drink recipe deleted');
 }
 function rDrLog(){
   var le=g('dr-log'); if(!le) return;
@@ -4396,20 +4353,6 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
-  // ONE-TIME: fix vol:0 on water DL entries using name parsing
-  (function(){
-    try{
-      var _wFixed=false;
-      DL.forEach(function(d){
-        if((d.cat==='water'||d.cat==='seltzer')&&(!d.vol||d.vol===0)){
-          var _ozM=(d.n||'').match(/(\d+)\s*oz/i);
-          if(_ozM){ d.vol=Math.round(parseInt(_ozM[1])*29.57); _wFixed=true; }
-          else{ d.vol=355; _wFixed=true; } // default 12oz
-        }
-      });
-      if(_wFixed) save();
-    }catch(e){}
-  }());
   // ONE-TIME: migrate DL entries - add sugar from carbs where missing
   (function(){
     try{
@@ -6714,31 +6657,49 @@ function restoreAllFoods(){
 // ── My Drinks Database ──────────────────────────────────────
 function loadDrinkRecipes(){try{return JSON.parse(localStorage.getItem('hs_drink_recipes')||'[]');}catch(e){return[];}}
 function saveDrinkRecipes(arr){try{localStorage.setItem('hs_drink_recipes',JSON.stringify(arr));}catch(e){}}
-function migrateRecipeToDrink(idx){
-  var recipes=loadRecipes();
-  var r=recipes[idx]; if(!r){toast('Recipe not found');return;}
+function editDrinkRecipe(idx){
+  var dr=loadDrinkRecipes(); var r=dr[idx]; if(!r) return;
   var drCats2=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','smoothie','shake'];
-  var catRaw=prompt('Move "'+r.name+'" to drink recipes.\nType a category:\n'+drCats2.join(' | '),'smoothie');
+  var newName=prompt('Recipe name:',r.name); if(!newName) return;
+  var newCat=prompt('Category ('+drCats2.join(', ')+'):',r.cat||'smoothie'); if(!newCat) return;
+  var cat=newCat.toLowerCase().trim();
+  var matched=drCats2.find(function(c){return c===cat||c.startsWith(cat)||cat.startsWith(c);})||cat;
+  dr[idx].name=newName; dr[idx].cat=matched;
+  saveDrinkRecipes(dr); rDrGrid(); toast('Updated ✓');
+}
+function deleteDrinkRecipe(idx){
+  var dr=loadDrinkRecipes(); dr.splice(idx,1);
+  saveDrinkRecipes(dr); rDrGrid(); toast('Drink recipe deleted');
+}
+function openDrinkRecipe(idx){
+  var r=loadDrinkRecipes()[idx]; if(!r) return;
+  selDr={n:r.name,e:r.emoji||'&#127864;',c:r.cals||0,u:0,
+    cb:r.carbs||0,sg:r.sugar||0,sugar:r.sugar||0,
+    cat:r.cat||'soft',vol:0,w:'Drink Recipe'};
+  g('dm-em').innerHTML=r.emoji||'&#127864;';
+  set('dm-name',r.name); set('dm-portion','1 serving');
+  dQty=1;
+  var info=g('dm-info');
+  if(info) info.innerHTML=D('style="background:var(--s3);border-radius:8px;padding:4px 8px;font-size:12px"',fN(r.cals)+' kcal');
+  openM('dr-m');
+}
+function migrateRecipeToDrink(idx){
+  var recipes=loadRecipes(); var r=recipes[idx]; if(!r) return;
+  var drCats2=['coffee','tea','water','beer','wine','spirits','soft','cocktail','kombucha','choc','prosecco','seltzer','smoothie','shake'];
+  var catRaw=prompt('Move to drink recipes. Category:\n'+drCats2.join(' | '),'smoothie');
   if(!catRaw) return;
   var cat=catRaw.toLowerCase().trim();
-  // Fuzzy match - find closest category
-  var _matched=drCats2.find(function(c){return c===cat||c.startsWith(cat)||cat.startsWith(c);});
-  if(!_matched){toast('Unknown category. Use: '+drCats2.join(', '));return;}
-  cat=_matched;
+  var matched=drCats2.find(function(c){return c===cat||c.startsWith(cat)||cat.startsWith(c);});
+  if(!matched){toast('Use: '+drCats2.join(', '));return;}
   var dr=loadDrinkRecipes();
-  dr.push({
-    name:r.name,emoji:r.emoji||'&#127864;',cat:cat,
+  dr.push({name:r.name,emoji:r.emoji||'&#127864;',cat:matched,
     cals:r.cals||0,protein:r.protein||0,carbs:r.carbs||0,fat:r.fat||0,
     fiber:r.fiber||0,sugar:r.sugar||0,sodium:r.sodium||0,
-    ingredients:r.ingredients||[],servings:r.servings||1,savedAt:Date.now()
-  });
+    ingredients:r.ingredients||[],servings:r.servings||1,savedAt:Date.now()});
   dr.sort(function(a,b){return a.name.localeCompare(b.name);});
   saveDrinkRecipes(dr);
-  // Remove from food recipes
-  recipes.splice(idx,1);
-  saveRecipes(recipes);
-  toast('Moved to Drink Recipes ✓');
-  rFoodGrid(); rDrGrid();
+  recipes.splice(idx,1); saveRecipes(recipes);
+  toast('Moved to Drink Recipes ✓'); rFoodGrid(); rDrGrid();
 }
 function loadMyDrinks(){
   try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}
