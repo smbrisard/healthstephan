@@ -1971,7 +1971,14 @@ function rHome() {
   // RHR reference: use yesterday's FL snap rhr strictly
   // Use P.prevRhr directly - set at launch from yesterday's snap
   // This is more reliable than FL scan which may have stale rhr values
+  // RHR ref: prevRhr first, then FL snap yesterday
   var _hmRhrRef=P.prevRhr>0?P.prevRhr:null;
+  if(!_hmRhrRef&&_hmYdSnap&&_hmYdSnap.rhr>0) _hmRhrRef=_hmYdSnap.rhr;
+  if(!_hmRhrRef){
+    var _rhrSnap=FL.filter(function(f){return f.date<today()&&(f.rhr||0)>0;})
+      .sort(function(a,b){return b.date.localeCompare(a.date);})[0];
+    if(_rhrSnap) _hmRhrRef=_rhrSnap.rhr;
+  }
   _hmD('hm-rhr-yd',P.rhr||0,_hmRhrRef,true,' bpm');
 
   // Stand/Exercise delta
@@ -4065,16 +4072,29 @@ function rDrBanner(){
   // Weekly units - sum all alcohol from past 7 days
   var _wkStart=new Date(); _wkStart.setDate(_wkStart.getDate()-6);
   var _wkStr=_wkStart.getFullYear()+'-'+String(_wkStart.getMonth()+1).padStart(2,'0')+'-'+String(_wkStart.getDate()).padStart(2,'0');
-  // Weekly units - only count alcoholic drinks (u>0) within past 7 days
-  var _wkDrinks=DL.filter(function(d){return d.date>=_wkStr&&d.date<=today()&&(d.u||0)>0;});
-  var u2=_wkDrinks.reduce(function(a,d){return a+(d.u||0);},0);
+  // Weekly units - count alcoholic drinks, estimate units from cals if u=0
+  var _alcCats=['beer','wine','spirits','cocktail','prosecco'];
+  var _wkDrinks=DL.filter(function(d){
+    return d.date>=_wkStr&&d.date<=today()&&
+      ((d.u||0)>0||(_alcCats.indexOf(d.cat)>=0&&(d.c||0)>50));
+  });
+  // For drinks with u=0 but alcoholic category, estimate units from calories
+  // ~100 kcal ≈ 1 standard drink for spirits/cocktails, ~150 for wine/beer
+  function _estUnits(d){
+    if((d.u||0)>0) return d.u;
+    if(!d.c||d.c<50) return 0;
+    if(d.cat==='beer') return Math.round(d.c/150*10)/10;
+    if(d.cat==='wine'||d.cat==='prosecco') return Math.round(d.c/120*10)/10;
+    return Math.round(d.c/100*10)/10; // spirits/cocktail
+  }
+  var u2=_wkDrinks.reduce(function(a,d){return a+_estUnits(d);},0);
   // Store breakdown for debugging
   window._wkDrinkBreakdown=_wkDrinks.map(function(d){return d.date+': '+d.n+' ('+d.u+'u)';});
   set('dr-units',fD(u2,1)); set('dr-cals',fN(c2)+' kcal');
   var _wkBrkEl=g('dr-units-breakdown');
   if(_wkBrkEl){
     var _byDate={};
-    _wkDrinks.forEach(function(d){_byDate[d.date]=(_byDate[d.date]||0)+(d.u||0);});
+    _wkDrinks.forEach(function(d){_byDate[d.date]=(_byDate[d.date]||0)+_estUnits(d);});
     var _brkStr=Object.keys(_byDate).sort().map(function(dt){
       var dd=new Date(dt+'T12:00').toLocaleDateString('en',{weekday:'short'});
       return dd+': '+fD(_byDate[dt],1)+'u';
@@ -7365,8 +7385,15 @@ function logScanItems() {
   _scanItems.forEach(function(it) {
     if(_isScanDrink(it)){
       // Route to drink log
+      var _scanAlcCats=['beer','wine','spirits','cocktail','prosecco'];
+      var _scanU=0;
+      if(_scanAlcCats.indexOf(it.category)>=0&&it.cals>50){
+        if(it.category==='beer') _scanU=Math.round(it.cals/150*10)/10;
+        else if(it.category==='wine'||it.category==='prosecco') _scanU=Math.round(it.cals/120*10)/10;
+        else _scanU=Math.round(it.cals/100*10)/10;
+      }
       DL.push({id:Date.now()+Math.random(),date:logDate,
-        n:it.name,e:it.emoji,c:it.cals,u:0,
+        n:it.name,e:it.emoji,c:it.cals,u:_scanU,
         cat:it.category||'soft',sugar:it.sugar||0,
         carbs:it.carbs||0,vol:0,sodium:it.sodium||0});
     } else {
