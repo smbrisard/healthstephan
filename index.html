@@ -1498,14 +1498,19 @@ function calcWaterForDate(dt) {
     // vol may be 0 for custom/Starbucks drinks - estimate from calories
     // Coffee/tea: ~3ml per kcal is a good proxy (110kcal latte ~ 330ml)
     var _vol=d.vol||0;
-    if(_vol===0&&d.c>0){
-      // Estimate serving size from calories if not stored
+    // Water: parse from name regardless of calories (water has c=0)
+    if(_vol===0&&(d.cat==='water'||d.cat==='seltzer')){
+      var _nm=d.n||'';
+      var _ozM=_nm.match(/(\d+)\s*oz/i);
+      if(_ozM) _vol=Math.round(parseInt(_ozM[1])*29.57);
+      else if(/alkaline|electrolyte/i.test(_nm)) _vol=591;
+      else _vol=355;
+    } else if(_vol===0&&d.c>0){
       if(d.cat==='coffee'||d.cat==='starbucks') _vol=Math.round(d.c*3);
       else if(d.cat==='tea'||d.cat==='kombucha') _vol=Math.round(d.c*4||240);
       else if(d.cat==='soft'&&!d.u) _vol=Math.round(d.c*3.5);
-      else if(d.cat==='water') _vol=240; // default glass if no vol
     }
-    if(d.cat==='water') ml+=_vol;
+    if(d.cat==='water'||d.cat==='seltzer') ml+=_vol;
     else if(d.cat==='coffee'||d.cat==='starbucks') ml+=_vol*0.5;
     else if(d.cat==='tea'||d.cat==='kombucha') ml+=_vol*0.8;
     else if(d.cat==='soft'&&!d.u) ml+=_vol*0.5;
@@ -4669,7 +4674,7 @@ function saveFiEdit(){
   // Save daily fitness snapshot
   var fiDt=(g('fi-date-input')&&g('fi-date-input').value)?g('fi-date-input').value:today();
   var isToday2=(fiDt===today());
-  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:(function(){var _sl=SL.filter(function(s){return s.date===today();});return _sl.length?_sl[_sl.length-1].hours:P.sleepLast||0;}()),water:P.waterToday,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
+  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:(function(){var _sl=SL.filter(function(s){return s.date===today();});return _sl.length?_sl[_sl.length-1].hours:P.sleepLast||0;}()),water:Math.round(calcWaterL()*33.814*10)/10,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:(function(){var _lws=latWt();return _lws?k2l(_lws.weight):null;})()};
   // For past days: save to snapshot but don't overwrite today's P values
   FI_FIELDS.forEach(function(f){
@@ -6255,7 +6260,7 @@ function fetchSync(){
       }
       var _lwSync=latWt();
       snap={date:today(),steps:P.stepsToday,burned:P.totalBurned||P.burned,activeBurned:P.burned||0,
-        rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:P.waterToday,dist:_finalDist,vo2Max:P.vo2Max||null,walkingSpeed:P.walkingSpeed||null,
+        rhr:d.rhr||P.rhr,hrv:d.hrv||P.hrv,spo2:d.spo2||P.spo2,rr:(d.rr&&d.rr>6&&d.rr<30?d.rr:P.rr),sleep:P.sleepLast,water:Math.round(calcWaterL()*33.814*10)/10,dist:_finalDist,vo2Max:P.vo2Max||null,walkingSpeed:P.walkingSpeed||null,
         standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:_lwSync?k2l(_lwSync.weight):null};
       // Save today's snap — also save yesterday's if it doesn't exist yet
