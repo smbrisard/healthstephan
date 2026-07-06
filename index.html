@@ -4367,6 +4367,24 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: fix vol:0 on water/seltzer DL entries
+  (function(){
+    try{
+      var _wf=false;
+      DL.forEach(function(d){
+        if((d.cat==='water'||d.cat==='seltzer')&&(!d.vol||d.vol===0)){
+          var _nm=d.n||'';
+          var _ozM=_nm.match(/(\d+)\s*oz/i);
+          var _mlM=_nm.match(/(\d+)\s*ml/i);
+          if(_ozM){d.vol=Math.round(parseInt(_ozM[1])*29.57);_wf=true;}
+          else if(_mlM){d.vol=parseInt(_mlM[1]);_wf=true;}
+          else if(/alkaline|electrolyte/i.test(_nm)){d.vol=591;_wf=true;}
+          else{d.vol=355;_wf=true;}
+        }
+      });
+      if(_wf) save();
+    }catch(e){}
+  }());
   // ONE-TIME: migrate DL entries - add sugar from carbs where missing
   (function(){
     try{
@@ -5474,11 +5492,13 @@ function launchApp(){
       save();
     }
     // Clear stale exercise mins: early morning + very few steps = yesterday's data
-    if(_hourNow<9&&_todaySteps<200&&(P.exerciseMins||0)>30){
-      P.exerciseMins=0; save();
+    // Stale exercise: low steps but high exercise = yesterday's data
+    if((P.exerciseMins||0)>30){
+      var _exStale=(_hourNow<12&&_todaySteps<1000)||(P.exerciseMins>120&&_todaySteps<2000);
+      if(_exStale){P.exerciseMins=0; save();}
     }
     // Also clear stale stand hours
-    if(_hourNow<9&&_todaySteps<200&&(P.standHours||0)>8){
+    if(_hourNow<11&&_todaySteps<500&&(P.standHours||0)>8){
       P.standHours=0; save();
     }
     // Aggressive stale detection for timezone travel:
