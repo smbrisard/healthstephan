@@ -4260,7 +4260,7 @@ function saveDrinkEdit(){
     if(DL[i].id===_editDrinkId){
       var dc=g('de-cals'),du=g('de-units'),dd=g('de-date');
       if(dc) DL[i].c=parseInt(dc.value)||DL[i].c;
-      var _eNA=['water','tea','coffee','soft','choc'].indexOf(DL[i].cat)>=0;
+      var _eNA=['water','tea','coffee','soft','choc','kombucha','seltzer','smoothie','shake'].indexOf(DL[i].cat)>=0;
       if(du) DL[i].u=_eNA?0:(parseFloat(du.value)||0);
       if(dd&&dd.value) DL[i].date=dd.value;
       var gDE=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
@@ -4344,7 +4344,7 @@ function saveDrinkToMyLibrary(){
 function addDrink(){
   if(!selDr) return;
   var de=g('dm-date'), ld=de&&de.value?de.value:today();
-  var _isNonAlc=['water','tea','coffee','soft','choc'].indexOf(selDr.cat)>=0;
+  var _isNonAlc=['water','tea','coffee','soft','choc','kombucha','seltzer','smoothie','shake'].indexOf(selDr.cat)>=0;
   // Get serving multiplier from drink modal
   var _dmSrv=parseFloat((g('dm-srv')||{value:1}).value)||1;
   for(var i=0;i<dQty;i++) DL.push({id:Date.now()+i*1000,date:ld,n:selDr.n+(_dmSrv!==1?' x'+_dmSrv:''),
@@ -4408,6 +4408,22 @@ function rFitness(){
         }
       });
       if(_wf) save();
+    }catch(e){}
+  }());
+  // ONE-TIME: fix u=0 on alcoholic DL entries (scanned drinks)
+  (function(){
+    try{
+      var _alcFix=false;
+      var _alcC=['beer','wine','spirits','cocktail','prosecco'];
+      DL.forEach(function(d){
+        if(_alcC.indexOf(d.cat)>=0&&(!d.u||d.u===0)&&(d.c||0)>50){
+          if(d.cat==='beer') d.u=Math.round((d.c||0)/150*10)/10;
+          else if(d.cat==='wine'||d.cat==='prosecco') d.u=Math.round((d.c||0)/120*10)/10;
+          else d.u=Math.round((d.c||0)/100*10)/10;
+          _alcFix=true;
+        }
+      });
+      if(_alcFix) save();
     }catch(e){}
   }());
   // ONE-TIME: migrate DL entries - add sugar from carbs where missing
@@ -6767,7 +6783,7 @@ function analyzeDrinkPhoto(b64){
   try{_ak=localStorage.getItem('hs_anthropic_key')||'';}catch(e){}
   if(!_ak||!SYNC_URL){toast('Add API key in Settings to use drink scanning');return;}
   var _vUrl=SYNC_URL.replace(/\/$/,'')+'/vision';
-  var _drPrompt='Identify this drink/beverage from the photo. Return ONLY a JSON array with ONE item: [{"name":"string","emoji":"single emoji","portion":"string e.g. 355ml","category":"one of: coffee/tea/beer/wine/spirits/soft/cocktail/kombucha/choc/smoothie/shake/water","mealType":"Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":0,"sugar":number,"satFat":0,"sodium":number,"cholesterol":0,"potassium":0,"calcium":0,"iron":0,"vitC":0,"vitD":0,"vitA":0}]';
+  var _drPrompt='Identify this drink/beverage from the photo. Return ONLY a JSON array with ONE item: [{"name":"string","emoji":"single emoji","portion":"string e.g. 355ml","category":"one of: coffee/tea/beer/wine/spirits/soft/cocktail/kombucha/choc/smoothie/shake/water","units":number (standard drinks: wine glass=1.5, beer pint=1.5, shot=1, cocktail=1.5, non-alcoholic=0),"mealType":"Snack","cals":number,"protein":number,"carbs":number,"fat":number,"fiber":0,"sugar":number,"satFat":0,"sodium":number,"cholesterol":0,"potassium":0,"calcium":0,"iron":0,"vitC":0,"vitD":0,"vitA":0}]';
   fetch(_vUrl,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -6790,7 +6806,16 @@ function analyzeDrinkPhoto(b64){
       sF('cd-prot',it.protein||0);
       sF('cd-fat',it.fat||0);
       sF('cd-sodium',it.sodium||0);
-      sF('cd-units',it.units||0);
+      // Estimate units for alcoholic drinks if not returned
+      var _scanCat=it.category||'';
+      var _alcDrCats=['beer','wine','spirits','cocktail','prosecco'];
+      var _estU=it.units||0;
+      if(!_estU&&_alcDrCats.indexOf(_scanCat)>=0&&(it.cals||0)>50){
+        if(_scanCat==='beer') _estU=Math.round((it.cals||0)/150*10)/10;
+        else if(_scanCat==='wine'||_scanCat==='prosecco') _estU=Math.round((it.cals||0)/120*10)/10;
+        else _estU=Math.round((it.cals||0)/100*10)/10;
+      }
+      sF('cd-units',_estU);
       // Store portion for reference
       var cdPor=g('cd-portion'); if(cdPor) cdPor.value=it.portion||'1 serving';
       var cdEm=g('cd-emoji'); if(cdEm) cdEm.value=it.emoji||'&#127866;';
