@@ -350,7 +350,7 @@ body { height: 100dvh; }
             <div class="eqop">-</div>
             <div class="eqb"><div class="eqv" style="color:var(--amb)" id="eq-eaten">0</div><div class="eql" style="font-size:9px">food+drinks</div></div>
             <div class="eqop">=</div>
-            <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-burned">389</div><div class="eql">deficit</div></div>
+            <div class="eqb"><div class="eqv" style="color:var(--cyn)" id="eq-burned">389</div><div class="eql">net burn</div></div>
             
           </div>
           <div style="margin-top:12px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden"><div id="hm-dbar" style="height:100%;background:linear-gradient(90deg,var(--pur),var(--pnk));width:0%;transition:width .5s;border-radius:3px"></div></div>
@@ -3489,8 +3489,16 @@ function addFood() {
   var f=selF, de=g('fm-date'), ld=de&&de.value?de.value:today();
   // Route starbucks/drink items to drink log
   if(_isScanDrink(f)){
+    var _alcAF=['beer','wine','spirits','cocktail','prosecco'];
+    var _afCat=f.cat||'coffee';
+    var _afU=0;
+    if(_alcAF.indexOf(_afCat)>=0&&(f.c||0)*fSrv>50){
+      if(_afCat==='beer') _afU=Math.round((f.c||0)*fSrv/150*10)/10;
+      else if(_afCat==='wine'||_afCat==='prosecco') _afU=Math.round((f.c||0)*fSrv/120*10)/10;
+      else _afU=Math.round((f.c||0)*fSrv/100*10)/10;
+    }
     DL.push({id:Date.now(),date:ld,n:f.n,e:f.e,c:Math.round((f.c||0)*fSrv),
-      u:0,cat:f.cat||'coffee',sugar:(f.su||0)*fSrv,carbs:(f.cb||0)*fSrv,vol:0,sodium:0});
+      u:_afU,cat:_afCat,sugar:(f.su||0)*fSrv,carbs:(f.cb||0)*fSrv,vol:0,sodium:0});
     P.mealsLogged=(P.mealsLogged||0)+1;
     save(); closeM('food-m'); rDrLog(); rHome(); rNutrition();
     toast(f.n+' added to drinks ✓'); return;
@@ -6926,7 +6934,14 @@ function migrateFoodToDrink(idx){
   if(drCats.indexOf(cat)<0){toast('Use one of: '+drCats.join(', '));return;}
   var md=loadMyDrinks();
   if(!md.find(function(d){return d.n===name;})){
-    md.push({n:item.n,e:item.e,c:item.c||0,u:0,cb:item.cb||0,sg:item.su||0,cat:cat,p:item.p||'1 serving',w:'',_custom:true});
+    var _alcMig=['beer','wine','spirits','cocktail','prosecco'];
+    var _uMig=0;
+    if(_alcMig.indexOf(cat)>=0&&(item.c||0)>50){
+      if(cat==='beer') _uMig=Math.round((item.c||0)/150*10)/10;
+      else if(cat==='wine'||cat==='prosecco') _uMig=Math.round((item.c||0)/120*10)/10;
+      else _uMig=Math.round((item.c||0)/100*10)/10;
+    }
+    md.push({n:item.n,e:item.e,c:item.c||0,u:_uMig,cb:item.cb||0,sg:item.su||0,cat:cat,p:item.p||'1 serving',w:'',_custom:true});
     md.sort(function(a,b){return a.n.localeCompare(b.n);});
     saveMyDrinks(md);
   }
@@ -7027,8 +7042,16 @@ function cfAdd() {
   try{var _catEl=document.querySelector('#cf-scan-results select');if(_catEl)catVal=_catEl.value;}catch(e){}
   var _cfItem={name:name,category:catVal||'custom'};
   if(_isScanDrink(_cfItem)){
+    var _alcCF=['beer','wine','spirits','cocktail','prosecco'];
+    var _cfCat=catVal||'soft';
+    var _cfU=0;
+    if(_alcCF.indexOf(_cfCat)>=0&&cals*_srv>50){
+      if(_cfCat==='beer') _cfU=Math.round(cals*_srv/150*10)/10;
+      else if(_cfCat==='wine'||_cfCat==='prosecco') _cfU=Math.round(cals*_srv/120*10)/10;
+      else _cfU=Math.round(cals*_srv/100*10)/10;
+    }
     DL.push({id:Date.now(),date:date,n:name,e:emoji,c:Math.round(cals*_srv),
-      u:0,cat:catVal||'soft',sugar:Math.round(sugar2*_srv*10)/10,
+      u:_cfU,cat:_cfCat,sugar:Math.round(sugar2*_srv*10)/10,
       carbs:Math.round(carbs*_srv*10)/10,vol:0});
     toast(name+' \u2713 added to drinks!');
   } else {
