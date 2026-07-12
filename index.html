@@ -5534,6 +5534,7 @@ function launchApp(){
     var _todaySteps=P.stepsToday||0;
     var _totalB=P.totalBurned||0;
     var _hourNow=new Date().getHours();
+    var _changed=false;
     // Before 10am with <1000 steps but >1500 burned = stale yesterday data
     // Clear if: before noon, steps<3000 (still early), burned>1500 (yesterday's value)
     if(_hourNow<12&&_todaySteps<3000&&_totalB>1500){
@@ -5550,7 +5551,8 @@ function launchApp(){
       P.standHours=0;_changed=true;
     }
     if(_changed){save();}
-    // Aggressive stale detection for timezone travel:
+  }());
+  // Aggressive stale detection for timezone travel:
     // If before noon but steps>5000 AND stand>8hrs AND burned>2000 = full yesterday day loaded
     if(_hourNow<12&&_todaySteps>5000&&(P.standHours||0)>8&&_totalB>2000){
       P.stepsToday=0; P.distMiles=0; P.waterToday=0;
