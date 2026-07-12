@@ -5541,15 +5541,15 @@ function launchApp(){
       save();
     }
     // Clear stale exercise mins: early morning + very few steps = yesterday's data
-    // Stale exercise: low steps but high exercise = yesterday's data
     if((P.exerciseMins||0)>30){
-      var _exStale=(_hourNow<12&&_todaySteps<1000)||(P.exerciseMins>120&&_todaySteps<2000);
-      if(_exStale){P.exerciseMins=0; save();}
+      var _exStale=(_hourNow<12&&_todaySteps<1500)||(P.exerciseMins>120&&_todaySteps<2000);
+      if(_exStale){P.exerciseMins=0;_changed=true;}
     }
-    // Also clear stale stand hours
-    if(_hourNow<11&&_todaySteps<500&&(P.standHours||0)>8){
-      P.standHours=0; save();
+    // Clear stale stand hours
+    if((P.standHours||0)>3&&_hourNow<12&&_todaySteps<1500){
+      P.standHours=0;_changed=true;
     }
+    if(_changed){save();}
     // Aggressive stale detection for timezone travel:
     // If before noon but steps>5000 AND stand>8hrs AND burned>2000 = full yesterday day loaded
     if(_hourNow<12&&_todaySteps>5000&&(P.standHours||0)>8&&_totalB>2000){
