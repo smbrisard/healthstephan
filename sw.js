@@ -1,5 +1,27 @@
 /* v215 */
 var CACHE='hs-v215';
-self.addEventListener('install',function(e){self.skipWaiting();});
-self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n);}));}).then(function(){return self.clients.claim();}));});
-self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});
+self.addEventListener('install',function(e){
+  self.skipWaiting();
+});
+self.addEventListener('activate',function(e){
+  e.waitUntil(
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
+    .then(function(){
+      // Force all open clients to reload
+      return self.clients.matchAll({type:'window'}).then(function(clients){
+        clients.forEach(function(client){ client.navigate(client.url); });
+      });
+    })
+  );
+});
+self.addEventListener('fetch',function(e){
+  if(e.request.method!=='GET') return;
+  // Always network first, cache as fallback
+  e.respondWith(
+    fetch(e.request).catch(function(){
+      return caches.match(e.request);
+    })
+  );
+});
