@@ -1917,8 +1917,9 @@ function rHome() {
   var _hmYdSnap=_ydSnap; // may be null
 
   // Steps delta
-  var _stepsYd=_hmYdSnap?Math.round(_hmYdSnap.steps||0):null;
-  if(_stepsYd!==null) _hmD('hm-steps-yd',Math.round(P.stepsToday||0),_stepsYd,false,'');
+  var _stepsYd=_hmYdSnap?(Math.round(_hmYdSnap.steps||0)||null):null;
+  if(!_stepsYd) _stepsYd=P.prevSteps||null;
+  if(_stepsYd) _hmD('hm-steps-yd',Math.round(P.stepsToday||0),_stepsYd,false,'');
 
   // HRV delta - scan FL for different value
   var _hmHrvRef=null;
@@ -1968,8 +1969,9 @@ function rHome() {
   _hmD('hm-burned-yd',_hmBurnedToday,_hmBurnedYd,false,' kcal');
 
   // Distance delta
-  var _distYd=_hmYdSnap&&_hmYdSnap.dist>0?_hmYdSnap.dist:null;
-  _hmD('hm-dist-yd',P.distMiles||0,_distYd,false,' mi');
+  var _distYd=(_hmYdSnap&&_hmYdSnap.dist>0)?_hmYdSnap.dist:null;
+  if(!_distYd){var _dSnap=FL.filter(function(f){return f.date<today()&&f.dist>0;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0]; if(_dSnap) _distYd=_dSnap.dist;}
+  if(_distYd) _hmD('hm-dist-yd',P.distMiles||0,_distYd,false,' mi');
 
   // RHR delta - scan FL for different value
   // Use yesterday's snap rhr directly - if same as today delta=0 (correct)
@@ -1989,7 +1991,10 @@ function rHome() {
   // Stand/Exercise delta
   if(_hmYdSnap){
     _hmD('hm-stand-yd',P.standHours||0,_hmYdSnap?(_hmYdSnap.standHours||P.prevStand||null):(P.prevStand||null),false,' hrs');
-    _hmD('hm-exmin-yd',P.exerciseMins||0,_hmYdSnap?(_hmYdSnap.exerciseMins||P.prevExMins||null):(P.prevExMins||null),false,' min');
+    var _exYd=(_hmYdSnap&&_hmYdSnap.exerciseMins>0)?_hmYdSnap.exerciseMins:null;
+    if(!_exYd) _exYd=P.prevExMins||null;
+    if(!_exYd){var _exSnap=FL.filter(function(f){return f.date<today()&&(f.exerciseMins||0)>0;}).sort(function(a,b){return b.date.localeCompare(a.date);})[0]; if(_exSnap) _exYd=_exSnap.exerciseMins;}
+    _hmD('hm-exmin-yd',P.exerciseMins||0,_exYd,false,' min');
   }
 
   // Weight vs yesterday (from WL entries)
@@ -4698,7 +4703,7 @@ function saveFiEdit(){
   // Save daily fitness snapshot
   var fiDt=(g('fi-date-input')&&g('fi-date-input').value)?g('fi-date-input').value:today();
   var isToday2=(fiDt===today());
-  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:(function(){var _sl=SL.filter(function(s){return s.date===today();});return _sl.length?_sl[_sl.length-1].hours:P.sleepLast||0;}()),water:Math.round(calcWaterL()*33.814*10)/10,dist:P.distMiles||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
+  var snap={date:fiDt,steps:P.stepsToday,burned:P.burned,rhr:P.rhr,hrv:P.hrv,spo2:P.spo2,rr:P.rr,sleep:(function(){var _sl=SL.filter(function(s){return s.date===today();});return _sl.length?_sl[_sl.length-1].hours:P.sleepLast||0;}()),water:Math.round(calcWaterL()*33.814*10)/10,dist:P.distMiles||0,exerciseMins:P.exerciseMins||0,standHours:P.standHours||0,exerciseMins:P.exerciseMins||0,
         wt:(function(){var _lws=latWt();return _lws?k2l(_lws.weight):null;})()};
   // For past days: save to snapshot but don't overwrite today's P values
   FI_FIELDS.forEach(function(f){
