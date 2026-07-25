@@ -6897,7 +6897,10 @@ function loadMyDrinks(){
   try{return JSON.parse(localStorage.getItem('hs_mydrinks')||'[]');}catch(e){return[];}
 }
 function saveMyDrinks(arr){
-  try{localStorage.setItem('hs_mydrinks',JSON.stringify(arr));}catch(e){}
+  try{
+    arr.sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+    localStorage.setItem('hs_mydrinks',JSON.stringify(arr));
+  }catch(e){}
 }
 function addMyDrinkToLog(idx){
   var myDrinks=loadMyDrinks();
@@ -6963,7 +6966,12 @@ function deleteMyFood(name){
   var sr=g('cf-results');
   if(sr) sr.innerHTML='<div style="padding:12px;text-align:center;color:var(--dim);font-size:13px">Deleted. Search again to refresh.</div>';
 }
-function saveMyFoods(arr){try{localStorage.setItem('hs_myfoods',JSON.stringify(arr));}catch(e){}}
+function saveMyFoods(arr){
+  try{
+    arr.sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+    localStorage.setItem('hs_myfoods',JSON.stringify(arr));
+  }catch(e){}
+}
 function saveToMyFoods(){
   var name=(g('cf-name')||{value:''}).value.trim();
   if(!name){toast('Enter a food name first');return;}
@@ -7571,11 +7579,27 @@ function saveAllScanToDatabase(){
       added++;
     }
   });
+  // Also save drinks to My Drinks
+  var md2=loadMyDrinks(); var drAdded=0;
+  _scanItems.forEach(function(it){
+    if(_isScanDrink(it)){
+      var drExists=md2.find(function(d){return d.n.toLowerCase()===it.name.toLowerCase();});
+      if(!drExists){
+        md2.push({n:it.name,e:it.emoji,c:it.cals,u:0,cb:it.carbs||0,
+          sg:it.sugar||0,cat:it.category||'soft',vol:0,_custom:true});
+        drAdded++;
+      }
+    }
+  });
   mf.sort(function(a,b){return a.n.localeCompare(b.n);});
   saveMyFoods(mf);
-  if(added>0) toast(added+' new item'+(added!==1?'s':'')+' saved to My Foods ✓');
+  if(drAdded>0){
+    md2.sort(function(a,b){return a.n.localeCompare(b.n);});
+    saveMyDrinks(md2);
+  }
+  if(added+drAdded>0) toast((added+drAdded)+' new item'+((added+drAdded)!==1?'s':'')+' saved ✓');
   else toast('All items already in database');
-  rFoodGrid();
+  rFoodGrid(); rDrGrid();
 }
 // ═══════════════════════════════════════════════════════
 // END FOOD CAMERA SCAN
