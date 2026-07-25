@@ -4405,6 +4405,40 @@ function rFitness(){
   var _fiToday=!P.lastSyncAt||((Date.now()-P.lastSyncAt)/3600000)<20;
   // Clear implausible rr value stored in localStorage
   if((P.rr||0)>35){P.rr=0; save();}
+  // ONE-TIME: alphabetize My Foods and My Drinks
+  (function(){
+    try{
+      var _mf=loadMyFoods();
+      if(_mf.length>1){
+        var _mfSorted=_mf.slice().sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+        var _mfChanged=_mfSorted.some(function(f,i){return f.n!==_mf[i].n;});
+        if(_mfChanged){localStorage.setItem('hs_myfoods',JSON.stringify(_mfSorted));}
+      }
+      var _md=loadMyDrinks();
+      if(_md.length>1){
+        var _mdSorted=_md.slice().sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+        var _mdChanged=_mdSorted.some(function(d,i){return d.n!==_md[i].n;});
+        if(_mdChanged){localStorage.setItem('hs_mydrinks',JSON.stringify(_mdSorted));}
+      }
+    }catch(e){}
+  }());
+  // ONE-TIME: alphabetize existing My Foods and My Drinks
+  (function(){
+    try{
+      var _mf=loadMyFoods();
+      if(_mf.length>1){
+        var _mfS=_mf.slice().sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+        var _mfChanged=_mfS.some(function(f,i){return f.n!==_mf[i].n;});
+        if(_mfChanged) saveMyFoods(_mfS);
+      }
+      var _md=loadMyDrinks();
+      if(_md.length>1){
+        var _mdS=_md.slice().sort(function(a,b){return (a.n||'').localeCompare(b.n||'');});
+        var _mdChanged=_mdS.some(function(d,i){return d.n!==_md[i].n;});
+        if(_mdChanged) saveMyDrinks(_mdS);
+      }
+    }catch(e){}
+  }());
   // ONE-TIME: fix vol:0 on water/seltzer DL entries
   (function(){
     try{
