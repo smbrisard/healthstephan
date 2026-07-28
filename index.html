@@ -1951,7 +1951,19 @@ function rHome() {
   var _hmYdSnap2=FL.filter(function(f){return f.date===_ydSl2||f.date===_d2ago2;})
     .sort(function(a,b){return b.date.localeCompare(a.date);})[0];
   if(!_prevSl&&_hmYdSnap2&&_hmYdSnap2.sleep>0) _prevSl={hours:_hmYdSnap2.sleep};
-  var _sleepRef=_prevSl?_prevSl.hours:null;
+  // Last resort: scan all FL snaps for any past sleep value
+  if(!_prevSl||!_prevSl.hours){
+    var _anySlSnap=FL.filter(function(f){return f.date<today()&&(f.sleep||0)>=3;})
+      .sort(function(a,b){return b.date.localeCompare(a.date);})[0];
+    if(_anySlSnap) _prevSl={hours:_anySlSnap.sleep};
+  }
+  // Also use syncSleepToProfile result if available
+  if(!_prevSl&&P.sleepLast>0&&P.sleepLast!=(P.prevSleep||0)){
+    // P.sleepLast is today - can't use as yesterday ref
+    // Check if lastSyncDate is yesterday - then sleepLast IS yesterday's sleep
+    if(P.lastSyncDate&&P.lastSyncDate===_ydSl2) _prevSl={hours:P.sleepLast};
+  }
+  var _sleepRef=(_prevSl&&_prevSl.hours>=3)?_prevSl.hours:null;
   _hmD('hm-sleep-yd',P.sleepLast||0,_sleepRef,false,'h');
   // Show travel reset bar if food logged but activity very low (timezone confusion)
   var _trBar=g('travel-reset-bar');
