@@ -3346,10 +3346,12 @@ function rFoodLog() {
   var secCals=items.reduce(function(a,m){return a+(m.cals||0);},0);
   var secColors={Breakfast:'var(--amb)',Lunch:'var(--grn)',Dinner:'var(--blu)',Snack:'var(--pur)'};
   var col=secColors[mealTab]||'var(--txt)';
-  var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal'));
+  var _isToday=logDate===today();
+  var _copyMealBtn=!_isToday?D('style="padding:3px 8px;border-radius:8px;background:rgba(0,212,170,.12);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation" onclick="copyMealToToday(\''+mealTab+'\',\''+logDate+'\')"','&#128203; Copy to Today'):'';
+  var html=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"',D('style="font-size:13px;font-weight:700;color:'+col+'"',mealTab+' total')+D('style="display:flex;gap:6px;align-items:center"',D('style="font-family:var(--mn);font-size:13px;font-weight:700;color:'+col+'"',fN(secCals)+' kcal')+_copyMealBtn));
   items.forEach(function(m){
     var _mTimeStr=new Date(m.id).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18;cursor:pointer" onclick="foodInfo('+m.id+')"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals)+' kcal &middot; '+_mTimeStr))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals))+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
+    html+=D('class="ritem"',D('class="ric" style="background:'+col+'18;cursor:pointer" onclick="foodInfo('+m.id+')"',(m.emoji||getFoodEmoji(m.name)||'&#127869;'))+D('class="rmain"',D('class="rname"',m.name)+D('class="rsub"',fN(m.cals)+' kcal &middot; '+_mTimeStr))+D('style="display:flex;align-items:center;gap:6px;flex-shrink:0"',D('class="rval" style="color:'+col+'"',fN(m.cals))+D('style="width:28px;height:28px;border-radius:50%;background:rgba(77,166,255,.1);border:.5px solid rgba(77,166,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--blu);touch-action:manipulation" onclick="openMealEdit('+m.id+')"','&#9998;')+D('style="width:28px;height:28px;border-radius:50%;background:rgba(0,212,170,.1);border:.5px solid rgba(0,212,170,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--grn);touch-action:manipulation" onclick="copyMealItemToToday('+m.id+')"','&#128203;')+D('class="rmbtn" onclick="rmMeal('+m.id+')"','&#215;')));
   });
   le.innerHTML=html;
 }
@@ -3374,6 +3376,26 @@ function updateMeServing(){
    ['me-iron','iron'],['me-cholest','cholest']].forEach(function(p){
     var el=g(p[0]); if(el) el.value=Math.round(_meBase[p[1]]*srv*10)/10;
   });
+}
+function copyMealItemToToday(id){
+  var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}}
+  if(!m){toast('Item not found');return;}
+  if(m.date===today()){toast('Already in today\'s log');return;}
+  var newItem=Object.assign({},m,{id:Date.now(),date:today()});
+  ML.push(newItem);
+  save(); rFoodLog(); rHome(); rNutrition();
+  toast('&#128203; '+m.name+' copied to today\'s '+m.type+' ✓');
+}
+function copyMealToToday(mealType,fromDate){
+  var items=ML.filter(function(m){return m.date===fromDate&&m.type.toLowerCase()===mealType.toLowerCase();});
+  if(!items.length){toast('No '+mealType+' items found');return;}
+  var already=ML.filter(function(m){return m.date===today()&&m.type.toLowerCase()===mealType.toLowerCase();});
+  var now=Date.now();
+  items.forEach(function(m,i){
+    ML.push(Object.assign({},m,{id:now+i,date:today()}));
+  });
+  save(); rFoodLog(); rHome(); rNutrition();
+  toast('&#128203; '+items.length+' '+mealType+' item'+(items.length!==1?'s':'')+' copied to today ✓');
 }
 function openMealEdit(id) {
   var m=null; for(var i=0;i<ML.length;i++){if(ML[i].id===id){m=ML[i];break;}} if(!m) return;
