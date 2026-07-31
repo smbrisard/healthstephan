@@ -5590,6 +5590,14 @@ function launchApp(){
     if(_hourNow<12&&_todaySteps<3000&&_totalB>1500){
       P.burned=0; P.totalBurned=0; P.restingEnergy=null; _changed=true;
     }
+    // Impossible stand hours: stand hrs > current hour + 1 = yesterday's data
+    // e.g. 18 stand hrs at 8am is impossible
+    if((P.standHours||0)>(_hourNow+2)){
+      P.standHours=0; P.exerciseMins=0;
+      P.stepsToday=0; P.distMiles=0;
+      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+      _changed=true;
+    }
     // Clear stale exercise mins
     if((P.exerciseMins||0)>30){
       if((_hourNow<12&&_todaySteps<1500)||(P.exerciseMins>120&&_todaySteps<2000)){
