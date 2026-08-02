@@ -1969,7 +1969,10 @@ function rHome() {
   var _trBar=g('travel-reset-bar');
   if(_trBar){
     var _tdFood=ML.filter(function(m){return m.date===today();});
-    var _showTr=_tdFood.length>0&&(P.totalBurned||0)<900&&(P.stepsToday||0)<3000;
+    // Only show if: food logged + very low steps + early morning + high calorie day
+    // The high calorie check (>2000 kcal) distinguishes full-day stale data from early morning
+    var _totalTodayCals=_tdFood.reduce(function(a,m){return a+(m.cals||0);},0);
+    var _showTr=_tdFood.length>0&&(P.stepsToday||0)<500&&_hourNow<9&&_totalTodayCals>1500;
     _trBar.style.display=_showTr?'flex':'none';
   }
 
@@ -5156,6 +5159,59 @@ function rDeficitChart(days30,FL){
 }
 
 
+function rBurnedChart(last7,FL){
+  var days=last7.map(function(d){
+    var snaps=FL.filter(function(f){return f.date===d.dt;});
+    var snap=snaps.length?snaps[snaps.length-1]:null;
+    var total=snap?(snap.burned||0):0;
+    var active=snap?(snap.activeBurned||0):0;
+    var rest=Math.max(0,total-active);
+    var label=new Date(d.dt+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});
+    return {dt:d.dt,total:total,active:active,rest:rest,label:label};
+  });
+  var validDays=days.filter(function(d){return d.total>0;});
+  if(validDays.length<2) return '';
+  var maxVal=Math.max.apply(null,days.map(function(d){return d.total||0;}));
+  if(maxVal===0) return '';
+  var avgActive=Math.round(validDays.reduce(function(a,d){return a+d.active;},0)/validDays.length);
+  var avgRest=Math.round(validDays.reduce(function(a,d){return a+d.rest;},0)/validDays.length);
+  var avgTotal=Math.round(validDays.reduce(function(a,d){return a+d.total;},0)/validDays.length);
+  var W=320,H=160,pad={t:20,r:10,b:30,l:44};
+  var cW=(W-pad.l-pad.r)/7;
+  var yScale=function(v){return pad.t+((maxVal-v)/(maxVal||1))*(H-pad.t-pad.b);};
+  var bars=days.map(function(d,i){
+    if(!d.total) return '';
+    var x=pad.l+i*cW+cW*0.15;
+    var bW=cW*0.7;
+    var yTop=yScale(d.total); var yBot=H-pad.b;
+    var yMid=yScale(d.rest); // split point between rest and active
+    var restH=yMid-yTop; var activeH=yBot-yMid;
+    return '<rect x="'+x+'" y="'+yTop+'" width="'+bW+'" height="'+restH+'" fill="rgba(77,166,255,0.7)" rx="2"/>'+
+           '<rect x="'+x+'" y="'+yMid+'" width="'+bW+'" height="'+activeH+'" fill="rgba(255,59,92,0.8)" rx="2"/>'+
+           '<text x="'+(x+bW/2)+'" y="'+(yTop-4)+'" text-anchor="middle" font-size="9" fill="var(--txt)">'+Math.round(d.total)+'</text>'+
+           '<text x="'+(x+bW/2)+'" y="'+(H-pad.b+12)+'" text-anchor="middle" font-size="9" fill="var(--dim)">'+d.label+'</text>';
+  }).join('');
+  // Y axis labels
+  var yLabels='';
+  for(var yi=0;yi<=3;yi++){
+    var yv=Math.round(maxVal*yi/3);
+    var yp=yScale(yv);
+    yLabels+='<text x="'+(pad.l-4)+'" y="'+(yp+3)+'" text-anchor="end" font-size="8" fill="var(--dim)">'+yv+'</text>';
+    yLabels+='<line x1="'+pad.l+'" y1="'+yp+'" x2="'+(W-pad.r)+'" y2="'+yp+'" stroke="var(--b1)" stroke-width="0.5"/>';
+  }
+  return D('class="card" style="margin-bottom:14px"',
+    D('style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:10px"','7-DAY CALORIES BURNED')+
+    '<svg viewBox="0 0 320 160" style="width:100%;height:auto">'+yLabels+bars+'</svg>'+
+    D('style="display:flex;gap:12px;margin-top:6px;justify-content:center"',
+      D('style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--dim)"',
+        '<div style="width:10px;height:10px;background:rgba(77,166,255,0.7);border-radius:2px"></div> Rest (avg '+avgRest+' kcal)')+
+      D('style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--dim)"',
+        '<div style="width:10px;height:10px;background:rgba(255,59,92,0.8);border-radius:2px"></div> Active (avg '+avgActive+' kcal)')+
+      D('style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--dim)"',
+        '<div style="width:10px;height:10px;background:rgba(255,255,255,0.2);border-radius:2px"></div> Total avg: '+avgTotal+' kcal')
+    )
+  );
+}
 function rHistory(){
   try{
     var hd=g('hist-date'); if(hd) hd.value=histDate;
@@ -5493,6 +5549,7 @@ function rHistory(){
               D('style="font-size:10px;color:var(--dim);margin-top:2px"',new Date(wst.dt+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}))));
         })():''));
       html+=rDeficitChart(days30,FL);
+      html+=rBurnedChart(last7,FL);
     }
     var wtPts=days30.filter(function(d){return d.wt!==null;});
     if(wtPts.length>=2){
