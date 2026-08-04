@@ -7143,8 +7143,10 @@ var _drinkCats=['coffee','tea','water','beer','wine','spirits','soft','cocktail'
 function _isScanDrink(it){
   if(!it) return false;
   var cat=it.category||it.cat||'';
-  if(_drinkCats.indexOf(cat)>=0) return true;
   var nm=(it.name||it.n||'').toLowerCase();
+  // Food-first override: bowls, whips, açaí, granola items stay in food even if smoothie/shake cat
+  if(/\b(bowl|whip|acai|açaí|granola|parfait|pudding|oatmeal|porridge)\b/i.test(nm)) return false;
+  if(_drinkCats.indexOf(cat)>=0) return true;
   return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
 }
 function cfAdd() {
