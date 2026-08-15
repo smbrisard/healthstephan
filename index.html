@@ -1972,7 +1972,9 @@ function rHome() {
     // Only show if: food logged + very low steps + early morning + high calorie day
     // The high calorie check (>2000 kcal) distinguishes full-day stale data from early morning
     var _totalTodayCals=_tdFood.reduce(function(a,m){return a+(m.cals||0);},0);
-    var _showTr=_tdFood.length>0&&(P.stepsToday||0)<500&&_hourNow<9&&_totalTodayCals>1500;
+    // Only show when: food >2000 kcal already logged + steps <200 + before 7am
+    // This is a very tight condition - full day food logged but barely moved yet
+    var _showTr=_tdFood.length>5&&(P.stepsToday||0)<200&&_hourNow<7&&_totalTodayCals>2000;
     _trBar.style.display=_showTr?'flex':'none';
   }
 
