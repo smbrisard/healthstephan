@@ -5659,56 +5659,56 @@ function histNav(dir){
 }
 
 
+function checkStaleData(){
+  var _todaySteps=P.stepsToday||0;
+  var _totalB=P.totalBurned||0;
+  var _hourNow=new Date().getHours();
+  var _changed=false;
+  // Impossible stand hours: stand hrs > current hour + 2 = yesterday's data
+  if((P.standHours||0)>(_hourNow+2)){
+    P.standHours=0; P.exerciseMins=0;
+    P.stepsToday=0; P.distMiles=0;
+    P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+    _changed=true;
+  }
+  // Before noon with low steps but high burned = stale
+  if(_hourNow<12&&_todaySteps<3000&&_totalB>1500&&!(P.standHours>0)){
+    P.burned=0; P.totalBurned=0; P.restingEnergy=null; _changed=true;
+  }
+  // Stale exercise
+  if((P.exerciseMins||0)>30){
+    if((_hourNow<12&&_todaySteps<1500)||(P.exerciseMins>120&&_todaySteps<2000)){
+      P.exerciseMins=0; _changed=true;
+    }
+  }
+  // Stale stand hours
+  if((P.standHours||0)>3&&_hourNow<12&&_todaySteps<1500){
+    P.standHours=0; _changed=true;
+  }
+  // Timezone travel: high steps + high stand + high burned before noon
+  if(_hourNow<12&&_todaySteps>5000&&(P.standHours||0)>8&&_totalB>2000){
+    P.stepsToday=0; P.distMiles=0; P.waterToday=0;
+    P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+    P.exerciseMins=0; P.standHours=0;
+    P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
+    P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
+    _changed=true;
+  }
+  // Day change
+  if(P.lastSyncDate&&P.lastSyncDate!==today()){
+    P.exerciseMins=0; P.standHours=0;
+    P.burned=0; P.totalBurned=0; P.restingEnergy=null;
+    P.stepsToday=0; P.distMiles=0; P.waterToday=0;
+    P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
+    P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
+    _changed=true;
+  }
+  if(_changed){save(); rHome();}
+}
 function launchApp(){
   // One-time fix: clear stale burned data from overnight HAE sync
   // If burned is high but steps are low, it's yesterday's complete value
-  (function(){
-    var _todaySteps=P.stepsToday||0;
-    var _totalB=P.totalBurned||0;
-    var _hourNow=new Date().getHours();
-    var _changed=false;
-    // Before noon with low steps but high burned = stale yesterday data
-    if(_hourNow<12&&_todaySteps<3000&&_totalB>1500){
-      P.burned=0; P.totalBurned=0; P.restingEnergy=null; _changed=true;
-    }
-    // Impossible stand hours: stand hrs > current hour + 1 = yesterday's data
-    // e.g. 18 stand hrs at 8am is impossible
-    if((P.standHours||0)>(_hourNow+2)){
-      P.standHours=0; P.exerciseMins=0;
-      P.stepsToday=0; P.distMiles=0;
-      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
-      _changed=true;
-    }
-    // Clear stale exercise mins
-    if((P.exerciseMins||0)>30){
-      if((_hourNow<12&&_todaySteps<1500)||(P.exerciseMins>120&&_todaySteps<2000)){
-        P.exerciseMins=0; _changed=true;
-      }
-    }
-    // Clear stale stand hours
-    if((P.standHours||0)>3&&_hourNow<12&&_todaySteps<1500){
-      P.standHours=0; _changed=true;
-    }
-    // Aggressive timezone travel detection
-    if(_hourNow<12&&_todaySteps>5000&&(P.standHours||0)>8&&_totalB>2000){
-      P.stepsToday=0; P.distMiles=0; P.waterToday=0;
-      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
-      P.exerciseMins=0; P.standHours=0;
-      P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
-      P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
-      _changed=true;
-    }
-    // Day change detection
-    if(P.lastSyncDate&&P.lastSyncDate!==today()){
-      P.exerciseMins=0; P.standHours=0;
-      P.burned=0; P.totalBurned=0; P.restingEnergy=null;
-      P.stepsToday=0; P.distMiles=0; P.waterToday=0;
-      P.prevRhr=0; P.prevHrv=0; P.prevSpo2=0; P.prevRr=0;
-      P.prevSleep=0; P.prevStand=0; P.prevExMins=0;
-      _changed=true;
-    }
-    if(_changed) save();
-  }());
+  checkStaleData();
   // Migrate myFoods categories based on name keywords
   (function(){
     var _mf=loadMyFoods(); var _ch=false;
@@ -6451,6 +6451,7 @@ function fetchSync(){
         }
       }
       syncSleepToProfile(); // Always derive P.sleepLast from SL log after sync
+      checkStaleData();
       save();rHome();rFitness();rHealth();
       var sb=g('sync-badge');
       if(sb){var t=new Date(d.syncedAt||Date.now());
