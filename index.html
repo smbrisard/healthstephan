@@ -5662,27 +5662,30 @@ function histNav(dir){
 function checkStaleData(){
   var _todaySteps=P.stepsToday||0;
   var _totalB=P.totalBurned||0;
+  var _activeB=P.burned||0; // active calories
   var _hourNow=new Date().getHours();
   var _changed=false;
-  // Impossible stand hours: stand hrs > current hour + 2 = yesterday's data
-  if((P.standHours||0)>(_hourNow+2)){
+  // If active calories are significant (>200), user has genuinely worked out - don't reset exercise/stand
+  var _realWorkout=_activeB>200;
+  // Impossible stand hours: stand hrs > current hour + 2 AND no real workout
+  if((P.standHours||0)>(_hourNow+2)&&!_realWorkout){
     P.standHours=0; P.exerciseMins=0;
     P.stepsToday=0; P.distMiles=0;
     P.burned=0; P.totalBurned=0; P.restingEnergy=null;
     _changed=true;
   }
-  // Before noon with low steps but high burned = stale
-  if(_hourNow<12&&_todaySteps<3000&&_totalB>1500&&!(P.standHours>0)){
+  // Before noon with low steps but high burned AND no real workout = stale
+  if(_hourNow<12&&_todaySteps<3000&&_totalB>1500&&!_realWorkout){
     P.burned=0; P.totalBurned=0; P.restingEnergy=null; _changed=true;
   }
-  // Stale exercise
-  if((P.exerciseMins||0)>30){
+  // Stale exercise: only reset if no real active calories
+  if((P.exerciseMins||0)>30&&!_realWorkout){
     if((_hourNow<12&&_todaySteps<1500)||(P.exerciseMins>120&&_todaySteps<2000)){
       P.exerciseMins=0; _changed=true;
     }
   }
-  // Stale stand hours
-  if((P.standHours||0)>3&&_hourNow<12&&_todaySteps<1500){
+  // Stale stand hours: only reset if no real active calories
+  if((P.standHours||0)>3&&_hourNow<12&&_todaySteps<1500&&!_realWorkout){
     P.standHours=0; _changed=true;
   }
   // Timezone travel: high steps + high stand + high burned before noon
