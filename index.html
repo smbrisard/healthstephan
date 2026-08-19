@@ -7150,8 +7150,8 @@ function _isScanDrink(it){
   if(!it) return false;
   var cat=it.category||it.cat||'';
   var nm=(it.name||it.n||'').toLowerCase();
-  // Food-first override: bowls, whips, açaí, granola items stay in food even if smoothie/shake cat
-  if(/\b(bowl|whip|acai|açaí|granola|parfait|pudding|oatmeal|porridge)\b/i.test(nm)) return false;
+  // Food-first override: these always stay in food regardless of category
+  if(/\b(bowl|whip|acai|a\u00e7a\u00ed|granola|parfait|pudding|oatmeal|porridge|cookie|bar|brownie|cake|muffin|waffle|pancake|biscuit|cracker|chip|crisp|pretzel|popcorn|jerky|nuts|seeds|protein bar|energy bar|lean body|quest|clif|rx bar|kind bar|lara|epic|rxbar)\b/i.test(nm)) return false;
   if(_drinkCats.indexOf(cat)>=0) return true;
   return /\b(juice|water|tea|coffee|beer|wine|latte|espresso|cappuccino|smoothie|shake|soda|cola|lemonade|cocktail|whiskey|vodka|gin|rum|kombucha|kefir|radler|bier|brew)\b/i.test(nm);
 }
