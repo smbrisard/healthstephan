@@ -4092,10 +4092,9 @@ var DRINKS=[
 
 var _editDayDate=null;
 function openEditDay(dateStr){
-  toast('Opening edit for: '+(dateStr||histDate||'?'));
   _editDayDate=dateStr||histDate||yesterday();
   var ex=FL.find(function(f){return f.date===_editDayDate;})||{};
-  var setF=function(id,v){var e=g(id);if(e)e.value=v||'';};
+  var setF=function(id,v){var e=g(id);if(e)e.value=(v||v===0)?v:'';};
   var restCals=Math.max(0,(ex.burned||0)-(ex.activeBurned||0));
   setF('ed-rest',restCals||'');
   setF('ed-active',ex.activeBurned||'');
@@ -4110,7 +4109,13 @@ function openEditDay(dateStr){
   setF('ed-spo2',ex.spo2||'');
   setF('ed-rr',ex.rr||'');
   var titleEl=g('edit-day-title'); if(titleEl) titleEl.textContent='Edit Day: '+_editDayDate;
-  openM('edit-day-m');
+  // Force show modal directly
+  var m=g('edit-day-m');
+  if(m){
+    m.style.display='flex';
+    m.classList.add('on');
+    document.body.style.overflow='hidden';
+  } else { toast('Modal not found'); }
 }
 function saveEditDay(){
   if(!_editDayDate) return;
