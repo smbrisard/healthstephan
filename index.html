@@ -796,7 +796,7 @@ body { height: 100dvh; }
         <div id="weekly-summary"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px 0">
           <div id="hist-day-label" style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim)"></div>
-          <button onclick="openEditDay(histDate)" style="padding:4px 10px;border-radius:8px;background:rgba(0,212,170,.12);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation">✏️ Edit day</button>
+          <button onclick="openEditDay(histDate)" style="padding:8px 14px;border-radius:10px;background:var(--grn);border:none;color:#000;font-size:12px;font-weight:800;cursor:pointer;touch-action:manipulation;position:relative;z-index:10">✏️ Edit day</button>
         </div>
         <div id="hist-body"></div>
       </div>
@@ -4116,6 +4116,7 @@ var DRINKS=[
 
 var _editDayDate=null;
 function openEditDay(dateStr){
+  toast('Opening edit for: '+(dateStr||histDate||'?'));
   _editDayDate=dateStr||histDate||yesterday();
   var ex=FL.find(function(f){return f.date===_editDayDate;})||{};
   var setF=function(id,v){var e=g(id);if(e)e.value=v||'';};
