@@ -443,7 +443,31 @@ body { height: 100dvh; }
           <div style="font-size:12px;color:var(--amb)">✈️ Travel day detected — food from previous timezone?</div>
           <button onclick="resetTodayFoodLog()" style="padding:6px 12px;border-radius:8px;background:rgba(255,165,0,.2);border:.5px solid var(--amb);color:var(--amb);font-size:11px;font-weight:700;touch-action:manipulation">Move to Yd</button>
         </div>
-        <!-- Quick shortcut widgets -->
+        <!-- Edit Past Day Modal -->
+<div class="modal" id="edit-day-m"><div class="mbg" onclick="closeM('edit-day-m')"></div>
+  <div class="msheet" style="max-height:90vh;overflow-y:auto">
+    <div class="mhandle"></div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:4px" id="edit-day-title">Edit Day</div>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:14px" id="edit-day-sub">Manually correct metrics</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div><div class="flbl">🔥 Rest Energy (kcal)</div><input class="fld" type="number" id="ed-rest" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">⚡ Active Energy (kcal)</div><input class="fld" type="number" id="ed-active" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">🏃 Steps</div><input class="fld" type="number" id="ed-steps" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">📍 Distance (mi)</div><input class="fld" type="number" id="ed-dist" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">⏱ Exercise (min)</div><input class="fld" type="number" id="ed-exmins" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">🧍 Stand (hrs)</div><input class="fld" type="number" id="ed-stand" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">😴 Sleep (hrs)</div><input class="fld" type="number" id="ed-sleep" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">💧 Water (fl oz)</div><input class="fld" type="number" id="ed-water" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">❤️ RHR (bpm)</div><input class="fld" type="number" id="ed-rhr" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">⚡ HRV (ms)</div><input class="fld" type="number" id="ed-hrv" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+      <div><div class="flbl">🦡 SpO2 (%)</div><input class="fld" type="number" id="ed-spo2" placeholder="0" style="margin-bottom:0"></div>
+      <div><div class="flbl">🌞 Resp Rate</div><input class="fld" type="number" id="ed-rr" placeholder="0" step="0.1" style="margin-bottom:0"></div>
+    </div>
+    <button class="btn btn-g" onclick="saveEditDay()" style="margin-bottom:8px">💾 Save Changes</button>
+    <button class="btn" onclick="closeM('edit-day-m')" style="background:var(--s2);color:var(--dim)">Cancel</button>
+  </div>
+</div>
+<!-- Quick shortcut widgets -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">
           <button onclick="openWtModal()" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--pur);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">⚖️</span>Weight</button>
           <button onclick="openM('sl-m')" style="padding:11px 4px;background:var(--s2);border:.5px solid var(--b1);border-radius:14px;color:var(--blu);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;touch-action:manipulation"><span style="font-size:22px;line-height:1">😴</span>Sleep</button>
@@ -4086,6 +4110,49 @@ var DRINKS=[
 ];
 
 
+var _editDayDate=null;
+function openEditDay(dateStr){
+  _editDayDate=dateStr||histDate||yesterday();
+  var ex=FL.find(function(f){return f.date===_editDayDate;})||{};
+  var setF=function(id,v){var e=g(id);if(e)e.value=v||'';};
+  var restCals=Math.max(0,(ex.burned||0)-(ex.activeBurned||0));
+  setF('ed-rest',restCals||'');
+  setF('ed-active',ex.activeBurned||'');
+  setF('ed-steps',ex.steps||'');
+  setF('ed-dist',ex.dist||'');
+  setF('ed-exmins',ex.exerciseMins||'');
+  setF('ed-stand',ex.standHours||'');
+  setF('ed-sleep',ex.sleep||'');
+  setF('ed-water',ex.water||'');
+  setF('ed-rhr',ex.rhr||'');
+  setF('ed-hrv',ex.hrv||'');
+  setF('ed-spo2',ex.spo2||'');
+  setF('ed-rr',ex.rr||'');
+  var titleEl=g('edit-day-title'); if(titleEl) titleEl.textContent='Edit Day: '+_editDayDate;
+  openM('edit-day-m');
+}
+function saveEditDay(){
+  if(!_editDayDate) return;
+  var gF=function(id){return parseFloat((g(id)||{value:0}).value)||0;};
+  var rest=gF('ed-rest'), active=gF('ed-active');
+  var idx=FL.findIndex(function(f){return f.date===_editDayDate;});
+  var ex=idx>=0?FL[idx]:{date:_editDayDate};
+  ex.burned=(rest+active)||ex.burned||0;
+  ex.activeBurned=active||ex.activeBurned||0;
+  if(gF('ed-steps')) ex.steps=gF('ed-steps');
+  if(gF('ed-dist')) ex.dist=gF('ed-dist');
+  if(gF('ed-exmins')) ex.exerciseMins=gF('ed-exmins');
+  if(gF('ed-stand')) ex.standHours=gF('ed-stand');
+  if(gF('ed-sleep')) ex.sleep=gF('ed-sleep');
+  if(gF('ed-water')) ex.water=gF('ed-water');
+  if(gF('ed-rhr')) ex.rhr=gF('ed-rhr');
+  if(gF('ed-hrv')) ex.hrv=gF('ed-hrv');
+  if(gF('ed-spo2')) ex.spo2=gF('ed-spo2');
+  if(gF('ed-rr')) ex.rr=gF('ed-rr');
+  if(idx>=0) FL[idx]=ex; else FL.push(ex);
+  save(); closeM('edit-day-m'); rHistory(); rHome(); rFitness();
+  toast('Day updated ✓');
+}
 function resetTodayFoodLog(){
   var td=today(); var yd=yesterday();
   var count=ML.filter(function(m){return m.date===td;}).length;
@@ -5554,6 +5621,7 @@ function rHistory(){
         })():''));
       html+=rDeficitChart(days30,FL);
       html+=rBurnedChart(last7,FL);
+      html+='<div style="text-align:right;margin-bottom:8px">'+'<button onclick="openEditDay(histDate)" style="padding:5px 12px;border-radius:10px;background:rgba(0,212,170,.12);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation">✏️ Edit this day</button>'+'</div>';
     }
     var wtPts=days30.filter(function(d){return d.wt!==null;});
     if(wtPts.length>=2){
