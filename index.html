@@ -794,6 +794,10 @@ body { height: 100dvh; }
       <div class="sec" style="padding-top:8px;padding-bottom:90px">
         <input type="date" id="hist-date" oninput="rHistory()" style="display:none">
         <div id="weekly-summary"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px 0">
+          <div id="hist-day-label" style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim)"></div>
+          <button onclick="openEditDay(histDate)" style="padding:4px 10px;border-radius:8px;background:rgba(0,212,170,.12);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation">✏️ Edit day</button>
+        </div>
         <div id="hist-body"></div>
       </div>
     </div>
@@ -5321,9 +5325,6 @@ function rHistory(){
     var last7=days30.slice(-7);
     var html='';
     // Edit day button near date header
-    html+=D('style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"',
-      D('style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim)"',new Date(histDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}))+
-      D('onclick="openEditDay(\''+histDate+'\')" style="padding:4px 10px;border-radius:8px;background:rgba(0,212,170,.12);border:.5px solid rgba(0,212,170,.3);color:var(--grn);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation"','&#9998; Edit day'));
 
     var selDm=ML.filter(function(m){return m.date===histDate;});
     var selDr=DL.filter(function(d){return d.date===histDate;});
@@ -5721,6 +5722,8 @@ function rHistory(){
       }
     }
     hb.innerHTML=html;
+    var _hdl=g('hist-day-label');
+    if(_hdl) _hdl.textContent=new Date(histDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
 
   }catch(e2){console.error('rHistory error',e2);}
 }
