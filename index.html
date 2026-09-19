@@ -4094,28 +4094,43 @@ var _editDayDate=null;
 function openEditDay(dateStr){
   _editDayDate=dateStr||histDate||yesterday();
   var ex=FL.find(function(f){return f.date===_editDayDate;})||{};
-  var setF=function(id,v){var e=g(id);if(e)e.value=(v||v===0)?v:'';};
   var restCals=Math.max(0,(ex.burned||0)-(ex.activeBurned||0));
-  setF('ed-rest',restCals||'');
-  setF('ed-active',ex.activeBurned||'');
-  setF('ed-steps',ex.steps||'');
-  setF('ed-dist',ex.dist||'');
-  setF('ed-exmins',ex.exerciseMins||'');
-  setF('ed-stand',ex.standHours||'');
-  setF('ed-sleep',ex.sleep||'');
-  setF('ed-water',ex.water||'');
-  setF('ed-rhr',ex.rhr||'');
-  setF('ed-hrv',ex.hrv||'');
-  setF('ed-spo2',ex.spo2||'');
-  setF('ed-rr',ex.rr||'');
-  var titleEl=g('edit-day-title'); if(titleEl) titleEl.textContent='Edit Day: '+_editDayDate;
-  // Force show modal directly
-  var m=g('edit-day-m');
-  if(m){
-    m.style.display='flex';
-    m.classList.add('on');
-    document.body.style.overflow='hidden';
-  } else { toast('Modal not found'); }
+  // Use native prompts - work reliably on iOS
+  var rest=prompt('Rest Energy kcal ('+_editDayDate+')',restCals||ex.burned||'');
+  if(rest===null) return;
+  var active=prompt('Active Energy kcal',ex.activeBurned||'');
+  if(active===null) return;
+  var steps=prompt('Steps',ex.steps||'');
+  if(steps===null) return;
+  var dist=prompt('Distance (mi)',ex.dist||'');
+  if(dist===null) return;
+  var exmins=prompt('Exercise (min)',ex.exerciseMins||'');
+  if(exmins===null) return;
+  var stand=prompt('Stand hours',ex.standHours||'');
+  if(stand===null) return;
+  var sleep=prompt('Sleep hours',ex.sleep||'');
+  if(sleep===null) return;
+  var rhr=prompt('RHR (bpm)',ex.rhr||'');
+  if(rhr===null) return;
+  saveEditDayDirect(_editDayDate,{rest:parseFloat(rest)||0,active:parseFloat(active)||0,steps:parseFloat(steps)||0,dist:parseFloat(dist)||0,exerciseMins:parseFloat(exmins)||0,standHours:parseFloat(stand)||0,sleep:parseFloat(sleep)||0,rhr:parseFloat(rhr)||0,hrv:ex.hrv||0,spo2:ex.spo2||0,water:ex.water||0});
+}
+function saveEditDayDirect(dt,vals){
+  var idx=FL.findIndex(function(f){return f.date===dt;});
+  var ex=idx>=0?FL[idx]:{date:dt};
+  ex.burned=(vals.rest+vals.active)||ex.burned||0;
+  ex.activeBurned=vals.active;
+  if(vals.steps) ex.steps=vals.steps;
+  if(vals.dist) ex.dist=vals.dist;
+  if(vals.exerciseMins) ex.exerciseMins=vals.exerciseMins;
+  if(vals.standHours) ex.standHours=vals.standHours;
+  if(vals.sleep) ex.sleep=vals.sleep;
+  if(vals.rhr) ex.rhr=vals.rhr;
+  if(vals.hrv) ex.hrv=vals.hrv;
+  if(vals.spo2) ex.spo2=vals.spo2;
+  if(vals.water) ex.water=vals.water;
+  if(idx>=0) FL[idx]=ex; else FL.push(ex);
+  save(); rHistory(); rHome(); rFitness();
+  toast('Day updated ✓');
 }
 function saveEditDay(){
   if(!_editDayDate) return;
